@@ -9,7 +9,7 @@
 
 ## Configuration
 All options and keybindings can be configured in the file `/etc/vimivrc.py`. You
-can copy the file to `~/.vimiv/vimivrc` and modify that file instead
+can copy the file to `~/.vimiv/vimivrc.py` and modify that file instead
 (recommended).
 
 ## Dependencies
