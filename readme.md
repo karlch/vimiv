@@ -1,12 +1,14 @@
 ### Vimiv, an image viewer with vim-like keybindings
 
-## Version 0.0.1
+## Version 0.0.2
 
 ## Features
 * vim-like keybindings
 * thumbnail mode
 * simple library browser (browse through folders and open images)
 * basic image editing (rotate, flip, brightness, contrast and optimize)
+* search directory recursively for images
+* slideshow mode
 
 ## Configuration
 All options and keybindings can be configured in the file `/etc/vimivrc.py`. You
@@ -44,7 +46,7 @@ I recommend binding the following keys in `$theme/gtk/gtk-3.0/gtk-keys.css`:
     }
 
 ## Thanks to
-James Campos, author of Pim https://github.com/Narrat/Pim upon which vimiv is
+James Campos, author of Pim https://github.com/Narrat/Pim upon which Vimiv is
 built.
 
 ## License

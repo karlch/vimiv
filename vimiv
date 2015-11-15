@@ -30,9 +30,9 @@ class Vimiv(Gtk.Window):
         self.zoom_lock = settings.zoom_lock
         self.thumbnail_toggled = settings.thumbnail_toggled
         self.library_toggled = False
-        self.keep_thumbs = settings.keep_thumbs
         self.tiling_wm = settings.tiling_wm
         self.geometry = settings.geometry
+        self.recursive = settings.recursive
 
         self.paths = []
         self.marked = []
@@ -48,8 +48,8 @@ class Vimiv(Gtk.Window):
             (settings.key_zoomlock_toggle, self.toggle_zoom_lock),
             (settings.key_thumbnail_toggle, self.thumbnail_toggle,
              self.thumbnail_toggled),
-            ("o", self.library_toggle),
-            ("u", self.move_up),
+            (settings.key_library_toggle, self.library_toggle),
+            (settings.key_move_up, self.move_up),
 
             # if True, scroll in the horizontal direction.
             (settings.key_scroll_left, self.scroll,
@@ -124,13 +124,6 @@ class Vimiv(Gtk.Window):
             self.move_index(delta)
 
     def quit(self):
-        if not self.keep_thumbs:
-            for image in self.paths:
-                try:
-                    thumb = image.split(".")[0] + ".thumbnail" + ".jpg"
-                    os.remove(thumb)
-                except:
-                    pass
         for pos in self.marked:
             print(pos)
 
@@ -466,7 +459,7 @@ class Vimiv(Gtk.Window):
         self.update_info()
 
     def start_size(self):
-        if self.win.get_size() == (100, 100):
+        if self.win.get_size() == (100, 100) or len(self.paths) == 0:
             return True
         else:
             self.zoom_to(0)
@@ -579,7 +572,7 @@ class Vimiv(Gtk.Window):
         return True
 
     def parse_args(self):
-        usage = '%(prog)s [options] path1 [path2 path3 ...]'
+        usage = '%(prog)s [options] [paths ...]'
         parser = argparse.ArgumentParser(usage=usage)
         parser.add_argument("-b", "--bar", action="store_true", dest="sbar",
                             help="display statusbar", default=self.sbar)
@@ -591,22 +584,27 @@ class Vimiv(Gtk.Window):
                             default=self.shuffle)
         parser.add_argument("-S", "--no-shuffle", action="store_false",
                             dest="shuffle", help="don't shuffle the filelist")
+        parser.add_argument("-r", "--recursive", action="store_true",
+                            dest="recursive",
+                            help="search given directories recursively",
+                            default=self.recursive)
         parser.add_argument("--slideshow-delay", type=int,
                             help="set the slideshow delay",
                             default=self.slideshow_delay)
         parser.add_argument("-g", "--geomtry", dest="geometry",
                             help="set the starting geometry",
                             default=self.geometry)
-        parser.add_argument("path", nargs='+')
+        self.files = self.filelist_create()
+        parser.add_argument("path", nargs='*', default=self.files)
         args = parser.parse_args()
         self.sbar = args.sbar
+        self.recursive = args.recursive
         self.fullscreen = args.fullscreen
         self.shuffle = args.shuffle
         self.slideshow_delay = args.slideshow_delay
         self.geometry = args.geometry
 
-        if not self.populate(args.path):
-            parser.error('no loadable images detected')
+        self.populate(args.path)
 
     def populate(self, args):
         ''' Generate a list of paths from the given arguments '''
@@ -618,26 +616,24 @@ class Vimiv(Gtk.Window):
 
         # If only one path is passed do special stuff
         single = None
-        if len(args) is 1:
+        if len(args) == 1:
             arg = args[0]
             if os.path.isfile(arg):
                 # use parent directory
                 single = os.path.abspath(arg)
                 directory = os.path.dirname(single)
-                args = (directory,)
+                args = self.filelist_create(directory)
 
         # add everything
         for arg in args:
             path = os.path.abspath(arg)
             if os.path.isfile(path):
                 self.paths.append(path)
-            elif os.path.isdir(path):
+            elif os.path.isdir(path) and self.recursive:
                 paths = sorted(
                     [os.path.join(path, x)
                      for x in os.listdir(path)])
                 self.paths.extend(paths)
-            else:
-                print("{} is not a valid path!".format(arg))
 
         # remove unsupported files
         self.paths = [
@@ -692,9 +688,6 @@ class Vimiv(Gtk.Window):
         self.libwin.set_border_width(5)
         self.libwin.set_default_size(300, 600)
         self.libwin.set_role("pop-up")
-        # self.libwin.add_events(Gdk.EventMask.KEY_PRESS_MASK |
-        #                        Gdk.EventMask.POINTER_MOTION_MASK)
-        # self.libwin.connect("key_press_event", self.handle_key_press)
         self.libwin.set_icon_name("image-x-generic")
 
         # Set up the grid in which the file info will be positioned
@@ -722,7 +715,7 @@ class Vimiv(Gtk.Window):
 
     def treeview_create(self):
         # Tree View
-        current_file_filter = self.liststore(self.filelist_create())
+        current_file_filter = self.liststore(self.datalist_create())
         self.treeview = Gtk.TreeView.new_with_model(current_file_filter)
         self.treeview.connect("row-activated", self.file_select)
         self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK |
@@ -751,35 +744,38 @@ class Vimiv(Gtk.Window):
         if os.path.isdir(fil):
             self.move_up(fil)
         else:
-            self.files = self.files[count:] + self.files[: count]
             self.paths = []
             self.populate(self.files)
-            self.move_index(0)
+            self.move_index(count)
             self.library_toggle()
 
     def move_up(self, dir=".."):
         try:
             os.chdir(dir)
         except:
-            self.statusbar.push(8, "Error: directory not accessible")
+            self.statusbar.push(9, "Error: directory not accessible")
             self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, 8)
         try:
             self.reload()
         except:
             self.library_toggle()
 
-    def filelist_create(self):
-        p = Popen(['ls'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+    def filelist_create(self, dir="."):
+        p = Popen(['ls', dir], stdin=PIPE, stdout=PIPE, stderr=PIPE)
         self.files, err = p.communicate()
         self.files = self.files.decode(encoding='UTF-8')
         self.files = self.files.split("\n")
         self.files.pop()
+        return self.files
+
+    def datalist_create(self):
         self.datalist = list()
         # supported types
         types = []  # for directories
         for pixbuf_format in GdkPixbuf.Pixbuf.get_formats():
             types.extend(pixbuf_format.get_mime_types())
         # remove unsupported files
+        self.filelist_create()
         self.files = [
             possible_file
             for possible_file in self.files
@@ -795,6 +791,8 @@ class Vimiv(Gtk.Window):
         return self.datalist
 
     def reload(self):
+        if not self.library_toggled:
+            raise ValueError
         self.scrollable_treelist.remove(self.treeview)
         self.treeview_create()
         self.scrollable_treelist.add(self.treeview)
@@ -809,11 +807,13 @@ class Vimiv(Gtk.Window):
         if not os.path.isdir(vimivdir):
             os.mkdir(vimivdir)
 
+        # Screen
         screen = Gdk.Screen()
         self.Sizes = {}
         self.Sizes['sWidth'] = screen.width()
         self.Sizes['sHeight'] = screen.height()
 
+        # Gtk window with keybindings
         self.win = Gtk.Window()
         self.win.add_events(Gdk.EventMask.KEY_PRESS_MASK |
                             Gdk.EventMask.POINTER_MOTION_MASK)
@@ -821,12 +821,14 @@ class Vimiv(Gtk.Window):
         self.win.connect("key_press_event", self.handle_key_press)
         self.win.set_icon_name("image-x-generic")
 
+        # Box in which everything gets packed
         self.vbox = Gtk.VBox()
         self.win.add(self.vbox)
-
+        # Scrollable window in there
         self.scrolled_win = Gtk.ScrolledWindow()
         self.vbox.pack_start(self.scrolled_win, True, True, 0)
 
+        # Viewport
         viewport = Gtk.Viewport()
         viewport.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse('#2C2C2C'))
         viewport.set_shadow_type(Gtk.ShadowType.NONE)
@@ -841,11 +843,21 @@ class Vimiv(Gtk.Window):
         self.statusbar = Gtk.Statusbar()
         self.vbox.pack_end(self.statusbar, False, False, 0)
 
-        self.move_index(0)
-        self.win.show_all()
-        if self.fullscreen:
-            self.win.fullscreen()
-        self.toggle_statusbar()
+        # Show images, if a path was given
+        if len(self.paths) > 0:
+            self.move_index(0)
+            self.win.show_all()
+            self.toggle_statusbar()
+            if self.fullscreen:
+                self.win.fullscreen()
+        else:
+            self.win.show_all()
+            self.statusbar.push(10, "No valid paths, opening library viewer")
+            self.timer_id = GLib.timeout_add_seconds(2, self.statusbar.pop, 10)
+            self.timer_id = GLib.timeout_add_seconds(2, self.toggle_statusbar)
+            self.timer_id = GLib.timeout_add(300, self.library_toggle)
+
+        # Finally show the main window
         Gtk.main()
 
 
