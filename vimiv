@@ -29,6 +29,7 @@ class Vimiv(Gtk.Window):
         self.sbar = settings.display_bar
         self.zoom_lock = settings.zoom_lock
         self.thumbnail_toggled = settings.thumbnail_toggled
+        self.library_toggled = False
         self.keep_thumbs = settings.keep_thumbs
         self.tiling_wm = settings.tiling_wm
         self.geometry = settings.geometry
@@ -47,6 +48,8 @@ class Vimiv(Gtk.Window):
             (settings.key_zoomlock_toggle, self.toggle_zoom_lock),
             (settings.key_thumbnail_toggle, self.thumbnail_toggle,
              self.thumbnail_toggled),
+            ("o", self.library_toggle),
+            ("u", self.move_up),
 
             # if True, scroll in the horizontal direction.
             (settings.key_scroll_left, self.scroll,
@@ -357,10 +360,12 @@ class Vimiv(Gtk.Window):
         if not os.path.isdir(thumbdir):
             os.mkdir(thumbdir)
 
+        # Create thumbnails for all images in the path
         for infile in self.paths:
             outfile = infile.split(".")[0] + ".thumbnail" + ".png"
             outfile = outfile.split("/")[-1]
             outfile = os.path.join(thumbdir, outfile)
+            # Only if they aren't cached already
             if outfile.split("/")[-1] not in thumbnails:
                 try:
                     im = Image.open(infile)
@@ -375,6 +380,7 @@ class Vimiv(Gtk.Window):
             else:
                 imlist.append(outfile)
 
+        # Create the liststore and iconview
         liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str)
         self.iconview = Gtk.IconView.new()
         self.iconview.connect("item-activated", self.iconview_clicked)
@@ -387,20 +393,23 @@ class Vimiv(Gtk.Window):
         self.iconview.set_border_width(0)
         self.iconview.set_text_column(1)
 
-        current = [(self.index) % len(self.paths)]
-        curpath = Gtk.TreePath.new_from_indices(current)
+        # Add all thumbnails to the liststore
         for thumb in imlist:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(thumb)
             name = thumb.split("/")[-1].split(".")[0]
             liststore.append([pixbuf, name])
 
+        # Draw the icon view instead of the image
         self.win.remove(self.vbox)
+        self.image.clear()
         self.win.add(self.iconview)
+        # Focus the current immage
         self.iconview.grab_focus()
+        current = [(self.index) % len(self.paths)]
+        curpath = Gtk.TreePath.new_from_indices(current)
         self.iconview.select_path(curpath)
         curthing = self.iconview.get_cells()[0]
         self.iconview.set_cursor(curpath, curthing, False)
-        self.image.clear()
         self.win.show_all()
         self.thumbnail_toggled = True
 
@@ -474,8 +483,9 @@ class Vimiv(Gtk.Window):
                 winWidth = int(self.geometry.split("x")[0])
                 winHeight = int(self.geometry.split("x")[1])
             except:
-                print("""Must be a correct geometry in the form of 800x600, \
-falling back to default""")
+                errstring = "Must be a correct geometry in the form of " + \
+                    "800x600, falling back to default"
+                print(errstring)
                 winWidth = 800
                 winHeight = 600
             self.win.resize(winWidth, winHeight)
@@ -595,7 +605,7 @@ falling back to default""")
         self.slideshow_delay = args.slideshow_delay
         self.geometry = args.geometry
 
-        if not self.populate(args):
+        if not self.populate(args.path):
             parser.error('no loadable images detected')
 
     def populate(self, args):
@@ -606,7 +616,6 @@ falling back to default""")
         for pixbuf_format in GdkPixbuf.Pixbuf.get_formats():
             types.extend(pixbuf_format.get_mime_types())
 
-        args = args.path
         # If only one path is passed do special stuff
         single = None
         if len(args) is 1:
@@ -616,10 +625,6 @@ falling back to default""")
                 single = os.path.abspath(arg)
                 directory = os.path.dirname(single)
                 args = (directory,)
-            elif os.path.isdir(arg) and os.path.isfile('vimiv-position'):
-                f = open('vimiv-position')
-                single = f.read()
-                print("Found position file. Starting with: "+single)
 
         # add everything
         for arg in args:
@@ -680,6 +685,121 @@ falling back to default""")
                 args = bind[2:]
                 funk(*args)
                 return
+
+    def library(self):
+        self.libwin = Gtk.Window()
+        self.libwin.set_title("Image Library Browser")
+        self.libwin.set_border_width(5)
+        self.libwin.set_default_size(300, 600)
+        self.libwin.set_role("pop-up")
+        # self.libwin.add_events(Gdk.EventMask.KEY_PRESS_MASK |
+        #                        Gdk.EventMask.POINTER_MOTION_MASK)
+        # self.libwin.connect("key_press_event", self.handle_key_press)
+        self.libwin.set_icon_name("image-x-generic")
+
+        # Set up the grid in which the file info will be positioned
+        grid = Gtk.Grid()
+        grid.set_column_homogeneous(True)
+        grid.set_row_homogeneous(True)
+        self.libwin.add(grid)
+        # Entering content
+        self.scrollable_treelist = Gtk.ScrolledWindow()
+        self.scrollable_treelist.set_vexpand(True)
+        grid.attach(self.scrollable_treelist, 0, 0, 8, 10)
+        # Call the function to create the treeview
+        self.treeview_create()
+        self.scrollable_treelist.add(self.treeview)
+        # Show it
+        self.libwin.show_all()
+        self.library_toggled = True
+
+    def library_toggle(self):
+        if self.library_toggled:
+            self.library_toggled = False
+            self.libwin.destroy()
+        else:
+            self.library()
+
+    def treeview_create(self):
+        # Tree View
+        current_file_filter = self.liststore(self.filelist_create())
+        self.treeview = Gtk.TreeView.new_with_model(current_file_filter)
+        self.treeview.connect("row-activated", self.file_select)
+        self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK |
+                                 Gdk.EventMask.POINTER_MOTION_MASK)
+        self.treeview.connect("key_press_event", self.handle_key_press)
+        for i, name in enumerate(["Num", "Name", "Size"]):
+            renderer = Gtk.CellRendererText()
+            column = Gtk.TreeViewColumn(name, renderer, text=i)
+            self.treeview.append_column(column)
+
+    def liststore(self, datalist):
+        # Filelist in a liststore model
+        filelist = Gtk.ListStore(int, str, str)
+        count = 0
+        for data in datalist:
+            data.insert(0, count)
+            filelist.append(data)
+            count += 1
+
+        current_file_filter = filelist.filter_new()
+        return current_file_filter
+
+    def file_select(self, w, count, b):
+        count = count.get_indices()[0]
+        fil = self.files[count]
+        if os.path.isdir(fil):
+            self.move_up(fil)
+        else:
+            self.files = self.files[count:] + self.files[: count]
+            self.paths = []
+            self.populate(self.files)
+            self.move_index(0)
+            self.library_toggle()
+
+    def move_up(self, dir=".."):
+        try:
+            os.chdir(dir)
+        except:
+            self.statusbar.push(8, "Error: directory not accessible")
+            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, 8)
+        try:
+            self.reload()
+        except:
+            self.library_toggle()
+
+    def filelist_create(self):
+        p = Popen(['ls'], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        self.files, err = p.communicate()
+        self.files = self.files.decode(encoding='UTF-8')
+        self.files = self.files.split("\n")
+        self.files.pop()
+        self.datalist = list()
+        # supported types
+        types = []  # for directories
+        for pixbuf_format in GdkPixbuf.Pixbuf.get_formats():
+            types.extend(pixbuf_format.get_mime_types())
+        # remove unsupported files
+        self.files = [
+            possible_file
+            for possible_file in self.files
+            if mimetypes.guess_type(possible_file)[0] in types
+            or os.path.isdir(possible_file)]
+        for fil in self.files:
+            p = Popen(['du', '-h', fil], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            size, err = p.communicate()
+            size = size.decode(encoding='UTF-8')
+            size = size.split()[0]
+            self.datalist.append([fil, size])
+
+        return self.datalist
+
+    def reload(self):
+        self.scrollable_treelist.remove(self.treeview)
+        self.treeview_create()
+        self.scrollable_treelist.add(self.treeview)
+        self.treeview.grab_focus()
+        self.libwin.show_all()
 
     def main(self):
 

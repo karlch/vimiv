@@ -22,6 +22,8 @@ key_statusbar_toggle = "b"
 key_slideshow_toggle = "s"
 key_zoomlock_toggle = "z"
 key_thumbnail_toggle = "t"
+key_library_toggle = "o"
+key_dir_up = "u"
 
 key_scroll_left = "h"
 key_scroll_down = "j"
