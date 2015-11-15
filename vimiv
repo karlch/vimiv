@@ -34,6 +34,7 @@ class Vimiv(Gtk.Window):
         self.geometry = settings.geometry
         self.recursive = settings.recursive
         self.animation_toggled = False
+        self.size = (100, 100)  # necessary for checks, start value for til_wm
 
         self.paths = []
         self.marked = []
@@ -94,7 +95,6 @@ class Vimiv(Gtk.Window):
             )
 
         self.popup_val = False
-        self.completed_thumbnails = []
         Gtk.Window.__init__(self)
 
     def toggle_zoom_lock(self):
@@ -468,33 +468,30 @@ class Vimiv(Gtk.Window):
 
         self.update_info()
 
-    def start_size(self):
-        if self.win.get_size() == (100, 100) or len(self.paths) == 0:
-            return True
-        else:
-            self.zoom_to(0)
-            return False
-
     def set_default_window_size(self):
         if self.tiling_wm:
-            winWidth = 100
-            winHeight = 100
-            self.win.resize(winWidth, winHeight)
+            self.win.resize(self.size[0], self.size[1])
             self.timer_id = GLib.timeout_add(1, self.start_size)
         else:
             try:
-                winWidth = int(self.geometry.split("x")[0])
-                winHeight = int(self.geometry.split("x")[1])
+                self.size = int(self.geometry.split("x")[0]), \
+                    int(self.geometry.split("x")[1])
             except:
                 errstring = "Must be a correct geometry in the form of " + \
                     "800x600, falling back to default"
                 print(errstring)
-                winWidth = 800
-                winHeight = 600
-            self.win.resize(winWidth, winHeight)
+                self.size = (800, 600)
+            self.win.resize(self.size)
 
         if self.fullscreen:
             self.win.fullscreen()
+
+    def start_size(self):
+        if self.win.get_size() == self.size or len(self.paths) == 0:
+            return True
+        else:
+            self.zoom_to(0)
+            return False
 
     def update_info(self):
         name = self.paths[self.index].split("/")
@@ -809,6 +806,11 @@ class Vimiv(Gtk.Window):
         self.treeview.grab_focus()
         self.libwin.show_all()
 
+    def auto_resize(self, w):
+        if self.win.get_size() != self.size and self.paths:
+            self.zoom_to(0)
+            self.size = self.win.get_size()
+
     def main(self):
 
         self.parse_args()
@@ -829,6 +831,7 @@ class Vimiv(Gtk.Window):
                             Gdk.EventMask.POINTER_MOTION_MASK)
         self.win.connect('destroy', Gtk.main_quit)
         self.win.connect("key_press_event", self.handle_key_press)
+        self.win.connect("check-resize", self.auto_resize)
         self.win.set_icon_name("image-x-generic")
 
         # Box in which everything gets packed
