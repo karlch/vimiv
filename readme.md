@@ -25,14 +25,14 @@ Be sure to install the dependencies first. A simple `sudo make` should then
 suffice.
 
 ## GTK3 recommendation
-I recommend binding the following keys in `theme/gtk/gtk-3.0/gtk-keys.css`:
+I recommend binding the following keys in `$theme/gtk/gtk-3.0/gtk-keys.css`:
 
     @binding-set gtk-vi-tree-view
     {
-        bind "j" { "move-cursor" (display-lines, 1) };               /* selection down */
-        bind "k" { "move-cursor" (display-lines, -1) };              /* selection up */
-        bind "l" { "move-cursor" (logical-positions, 1) };           /* selection right */
-        bind "h" { "move-cursor" (logical-positions, -1) };          /* selection left */
+        bind "j" { "move-cursor" (display-lines, 1) };
+        bind "k" { "move-cursor" (display-lines, -1) }
+        bind "l" { "move-cursor" (logical-positions, 1) };
+        bind "h" { "move-cursor" (logical-positions, -1) };
     }
 
     GtkTreeView {
