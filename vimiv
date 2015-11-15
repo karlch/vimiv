@@ -30,6 +30,8 @@ class Vimiv(Gtk.Window):
         self.zoom_lock = settings.zoom_lock
         self.thumbnail_toggled = settings.thumbnail_toggled
         self.keep_thumbs = settings.keep_thumbs
+        self.tiling_wm = settings.tiling_wm
+        self.geometry = settings.geometry
 
         self.paths = []
         self.marked = []
@@ -462,11 +464,22 @@ class Vimiv(Gtk.Window):
             return False
 
     def set_default_window_size(self):
-        winWidth = 100
-        winHeight = 100
+        if self.tiling_wm:
+            winWidth = 100
+            winHeight = 100
+            self.win.resize(winWidth, winHeight)
+            self.timer_id = GLib.timeout_add(1, self.start_size)
+        else:
+            try:
+                winWidth = int(self.geometry.split("x")[0])
+                winHeight = int(self.geometry.split("x")[1])
+            except:
+                print("""Must be a correct geometry in the form of 800x600, \
+falling back to default""")
+                winWidth = 800
+                winHeight = 600
+            self.win.resize(winWidth, winHeight)
 
-        self.win.resize(winWidth, winHeight)
-        self.timer_id = GLib.timeout_add(1, self.start_size)
         if self.fullscreen:
             self.win.fullscreen()
 
@@ -571,12 +584,16 @@ class Vimiv(Gtk.Window):
         parser.add_argument("--slideshow-delay", type=int,
                             help="set the slideshow delay",
                             default=self.slideshow_delay)
+        parser.add_argument("-g", "--geomtry", dest="geometry",
+                            help="set the starting geometry",
+                            default=self.geometry)
         parser.add_argument("path", nargs='+')
         args = parser.parse_args()
         self.sbar = args.sbar
         self.fullscreen = args.fullscreen
         self.shuffle = args.shuffle
         self.slideshow_delay = args.slideshow_delay
+        self.geometry = args.geometry
 
         if not self.populate(args):
             parser.error('no loadable images detected')

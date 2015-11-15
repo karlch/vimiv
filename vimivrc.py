@@ -10,6 +10,8 @@ zoom_lock = False
 thumbsize = (128, 128)
 keep_thumbs = False
 thumbnail_toggled = False
+tiling_wm = True
+geometry = "800x600"  # only used when tiling_wm is False
 
 # Keybindings ##################################################################
 # Modifiers: Shift (through uppercase) Ctrl (through ^), Alt (through Alt+)
