@@ -33,6 +33,7 @@ class Vimiv(Gtk.Window):
         self.tiling_wm = settings.tiling_wm
         self.geometry = settings.geometry
         self.recursive = settings.recursive
+        self.animation_toggled = False
 
         self.paths = []
         self.marked = []
@@ -41,6 +42,7 @@ class Vimiv(Gtk.Window):
 
         self.binds = (
             (settings.key_quit, self.quit),
+            (settings.key_animation_toggle, self.animation_toggle),
 
             (settings.key_fullscreen_toggle, self.toggle_fullscreen),
             (settings.key_statusbar_toggle, self.toggle_statusbar),
@@ -339,6 +341,10 @@ class Vimiv(Gtk.Window):
             self.zoom_percent = 1
         self.update_image()
 
+    def animation_toggle(self):
+        self.animation_toggled = not self.animation_toggled
+        self.update_image()
+
     def thumbnails(self):
         size = self.thumbsize
         imlist = list()
@@ -454,7 +460,11 @@ class Vimiv(Gtk.Window):
                 pbfWidth, pbfHeight, GdkPixbuf.InterpType.BILINEAR)
             self.image.set_from_pixbuf(pixbufFinal)
         except:
-            self.image.set_from_animation(self.pixbufOriginal)
+            if not self.animation_toggled:
+                self.image.set_from_animation(self.pixbufOriginal)
+            else:
+                pixbufFinal = self.pixbufOriginal.get_static_image()
+                self.image.set_from_pixbuf(pixbufFinal)
 
         self.update_info()
 

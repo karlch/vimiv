@@ -23,6 +23,7 @@ key_slideshow_toggle = "s"
 key_zoomlock_toggle = "z"
 key_thumbnail_toggle = "t"
 key_library_toggle = "o"
+key_animation_toggle = "space"  # Toggle animation of Gifs
 key_move_up = "u"
 
 key_scroll_left = "h"
