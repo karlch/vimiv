@@ -143,6 +143,16 @@ class Vimiv(Gtk.Window):
             GLib.source_remove(self.timer_id)
         self.update_info()
 
+    def err_message(self, id, mes):
+        if not self.sbar:
+            self.statusbar.push(id, mes)
+            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, id)
+        else:
+            self.toggle_statusbar()
+            self.statusbar.push(id, mes)
+            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, id)
+            self.timer_id = GLib.timeout_add_seconds(1, self.toggle_statusbar)
+
     def toggle_fullscreen(self):
         self.fullscreen = not self.fullscreen
 
@@ -182,8 +192,8 @@ class Vimiv(Gtk.Window):
             im.save(self.paths[self.index])
 
         except:
-            self.statusbar.push(5, "Warning: Object cannot be rotated")
-            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, 5)
+            err = "Warning: Object cannot be rotated"
+            self.err_message(5, err)
 
     def flip(self, dir):
         try:
@@ -201,8 +211,8 @@ class Vimiv(Gtk.Window):
             im.save(self.paths[self.index])
 
         except:
-            self.statusbar.push(6, "Warning: Object cannot be flipped")
-            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, 6)
+            err = "Warning: Object cannot be flipped"
+            self.err_message(6, err)
 
     def manipulate(self):
         self.popup = Gtk.Window()
@@ -299,8 +309,8 @@ class Vimiv(Gtk.Window):
         try:
             shutil.move(self.paths[self.index] + "edit", self.paths[self.index])
         except:
-            self.statusbar.push(3, "Error: no changes saved")
-            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, 3)
+            err = "Error: no changes saved"
+            self.err_message(3, err)
         self.manipulate_toggle()
 
     def button_no_clicked(self, widget):
@@ -320,8 +330,8 @@ class Vimiv(Gtk.Window):
                 self.zoom_percent = 1
             self.update_image()
         except:
-            self.statusbar.push(3, "No file to remove")
-            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, 3)
+            err = "No file to remove"
+            self.err_message(4, err)
         self.manipulate_toggle()
 
     def button_opt_clicked(self, widget):
@@ -346,6 +356,7 @@ class Vimiv(Gtk.Window):
         self.update_image()
 
     def thumbnails(self):
+        # Size of the thumbnails
         size = self.thumbsize
         imlist = list()
 
@@ -372,10 +383,8 @@ class Vimiv(Gtk.Window):
                     im.save(outfile, "PNG")
                     imlist.append(outfile)
                 except:
-                    self.statusbar.push(4, "Error: thumbnail creation for "
-                                        + outfile + " failed")
-                    self.timer_id = GLib.timeout_add_seconds(
-                        1, self.statusbar.pop, 4)
+                    err = "Error: thumbnail creation for " + outfile + " failed"
+                    self.err_message(4, err)
             else:
                 imlist.append(outfile)
 
@@ -384,12 +393,13 @@ class Vimiv(Gtk.Window):
         self.iconview = Gtk.IconView.new()
         self.iconview.connect("item-activated", self.iconview_clicked)
         self.iconview.set_model(liststore)
+        self.iconview.set_size_request(self.size[0], self.size[1])
         self.iconview.set_columns(-1)
         self.iconview.set_column_spacing(0)
-        self.iconview.set_item_width(10)
-        self.iconview.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        self.iconview.set_row_spacing(0)
+        self.iconview.set_item_width(128)
         self.iconview.set_pixbuf_column(0)
-        self.iconview.set_border_width(0)
+        self.iconview.set_border_width(1)
         self.iconview.set_text_column(1)
 
         # Add all thumbnails to the liststore
@@ -409,8 +419,8 @@ class Vimiv(Gtk.Window):
         self.iconview.select_path(curpath)
         curthing = self.iconview.get_cells()[0]
         self.iconview.set_cursor(curpath, curthing, False)
-        self.win.show_all()
         self.thumbnail_toggled = True
+        self.win.show_all()
 
     def iconview_clicked(self, w, count):
         self.thumbnail_toggle(self.thumbnail_toggled)
@@ -481,7 +491,7 @@ class Vimiv(Gtk.Window):
                     "800x600, falling back to default"
                 print(errstring)
                 self.size = (800, 600)
-            self.win.resize(self.size)
+            self.win.resize(self.size[0], self.size[1])
 
         if self.fullscreen:
             self.win.fullscreen()
@@ -510,8 +520,8 @@ class Vimiv(Gtk.Window):
                 self.zoom_percent = 1/100
             self.update_image()
         except:
-            self.statusbar.push(7, "Warning: Object cannot be zoomed")
-            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, 7)
+            err = "Warning: Object cannot be zoomed"
+            self.err_message(7, err)
 
     def zoom_to(self, percent, zWidth=False, zHeight=False):
         try:
@@ -522,8 +532,8 @@ class Vimiv(Gtk.Window):
                 zHeight)
             self.update_image()
         except:
-            self.statusbar.push(7, "Warning: Object cannot be zoomed")
-            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, 7)
+            err = "Warning: Object cannot be zoomed"
+            self.err_message(7, err)
 
     def move_index(self, delta):
         self.index = (self.index + delta) % len(self.paths)
@@ -569,8 +579,8 @@ class Vimiv(Gtk.Window):
             current = int(current)
             max = int(max)
         except:
-            self.statusbar.push(8, "Warning: Unsupported index")
-            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, 7)
+            err = "Warning: Unsupported index"
+            self.err_message(8, err)
             return False
         current += 1
         dif = pos - current
@@ -760,8 +770,8 @@ class Vimiv(Gtk.Window):
         try:
             os.chdir(dir)
         except:
-            self.statusbar.push(9, "Error: directory not accessible")
-            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, 8)
+            err = "Error: directory not accessible"
+            self.err_message(9, err)
         try:
             self.reload()
         except:
@@ -849,7 +859,6 @@ class Vimiv(Gtk.Window):
 
         self.set_default_window_size()
         self.Sizes['wSize'] = self.win.get_size()
-
         self.image = Gtk.Image()
         viewport.add(self.image)
 
