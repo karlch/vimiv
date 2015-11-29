@@ -393,8 +393,8 @@ class Vimiv(Gtk.Window):
         self.iconview = Gtk.IconView.new()
         self.iconview.connect("item-activated", self.iconview_clicked)
         self.iconview.set_model(liststore)
-        self.iconview.set_size_request(self.size[0], self.size[1])
-        self.iconview.set_columns(-1)
+        columns = int(self.size[0]/228)
+        self.iconview.set_columns(columns)
         self.iconview.set_column_spacing(0)
         self.iconview.set_row_spacing(0)
         self.iconview.set_item_width(128)
@@ -409,9 +409,11 @@ class Vimiv(Gtk.Window):
             liststore.append([pixbuf, name])
 
         # Draw the icon view instead of the image
-        self.win.remove(self.vbox)
-        self.image.clear()
-        self.win.add(self.iconview)
+        self.viewport.remove(self.image)
+        self.viewport.add(self.iconview)
+        # Show the window
+        self.win.show_all()
+        self.thumbnail_toggled = True
         # Focus the current immage
         self.iconview.grab_focus()
         current = [(self.index) % len(self.paths)]
@@ -419,8 +421,6 @@ class Vimiv(Gtk.Window):
         self.iconview.select_path(curpath)
         curthing = self.iconview.get_cells()[0]
         self.iconview.set_cursor(curpath, curthing, False)
-        self.thumbnail_toggled = True
-        self.win.show_all()
 
     def iconview_clicked(self, w, count):
         self.thumbnail_toggle(self.thumbnail_toggled)
@@ -429,8 +429,8 @@ class Vimiv(Gtk.Window):
 
     def thumbnail_toggle(self, thumbnail_toggled):
         if self.thumbnail_toggled:
-            self.win.remove(self.iconview)
-            self.win.add(self.vbox)
+            self.viewport.remove(self.iconview)
+            self.viewport.add(self.image)
             self.update_image()
             self.win.show()
             self.thumbnail_toggled = False
@@ -852,15 +852,17 @@ class Vimiv(Gtk.Window):
         self.vbox.pack_start(self.scrolled_win, True, True, 0)
 
         # Viewport
-        viewport = Gtk.Viewport()
-        viewport.modify_bg(Gtk.StateType.NORMAL, Gdk.color_parse('#2C2C2C'))
-        viewport.set_shadow_type(Gtk.ShadowType.NONE)
-        self.scrolled_win.add(viewport)
+        self.viewport = Gtk.Viewport()
+        self.viewport.modify_bg(
+            Gtk.StateType.NORMAL,
+            Gdk.color_parse('#2C2C2C'))
+        self.viewport.set_shadow_type(Gtk.ShadowType.NONE)
+        self.scrolled_win.add(self.viewport)
 
         self.set_default_window_size()
         self.Sizes['wSize'] = self.win.get_size()
         self.image = Gtk.Image()
-        viewport.add(self.image)
+        self.viewport.add(self.image)
 
         self.statusbar = Gtk.Statusbar()
         self.vbox.pack_end(self.statusbar, False, False, 0)
