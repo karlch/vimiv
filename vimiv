@@ -144,29 +144,20 @@ class Vimiv(Gtk.Window):
     def library_scroll(self, scrolltype, horizontal):
         """ Scroll the library viewer and select if necessary """
         # Handle the specific keys
-        if horizontal:
+        if horizontal:  # Go up a directory like in ranger
             if scrolltype == Gtk.ScrollType.STEP_BACKWARD:
                 self.move_up()
-            else:
-                self.file_select(self.treepos, "count", "b")
         else:
+            # TODO !!
+            # go down
             if scrolltype == Gtk.ScrollType.STEP_FORWARD:
-                # go down
-                self.treepos += 1
-                if self.treepos > len(self.filelist):
-                    self.treepos = len(self.filelist)
-            else:
-                # go up
+                if self.treepos != len(self.filelist)-1:
+                    self.treepos += 1
+            # go up
+            elif self.treepos != 1:
                 self.treepos -= 1
-                if self.treepos < 0:
-                    self.treepos = 0
-            path = Gtk.TreePath(self.treepos)
-            # col = self.filelist[path][:]
-            select = self.treeview.get_selected_rows()
-            treeiter = self.filelist.get_iter(path)
-            print(1)
-            select.select_iter(treeiter)
-            print(2)
+
+            self.treeview.set_cursor(Gtk.TreePath(self.treepos), None, False)
 
     def thumbnail_scroll(self, scrolltype, horizontal):
         """ Select thumbnails correctly and scroll """
@@ -534,7 +525,6 @@ class Vimiv(Gtk.Window):
 
     def update_image(self):
         ''' Show the final image '''
-
         pboWidth = self.pixbufOriginal.get_width()
         pboHeight = self.pixbufOriginal.get_height()
 
@@ -728,7 +718,6 @@ class Vimiv(Gtk.Window):
 
     def populate(self, args):
         ''' Generate a list of paths from the given arguments '''
-
         # get supported mimetypes
         types = []
         for pixbuf_format in GdkPixbuf.Pixbuf.get_formats():
@@ -837,12 +826,12 @@ class Vimiv(Gtk.Window):
         # Tree View
         current_file_filter = self.filestore(self.datalist_create())
         self.treeview = Gtk.TreeView.new_with_model(current_file_filter)
-        self.treepos = 0  # Needed for the movement keys
+        self.select = self.treeview.get_selection()
+        self.treepos = 1  # Needed for the movement keys
         # Select file when row activated
         self.treeview.connect("row-activated", self.file_select)
         # Handle key events
-        self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK |
-                                 Gdk.EventMask.POINTER_MOTION_MASK)
+        self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK)
         self.treeview.connect("key_press_event", self.handle_key_press)
         # Add the columns
         for i, name in enumerate(["Num", "Name", "Size"]):
@@ -853,24 +842,43 @@ class Vimiv(Gtk.Window):
     def filestore(self, datalist):
         # Filelist in a liststore model
         self.filelist = Gtk.ListStore(int, str, str)
+        # Numerate each filename
         count = 0
         for data in datalist:
-            data.insert(0, count)
-            self.filelist.append(data)
             count += 1
+            data.insert(0, count)
+            # The data into the filelist
+            self.filelist.append(data)
 
         current_file_filter = self.filelist.filter_new()
         return current_file_filter
 
+    def datalist_create(self):
+        self.datalist = list()
+        # supported types
+        types = []  # for directories
+        for pixbuf_format in GdkPixbuf.Pixbuf.get_formats():
+            types.extend(pixbuf_format.get_mime_types())
+        # remove unsupported files
+        self.filelist_create()
+        self.files = [
+            possible_file
+            for possible_file in self.files
+            if mimetypes.guess_type(possible_file)[0] in types
+            or os.path.isdir(possible_file)]
+        for fil in self.files:
+            p = Popen(['du', '-h', fil], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            size, err = p.communicate()
+            size = size.decode(encoding='UTF-8')
+            size = size.split()[0]
+            self.datalist.append([fil, size])
+
+        return self.datalist
+
     def file_select(self, alternative, count, b):
         """ Selects the file from the treeview and does the correct thing
-            namely focus image or go to directory """
-        # Alternative comes from hjkl version
-        try:
-            int(alternative)
-            count = alternative
-        except:
-            count = count.get_indices()[0]
+         namely focus image or go to directory """
+        count = count.get_indices()[0]
         fil = self.files[count]
         if os.path.isdir(fil):
             self.move_up(fil)
@@ -898,28 +906,6 @@ class Vimiv(Gtk.Window):
         self.files = self.files.split("\n")
         self.files.pop()
         return self.files
-
-    def datalist_create(self):
-        self.datalist = list()
-        # supported types
-        types = []  # for directories
-        for pixbuf_format in GdkPixbuf.Pixbuf.get_formats():
-            types.extend(pixbuf_format.get_mime_types())
-        # remove unsupported files
-        self.filelist_create()
-        self.files = [
-            possible_file
-            for possible_file in self.files
-            if mimetypes.guess_type(possible_file)[0] in types
-            or os.path.isdir(possible_file)]
-        for fil in self.files:
-            p = Popen(['du', '-h', fil], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            size, err = p.communicate()
-            size = size.decode(encoding='UTF-8')
-            size = size.split()[0]
-            self.datalist.append([fil, size])
-
-        return self.datalist
 
     def reload(self):
         if not self.library_toggled:
