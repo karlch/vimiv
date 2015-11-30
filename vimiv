@@ -78,6 +78,7 @@ class Vimiv(Gtk.Window):
             (settings.key_fit, self.zoom_to, 0),
             (settings.key_fit_horiz, self.zoom_to, 0, True, False),
             (settings.key_fit_vert, self.zoom_to, 0, False, True),
+            (settings.key_center, self.center_window),
 
             (settings.key_next_image, self.move_index, +1),
             (settings.key_prev_image, self.move_index, -1),
@@ -589,7 +590,7 @@ class Vimiv(Gtk.Window):
 
     def zoom_delta(self, delta):
         try:
-            self.zoom_percent = self.zoom_percent + delta
+            self.zoom_percent = self.zoom_percent * (1 + delta)
             self.update_image()
         except:
             err = "Warning: Object cannot be zoomed"
@@ -606,6 +607,36 @@ class Vimiv(Gtk.Window):
         except:
             err = "Warning: Object cannot be zoomed"
             self.err_message(7, err)
+
+    def center_window(self):
+        # Vertical
+        pboHeight = self.pixbufOriginal.get_height()
+        vadj = self.viewport.get_vadjustment().get_value()
+        vact = self.zoom_percent * pboHeight
+        diff = vact - self.size[1]
+        if diff > 0:
+            toscroll = (diff - 2*vadj) / 2
+            Gtk.Adjustment.set_step_increment(
+                self.viewport.get_vadjustment(), toscroll)
+            self.scrolled_win.emit('scroll-child',
+                                   Gtk.ScrollType.STEP_FORWARD, False)
+            # Reset
+            Gtk.Adjustment.set_step_increment(self.viewport.get_vadjustment(),
+                                              100)
+        # Horizontal
+        pboWidth = self.pixbufOriginal.get_width()
+        hadj = self.viewport.get_hadjustment().get_value()
+        hact = self.zoom_percent * pboWidth
+        if diff > 0:
+            diff = hact - self.size[0]
+            toscroll = (diff - 2*hadj) / 2
+            Gtk.Adjustment.set_step_increment(
+                self.viewport.get_hadjustment(), toscroll)
+            self.scrolled_win.emit('scroll-child',
+                                   Gtk.ScrollType.STEP_FORWARD, True)
+            # Reset
+            Gtk.Adjustment.set_step_increment(self.viewport.get_hadjustment(),
+                                              100)
 
     def move_index(self, delta):
         self.index = (self.index + delta) % len(self.paths)

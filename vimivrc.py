@@ -39,6 +39,7 @@ key_scroll_right_page = "L"
 key_zoom_in = "plus"
 key_zoom_out = "minus"
 key_fit = "w"
+key_center = "W"
 key_fit_horiz = "e"
 key_fit_vert = "E"
 
