@@ -10,7 +10,7 @@ zoom_lock = False
 thumbsize = (128, 128)
 thumbnail_toggled = False
 tiling_wm = True
-geometry = "800x600"  # only used when tiling_wm is False
+geometry = "800x600"  # Only used when tiling_wm is False
 recursive = False  # Search directories recursively for images
 
 # Keybindings ##################################################################
@@ -55,4 +55,4 @@ key_rotate_cclock = "less"
 key_fliph = "y"
 key_flipv = "Y"
 key_delete = "x"
-key_edit = "c"
+key_edit = "c"  # Toggles the image manipulation window

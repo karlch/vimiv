@@ -1,6 +1,6 @@
 ### Vimiv, an image viewer with vim-like keybindings
 
-## Version 0.0.6
+## Version 0.0.7
 
 ## Features
 * vim-like keybindings
@@ -32,6 +32,3 @@ built.
 
 ## License
 In accordance with Pim Vimiv is released under the MIT license.
-
-## TODO
-* Clean code
