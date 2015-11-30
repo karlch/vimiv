@@ -132,6 +132,69 @@ class Vimiv(Gtk.Window):
         Gtk.main_quit()
 
     def scroll(self, scrolltype, horizontal):
+        """ Scroll the correct object """
+        if self.library_toggled:
+            self.library_scroll(scrolltype, horizontal)
+        elif self.thumbnail_toggled:
+            self.thumbnail_scroll(scrolltype, horizontal)
+        else:
+            self.scrolled_win.emit('scroll-child', scrolltype, horizontal)
+
+    def library_scroll(self, scrolltype, horizontal):
+        """ Scroll the library viewer and select if necessary """
+        # Handle the specific keys
+        if horizontal:
+            if scrolltype == Gtk.ScrollType.STEP_BACKWARD:
+                self.move_up()
+            else:
+                self.file_select(self.treepos, "count", "b")
+        else:
+            if scrolltype == Gtk.ScrollType.STEP_FORWARD:
+                # go down
+                self.treepos += 1
+                if self.treepos > len(self.filelist):
+                    self.treepos = len(self.filelist)
+            else:
+                # go up
+                self.treepos -= 1
+                if self.treepos < 0:
+                    self.treepos = 0
+            path = Gtk.TreePath(self.treepos)
+            # col = self.filelist[path][:]
+            select = self.treeview.get_selected_rows()
+            treeiter = self.filelist.get_iter(path)
+            print(1)
+            select.select_iter(treeiter)
+            print(2)
+
+    def thumbnail_scroll(self, scrolltype, horizontal):
+        """ Select thumbnails correctly and scroll """
+        # Adjust the scrolling so it moves one thumbnail by one
+        Gtk.Adjustment.set_step_increment(
+            self.viewport.get_vadjustment(), self.thumbsize[1])
+        # Check for the specified thumbnail and handle exceptons
+        if scrolltype == Gtk.ScrollType.STEP_BACKWARD and horizontal:
+            self.togo[0] -= 1
+            if self.togo[0] < 0:
+                self.togo[0] = 0
+        elif scrolltype == Gtk.ScrollType.STEP_BACKWARD:
+            self.togo[0] -= self.columns
+            if self.togo[0] < 0:
+                self.togo[0] += self.columns
+        elif scrolltype == Gtk.ScrollType.STEP_FORWARD and horizontal:
+            self.togo[0] += 1
+            if self.togo[0] == len(self.paths):
+                self.togo[0] -= 1
+        else:
+            self.togo = [self.togo[0] + self.columns]
+            if self.togo[0] >= len(self.paths):
+                self.togo[0] -= self.columns
+        # Exceptions
+        # Move
+        path = Gtk.TreePath.new_from_indices(self.togo)
+        self.iconview.select_path(path)
+        curthing = self.iconview.get_cells()[0]
+        self.iconview.set_cursor(path, curthing, False)
         self.scrolled_win.emit('scroll-child', scrolltype, horizontal)
 
     def toggle_slideshow(self):
@@ -393,8 +456,8 @@ class Vimiv(Gtk.Window):
         self.iconview = Gtk.IconView.new()
         self.iconview.connect("item-activated", self.iconview_clicked)
         self.iconview.set_model(liststore)
-        columns = int(self.size[0]/228)
-        self.iconview.set_columns(columns)
+        self.columns = int(self.size[0]/(self.thumbsize[0]+100))
+        self.iconview.set_columns(self.columns)
         self.iconview.set_column_spacing(0)
         self.iconview.set_row_spacing(0)
         self.iconview.set_item_width(128)
@@ -412,12 +475,12 @@ class Vimiv(Gtk.Window):
         self.viewport.remove(self.image)
         self.viewport.add(self.iconview)
         # Show the window
-        self.win.show_all()
+        self.iconview.show()
         self.thumbnail_toggled = True
         # Focus the current immage
         self.iconview.grab_focus()
-        current = [(self.index) % len(self.paths)]
-        curpath = Gtk.TreePath.new_from_indices(current)
+        self.togo = [(self.index) % len(self.paths)]
+        curpath = Gtk.TreePath.new_from_indices(self.togo)
         self.iconview.select_path(curpath)
         curthing = self.iconview.get_cells()[0]
         self.iconview.set_cursor(curpath, curthing, False)
@@ -436,6 +499,17 @@ class Vimiv(Gtk.Window):
             self.thumbnail_toggled = False
         else:
             self.thumbnails()
+            # ugly workaround (scrolls to the current thumbnail)
+            # TODO Improve this
+            self.zoom_delta(1)
+            self.timer_id = GLib.timeout_add(1, self.scroll_to_thumb)
+
+    def scroll_to_thumb(self):
+        scrollamount = int(self.togo[0] / self.columns) * self.thumbsize[1]
+        Gtk.Adjustment.set_step_increment(
+            self.viewport.get_vadjustment(), scrollamount)
+        self.scrolled_win.emit('scroll-child',
+                               Gtk.ScrollType.STEP_FORWARD, False)
 
     def get_zoom_percent(self, zWidth=False, zHeight=False):
         pboWidth = self.pixbufOriginal.get_width()
@@ -516,8 +590,6 @@ class Vimiv(Gtk.Window):
     def zoom_delta(self, delta):
         try:
             self.zoom_percent = self.zoom_percent + delta
-            if self.zoom_percent <= 0:
-                self.zoom_percent = 1/100
             self.update_image()
         except:
             err = "Warning: Object cannot be zoomed"
@@ -732,31 +804,42 @@ class Vimiv(Gtk.Window):
 
     def treeview_create(self):
         # Tree View
-        current_file_filter = self.liststore(self.datalist_create())
+        current_file_filter = self.filestore(self.datalist_create())
         self.treeview = Gtk.TreeView.new_with_model(current_file_filter)
+        self.treepos = 0  # Needed for the movement keys
+        # Select file when row activated
         self.treeview.connect("row-activated", self.file_select)
+        # Handle key events
         self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK |
                                  Gdk.EventMask.POINTER_MOTION_MASK)
         self.treeview.connect("key_press_event", self.handle_key_press)
+        # Add the columns
         for i, name in enumerate(["Num", "Name", "Size"]):
             renderer = Gtk.CellRendererText()
             column = Gtk.TreeViewColumn(name, renderer, text=i)
             self.treeview.append_column(column)
 
-    def liststore(self, datalist):
+    def filestore(self, datalist):
         # Filelist in a liststore model
-        filelist = Gtk.ListStore(int, str, str)
+        self.filelist = Gtk.ListStore(int, str, str)
         count = 0
         for data in datalist:
             data.insert(0, count)
-            filelist.append(data)
+            self.filelist.append(data)
             count += 1
 
-        current_file_filter = filelist.filter_new()
+        current_file_filter = self.filelist.filter_new()
         return current_file_filter
 
-    def file_select(self, w, count, b):
-        count = count.get_indices()[0]
+    def file_select(self, alternative, count, b):
+        """ Selects the file from the treeview and does the correct thing
+            namely focus image or go to directory """
+        # Alternative comes from hjkl version
+        try:
+            int(alternative)
+            count = alternative
+        except:
+            count = count.get_indices()[0]
         fil = self.files[count]
         if os.path.isdir(fil):
             self.move_up(fil)
