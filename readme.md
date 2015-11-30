@@ -32,7 +32,7 @@ I recommend binding the following keys in `$theme/gtk/gtk-3.0/gtk-keys.css`:
     @binding-set gtk-vi-tree-view
     {
         bind "j" { "move-cursor" (display-lines, 1) };
-        bind "k" { "move-cursor" (display-lines, -1) }
+        bind "k" { "move-cursor" (display-lines, -1) };
     }
 
     GtkTreeView {

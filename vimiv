@@ -148,13 +148,12 @@ class Vimiv(Gtk.Window):
             if scrolltype == Gtk.ScrollType.STEP_BACKWARD:
                 self.move_up()
         else:
-            # TODO !!
-            # go down
+            # Go down
             if scrolltype == Gtk.ScrollType.STEP_FORWARD:
                 if self.treepos != len(self.filelist)-1:
                     self.treepos += 1
-            # go up
-            elif self.treepos != 1:
+            # Go up
+            elif self.treepos != 0:
                 self.treepos -= 1
 
             self.treeview.set_cursor(Gtk.TreePath(self.treepos), None, False)
@@ -827,7 +826,9 @@ class Vimiv(Gtk.Window):
         current_file_filter = self.filestore(self.datalist_create())
         self.treeview = Gtk.TreeView.new_with_model(current_file_filter)
         self.select = self.treeview.get_selection()
-        self.treepos = 1  # Needed for the movement keys
+        # Needed for the movement keys
+        self.treepos = 0
+        self.treeview.set_enable_search(False)
         # Select file when row activated
         self.treeview.connect("row-activated", self.file_select)
         # Handle key events
