@@ -498,10 +498,10 @@ class Vimiv(Gtk.Window):
             self.win.show()
             self.thumbnail_toggled = False
         else:
+            self.zoom_delta(1)
             self.thumbnails()
             # ugly workaround (scrolls to the current thumbnail)
             # TODO Improve this
-            self.zoom_delta(1)
             self.timer_id = GLib.timeout_add(1, self.scroll_to_thumb)
 
     def scroll_to_thumb(self):

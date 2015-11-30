@@ -1,10 +1,10 @@
 ### Vimiv, an image viewer with vim-like keybindings
 
-## Version 0.0.4
+## Version 0.0.5
 
 ## Features
 * vim-like keybindings
-* thumbnail mode
+* thumbnail mode (supports caching of thumbnails)
 * simple library browser (browse through folders and open images)
 * basic image editing (rotate, flip, brightness, contrast and optimize)
 * search directory recursively for images
@@ -33,16 +33,10 @@ I recommend binding the following keys in `$theme/gtk/gtk-3.0/gtk-keys.css`:
     {
         bind "j" { "move-cursor" (display-lines, 1) };
         bind "k" { "move-cursor" (display-lines, -1) }
-        bind "l" { "move-cursor" (logical-positions, 1) };
-        bind "h" { "move-cursor" (logical-positions, -1) };
     }
 
     GtkTreeView {
     gtk-key-bindings: gtk-vi-tree-view;
-    }
-
-    GtkIconView {
-        gtk-key-bindings: gtk-vi-tree-view
     }
 
 ## Thanks to
@@ -51,3 +45,7 @@ built.
 
 ## License
 In accordance with Pim Vimiv is released under the MIT license.
+
+## TODO
+* Implement the two tree view bindings in the code
+* Clean code
