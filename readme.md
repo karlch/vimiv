@@ -1,6 +1,6 @@
 ### Vimiv, an image viewer with vim-like keybindings
 
-## Version 0.0.5
+## Version 0.0.6
 
 ## Features
 * vim-like keybindings
@@ -26,19 +26,6 @@ can copy the file to `~/.vimiv/vimivrc.py` and modify that file instead
 Be sure to install the dependencies first. A simple `sudo make` should then
 suffice.
 
-## GTK3 recommendation
-I recommend binding the following keys in `$theme/gtk/gtk-3.0/gtk-keys.css`:
-
-    @binding-set gtk-vi-tree-view
-    {
-        bind "j" { "move-cursor" (display-lines, 1) };
-        bind "k" { "move-cursor" (display-lines, -1) };
-    }
-
-    GtkTreeView {
-    gtk-key-bindings: gtk-vi-tree-view;
-    }
-
 ## Thanks to
 James Campos, author of Pim https://github.com/Narrat/Pim upon which Vimiv is
 built.
@@ -47,5 +34,4 @@ built.
 In accordance with Pim Vimiv is released under the MIT license.
 
 ## TODO
-* Implement the two tree view bindings in the code
 * Clean code
