@@ -1,4 +1,4 @@
-VERSION   := 0.0.1
+VERSION   := 0.1.0
 
 PREFIX    := /usr/local
 
@@ -9,9 +9,10 @@ install:
 	cp vimiv $(DESTDIR)$(PREFIX)/bin
 	chmod 755 $(DESTDIR)$(PREFIX)/bin/vimiv
 	cp vimivrc.py $(DESTDIR)/etc
+	mkdir -p $(DESTDIR)/usr/share/applications
 	cp vimiv.desktop $(DESTDIR)/usr/share/applications
 
 uninstall:
-	rm -f $(DESTDIR)/$(PREFIX)/bin/vimiv
+	rm -f $(DESTDIR)$(PREFIX)/bin/vimiv
 	rm -f $(DESTDIR)/etc/vimivrc
 	rm -f $(DESTDIR)/usr/share/applications/vimiv.desktop
