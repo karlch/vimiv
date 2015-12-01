@@ -5,15 +5,13 @@ PREFIX    := /usr/local
 SRC := vimiv
 
 install:
-	mkdir -p $(PREFIX)/bin
-	cp vimiv $(PREFIX)/bin
-	chmod 755 $(PREFIX)/bin/vimiv
-	cp vimivrc.py /etc
-	mkdir -p ~/.vimiv
-	cp vimivrc.py ~/.vimiv
-	cp vimiv.desktop /usr/share/applications
+	mkdir -p $(DESTDIR)$(PREFIX)/bin
+	cp vimiv $(DESTDIR)$(PREFIX)/bin
+	chmod 755 $(DESTDIR)$(PREFIX)/bin/vimiv
+	cp vimivrc.py $(DESTDIR)/etc
+	cp vimiv.desktop $(DESTDIR)/usr/share/applications
 
 uninstall:
-	rm -f $(PREFIX)/bin/vimiv
-	rm -f /etc/vimivrc
-	rm -f /usr/share/applications/vimiv.desktop
+	rm -f $(DESTDIR)/$(PREFIX)/bin/vimiv
+	rm -f $(DESTDIR)/etc/vimivrc
+	rm -f $(DESTDIR)/usr/share/applications/vimiv.desktop
