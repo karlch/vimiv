@@ -38,6 +38,10 @@ class Vimiv(Gtk.Window):
 
         self.paths = []
         self.marked = []
+        self.popup_val = False
+        self.user_zoomed = False  # checks if the user manually zoomed the image
+        #                           necessary for the auto_resize function
+        self.delta_str = ""  # used to prepend actions with numbers
 
         self.thumbsize = settings.thumbsize
 
@@ -80,10 +84,12 @@ class Vimiv(Gtk.Window):
             (settings.key_fit_vert, self.zoom_to, 0, False, True),
             (settings.key_center, self.center_window),
 
-            (settings.key_next_image, self.move_index, +1),
-            (settings.key_prev_image, self.move_index, -1),
-            (settings.key_first_image, self.move_pos, 1),
-            (settings.key_last_image, self.move_pos, "max"),
+            # Move_index(forward, key, delta=1)
+            (settings.key_next_image, self.move_index, True, True),
+            (settings.key_prev_image, self.move_index, False, True),
+            # Move_pos(forward, key)
+            (settings.key_first_image, self.move_pos, False),
+            (settings.key_last_image, self.move_pos, True),
 
             (settings.key_mark, self.mark),
 
@@ -93,9 +99,19 @@ class Vimiv(Gtk.Window):
             (settings.key_flipv, self.flip, False),
             (settings.key_delete, self.delete, 0),
             (settings.key_edit, self.manipulate_toggle),
+
+            ("1", self.num_append, "1"),
+            ("2", self.num_append, "2"),
+            ("3", self.num_append, "3"),
+            ("4", self.num_append, "4"),
+            ("5", self.num_append, "5"),
+            ("6", self.num_append, "6"),
+            ("7", self.num_append, "7"),
+            ("8", self.num_append, "8"),
+            ("9", self.num_append, "9"),
+            ("0", self.num_append, "0"),
             )
 
-        self.popup_val = False
         Gtk.Window.__init__(self)
 
     def toggle_zoom_lock(self):
@@ -124,7 +140,7 @@ class Vimiv(Gtk.Window):
         if len(self.paths) == 0:
             self.quit()
         else:
-            self.move_index(delta)
+            self.move_index(True, False, delta)
 
     def quit(self):
         for pos in self.marked:
@@ -152,48 +168,88 @@ class Vimiv(Gtk.Window):
                 self.file_select("a", Gtk.TreePath(self.treepos), "b")
         else:
             # Scroll the tree with jk
+            # Check for a user prefixed step
+            if self.delta_str:
+                step = int(self.delta_str)
+            else:
+                step = 1
             if scrolltype == Gtk.ScrollType.STEP_FORWARD:
-                if self.treepos != len(self.filelist)-1:
-                    self.treepos += 1
-            elif self.treepos != 0:
-                self.treepos -= 1
+                if self.treepos < len(self.filelist)-step:
+                    self.treepos += step
+            elif self.treepos > step-1:
+                self.treepos -= step
             self.treeview.set_cursor(Gtk.TreePath(self.treepos), None, False)
+            # Clear the user prefixed step
+            self.num_clear()
 
     def thumbnail_scroll(self, scrolltype, horizontal):
         """ Select thumbnails correctly and scroll """
-        # Adjust the scrolling so it moves one thumbnail by one
-        Gtk.Adjustment.set_step_increment(
-            self.viewport.get_vadjustment(), self.thumbsize[1])
+        # Check for a user prefixed step
+        if self.delta_str:
+            step = int(self.delta_str)
+        else:
+            step = 1
         # Check for the specified thumbnail and handle exceptons
         if scrolltype == Gtk.ScrollType.STEP_BACKWARD and horizontal:
-            self.togo[0] -= 1
+            self.togo[0] -= step
             if self.togo[0] < 0:
-                self.togo[0] = 0
+                self.togo[0] += step
+                step = 0  # Do not scroll
         elif scrolltype == Gtk.ScrollType.STEP_BACKWARD:
-            self.togo[0] -= self.columns
+            self.togo[0] -= self.columns*step
             if self.togo[0] < 0:
-                self.togo[0] += self.columns
+                self.togo[0] += self.columns*step
+                step = 0
         elif scrolltype == Gtk.ScrollType.STEP_FORWARD and horizontal:
-            self.togo[0] += 1
+            self.togo[0] += step
             if self.togo[0] == len(self.paths):
-                self.togo[0] -= 1
+                self.togo[0] -= step
+                step = 0
         else:
-            self.togo = [self.togo[0] + self.columns]
+            self.togo = [self.togo[0] + self.columns*step]
             if self.togo[0] >= len(self.paths):
-                self.togo[0] -= self.columns
+                self.togo[0] -= self.columns*step
+                step = 0
         # Move
         path = Gtk.TreePath.new_from_indices(self.togo)
         self.iconview.select_path(path)
         curthing = self.iconview.get_cells()[0]
         self.iconview.set_cursor(path, curthing, False)
-        # Scroll to the current thumbnail
-        self.scrolled_win.emit('scroll-child', scrolltype, horizontal)
+        # Actual scrolling
+        self.thumbnail_scroll_scroll(scrolltype, horizontal, step, self.togo[0])
+        # Clear the user prefixed step
+        self.num_clear()
+
+    def thumbnail_scroll_scroll(self, scrolltype, horizontal, step, target):
+        """ Handles the actual scrolling, stupid name, I know """
+        # Vertical
+        if not horizontal:
+            Gtk.Adjustment.set_step_increment(
+                self.viewport.get_vadjustment(), self.thumbsize[1]*step)
+            self.scrolled_win.emit('scroll-child', scrolltype, False)
+        # Horizontal (tricky because one might reach a new column)
+        else:
+            if step == 1:
+                if ((self.togo[0] % self.columns == 0 and
+                        scrolltype == Gtk.ScrollType.STEP_FORWARD) or
+                        (self.togo[0] % self.columns == self.columns-1 and
+                         scrolltype == Gtk.ScrollType.STEP_BACKWARD)):
+                    self.scrolled_win.emit('scroll-child', scrolltype, False)
+            else:
+                start = target - step
+                startcol = int(start / self.columns)
+                endcol = int(target / self.columns)
+                toscroll = endcol - startcol
+                Gtk.Adjustment.set_step_increment(
+                    self.viewport.get_vadjustment(), self.thumbsize[1]*toscroll)
+                self.scrolled_win.emit('scroll-child', scrolltype, False)
 
     def toggle_slideshow(self):
         self.slideshow = not self.slideshow
         if self.slideshow:
             self.timer_id = GLib.timeout_add_seconds(self.slideshow_delay,
-                                                     self.move_index, 1)
+                                                     self.move_index, True,
+                                                     False, 1)
         else:
             GLib.source_remove(self.timer_id)
         self.update_info()
@@ -500,7 +556,9 @@ class Vimiv(Gtk.Window):
         # Move to the current position if the iconview is clicked
         self.thumbnail_toggle(self.thumbnail_toggled)
         count = count.get_indices()[0] + 1
-        self.move_pos(count)
+        self.num_clear()
+        self.delta_str = str(count)
+        self.move_pos()
 
     def thumbnail_toggle(self, thumbnail_toggled):
         if self.thumbnail_toggled:
@@ -572,10 +630,11 @@ class Vimiv(Gtk.Window):
         """ Update the statusbar """
         name = self.paths[self.index].split("/")
         name = name[-1]  # Not the full path, only image name
-        message = "{0}/{1}   [{3:3.0f}%]   {2: <30} {5: <3} {4: <11}".format(
+        message = "{0}/{1}   [{3:3.0f}%]   {2:<30} {5:<3} {4:<11} {6}".format(
             self.index+1, len(self.paths), name,
             self.zoom_percent * 100, '[slideshow]' if self.slideshow else '',
-            '[*]' if self.paths[self.index] in self.marked else '')
+            '[*]' if self.paths[self.index] in self.marked else '',
+            self.delta_str)
         self.win.set_title("vimiv "+message)
         self.statusbar.push(1, message)
 
@@ -608,6 +667,7 @@ class Vimiv(Gtk.Window):
 
     def zoom_delta(self, delta):
         """ Zooms the image by delta percent """
+        self.user_zoomed = True
         try:
             self.zoom_percent = self.zoom_percent * (1 + delta)
             # Catch some unreasonable zooms
@@ -623,6 +683,7 @@ class Vimiv(Gtk.Window):
 
     def zoom_to(self, percent, zWidth=False, zHeight=False):
         """ Zooms to a given percentage """
+        self.user_zoomed = False
         try:
             if not self.fullscreen:
                 self.Sizes['wSize'] = self.win.get_size()
@@ -665,9 +726,16 @@ class Vimiv(Gtk.Window):
             Gtk.Adjustment.set_step_increment(self.viewport.get_hadjustment(),
                                               100)
 
-    def move_index(self, delta):
+    def move_index(self, forward=True, key=False, delta=1):
         """ Move by delta in the path """
+        # Check for prepended numbers
+        if key and self.delta_str:
+            delta *= int(self.delta_str)
+        # Forward or backward
+        if not forward:
+            delta *= -1
         self.index = (self.index + delta) % len(self.paths)
+        self.user_zoomed = False
 
         # reshuffle on wrap-around
         if self.shuffle and self.index is 0 and delta > 0:
@@ -694,28 +762,50 @@ class Vimiv(Gtk.Window):
 
         except GLib.Error as err:
             print(err)
-            self.move_index(1)
+            self.move_index()
 
+        self.num_clear()
         return True  # for the slideshow
 
-    def move_pos(self, pos=1):
+    def move_pos(self, forward=True):
         """ Move to pos in path """
         current = (self.index) % len(self.paths)
         max = len(self.paths)
-        if pos == "max":
+        # Move to definition by keys or end/beg
+        if self.delta_str:
+            pos = int(self.delta_str)
+        elif forward:
             pos = max
+        else:
+            pos = 1
+        # Catch exceptions
         try:
             current = int(current)
             max = int(max)
+            if pos < 0 or pos > max:
+                raise ValueError
         except:
             err = "Warning: Unsupported index"
             self.err_message(8, err)
             return False
-        current += 1
-        dif = pos - current
-        self.move_index(dif)
+        # Do the math and move
+        dif = pos - current - 1
+        self.move_index(True, False, dif)
+        self.user_zoomed = False
 
+        self.num_clear()
         return True
+
+    def num_append(self, num):
+        """ Adds a new char to the delta_str """
+        self.delta_str += num
+        self.timer_id = GLib.timeout_add_seconds(1, self.num_clear)
+        self.update_info()
+
+    def num_clear(self):
+        """ Clears the delta_str """
+        self.delta_str = ""
+        self.update_info()
 
     def populate(self, args):
         """ Generate a list of paths from the given arguments """
@@ -882,7 +972,7 @@ class Vimiv(Gtk.Window):
         else:  # Focus the image and populate a new list from the dir
             self.paths = []
             self.populate(self.files)
-            self.move_index(count)
+            self.move_index(True, False, count)
             self.update_image()
             self.library_toggle()
 
@@ -910,7 +1000,8 @@ class Vimiv(Gtk.Window):
 
     def auto_resize(self, w):
         """ Automatically resize image when window is resized """
-        if self.win.get_size() != self.size and self.paths:
+        if (self.win.get_size() != self.size and self.paths
+                and not self.user_zoomed):
             self.zoom_to(0)
             self.size = self.win.get_size()
 
@@ -1019,7 +1110,7 @@ class Vimiv(Gtk.Window):
 
         # Show images, if a path was given
         if len(self.paths) > 0:
-            self.move_index(0)
+            self.move_index(True, False, 0)
             self.win.show_all()
             self.toggle_statusbar()
             if self.fullscreen:

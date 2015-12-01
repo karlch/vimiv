@@ -1,6 +1,6 @@
 ### Vimiv, an image viewer with vim-like keybindings
 
-## Version 0.0.7
+## Version 0.1.0
 
 ## Features
 * vim-like keybindings
