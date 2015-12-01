@@ -29,6 +29,7 @@ suffice.
 ## Thanks to
 James Campos, author of Pim https://github.com/Narrat/Pim upon which Vimiv is
 built.
+
 Bert Muennich, author of sxiv https://github.com/muennich/sxiv which inspired
 many of the features of vimiv.
 
