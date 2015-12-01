@@ -610,9 +610,15 @@ class Vimiv(Gtk.Window):
         """ Zooms the image by delta percent """
         try:
             self.zoom_percent = self.zoom_percent * (1 + delta)
+            # Catch some unreasonable zooms
+            if (self.zoom_percent < 0.01 or self.zoom_percent > 10 or
+                    self.pixbufOriginal.get_height()*self.zoom_percent >
+                    self.Sizes['sHeight']*5):
+                self.zoom_percent = self.zoom_percent / (1 + delta)
+                raise ValueError
             self.update_image()
         except:
-            err = "Warning: Object cannot be zoomed"
+            err = "Warning: Object cannot be zoomed (further)"
             self.err_message(7, err)
 
     def zoom_to(self, percent, zWidth=False, zHeight=False):
