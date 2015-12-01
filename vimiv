@@ -27,8 +27,7 @@ class Vimiv(Gtk.Window):
         self.slideshow_delay = settings.slideshow_delay
         self.shuffle = settings.shuffle
         self.sbar = settings.display_bar
-        self.zoom_lock = settings.zoom_lock
-        self.thumbnail_toggled = settings.thumbnail_toggled
+        self.thumbnail_toggled = False
         self.library_toggled = False
         self.tiling_wm = settings.tiling_wm
         self.geometry = settings.geometry
@@ -41,7 +40,7 @@ class Vimiv(Gtk.Window):
         self.popup_val = False
         self.user_zoomed = False  # checks if the user manually zoomed the image
         #                           necessary for the auto_resize function
-        self.delta_str = ""  # used to prepend actions with numbers
+        self.count_str = ""  # used to prepend actions with numbers
 
         self.thumbsize = settings.thumbsize
 
@@ -52,7 +51,6 @@ class Vimiv(Gtk.Window):
             (settings.key_fullscreen_toggle, self.toggle_fullscreen),
             (settings.key_statusbar_toggle, self.toggle_statusbar),
             (settings.key_slideshow_toggle, self.toggle_slideshow),
-            (settings.key_zoomlock_toggle, self.toggle_zoom_lock),
             (settings.key_thumbnail_toggle, self.thumbnail_toggle,
              self.thumbnail_toggled),
             (settings.key_library_toggle, self.library_toggle),
@@ -114,9 +112,6 @@ class Vimiv(Gtk.Window):
 
         Gtk.Window.__init__(self)
 
-    def toggle_zoom_lock(self):
-        self.zoom_lock = not self.zoom_lock
-
     def delete(self, delta=0):
         current = self.paths[self.index]
         self.paths.remove(current)
@@ -169,8 +164,8 @@ class Vimiv(Gtk.Window):
         else:
             # Scroll the tree with jk
             # Check for a user prefixed step
-            if self.delta_str:
-                step = int(self.delta_str)
+            if self.count_str:
+                step = int(self.count_str)
             else:
                 step = 1
             if scrolltype == Gtk.ScrollType.STEP_FORWARD:
@@ -185,8 +180,8 @@ class Vimiv(Gtk.Window):
     def thumbnail_scroll(self, scrolltype, horizontal):
         """ Select thumbnails correctly and scroll """
         # Check for a user prefixed step
-        if self.delta_str:
-            step = int(self.delta_str)
+        if self.count_str:
+            step = int(self.count_str)
         else:
             step = 1
         # Check for the specified thumbnail and handle exceptons
@@ -276,8 +271,6 @@ class Vimiv(Gtk.Window):
             self.Sizes['wSize'] = self.win.get_size()
         else:
             self.win.unfullscreen()
-        if not self.zoom_lock:
-            self.zoom_percent = self.get_zoom_percent()
 
         self.update_image()
 
@@ -292,8 +285,6 @@ class Vimiv(Gtk.Window):
         try:
             # Rotate the image shown
             self.pixbufOriginal = self.pixbufOriginal.rotate_simple((90*cwise))
-            if not self.zoom_lock:
-                self.zoom_percent = self.get_zoom_percent()
             self.update_image()
             # Rotate the actual file
             im = Image.open(self.paths[self.index])
@@ -311,8 +302,6 @@ class Vimiv(Gtk.Window):
         try:
             # Flip the image shown
             self.pixbufOriginal = self.pixbufOriginal.flip(dir)
-            if not self.zoom_lock:
-                self.zoom_percent = self.get_zoom_percent()
             self.update_image()
             # Flip the actual file
             im = Image.open(self.paths[self.index])
@@ -420,10 +409,9 @@ class Vimiv(Gtk.Window):
             self.paths[self.index])
         if self.pixbufOriginal.is_static_image():
             self.pixbufOriginal = self.pixbufOriginal.get_static_image()
-            if not self.zoom_lock:
-                if not self.fullscreen:
-                    self.Sizes['wSize'] = self.win.get_size()
-                self.zoom_percent = self.get_zoom_percent()
+            if not self.fullscreen:
+                self.Sizes['wSize'] = self.win.get_size()
+            self.zoom_percent = self.get_zoom_percent()
         else:
             self.zoom_percent = 1
         self.update_image()
@@ -451,10 +439,9 @@ class Vimiv(Gtk.Window):
                 self.paths[self.index])
             if self.pixbufOriginal.is_static_image():
                 self.pixbufOriginal = self.pixbufOriginal.get_static_image()
-                if not self.zoom_lock:
-                    if not self.fullscreen:
-                        self.Sizes['wSize'] = self.win.get_size()
-                    self.zoom_percent = self.get_zoom_percent()
+                if not self.fullscreen:
+                    self.Sizes['wSize'] = self.win.get_size()
+                self.zoom_percent = self.get_zoom_percent()
             else:
                 self.zoom_percent = 1
             self.update_image()
@@ -473,10 +460,9 @@ class Vimiv(Gtk.Window):
             self.paths[self.index] + "edit")
         if self.pixbufOriginal.is_static_image():
             self.pixbufOriginal = self.pixbufOriginal.get_static_image()
-            if not self.zoom_lock:
-                if not self.fullscreen:
-                    self.Sizes['wSize'] = self.win.get_size()
-                self.zoom_percent = self.get_zoom_percent()
+            if not self.fullscreen:
+                self.Sizes['wSize'] = self.win.get_size()
+            self.zoom_percent = self.get_zoom_percent()
         else:
             self.zoom_percent = 1
         self.update_image()
@@ -557,7 +543,7 @@ class Vimiv(Gtk.Window):
         self.thumbnail_toggle(self.thumbnail_toggled)
         count = count.get_indices()[0] + 1
         self.num_clear()
-        self.delta_str = str(count)
+        self.count_str = str(count)
         self.move_pos()
 
     def thumbnail_toggle(self, thumbnail_toggled):
@@ -568,7 +554,6 @@ class Vimiv(Gtk.Window):
             self.win.show()
             self.thumbnail_toggled = False
         else:
-            self.zoom_delta(1)
             self.thumbnails()
             # ugly workaround (scrolls to the current thumbnail)
             # TODO Improve this
@@ -634,7 +619,7 @@ class Vimiv(Gtk.Window):
             self.index+1, len(self.paths), name,
             self.zoom_percent * 100, '[slideshow]' if self.slideshow else '',
             '[*]' if self.paths[self.index] in self.marked else '',
-            self.delta_str)
+            self.count_str)
         self.win.set_title("vimiv "+message)
         self.statusbar.push(1, message)
 
@@ -729,8 +714,8 @@ class Vimiv(Gtk.Window):
     def move_index(self, forward=True, key=False, delta=1):
         """ Move by delta in the path """
         # Check for prepended numbers
-        if key and self.delta_str:
-            delta *= int(self.delta_str)
+        if key and self.count_str:
+            delta *= int(self.count_str)
         # Forward or backward
         if not forward:
             delta *= -1
@@ -752,10 +737,9 @@ class Vimiv(Gtk.Window):
                     path)
             if self.pixbufOriginal.is_static_image():
                 self.pixbufOriginal = self.pixbufOriginal.get_static_image()
-                if not self.zoom_lock:
-                    if not self.fullscreen:
-                        self.Sizes['wSize'] = self.win.get_size()
-                    self.zoom_percent = self.get_zoom_percent()
+                if not self.fullscreen:
+                    self.Sizes['wSize'] = self.win.get_size()
+                self.zoom_percent = self.get_zoom_percent()
             else:
                 self.zoom_percent = 1
             self.update_image()
@@ -772,8 +756,8 @@ class Vimiv(Gtk.Window):
         current = (self.index) % len(self.paths)
         max = len(self.paths)
         # Move to definition by keys or end/beg
-        if self.delta_str:
-            pos = int(self.delta_str)
+        if self.count_str:
+            pos = int(self.count_str)
         elif forward:
             pos = max
         else:
@@ -797,14 +781,14 @@ class Vimiv(Gtk.Window):
         return True
 
     def num_append(self, num):
-        """ Adds a new char to the delta_str """
-        self.delta_str += num
+        """ Adds a new char to the count_str """
+        self.count_str += num
         self.timer_id = GLib.timeout_add_seconds(1, self.num_clear)
         self.update_info()
 
     def num_clear(self):
-        """ Clears the delta_str """
-        self.delta_str = ""
+        """ Clears the count_str """
+        self.count_str = ""
         self.update_info()
 
     def populate(self, args):

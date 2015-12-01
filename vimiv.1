@@ -1,0 +1,263 @@
+.TH VIMIV 1
+.SH NAME
+vimiv \- an image viewer with vim-like keybindings
+.SH SYNOPSIS
+.B vimiv
+.RB [ \-bfhrsS ]
+.RB [ \-g,\ \-\-geometry
+.IR GEOMETRY]
+.RB [ \--slideshow-delay
+.IR SLIDESHOW-DELAY]
+.IR FILE[S]
+.SH DESCRIPTION
+Vimiv is an image viewer with vim-like keybindings for X. It is written in
+python and works well with tiling window managers.
+.P
+Vimiv features various modes of operation: image, thumbnail, library and
+manipulate mode. If a file is passed to vimiv it starts in image mode,
+otherwise a quick error is displayed and library mode starts.
+.P
+In image mode the current image and possibly a statusbar is shown. It is
+possible to navigate through the images and apply basic actions.
+.P
+In thumbnail mode a grid of small previews and the name of each image is
+displayed. It is useful for getting an overview of the open images and for
+selecting a specific one.
+.P
+In library mode a small popup window with a list of the current images is
+displayed. One can select any image or navigate the directory tree to load new
+images.
+.P
+In manipulate mode a small popup window with further image editing options is
+displayed. These feature the change of brightness and contrast and a button
+called "optimize". This button uses imagemagick to optimize contrast, gamma and
+level of the image. This tends to work well with photographs.
+.SH OPTIONS
+.TP
+.B \-b
+display the statusbar
+.TP
+.B \-f
+start in fullscreen
+.TP
+.B \-h
+display a simple help text
+.TP
+.B \-r
+search the directory recursively for images
+.TP
+.B \-s
+shuffle the filelist
+.TP
+.B \-S
+do not shuffle the filelist
+.TP
+.BI "\-g " GEOMETRY
+set the starting geometry
+.TP
+.BI "\--geometry " GEOMETRY
+same as \-g
+.TP
+.BI "\--slideshow-delay " SLIDESHOW_DELAY
+set the slideshow delay
+.SH KEYBOARD COMMANDS
+These keyboard commands apply in image mode and if not stated differently in the
+other modes as well.
+.TP
+.BR 0 \- 9
+Prefix the next command with a COUNT. If this is possible for a command it is
+denoted.
+.TP
+.BR h
+Scroll to the left.
+.TP
+.BR j
+Scroll down.
+.TP
+.BR k
+Scroll up.
+.TP
+.BR l
+Scroll to the right.
+.TP
+.BR H
+Scroll to the left end.
+.TP
+.BR J
+Scroll to the bottom.
+.TP
+.BR K
+Scroll to the top.
+.TP
+.BR L
+Scroll to the right end.
+.TP
+.BR n
+Focus the [COUNT] next image in filelist.
+.TP
+.BR p
+Focus the [COUNT] previous image in filelist.
+.TP
+.BR g
+Focus the first image or image number [COUNT].
+.TP
+.BR G
+Focus the last image or image number [COUNT].
+.TP
+.BR m
+Mark the current image, marked images will be printed to stdout on exit.
+.TP
+.BR +
+Zoom in.
+.TP
+.BR -
+Zoom out.
+.TP
+.BR w
+Fit the image to the current window size.
+.TP
+.BR W
+Center the current image.
+.TP
+.BR e
+Fit the image to the current window size horizontally.
+.TP
+.BR E
+Fit the image to the current window size vertically.
+.TP
+.BR >
+Rotate the current image clockwise.
+.TP
+.BR <
+Rotate the current image counter-clockwise.
+.TP
+.BR y
+Flip the current image horizontally.
+.TP
+.BR Y
+Flip the current image vertically.
+.TP
+.BR x
+Delte the current image, this moves the file to "~/.vimiv/Trash".
+.TP
+.BR f
+Toggle fullscreen.
+.TP
+.BR b
+Toggle the statusbar.
+.TP
+.BR s
+Toggle the slideshow.
+.TP
+.BR space
+Toggle animation state of animated images (e.g. Gifs).
+.TP
+.BR t
+Toggle thumbnail mode.
+.TP
+.BR o
+Toggle library mode.
+.TP
+.BR u
+Open library mode and move up a directory.
+.TP
+.BR c
+Toggle manipulation mode.
+.TP
+.BR q
+Quit vimiv.
+.SH KEYBOARD COMMANDS IN THUMBNAIL MODE
+.BR h
+Focus left.
+.TP
+.BR j
+Focus down.
+.TP
+.BR k
+Focus up.
+.TP
+.BR l
+Focus right.
+.TP
+.BR space
+Select the current image and return to image mode.
+.TP
+.BR return
+Select the current image and return to image mode.
+.SH KEYBOARD COMMANDS IN LIBRARY MODE
+.BR h
+Move up a directory.
+.TP
+.BR j
+Focus down.
+.TP
+.BR k
+Focus up.
+.TP
+.BR l
+Select the current path.
+.TP
+.BR space
+Select the current path.
+.TP
+.BR return
+Select the current path.
+.TP
+.BR u
+Move up a directory.
+
+.SH CONFIGURATION
+All keyboard commands and some additional settings can be configured in
+"/etc/vimivrc.py" or in "~/.vimiv/vimivrc.py" (recommended). This file is python
+code which declares variables used in the actual program. Since python code is
+very readable this should not be an issue. The following settings can also be
+configured:
+.BR start_fullscreen\ (Bool)
+If True start in fullscreen mode.
+.TP
+.BR start_slideshow\ (Bool)
+If True start in slideshow mode.
+.TP
+.BR slideshow_delay\ (Float)
+Specify the delay in slideshow mode.
+.TP
+.BR shuffle\ (Bool)
+If True shuffle the images in filelist.
+.TP
+.BR display_bar\ (Bool)
+If True show the statusbar.
+.TP
+.BR thumbsize\ (tuple)
+Size for the thumbnails
+.TP
+.BR tiling_wm\ (Bool)
+If True optimize behaviour for tiling window managers. Geometry will not be
+parsed but vimiv will wait for the window manager to resize the window and then
+update the image.
+.TP
+.BR geometry\ (string)
+A string of the form "WIDTHxHEIGHT" which sets the default size for the image.
+This is only used if tiling_wm is False
+.TP
+.BR recursive\ (Bool)
+If True search the given directory recursively for images.
+.SH THUMBNAIL CACHING
+Thumbnails are cached under "~/.vimiv/Thumbnails" so they can be loaded a lot
+faster.
+.SH IMAGE MANIPULATION
+The basic manipulations (rotate, flip, ...) are automatically also applied to
+the file. The file is overwritten. The more advanced manipulations which can be
+accessed in manipulation mode are only written to the actual file if one selects
+"Accept changes", otherwise they are ignored.
+.SH LIBRARY VIEWER
+Users of "ranger" should be familiar with the concept. This library viewer will
+only show files which it recognizes as images and directories as vimiv can and
+should not access other files.
+.SH THANKS TO
+James Campos, author of Pim https://github.com/Narrat/Pim upon which Vimiv is
+built.
+
+Bert Muennich, author of sxiv https://github.com/muennich/sxiv which inspired
+many of the features of vimiv.
+.SH HOMEPAGE
+https://github.com/karlch/vimiv
