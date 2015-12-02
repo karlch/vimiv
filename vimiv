@@ -452,20 +452,24 @@ class Vimiv(Gtk.Window):
         self.manipulate_toggle()
 
     def button_opt_clicked(self, widget):
-        call(["convert", "-contrast", "-auto-gamma", "-auto-level",
-              self.paths[self.index], self.paths[self.index] + "edit"])
+        try:
+            call(["convert", "-contrast", "-auto-gamma", "-auto-level",
+                 self.paths[self.index], self.paths[self.index] + "edit"])
 
-        self.image.clear()
-        self.pixbufOriginal = GdkPixbuf.PixbufAnimation.new_from_file(
-            self.paths[self.index] + "edit")
-        if self.pixbufOriginal.is_static_image():
-            self.pixbufOriginal = self.pixbufOriginal.get_static_image()
-            if not self.fullscreen:
-                self.Sizes['wSize'] = self.win.get_size()
-            self.zoom_percent = self.get_zoom_percent()
-        else:
-            self.zoom_percent = 1
-        self.update_image()
+            self.image.clear()
+            self.pixbufOriginal = GdkPixbuf.PixbufAnimation.new_from_file(
+                self.paths[self.index] + "edit")
+            if self.pixbufOriginal.is_static_image():
+                self.pixbufOriginal = self.pixbufOriginal.get_static_image()
+                if not self.fullscreen:
+                    self.Sizes['wSize'] = self.win.get_size()
+                self.zoom_percent = self.get_zoom_percent()
+            else:
+                self.zoom_percent = 1
+            self.update_image()
+        except:
+            errstring = "Optimize exited with code 1, is imagemagick installed?"
+            self.err_message("15", errstring)
 
     def animation_toggle(self):
         self.animation_toggled = not self.animation_toggled
