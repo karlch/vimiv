@@ -1,6 +1,6 @@
 ### Vimiv, an image viewer with vim-like keybindings
 
-## Version 0.1.0
+## Version 0.1
 
 ## Features
 * vim-like keybindings
@@ -17,14 +17,17 @@ can copy the file to `~/.vimiv/vimivrc.py` and modify that file instead
 
 ## Dependencies
 * python3
-* pygobject
+* python-gobject
 * gtk3
 * python-pillow
-* imagemagick (for the optimization)
+* imagemagick (optional for the optimization of images)
 
 ## Installation
 Be sure to install the dependencies first. A simple `sudo make` should then
 suffice.
+
+## Documentation
+Vimiv comes with a man-page for further documentation.
 
 ## Thanks to
 James Campos, author of Pim https://github.com/Narrat/Pim upon which Vimiv is
