@@ -14,7 +14,7 @@ from PIL import Image, ImageEnhance
 from subprocess import call, Popen, PIPE
 # Settings
 sys.path.append(os.path.join(os.path.expanduser("~"), ".vimiv"))
-sys.path.append("/etc")
+sys.path.append("/etc/vimiv")
 import vimivrc as settings
 
 
