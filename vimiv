@@ -265,12 +265,12 @@ class Vimiv(Gtk.Window):
         """ Pushes an error message to the statusbar """
         if not self.sbar:
             self.statusbar.push(id, mes)
-            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, id)
+            self.timer_id = GLib.timeout_add_seconds(10, self.statusbar.pop, id)
         else:  # Show bar quickly if it isn't there
             self.toggle_statusbar()
             self.statusbar.push(id, mes)
-            self.timer_id = GLib.timeout_add_seconds(1, self.statusbar.pop, id)
-            self.timer_id = GLib.timeout_add_seconds(1, self.toggle_statusbar)
+            self.timer_id = GLib.timeout_add_seconds(10, self.statusbar.pop, id)
+            self.timer_id = GLib.timeout_add_seconds(10, self.toggle_statusbar)
 
     def toggle_fullscreen(self):
         self.fullscreen = not self.fullscreen
@@ -1117,9 +1117,7 @@ class Vimiv(Gtk.Window):
                 self.win.fullscreen()
         else:
             self.win.show_all()
-            self.statusbar.push(10, "No valid paths, opening library viewer")
-            self.timer_id = GLib.timeout_add_seconds(2, self.statusbar.pop, 10)
-            self.timer_id = GLib.timeout_add_seconds(2, self.toggle_statusbar)
+            self.err_message(10, "No valid paths, opening library viewr")
             self.timer_id = GLib.timeout_add(300, self.library_toggle)
 
         # Finally show the main window
