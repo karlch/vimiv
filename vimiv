@@ -810,6 +810,8 @@ class Vimiv(Gtk.Window):
                 single = os.path.abspath(arg)
                 directory = os.path.dirname(single)
                 args = self.filelist_create(directory)
+                for i, arg in enumerate(args):
+                    args[i] = os.path.join(directory, arg)
 
         # Add everything
         for arg in args:
@@ -821,7 +823,6 @@ class Vimiv(Gtk.Window):
                     [os.path.join(path, x)
                      for x in os.listdir(path)])
                 self.paths.extend(paths)
-
         # Remove unsupported files
         self.paths = [
             possible_path
@@ -899,7 +900,10 @@ class Vimiv(Gtk.Window):
         # Add the columns
         for i, name in enumerate(["Num", "Name", "Size"]):
             renderer = Gtk.CellRendererText()
+            renderer.set_property("background-set", True)
             column = Gtk.TreeViewColumn(name, renderer, text=i)
+            if name != "Num":
+                column.set_expand(True)
             self.treeview.append_column(column)
 
     def filestore(self, datalist):
