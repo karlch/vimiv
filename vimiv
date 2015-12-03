@@ -58,13 +58,22 @@ class Vimiv(Gtk.Window):
 
             # if True, scroll in the horizontal direction.
             (settings.key_scroll_left, self.scroll,
-             Gtk.ScrollType.STEP_BACKWARD, True),
+             Gtk.ScrollType.STEP_BACKWARD, True, False),
             (settings.key_scroll_down, self.scroll,
-             Gtk.ScrollType.STEP_FORWARD, False),
+             Gtk.ScrollType.STEP_FORWARD, False, False),
             (settings.key_scroll_up, self.scroll,
-             Gtk.ScrollType.STEP_BACKWARD, False),
+             Gtk.ScrollType.STEP_BACKWARD, False, False),
             (settings.key_scroll_right, self.scroll,
-             Gtk.ScrollType.STEP_FORWARD, True),
+             Gtk.ScrollType.STEP_FORWARD, True, False),
+            # Also with the arrow keys
+            ("Left", self.scroll,
+             Gtk.ScrollType.STEP_BACKWARD, True, True),
+            ("Down", self.scroll,
+             Gtk.ScrollType.STEP_FORWARD, False, True),
+            ("Up", self.scroll,
+             Gtk.ScrollType.STEP_BACKWARD, False, True),
+            ("Right", self.scroll,
+             Gtk.ScrollType.STEP_FORWARD, True, True),
 
             (settings.key_scroll_left_page, self.scroll,
              Gtk.ScrollType.START, True),
@@ -143,16 +152,16 @@ class Vimiv(Gtk.Window):
 
         Gtk.main_quit()
 
-    def scroll(self, scrolltype, horizontal):
+    def scroll(self, scrolltype, horizontal, arrkey):
         """ Scroll the correct object """
         if self.library_toggled:
-            self.library_scroll(scrolltype, horizontal)
+            self.library_scroll(scrolltype, horizontal, arrkey)
         elif self.thumbnail_toggled:
-            self.thumbnail_scroll(scrolltype, horizontal)
+            self.thumbnail_scroll(scrolltype, horizontal, arrkey)
         else:
             self.scrolled_win.emit('scroll-child', scrolltype, horizontal)
 
-    def library_scroll(self, scrolltype, horizontal):
+    def library_scroll(self, scrolltype, horizontal, arrkey):
         """ Scroll the library viewer and select if necessary """
         # Handle the specific keys
         if horizontal:
@@ -173,11 +182,13 @@ class Vimiv(Gtk.Window):
                     self.treepos += step
             elif self.treepos > step-1:
                 self.treepos -= step
-            self.treeview.set_cursor(Gtk.TreePath(self.treepos), None, False)
+            if not arrkey:  # Necessary because Gtk moves with the arrows anyway
+                self.treeview.set_cursor(Gtk.TreePath(self.treepos),
+                                         None, False)
             # Clear the user prefixed step
             self.num_clear()
 
-    def thumbnail_scroll(self, scrolltype, horizontal):
+    def thumbnail_scroll(self, scrolltype, horizontal, arrkey):
         """ Select thumbnails correctly and scroll """
         # Check for a user prefixed step
         if self.count_str:
@@ -207,9 +218,10 @@ class Vimiv(Gtk.Window):
                 step = 0
         # Move
         path = Gtk.TreePath.new_from_indices(self.togo)
-        self.iconview.select_path(path)
-        curthing = self.iconview.get_cells()[0]
-        self.iconview.set_cursor(path, curthing, False)
+        if not arrkey:
+            self.iconview.select_path(path)
+            curthing = self.iconview.get_cells()[0]
+            self.iconview.set_cursor(path, curthing, False)
         # Actual scrolling
         self.thumbnail_scroll_scroll(scrolltype, horizontal, step, self.togo[0])
         # Clear the user prefixed step
