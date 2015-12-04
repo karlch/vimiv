@@ -7,7 +7,6 @@ slideshow_delay = 2
 shuffle = False
 display_bar = True
 thumbsize = (128, 128)
-tiling_wm = True
 geometry = "800x600"  # Only used when tiling_wm is False
 recursive = False  # Search directories recursively for images
 
