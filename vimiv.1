@@ -18,8 +18,8 @@ Additionally there are two popup windows: the library popup and the manipulation
 popup. If a file is passed to vimiv it starts in image mode, otherwise a quick
 error is displayed and the library popup appears.
 .P
-In image mode the current image and possibly a statusbar is shown. It is
-possible to navigate through the images and apply basic actions.
+In image mode the current image and possibly a statusbar is shown. One can
+navigate through the images and apply basic actions.
 .P
 In thumbnail mode a grid of small previews and the name of each image is
 displayed. It is useful for getting an overview of the open images and for
@@ -61,8 +61,8 @@ same as \-g
 .BI "\--slideshow-delay " SLIDESHOW_DELAY
 set the slideshow delay
 .SH KEYBOARD COMMANDS
-These keyboard commands apply in image mode and if not stated differently in the
-other modes as well.
+These keyboard commands apply in image mode and if not stated differently
+thumbnail mode as well.
 .TP
 .BR 0 \- 9
 Prefix the next command with a COUNT. If this is possible for a command it is
@@ -107,6 +107,10 @@ Focus the last image or image number [COUNT].
 .BR m
 Mark the current image, marked images will be printed to stdout on exit.
 .TP
+.BR M
+Toggle the mark status, if images are marked all marks will be removed otherwise
+the last list of marked images will be marked again.
+.TP
 .BR +
 Zoom in.
 .TP
@@ -114,7 +118,8 @@ Zoom in.
 Zoom out.
 .TP
 .BR w
-Fit the image to the current window size.
+Fit the image to the current window size or zoom to [COUNT]. If [COUNT] begins
+with 0 zoom to 1/[COUNT].
 .TP
 .BR W
 Center the current image.
@@ -126,19 +131,19 @@ Fit the image to the current window size horizontally.
 Fit the image to the current window size vertically.
 .TP
 .BR >
-Rotate the current image clockwise.
+Rotate image clockwise.
 .TP
 .BR <
-Rotate the current image counter-clockwise.
+Rotate image counter-clockwise.
 .TP
 .BR y
-Flip the current image horizontally.
+Flip mage horizontally.
 .TP
 .BR Y
-Flip the current image vertically.
+Flip image vertically.
 .TP
 .BR x
-delete the current image, this moves the file to "~/.vimiv/Trash".
+Delete image, this moves the file to "~/.vimiv/Trash".
 .TP
 .BR f
 Toggle fullscreen.
@@ -156,13 +161,13 @@ Toggle animation state of animated images (e.g. Gifs).
 Toggle thumbnail mode.
 .TP
 .BR o
-Toggle library mode.
+Toggle library popup.
 .TP
 .BR u
-Open library mode and move up a directory.
+Open library popup and move up a directory.
 .TP
 .BR c
-Toggle manipulation mode.
+Toggle manipulation popup.
 .TP
 .BR q
 Quit vimiv.
@@ -199,6 +204,12 @@ Focus [COUNT] up.
 .BR l
 Select the current path.
 .TP
+.BR i
+Focus the cmd_handler.
+.TP
+.BR Escape
+Unfocus the cmd_handler.
+.TP
 .BR space
 Select the current path.
 .TP
@@ -234,11 +245,6 @@ If True show the statusbar.
 .BR thumbsize\ (tuple)
 Size for the thumbnails.
 .TP
-.BR tiling_wm\ (Bool)
-If True optimize behaviour for tiling window managers. Geometry will not be
-parsed but vimiv will wait for the window manager to resize the window and then
-update the image.
-.TP
 .BR geometry\ (string)
 A string of the form "WIDTHxHEIGHT" which sets the default size for the image.
 This is only used if tiling_wm is False.
@@ -260,7 +266,27 @@ only show files which it recognizes as images and directories as vimiv can and
 should not access other files. If an image is selected vimiv will populate a new
 filelist with all images in the same directory, close the library viewer  and
 focus the selected image. If a directory is selected, all accessible files in
-that directory will be shown in the library
+that directory will be shown in the library.
+
+Additionally there is a small text box at the bottom. This is called the
+cmd_handler. One can type the absolute or relative path of an image/directory
+and this path will be focused. If one only types a string this string will be
+searched for in all files in the current directory. If it is a substring of a
+filename that file will be focused. Consider e.g. the case where the files
+"image_001", "image_002" and "image_003" are in current directory. If one enters
+"3", "image_003" will be focused.
+
+If the input is prepended with "!" the following string will be sent to the
+shell and executed. Here "%" is substituted with the currently selected file and
+"*" is substituted with all files in the current directory. So if "image" is
+selected and one enters "!gimp %", "image" will be opened in gimp.
+.SH MARKING
+If images are marked the simple manipulations (rotating, flipping and deleting)
+are executed for all marked images and not for the current image. In thumbnail
+mode those actions will always work on marked images. If there are none, no
+manipulation will be done.
+.SH BUGS
+Probably. Please contact me under <christian.karl@protonmail.com>.
 .SH THANKS TO
 James Campos, author of Pim https://github.com/Narrat/Pim upon which Vimiv is
 built.

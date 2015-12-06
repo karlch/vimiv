@@ -1,14 +1,16 @@
 ### Vimiv, an image viewer with vim-like keybindings
 
-## Version 0.1
+## Version 0.2
 
 ## Features
 * vim-like keybindings
 * thumbnail mode (supports caching of thumbnails)
 * simple library browser (browse through folders and open images)
+* run external commands
 * basic image editing (rotate, flip, brightness, contrast and optimize)
 * search directory recursively for images
 * slideshow mode
+* marking of images
 
 ## Configuration
 All options and keybindings can be configured in the file
@@ -24,7 +26,7 @@ modify that file instead (recommended).
 
 ## Installation
 Be sure to install the dependencies first. A simple `sudo make` should then
-suffice.
+suffice. For arch-users there is an AUR package called vimiv-git.
 
 ## Documentation
 Vimiv comes with a man-page for further documentation.

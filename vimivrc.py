@@ -45,6 +45,7 @@ key_first_image = "g"
 key_last_image = "G"
 
 key_mark = "m"
+key_mark_toggle = "M"
 
 key_rotate_clock = "greater"
 key_rotate_cclock = "less"

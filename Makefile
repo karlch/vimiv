@@ -22,3 +22,4 @@ uninstall:
 	rm -rf $(DESTDIR)/etc/vimiv/vimivrc.py
 	rm -f $(DESTDIR)/usr/share/applications/vimiv.desktop
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/vimiv.1
+	rm -f $(DESTDIR)$(MANPREFIX)/man1/vimiv.1.gz
