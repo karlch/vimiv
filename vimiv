@@ -172,6 +172,7 @@ class Vimiv(Gtk.Window):
 
         self.cmd_handlerbinds = (
             ("Escape", self.leave_cmd_handler),
+            ("^q", self.quit),
             )
 
         self.binds = {}
@@ -817,10 +818,11 @@ class Vimiv(Gtk.Window):
                 self.zoom_percent*100, '[slideshow]' if self.slideshow else '',
                 '[*]' if self.paths[self.index] in self.marked else '',
                 self.count_str)
+            self.win.set_title("vimiv "+message)
+            self.statusbar.push(1, message)
         except:
             message = "No open images     %s" % (self.count_str)
-        self.win.set_title("vimiv "+message)
-        self.statusbar.push(1, message)
+            self.statusbar.push(1, message)
 
     def set_default_window_size(self):
         """ Sets the window size at the beginning """
