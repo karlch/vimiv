@@ -1211,9 +1211,9 @@ class Vimiv(Gtk.Window):
         for i, name in enumerate(["Num", "Name", "Size", "M"]):
             renderer = Gtk.CellRendererText()
             column = Gtk.TreeViewColumn(name, renderer, markup=i)
-            column.set_max_width(190)
             if name == "Name":
                 column.set_expand(True)
+                column.set_max_width(20)
             self.treeview.append_column(column)
 
     def filestore(self, datalist):
