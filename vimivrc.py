@@ -10,6 +10,10 @@ thumbsize = (128, 128)
 geometry = "800x600"  # Only used when tiling_wm is False
 recursive = False  # Search directories recursively for images
 
+# Library settings #############################################################
+show_library = False
+library_width = 300
+
 # Keybindings ##################################################################
 # Modifiers: Shift (through uppercase) Ctrl (through ^), Alt (through Alt+)
 key_quit = "q"
@@ -19,8 +23,12 @@ key_statusbar_toggle = "b"
 key_slideshow_toggle = "s"
 key_thumbnail_toggle = "t"
 key_library_toggle = "o"
+key_library_toggle_focus= "O"
 key_animation_toggle = "space"  # Toggle animation of Gifs
 key_move_up = "u"
+
+key_slideshow_inc = "period"  # Increase slideshow delay
+key_slideshow_dec = "comma"  # Decrease slideshow delay
 
 key_scroll_left = "h"
 key_scroll_down = "j"
@@ -52,4 +60,7 @@ key_rotate_cclock = "less"
 key_fliph = "y"
 key_flipv = "Y"
 key_delete = "x"
-key_edit = "c"  # Toggles the image manipulation window
+key_edit = "c"
+
+key_cmd_history_up = "^k"
+key_cmd_history_down = "^j"

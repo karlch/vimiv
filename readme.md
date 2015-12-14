@@ -1,4 +1,4 @@
-### Vimiv, an image viewer with vim-like keybindings
+### vimiv, an image viewer with vim-like keybindings
 
 ## Version 0.2
 
@@ -14,7 +14,11 @@
 
 ## Screenshots
 
+**Open image and library:**
+
 ![Image](https://raw.githubusercontent.com/karlch/vimiv/gh-pages/vimiv-lib.jpg "Open image and library")
+
+**Thumbnail mode:**
 
 ![Image](https://raw.githubusercontent.com/karlch/vimiv/gh-pages/vimiv-thumb.jpg "Thumbnail mode")
 
@@ -35,14 +39,14 @@ Be sure to install the dependencies first. A simple `sudo make` should then
 suffice. For arch-users there is an AUR package called vimiv-git.
 
 ## Documentation
-Vimiv comes with a man-page for further documentation.
+vimiv comes with a man-page for further documentation.
 
 ## Thanks to
-James Campos, author of Pim https://github.com/Narrat/Pim upon which Vimiv is
+James Campos, author of Pim https://github.com/Narrat/Pim upon which vimiv is
 built.
 
 Bert Muennich, author of sxiv https://github.com/muennich/sxiv which inspired
 many of the features of vimiv.
 
 ## License
-In accordance with Pim Vimiv is released under the MIT license.
+In accordance with Pim vimiv is released under the MIT license.
