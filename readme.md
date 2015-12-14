@@ -12,6 +12,12 @@
 * slideshow mode
 * marking of images
 
+## Screenshots
+
+![Image](https://raw.githubusercontent.com/karlch/vimiv/gh-pages/vimiv-lib.jpg "Open image and library")
+
+![Image](https://raw.githubusercontent.com/karlch/vimiv/gh-pages/vimiv-thumb.jpg "Thumbnail mode")
+
 ## Configuration
 All options and keybindings can be configured in the file
 `/etc/vimiv/vimivrc.py`. You can copy the file to `~/.vimiv/vimivrc.py` and
