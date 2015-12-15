@@ -39,7 +39,7 @@ Be sure to install the dependencies first. A simple `sudo make` should then
 suffice. For arch-users there is an AUR package called vimiv-git.
 
 ## Documentation
-vimiv comes with a man-page for further documentation.
+Vimiv comes with a man-page for further documentation.
 
 ## Thanks to
 James Campos, author of Pim https://github.com/Narrat/Pim upon which vimiv is
