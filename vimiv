@@ -47,6 +47,7 @@ class Vimiv(Gtk.Window):
             self.library_width = int(settings.library_width)
             self.geometry = str(settings.geometry)
             self.recursive = bool(settings.recursive)
+            self.rescale_svg = bool(settings.rescale_svg)
             self.animation_toggled = False
             self.winsize = (100, 100)  # necessary for checks
             self.cmd_history = [""]  # Remember cmd history
@@ -88,6 +89,7 @@ class Vimiv(Gtk.Window):
                 (settings.key_thumbnail_toggle, self.thumbnail_toggle),
                 (settings.key_library_toggle, self.library_toggle),
                 (settings.key_library_toggle_focus, self.library_focus, True),
+                (settings.key_rescale_toggle, self.toggle_rescale_svg),
                 (settings.key_move_up, self.move_up),
 
                 # if True, scroll in the horizontal direction.
@@ -166,6 +168,7 @@ class Vimiv(Gtk.Window):
                 (settings.key_statusbar_toggle, self.toggle_statusbar),
                 (settings.key_library_toggle, self.library_toggle),
                 (settings.key_library_toggle_focus, self.library_focus, False),
+                (settings.key_rescale_toggle, self.toggle_rescale_svg),
                 (settings.key_move_up, self.move_up),
 
                 # if True, scroll in the horizontal direction.
@@ -494,6 +497,9 @@ class Vimiv(Gtk.Window):
         # Resize the image if necessary
         if not self.user_zoomed and self.paths and not self.thumbnail_toggled:
             self.zoom_to(0)
+
+    def toggle_rescale_svg(self):
+        self.rescale_svg = not self.rescale_svg
 
     def manipulated_images(self, message):
         """ Returns the images which should be manipulated - either the
@@ -968,8 +974,14 @@ class Vimiv(Gtk.Window):
         try:  # If possible scale the image
             pbfWidth = int(pboWidth * self.zoom_percent)
             pbfHeight = int(pboHeight * self.zoom_percent)
-            pixbufFinal = self.pixbufOriginal.scale_simple(
-                pbfWidth, pbfHeight, GdkPixbuf.InterpType.BILINEAR)
+            # Rescaling of svg
+            ending = self.paths[self.index].split("/")[-1].split(".")[-1]
+            if ending == "svg" and self.rescale_svg:
+                pixbufFinal = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                    self.paths[self.index], -1, pbfHeight, True)
+            else:
+                pixbufFinal = self.pixbufOriginal.scale_simple(
+                    pbfWidth, pbfHeight, GdkPixbuf.InterpType.BILINEAR)
             self.image.set_from_pixbuf(pixbufFinal)
         except:  # If not it must me an animation
             if not self.animation_toggled:
@@ -1065,7 +1077,7 @@ class Vimiv(Gtk.Window):
         try:
             self.zoom_percent = self.zoom_percent * (1 + delta)
             # Catch some unreasonable zooms
-            if (self.zoom_percent < 0.01 or self.zoom_percent > 10 or
+            if (self.pixbufOriginal.get_height()*self.zoom_percent < 5 or
                     self.pixbufOriginal.get_height()*self.zoom_percent >
                     self.screensize[0]*5):
                 self.zoom_percent = self.zoom_percent / (1 + delta)
@@ -1099,7 +1111,7 @@ class Vimiv(Gtk.Window):
                 zWidth,
                 zHeight)
             # Catch some unreasonable zooms
-            if (self.zoom_percent < 0.01 or self.zoom_percent > 10 or
+            if (self.pixbufOriginal.get_height()*self.zoom_percent < 5 or
                     self.pixbufOriginal.get_height()*self.zoom_percent >
                     self.screensize[0]*5):
                 self.zoom_percent = before
@@ -1581,7 +1593,7 @@ class Vimiv(Gtk.Window):
     def move_up(self, dir=".."):
         """ move (up/to) dir in the library """
         try:
-            curdir=os.path.abspath(".")
+            curdir = os.path.abspath(".")
             os.chdir(dir)
             self.reload(os.path.abspath("."), curdir)
         except:

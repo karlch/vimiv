@@ -183,6 +183,9 @@ Fit the image to the current window size horizontally.
 .BR E
 Fit the image to the current window size vertically.
 .TP
+.BR r
+Toggle the rescaling of vector graphics.
+.TP
 .BR s
 Toggle the slideshow. If prefixed by [COUNT] set the slideshow delay to [COUNT]
 .TP
@@ -335,6 +338,10 @@ A string of the form "WIDTHxHEIGHT" which sets the default size for the image.
 .TP
 .BR recursive\ (Bool)
 If True search the given directory recursively for images.
+.TP
+.BR rescale_svg\ (Bool)
+If True rescale vector graphics automatically by reloading the image. Otherwise
+simply zoom as if it were a normal image.
 .TP
 .BR show_library\ (Bool)
 If True show the library at startup.

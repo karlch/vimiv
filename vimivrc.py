@@ -9,6 +9,7 @@ display_bar = True
 thumbsize = (128, 128)
 geometry = "800x600"  # Only used when tiling_wm is False
 recursive = False  # Search directories recursively for images
+rescale_svg = True
 
 # Library settings #############################################################
 show_library = False
@@ -25,6 +26,7 @@ key_thumbnail_toggle = "t"
 key_library_toggle = "o"
 key_library_toggle_focus= "O"
 key_animation_toggle = "space"  # Toggle animation of Gifs
+key_rescale_toggle = "r"
 key_move_up = "u"
 
 key_slideshow_inc = "period"  # Increase slideshow delay
