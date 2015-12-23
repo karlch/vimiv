@@ -1261,6 +1261,8 @@ class Vimiv(Gtk.Window):
         single = None
         if len(args) == 1:
             arg = args[0]
+            if os.path.islink(arg):
+                arg = os.path.realpath(arg)
             if os.path.isfile(arg):
                 # Use parent directory
                 single = os.path.abspath(arg)
@@ -1568,17 +1570,29 @@ class Vimiv(Gtk.Window):
             count = count.get_indices()[0]
             fil = self.files[count]
             self.remember_pos(os.path.abspath("."), count)
+        # Catch symbolic links
+        if "->" in fil:
+            fil = "".join(fil.split(">")[:-1]).split(" ")[:-1]
+            fil = "".join(fil)
+            fil = os.path.realpath(fil)
+            self.move_up(os.path.dirname(fil))
         if os.path.isdir(fil):  # Open the directory
             self.move_up(fil)
         else:  # Focus the image and populate a new list from the dir
             if self.paths and fil in self.paths[self.index]:  # Close if file selected twice
                 close = True
             self.paths = []
+            count = 0  # Filter directories
+            path = 0  # Reload the path, could have changed (symlinks)
             for f in self.files:
-                if os.path.isdir(f):
-                    count -= 1
-                elif f == fil:
+                if f in fil:
                     break
+                else:
+                    path += 1
+                    if not os.path.isdir(f):
+                        count += 1
+            self.treeview.set_cursor(Gtk.TreePath(path), None, False)
+            self.treepos = path
             self.populate(self.files)
             # Show the selected file, if thumbnail toggled go out
             if self.thumbnail_toggled:
@@ -1785,9 +1799,7 @@ class Vimiv(Gtk.Window):
 
         # Move to the directory of the image
         if self.paths:
-            path = self.paths[self.index].split("/")[:-1]
-            path = "/".join(path)
-            os.chdir(path)
+            os.chdir(os.path.dirname(self.paths[self.index]))
 
         # Screen
         screen = Gdk.Screen()
