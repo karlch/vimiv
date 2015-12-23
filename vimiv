@@ -61,8 +61,8 @@ class Vimiv(Gtk.Window):
             self.marked = []
             self.marked_bak = []  # saves marked images after marked toggle
             self.manipulate_toggled = False
-            self.user_zoomed = False  # checks if the user manually zoomed the image
-            #                          necessary for the auto_resize function
+            self.user_zoomed = False  # checks if the user manually zoomed the
+            #                      image, necessary for the auto_resize function
             self.num_str = ""  # used to prepend actions with numbers
             self.dir_pos = {}  # Remembers positions in the library browser
             self.error = []
@@ -1270,7 +1270,7 @@ class Vimiv(Gtk.Window):
                     args[i] = os.path.join(directory, arg)
             elif os.path.isdir(arg):
                 # Open dir in library browser
-                self.move_up(arg)
+                self.move_up(arg, True)
                 return
 
         # Add everything
@@ -1590,12 +1590,13 @@ class Vimiv(Gtk.Window):
             if close:
                 self.library_toggle()
 
-    def move_up(self, dir=".."):
+    def move_up(self, dir="..", start=False):
         """ move (up/to) dir in the library """
         try:
             curdir = os.path.abspath(".")
             os.chdir(dir)
-            self.reload(os.path.abspath("."), curdir)
+            if not start:
+                self.reload(os.path.abspath("."), curdir)
         except:
             self.err_message("Error: directory not accessible")
 
