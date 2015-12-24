@@ -14,6 +14,9 @@ rescale_svg = True
 # Library settings #############################################################
 show_library = False
 library_width = 300
+expand_lib = True
+border_width = 0
+border_color = "#000000"
 
 # Keybindings ##################################################################
 # Modifiers: Shift (through uppercase) Ctrl (through ^), Alt (through Alt+)

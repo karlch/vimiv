@@ -78,6 +78,9 @@ class Vimiv(Gtk.Window):
                       "of the form (Int, Int).")
                 sys.exit(1)
 
+            self.border_width = int(settings.border_width)
+            self.expand_lib = settings.expand_lib
+
             self.mainbinds = (
                 (settings.key_quit, self.quit),
                 ("^q", self.quit),
@@ -300,7 +303,8 @@ class Vimiv(Gtk.Window):
                 shutil.move(im, deldir)
             if not self.paths:
                 self.move_up()
-                self.grid.set_size_request(self.winsize[0], 10)
+                if self.expand_lib:
+                    self.grid.set_size_request(self.winsize[0], 10)
                 self.err_message("No valid paths, opening library viewer")
             elif self.thumbnail_toggled:
                 iter = self.liststore.get_iter(index)
@@ -577,7 +581,6 @@ class Vimiv(Gtk.Window):
         """ Starts a window with basic image manipulation """
         # A vbox in which everything gets packed
         self.hboxman = Gtk.HBox(spacing=5)
-        self.hboxman.set_border_width(8)
         self.hboxman.connect("key_press_event", self.handle_key_press, "man")
 
         # A list to save the changes being done
@@ -795,7 +798,7 @@ class Vimiv(Gtk.Window):
         self.errorpos = []  # Catch errors to focus images correctly later
         # Create thumbnails for all images in the path
         for i, infile in enumerate(self.paths):
-            outfile = infile.split(".")[0] + ".thumbnail" + ".png"
+            outfile = ".".join(infile.split(".")[:-1]) + ".thumbnail" + ".png"
             outfile = outfile.split("/")[-1]
             outfile = os.path.join(thumbdir, outfile)
             # Only if they aren't cached already
@@ -1300,7 +1303,7 @@ class Vimiv(Gtk.Window):
 
         # Show the image as soon as possible
         if self.paths and not start:
-            self.grid.set_size_request(self.library_width, 10)
+            self.grid.set_size_request(self.library_width-self.border_width, 10)
             self.scrolled_win.show()
 
         return len(self.paths)
@@ -1338,27 +1341,38 @@ class Vimiv(Gtk.Window):
 
     def library(self):
         """ Starts the library browser """
+        # Librarybox
+        self.boxlib = Gtk.HBox()
         # Set up the self.grid in which the file info will be positioned
         self.grid = Gtk.Grid()
         self.grid.set_column_homogeneous(True)
         self.grid.set_row_homogeneous(True)
-        if self.paths:
-            self.grid.set_size_request(self.library_width, 10)
+        if self.paths or not self.expand_lib:
+            self.grid.set_size_request(self.library_width-self.border_width, 10)
         else:
             self.grid.set_size_request(self.winsize[0], 10)
+        # A simple border
+        if self.border_width:
+            border = Gtk.Box()
+            border.set_size_request(self.border_width, 0)
+            bg = Gdk.color_parse(settings.border_color)
+            border.modify_bg(Gtk.StateType.NORMAL, bg)
+            self.boxlib.pack_end(border, False, False, 0)
         # Vbox for treeview and cmd_handler
-        self.vboxlib = Gtk.VBox()
-        self.vboxlib.pack_start(self.grid, True, True, 0)
+        vboxlib = Gtk.VBox()
+        vboxlib.pack_start(self.grid, True, True, 0)
         self.entry = Gtk.Entry()
         self.entry.set_text("Search ...")
         self.entry.connect("activate", self.cmd_handler)
         self.entry.connect("key_press_event", self.handle_key_press,
                            "cmd_handler")
-        self.vboxlib.pack_end(self.entry, False, False, 0)
+        vboxlib.pack_end(self.entry, False, False, 0)
         # Entering content
         self.scrollable_treelist = Gtk.ScrolledWindow()
         self.scrollable_treelist.set_vexpand(True)
         self.grid.attach(self.scrollable_treelist, 0, 0, 4, 10)
+        # Pack everything
+        self.boxlib.pack_start(vboxlib, True, True, 0)
         # Call the function to create the treeview
         self.treeview_create()
         self.scrollable_treelist.add(self.treeview)
@@ -1441,12 +1455,12 @@ class Vimiv(Gtk.Window):
         """ Toggles the library """
         if self.library_toggled:
             self.remember_pos(os.path.abspath("."), self.treepos)
-            self.vboxlib.hide()
+            self.boxlib.hide()
             self.animation_toggled = False  # Now play Gifs
             self.library_toggled = not self.library_toggled
             self.library_focus(False)
         else:
-            self.vboxlib.show()
+            self.boxlib.show()
             if not self.paths:
                 self.scrolled_win.hide()
             else:  # Try to focus the current image in the library
@@ -1636,7 +1650,7 @@ class Vimiv(Gtk.Window):
                     self.treeview.set_cursor(Gtk.TreePath([i]), None, False)
                     self.treepos = i
                     break
-        self.vboxlib.show_all()
+        self.boxlib.show_all()
 
     def move_pos_lib(self, forward=True):
         """ Move to pos in lib """
@@ -1700,7 +1714,7 @@ class Vimiv(Gtk.Window):
             self.library_width += 20
         elif not inc and self.library_width > 160:
             self.library_width -= 20
-        self.grid.set_size_request(self.library_width, 10)
+        self.grid.set_size_request(self.library_width-self.border_width, 10)
         if not self.user_zoomed:
             self.zoom_to(0)
 
@@ -1710,7 +1724,7 @@ class Vimiv(Gtk.Window):
             self.winsize = self.win.get_size()
             if self.paths and not self.user_zoomed:
                 self.zoom_to(0)
-            elif not self.paths:
+            elif not self.paths and self.expand_lib:
                 self.grid.set_size_request(self.winsize[0], 10)
 
     def handle_key_press(self, widget, event, window):
@@ -1833,7 +1847,7 @@ class Vimiv(Gtk.Window):
 
         # Statusbar on the bottom
         self.labelbox = Gtk.HBox(False, 0)
-        self.labelbox.set_border_width(8)
+        self.labelbox.set_border_width(12)
         # Two labels for two sides of statusbar and one in the middle for
         # additional info
         self.left_label = Gtk.Label()  # Position and image name
@@ -1851,7 +1865,7 @@ class Vimiv(Gtk.Window):
 
         # Treeview
         self.library()
-        self.hbox.pack_start(self.vboxlib, False, False, 0)
+        self.hbox.pack_start(self.boxlib, False, False, 0)
 
         # Manipulate Bar
         self.manipulate()
@@ -1865,9 +1879,9 @@ class Vimiv(Gtk.Window):
             self.move_index(True, False, 0)
             # Show library at the beginning?
             if self.library_toggled:
-                self.vboxlib.show()
+                self.boxlib.show()
             else:
-                self.vboxlib.hide()
+                self.boxlib.hide()
             self.scrolled_win.grab_focus()
             if self.fullscreen:
                 self.win.fullscreen()
@@ -1881,7 +1895,8 @@ class Vimiv(Gtk.Window):
             self.toggle_statusbar()
             self.err_message("No valid paths, opening library viewer")
             self.library_focus(True)
-            self.grid.set_size_request(self.winsize[0], 10)
+            if self.expand_lib:
+                self.grid.set_size_request(self.winsize[0], 10)
 
         # Hide the manipulate bar
         self.hboxman.hide()
