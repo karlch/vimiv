@@ -17,6 +17,7 @@ library_width = 300
 expand_lib = True
 border_width = 0
 border_color = "#000000"
+show_hidden = False
 
 # Keybindings ##################################################################
 # Modifiers: Shift (through uppercase) Ctrl (through ^), Alt (through Alt+)
@@ -30,6 +31,7 @@ key_library_toggle = "o"
 key_library_toggle_focus= "O"
 key_animation_toggle = "space"  # Toggle animation of Gifs
 key_rescale_toggle = "r"
+key_hidden_toggle = "t"
 key_move_up = "u"
 
 key_slideshow_inc = "period"  # Increase slideshow delay

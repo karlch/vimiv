@@ -79,7 +79,17 @@ class Vimiv(Gtk.Window):
                 sys.exit(1)
 
             self.border_width = int(settings.border_width)
+            border_color = str(settings.border_color)
+            try:
+                if len(border_color) != 7 or border_color[0] != "#":
+                    raise ValueError
+                self.border_color = Gdk.color_parse(border_color)
+            except:
+                print("Border color in config not given in the correct form,",
+                      "falling back to default.")
+                self.border_color = Gdk.color_parse("#000000")
             self.expand_lib = settings.expand_lib
+            self.show_hidden = bool(settings.show_hidden)
 
             self.mainbinds = (
                 (settings.key_quit, self.quit),
@@ -211,6 +221,8 @@ class Vimiv(Gtk.Window):
                 (settings.key_rotate_cclock, self.rotate, 1),
                 (settings.key_fliph, self.flip, True),
                 (settings.key_flipv, self.flip, False),
+
+                (settings.key_hidden_toggle, self.hidden_toggle),
 
                 ("1", self.num_append, "1"),
                 ("2", self.num_append, "2"),
@@ -1355,13 +1367,7 @@ class Vimiv(Gtk.Window):
         if self.border_width:
             border = Gtk.Box()
             border.set_size_request(self.border_width, 0)
-            try:
-                bg = Gdk.color_parse(settings.border_color)
-            except:
-                print("Border color in config not given in the correct form,",
-                      "falling back to default")
-                bg = Gdk.color_parse("#000000")
-            border.modify_bg(Gtk.StateType.NORMAL, bg)
+            border.modify_bg(Gtk.StateType.NORMAL, self.border_color)
             self.boxlib.pack_end(border, False, False, 0)
         # Vbox for treeview and cmd_handler
         vboxlib = Gtk.VBox()
@@ -1555,7 +1561,10 @@ class Vimiv(Gtk.Window):
     def filelist_create(self, dir="."):
         """ Create a filelist from all files in dir """
         # Get data from ls -lh and parse it correctly
-        p = Popen(['ls', '-lh', dir], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        if self.show_hidden:
+            p = Popen(['ls', '-lAh', dir], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        else:
+            p = Popen(['ls', '-lh', dir], stdin=PIPE, stdout=PIPE, stderr=PIPE)
         data, err = p.communicate()
         data = data.decode(encoding='UTF-8').split("\n")[1:-1]
         files = []
@@ -1722,6 +1731,10 @@ class Vimiv(Gtk.Window):
         self.grid.set_size_request(self.library_width-self.border_width, 10)
         if not self.user_zoomed:
             self.zoom_to(0)
+
+    def hidden_toggle(self):
+        self.show_hidden = not self.show_hidden
+        self.reload('.')
 
     def auto_resize(self, w):
         """ Automatically resize image when window is resized """
