@@ -1355,7 +1355,12 @@ class Vimiv(Gtk.Window):
         if self.border_width:
             border = Gtk.Box()
             border.set_size_request(self.border_width, 0)
-            bg = Gdk.color_parse(settings.border_color)
+            try:
+                bg = Gdk.color_parse(settings.border_color)
+            except:
+                print("Border color in config not given in the correct form,",
+                      "falling back to default")
+                bg = Gdk.color_parse("#000000")
             border.modify_bg(Gtk.StateType.NORMAL, bg)
             self.boxlib.pack_end(border, False, False, 0)
         # Vbox for treeview and cmd_handler
