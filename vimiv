@@ -404,8 +404,6 @@ class Vimiv(Gtk.Window):
             curthing = self.iconview.get_cells()[0]
             self.iconview.set_cursor(path, curthing, False)
         # Actual scrolling
-        self.viewport.set_size_request(300, 300)
-        self.iconview.scroll_to_path(path, True, 0.5, 0.5)
         self.thumbnail_scroll(scrolltype, horizontal, step,
                               self.thumbpos[0])
         # Clear the user prefixed step
@@ -413,6 +411,7 @@ class Vimiv(Gtk.Window):
 
     def thumbnail_scroll(self, scrolltype, horizontal, step, target):
         """ Handles the actual scrolling """
+        # TODO
         if step == 0:
             step += 1
         # Vertical
@@ -840,7 +839,6 @@ class Vimiv(Gtk.Window):
         self.iconview.set_pixbuf_column(0)
         self.iconview.set_border_width(1)
         self.iconview.set_markup_column(1)
-        self.iconview.set_size_request(300, 300)
 
         # Add all thumbnails to the liststore
         for i, thumb in enumerate(imlist):
@@ -927,12 +925,14 @@ class Vimiv(Gtk.Window):
 
     def name_reload(self, name, index, mark=True):
         """ Reloads the name of marked thumbnails """
-        for i in self.errorpos:
+        for i in self.errorpos:  # Images where thumbnail creation failed
             if index > i:
                 index -= 1
+        # Remove the old thumbnail
         iter = self.liststore.get_iter(index)
         self.liststore.remove(iter)
         try:
+            # Recreate the thumbnail
             outfile = name.split(".")[0] + ".thumbnail" + ".png"
             outfile = outfile.split("/")[-1]
             thumbdir = os.path.join(os.path.expanduser("~"),
@@ -942,7 +942,9 @@ class Vimiv(Gtk.Window):
             name = name.split("/")[-1].split(".")[0]
             if mark:
                 name = name + " [*]"
+            # Insert it
             self.liststore.insert(index, [pixbuf, name])
+            # Set the cursor back to where it was
             path = Gtk.TreePath.new_from_indices(self.thumbpos)
             self.iconview.select_path(path)
             curthing = self.iconview.get_cells()[0]
@@ -999,6 +1001,7 @@ class Vimiv(Gtk.Window):
                     pbfWidth, pbfHeight, GdkPixbuf.InterpType.BILINEAR)
             self.image.set_from_pixbuf(pixbufFinal)
         except:  # If not it must me an animation
+            # TODO actual pause and play of Gifs
             if not self.animation_toggled:
                 self.image.set_from_animation(self.pixbufOriginal)
             else:
