@@ -64,6 +64,7 @@ key_mark_toggle = "M"
 
 key_rotate_clock = "greater"
 key_rotate_cclock = "less"
+key_rotate_auto = "a"
 key_fliph = "y"
 key_flipv = "Y"
 key_delete = "x"

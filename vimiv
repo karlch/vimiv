@@ -153,6 +153,7 @@ class Vimiv(Gtk.Window):
 
                 (settings.key_rotate_clock, self.rotate, 3),
                 (settings.key_rotate_cclock, self.rotate, 1),
+                (settings.key_rotate_auto, self.rotate_auto),
                 (settings.key_fliph, self.flip, True),
                 (settings.key_flipv, self.flip, False),
                 (settings.key_delete, self.delete, 0),
@@ -219,6 +220,7 @@ class Vimiv(Gtk.Window):
                 (settings.key_prev_image, self.move_index, False, True),
                 (settings.key_rotate_clock, self.rotate, 3),
                 (settings.key_rotate_cclock, self.rotate, 1),
+                (settings.key_rotate_auto, self.rotate_auto),
                 (settings.key_fliph, self.flip, True),
                 (settings.key_flipv, self.flip, False),
 
@@ -587,6 +589,57 @@ class Vimiv(Gtk.Window):
 
         except:
             self.err_message("Warning: Object cannot be flipped")
+
+    def rotate_auto(self):
+        """ This function autorotates all pictures in the current pathlist """
+        rotated_images = 0
+        # ImageMagick does this better
+        try:
+            cmd = ["jhead", "-autorot", "-ft"] + self.paths
+            p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            out, err = p.communicate()
+            out = out.decode(encoding='UTF-8')
+            err = err.decode(encoding='UTF-8')
+            # Find out how many images were rotated
+            for line in out.split("\n"):
+                if "Modified" in line and line.split()[1] not in err:
+                    rotated_images += 1
+            # Added to the message displayed when done
+            method = "ImageMagick"
+        # If it isn't there fall back to PIL
+        except:
+            for path in self.paths:
+                im = Image.open(path)
+                exif = im._getexif()
+
+                orientation_key = 274  # cf ExifTags
+                rotated = True
+
+                # Only do something if orientation info is there
+                if exif and orientation_key in exif:
+                    orientation = exif[orientation_key]
+
+                    # Rotate and save the image
+                    if orientation == 3:
+                        im = im.transpose(Image.ROTATE_180)
+                    elif orientation == 6:
+                        im = im.transpose(Image.ROTATE_270)
+                    elif orientation == 8:
+                        im = im.transpose(Image.ROTATE_90)
+                    else:
+                        rotated = False
+                    if rotated:
+                        im.save(path, quality=100)
+                        rotated_images += 1
+                method = "PIL"
+        # Reload current image and display a message if something was done
+        if rotated_images:
+            self.move_index(True, False, 0)
+            message = "Autorotated %d image(s) using %s." % (rotated_images,
+                                                             method)
+        else:
+            message = "No image rotated."
+        self.err_message(message)
 
     def manipulate(self):
         """ Starts a window with basic image manipulation """
@@ -1015,20 +1068,27 @@ class Vimiv(Gtk.Window):
         """ Update the statusbar and the window title """
         # Left side
         try:
-            if not self.thumbnail_toggled or not self.error:
+            # Directory if library is focused
+            if self.library_focused:
+                self.left_label.set_text(os.path.abspath("."))
+            # Position, name and thumbnail size in thumb mode
+            elif self.thumbnail_toggled:
+                name = self.paths[self.thumbpos[0]].split("/")[-1]
+                message = "{0}/{1}  {2}  {3}".format(self.thumbpos[0]+1,
+                    len(self.paths), name, self.thumbsize)
+                self.left_label.set_text(message)
+            # Image info in image mode
+            else:
                 name = self.paths[self.index].split("/")[-1]
                 message = "{0}/{1}  {2}  [{3:.0f}%]".format(self.index+1,
                     len(self.paths), name, self.zoom_percent*100)
                 self.left_label.set_text(message)
-            else:
-                raise ValueError
         except:
-            if not self.error:
-                self.left_label.set_text("No open images")
+            self.left_label.set_text("No open images")
         # Center
-        try:
+        if not (self.thumbnail_toggled or self.library_focused) and self.paths:
             mark = "[*]" if self.paths[self.index] in self.marked else ""
-        except:
+        else:
             mark = ""
         if self.slideshow:
             slideshow = "[slideshow - {0:.1f}s]".format(self.slideshow_delay)
@@ -1052,6 +1112,7 @@ class Vimiv(Gtk.Window):
     def get_mode(self):
         """ Returns which widget is currently focused """
         if self.library_focused:
+            # Additionally show the current library directory
             return "<b>-- LIBRARY --</b>"
         elif self.manipulate_toggled:
             return "<b>-- MANIPULATE --</b>"
@@ -1123,6 +1184,7 @@ class Vimiv(Gtk.Window):
             except:
                 self.err_message("Error: Zoom percentage not parseable")
                 return
+            self.num_str = ""
         try:
             self.imsize = self.image_size()
             self.zoom_percent = percent if percent else self.get_zoom_percent(
@@ -1205,7 +1267,11 @@ class Vimiv(Gtk.Window):
                 self.zoom_percent = self.get_zoom_percent()
             else:
                 self.zoom_percent = 1
-            self.update_image()
+            # If one simply reloads the file the info shouldn't be updated
+            if delta:
+                self.update_image()
+            else:
+                self.update_image(False)
 
         except GLib.Error:  # File not accessible
             self.paths.remove(path)
@@ -1291,7 +1357,7 @@ class Vimiv(Gtk.Window):
             elif os.path.isdir(arg):
                 # Open dir in library browser
                 self.move_up(arg, True)
-                return
+                return 0
 
         # Add everything
         for arg in args:
@@ -1487,6 +1553,7 @@ class Vimiv(Gtk.Window):
             self.animation_toggled = True  # Do not play Gifs with the lib
             self.library_toggled = not self.library_toggled
             self.library_focus(True)
+            self.reload(".")  # Markings and other stuff might have changed
         if not self.user_zoomed and self.paths:
             self.zoom_to(0)  # Always rezoom the image
 
@@ -1721,7 +1788,11 @@ class Vimiv(Gtk.Window):
                         break
                     backnum += 1
             shutil.move(current, deldir)
-            self.reload(".")
+            # Just move up one path
+            if self.treepos > 0:
+                self.treepos -= 1
+            self.remember_pos(os.path.abspath("."), self.treepos)
+            self.reload(os.path.abspath("."))
 
     def resize_lib(self, inc=True):
         """ Resize the library and update the image if necessary """
@@ -1914,10 +1985,10 @@ class Vimiv(Gtk.Window):
         else:
             self.slideshow = False  # Slideshow without paths makes no sense
             self.toggle_statusbar()
-            self.err_message("No valid paths, opening library viewer")
             self.library_focus(True)
             if self.expand_lib:
                 self.grid.set_size_request(self.winsize[0], 10)
+            self.err_message("No valid paths, opening library viewer")
 
         # Hide the manipulate bar
         self.hboxman.hide()
