@@ -2,17 +2,18 @@
 # encoding: utf-8
 
 try:
-    import sys
-    import os
-    import signal
-    import shutil
     import argparse
-    from random import shuffle
     import mimetypes
+    import os
+    # import re
+    import shutil
+    import signal
+    import sys
+    from PIL import Image, ImageEnhance
     from gi import require_version
     require_version('Gtk', '3.0')
     from gi.repository import GLib, Gtk, Gdk, GdkPixbuf
-    from PIL import Image, ImageEnhance
+    from random import shuffle
     from subprocess import call, Popen, PIPE
     # Settings
     sys.path.append(os.path.join(os.path.expanduser("~"), ".vimiv"))
@@ -48,6 +49,7 @@ class Vimiv(Gtk.Window):
             self.geometry = str(settings.geometry)
             self.recursive = bool(settings.recursive)
             self.rescale_svg = bool(settings.rescale_svg)
+            self.overzoom = bool(settings.overzoom)  # Scale images up
             self.animation_toggled = False
             self.winsize = (100, 100)  # necessary for checks
             self.cmd_history = [""]  # Remember cmd history
@@ -605,7 +607,7 @@ class Vimiv(Gtk.Window):
                 if "Modified" in line and line.split()[1] not in err:
                     rotated_images += 1
             # Added to the message displayed when done
-            method = "ImageMagick"
+            method = "jhead"
         # If it isn't there fall back to PIL
         except:
             for path in self.paths:
@@ -638,7 +640,7 @@ class Vimiv(Gtk.Window):
             message = "Autorotated %d image(s) using %s." % (rotated_images,
                                                              method)
         else:
-            message = "No image rotated."
+            message = "No image rotated. Tried using %s." % (method)
         self.err_message(message)
 
     def manipulate(self):
@@ -1024,17 +1026,18 @@ class Vimiv(Gtk.Window):
         wScale = self.imsize[0] / self.imsize[1]
 
         stickout = zWidth | zHeight
-        # Image is completely shown
-        if pboWidth < self.imsize[0] and pboHeight < self.imsize[1] and not stickout:
+        # Image is completely shown and user doesn't want overzoom
+        if (pboWidth < self.imsize[0] and pboHeight < self.imsize[1] and
+                not (stickout or self.overzoom)):
             return 1
-        # Vertical proportions relevant
+        # "Portrait" image
         elif (pboScale < wScale and not stickout) or zHeight:
             return self.imsize[1] / pboHeight
-        # Horizontal proportions relevant
+        # "Panorama/landscape" image
         else:
             return self.imsize[0] / pboWidth
 
-    def update_image(self, update_info=True):
+    def update_image(self, update_info=True, update_gif=True):
         """ Show the final image """
         if not self.paths:
             return
@@ -1055,11 +1058,13 @@ class Vimiv(Gtk.Window):
             self.image.set_from_pixbuf(pixbufFinal)
         except:  # If not it must me an animation
             # TODO actual pause and play of Gifs
-            if not self.animation_toggled:
-                self.image.set_from_animation(self.pixbufOriginal)
-            else:
-                pixbufFinal = self.pixbufOriginal.get_static_image()
-                self.image.set_from_pixbuf(pixbufFinal)
+            self.zoom_percent = 1
+            if update_gif:
+                if not self.animation_toggled:
+                    self.image.set_from_animation(self.pixbufOriginal)
+                else:
+                    pixbufFinal = self.pixbufOriginal.get_static_image()
+                    self.image.set_from_pixbuf(pixbufFinal)
         # Update the statusbar if required
         if update_info:
             self.update_info()
@@ -1152,17 +1157,17 @@ class Vimiv(Gtk.Window):
         """ Zooms the image by delta percent """
         if self.thumbnail_toggled:
             return
-        self.user_zoomed = True
         try:
             self.zoom_percent = self.zoom_percent * (1 + delta)
             # Catch some unreasonable zooms
             if (self.pixbufOriginal.get_height()*self.zoom_percent < 5 or
                     self.pixbufOriginal.get_height()*self.zoom_percent >
                     self.screensize[0]*5):
-                self.zoom_percent = self.zoom_percent / (1 + delta)
                 raise ValueError
-            self.update_image()
+            self.user_zoomed = True
+            self.update_image(update_gif=False)
         except:
+            self.zoom_percent = self.zoom_percent / (1 + delta)
             self.err_message("Warning: Object cannot be zoomed (further)")
 
     def zoom_to(self, percent, zWidth=False, zHeight=False):
@@ -1187,16 +1192,15 @@ class Vimiv(Gtk.Window):
             self.num_str = ""
         try:
             self.imsize = self.image_size()
-            self.zoom_percent = percent if percent else self.get_zoom_percent(
-                zWidth,
-                zHeight)
+            self.zoom_percent = (percent if percent
+                                    else self.get_zoom_percent(zWidth, zHeight))
             # Catch some unreasonable zooms
             if (self.pixbufOriginal.get_height()*self.zoom_percent < 5 or
                     self.pixbufOriginal.get_height()*self.zoom_percent >
                     self.screensize[0]*5):
                 self.zoom_percent = before
                 raise ValueError
-            self.update_image()
+            self.update_image(update_gif=False)
         except:
             self.err_message("Warning: Object cannot be zoomed (further)")
 
@@ -1556,6 +1560,8 @@ class Vimiv(Gtk.Window):
             self.reload(".")  # Markings and other stuff might have changed
         if not self.user_zoomed and self.paths:
             self.zoom_to(0)  # Always rezoom the image
+        #  Change the toggle state of animation
+        self.update_image()
 
     def library_focus(self, library=True):
         if library:
@@ -1697,10 +1703,10 @@ class Vimiv(Gtk.Window):
                 self.thumbnail_toggle()
                 self.treeview.grab_focus()
             self.move_index(True, False, count)
-            self.zoom_to(0)
             # Close the library depending on key and repeat
             if close:
                 self.library_toggle()
+                self.update_image()
 
     def move_up(self, dir="..", start=False):
         """ move (up/to) dir in the library """

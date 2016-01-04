@@ -10,6 +10,7 @@ thumbsize = (128, 128)
 geometry = "800x600"  # Only used when tiling_wm is False
 recursive = False  # Search directories recursively for images
 rescale_svg = True
+overzoom = False  # Scale images up to fit the window
 
 # Library settings #############################################################
 show_library = False
