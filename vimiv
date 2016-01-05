@@ -5,7 +5,6 @@ try:
     import argparse
     import mimetypes
     import os
-    # import re
     import shutil
     import signal
     import sys
@@ -51,7 +50,14 @@ class Vimiv(Gtk.Window):
             self.rescale_svg = bool(settings.rescale_svg)
             self.overzoom = bool(settings.overzoom)  # Scale images up
             self.animation_toggled = False
-            self.winsize = (100, 100)  # necessary for checks
+            # Window size
+            try:
+                self.winsize = (int(self.geometry.split("x")[0]),
+                                int(self.geometry.split("x")[1]))
+            except:
+                print("Must be a correct geometry in the form of "
+                    "800x600, falling back to default")
+                self.winsize = (800, 600)
             self.cmd_history = [""]  # Remember cmd history
             self.cmd_pos = 0
 
@@ -595,7 +601,7 @@ class Vimiv(Gtk.Window):
     def rotate_auto(self):
         """ This function autorotates all pictures in the current pathlist """
         rotated_images = 0
-        # ImageMagick does this better
+        # jhead does this better
         try:
             cmd = ["jhead", "-autorot", "-ft"] + self.paths
             p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
@@ -613,14 +619,12 @@ class Vimiv(Gtk.Window):
             for path in self.paths:
                 im = Image.open(path)
                 exif = im._getexif()
-
                 orientation_key = 274  # cf ExifTags
                 rotated = True
 
                 # Only do something if orientation info is there
                 if exif and orientation_key in exif:
                     orientation = exif[orientation_key]
-
                     # Rotate and save the image
                     if orientation == 3:
                         im = im.transpose(Image.ROTATE_180)
@@ -644,7 +648,7 @@ class Vimiv(Gtk.Window):
         self.err_message(message)
 
     def manipulate(self):
-        """ Starts a window with basic image manipulation """
+        """ Starts a toolbar with basic image manipulation """
         # A vbox in which everything gets packed
         self.hboxman = Gtk.HBox(spacing=5)
         self.hboxman.connect("key_press_event", self.handle_key_press, "man")
@@ -849,7 +853,7 @@ class Vimiv(Gtk.Window):
             self.update_image()
 
     def thumbnails(self):
-        imlist = list()
+        imlist = []
 
         # Thumbnail directory and all thumbnails in there
         thumbdir = os.path.join(os.path.expanduser("~"), ".vimiv/Thumbnails")
@@ -1126,20 +1130,6 @@ class Vimiv(Gtk.Window):
         else:
             return "<b>-- IMAGE --</b>"
 
-    def set_default_window_size(self):
-        """ Sets the window size at the beginning """
-        try:
-            self.winsize = (int(self.geometry.split("x")[0]),
-                            int(self.geometry.split("x")[1]))
-        except:
-            print("Must be a correct geometry in the form of "
-                  "800x600, falling back to default")
-            self.winsize = (800, 600)
-        self.win.resize(self.winsize[0], self.winsize[1])
-
-        if self.fullscreen:
-            self.win.fullscreen()
-
     def image_size(self):
         """ Returns the size of the image depending on what other widgets
         are visible and if fullscreen or not """
@@ -1150,7 +1140,7 @@ class Vimiv(Gtk.Window):
         if self.library_toggled:
             size = (size[0] - self.library_width, size[1])
         if not self.sbar:
-            size = (size[0], size[1] - self.statusbar_size - 16)
+            size = (size[0], size[1] - self.statusbar_size - 24)
         return size
 
     def zoom_delta(self, delta):
@@ -1809,7 +1799,7 @@ class Vimiv(Gtk.Window):
         elif not inc and self.library_width > 160:
             self.library_width -= 20
         self.grid.set_size_request(self.library_width-self.border_width, 10)
-        if not self.user_zoomed:
+        if not self.user_zoomed and self.paths:
             self.zoom_to(0)
 
     def hidden_toggle(self):
@@ -1968,8 +1958,11 @@ class Vimiv(Gtk.Window):
         # Manipulate Bar
         self.manipulate()
         self.vbox.pack_end(self.hboxman, False, False, 0)
-        self.set_default_window_size()
-        self.winsize = self.win.get_size()
+
+        # Set the window size
+        self.win.resize(self.winsize[0], self.winsize[1])
+        if self.fullscreen:
+            self.win.fullscreen()
 
         self.win.show_all()
         # Show images, if a path was given

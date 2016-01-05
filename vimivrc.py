@@ -7,8 +7,8 @@ slideshow_delay = 2
 shuffle = False
 display_bar = True
 thumbsize = (128, 128)
-geometry = "800x600"  # Only used when tiling_wm is False
-recursive = False  # Search directories recursively for images
+geometry = "800x600"
+recursive = False  # Search directory recursively for images
 rescale_svg = True
 overzoom = False  # Scale images up to fit the window
 
