@@ -312,10 +312,10 @@ Accept changes and close the manipulation bar.
 
 .SH KEYBOARD COMMANDS IN THE COMMAND LINE
 .TP
-.BR ^k
+.BR Up
 Go up in history.
 .TP
-.BR ^j
+.BR Down
 Go down in history.
 .TP
 .BR Tab
@@ -385,11 +385,6 @@ Color of the border separating library and image, must be given in the form
 .TP
 .BR show_hidden\ (Bool)
 If True show hidden files.
-.TP
-.BR external_commands\ (List\ of\ strings)
-These external commands will be tab-completed when prepending a command with !.
-If you know any commands that are generally useful for images feel free to
-contact me so I can add them to the default list. 
 
 .SH THUMBNAIL CACHING
 Thumbnails are cached under "~/.vimiv/Thumbnails" so they can be loaded a lot
@@ -476,11 +471,6 @@ Reload the library.
 .B rotate Int
 Rotate the image (Int % 4)-times counter-clockwise.
 .TP
-.B search "string"
-Search for "string" in either all currently open images or all files in the 
-library, depending on which is focused. If "string" is substring of any file 
-this file will be focused.
-.TP
 .B set animation!
 Toggle the animation status.
 .TP
@@ -519,6 +509,11 @@ Toggle the slideshow. If prefixed by [COUNT] set the slideshow delay to [COUNT]
 .TP
 .B zoom_to Float.
 Zoom to Float.
+
+.SH SEARCHING
+Search for "string" in either all currently open images or all files in the
+library, depending on which is focused. If "string" is substring of any file
+this file will be focused.
 
 .SH MARKING
 If images are marked the simple manipulations (rotating, flipping and deleting)

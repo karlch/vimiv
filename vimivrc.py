@@ -74,9 +74,5 @@ key_flipv = "Y"
 key_delete = "x"
 key_edit = "c"
 
-key_cmd_history_up = "^k"
-key_cmd_history_down = "^j"
-
-# External Commands ############################################################
-external_commands = ["gimp", "mv", "rm", "feh --bg-scale", "feh --bg-fill",
-                     "feh --bg-tile", "cp"]
+key_cmd_history_up = "Up"
+key_cmd_history_down = "Down"

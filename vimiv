@@ -14,7 +14,7 @@ try:
     require_version('Gtk', '3.0')
     from gi.repository import GLib, Gtk, Gdk, GdkPixbuf, Pango
     from random import shuffle
-    from subprocess import call, Popen, PIPE
+    from subprocess import Popen, PIPE
     from threading import Thread
     # Settings
     sys.path.append(os.path.expanduser("~/.vimiv"))
@@ -36,7 +36,6 @@ except NameError as e:
 class Vimiv(Gtk.Window):
 
     def __init__(self):
-
         # Default values
         self.animation_toggled = False
         self.thumbnail_toggled = False
@@ -71,7 +70,6 @@ class Vimiv(Gtk.Window):
                          "q!": "self.quit(True)",
                          "reload_lib": "self.reload('.')",
                          "rotate": "self.rotate",
-                         "search": "self.search",
                          "set animation!": "self.animation_toggle()",
                          "set brightness": "self.cmd_edit('bri'",
                          "set contrast": "self.cmd_edit('con'",
@@ -87,9 +85,17 @@ class Vimiv(Gtk.Window):
                          "slideshow": "self.toggle_slideshow()",
                          "zoom_to": "self.zoom_to"}
 
+        # A list of all external commands
         self.external_commands = []
-        for cmd in sorted(settings.external_commands):
-            self.external_commands.append("!" + cmd)
+        try:
+            p = Popen('echo $PATH | tr \':\' \'\n\' | xargs -n 1 ls -1',
+                      stdout=PIPE, stderr=PIPE, shell=True)
+            out, err = p.communicate()
+            out = out.decode('utf-8').split()
+            for cmd in sorted(list(set(out))):
+                self.external_commands.append("!" + cmd)
+        except:
+            print("List of external commands could not be generated")
 
         try:
             # The configruations from vimivrc
@@ -349,13 +355,12 @@ class Vimiv(Gtk.Window):
         self.binds["man"] = self.manbinds
 
         # Cmd history from file
-        self.cmd_history = [""]  # Remember cmd history
+        self.cmd_history = []  # Remember cmd history
         histfile = os.path.expanduser("~/.vimiv/history")
         try:
             histfile = open(histfile, 'r')
             for line in histfile:
-                line = line.rstrip("\n")
-                self.cmd_history.append(line)
+                self.cmd_history.append(line.rstrip("\n"))
         except:
             histfile = open(histfile, 'w')
             histfile.write("")
@@ -823,8 +828,8 @@ class Vimiv(Gtk.Window):
         # Apply all manipulations
         if self.manipulations[3]:  # Optimize
             try:
-                call(["mogrify", "-contrast", "-auto-gamma", "-auto-level",
-                     orig])
+                Popen("mogrify -contrast -auto-gamma -auto-level " + orig,
+                      shell=True).communicate()
             except:
                 err = "Optimize exited with status 1, is imagemagick installed?"
                 self.err_message(err)
@@ -1431,11 +1436,9 @@ class Vimiv(Gtk.Window):
         single = None
         if len(args) == 1:
             arg = args[0]
-            if os.path.islink(arg):
-                arg = os.path.realpath(arg)
             if os.path.isfile(arg):
-                # Use parent directory
-                single = os.path.abspath(arg)
+                # Use parent directory and realpath
+                single = os.path.realpath(arg)
                 directory = os.path.dirname(single)
                 args = self.filelist_create(directory)
                 for i, arg in enumerate(args):
@@ -1841,32 +1844,36 @@ class Vimiv(Gtk.Window):
         """ Handles input from the entry, namely if it is a path to be focused
         or a (external) command to be run """
         # cmd from input
-        cmd = entry.get_text()
+        command = entry.get_text()
         # And close the cmd line
         self.cmd_line_leave()
-        # If there was no command just leave
-        if not cmd:
-            return
+        if command[0] == "/":  # Search
+            self.search(command.lstrip("/"))
+        else:  # Run a command
+            cmd = command.lstrip(":")
+            # If there was no command just leave
+            if not cmd:
+                return
+            # Parse different starts
+            if cmd[0] == "!":
+                self.run_external_command(cmd)
+            elif cmd[0] == "~" or cmd[0] == "." or cmd[0] == "/":
+                self.cmd_path(cmd)
+            else:
+                self.num_str = ""  # Be able to repeat commands
+                while True:
+                    try:
+                        num = int(cmd[0])
+                        self.num_str = self.num_str + str(num)
+                        cmd = cmd[1:]
+                    except:
+                        break
+                self.run_command(cmd)
         # Save the cmd to a list
-        if cmd in self.cmd_history:
-            self.cmd_history.remove(cmd)
-        self.cmd_history.insert(1, cmd)
+        if command in self.cmd_history:
+            self.cmd_history.remove(command)
+        self.cmd_history.insert(1, command)
         self.cmd_pos = 0
-        # Parse different starts
-        if cmd[0] == "!":
-            self.run_external_command(cmd)
-        elif cmd[0] == "~" or cmd[0] == "." or cmd[0] == "/":
-            self.cmd_path(cmd)
-        else:
-            self.num_str = ""  # Be able to repeat commands
-            while True:
-                try:
-                    num = int(cmd[0])
-                    self.num_str = self.num_str + str(num)
-                    cmd = cmd[1:]
-                except:
-                    break
-            self.run_command(cmd)
 
     def run_external_command(self, cmd):
         """ Run the entered command in the terminal """
@@ -1879,31 +1886,27 @@ class Vimiv(Gtk.Window):
             fil = self.paths[self.index]
         # Remove the !
         cmd = cmd[1:]
-        # Substitute %, * and ~
-        if "%" in cmd:
-            cmd = cmd.replace("%", fil)
-        if "*" in cmd:
-            cmd = cmd.replace("*", " ".join(filelist))
-        if "~" in cmd:
-            cmd = cmd.replace("~", os.path.expanduser("~"))
-        dir = os.path.abspath(".")
+        # Substitute % and * with escaping
+        cmd = re.sub(r'(?<!\\)(%)', fil, cmd)
+        cmd = re.sub(r'(?<!\\)(\*)', " ".join(filelist), cmd)
+        cmd = re.sub(r'(\\)(?!\\)', '', cmd)
         # Run the command in an extra thread
+        dir = os.path.abspath(".")
         cmd_thread = Thread(target=self.thread_for_external, args=(cmd, dir))
         cmd_thread.start()
 
     def thread_for_external(self, cmd, dir):
         """ Starting a new thread for external commands """
-        # Command needed as a list
-        cmd = cmd.split()
         try:
-            p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            p = Popen(cmd, stderr=PIPE, shell=True)
             out, err = p.communicate()
             if err:
                 err = err.decode('utf-8').split("\n")[0]
                 self.err_message(err)
+            else:
+                GLib.timeout_add(1, self.reload_changes, dir)
             # Reload everything after an external command if we haven't moved,
             # you never know what happend ...
-            GLib.timeout_add(1, self.reload_changes, dir)
             # Must be in a timer because not all Gtk stuff can be accessed from
             # an external thread
         except FileNotFoundError as e:
@@ -2006,16 +2009,31 @@ class Vimiv(Gtk.Window):
 
     def history(self, down):
         """ Update the cmd_handler text with history """
+        # Shortly disconnect the change signal
+        self.cmd_line.disconnect_by_func(self.cmd_check_close)
+        # Only parts of the history that match the entered text
+        if not self.sub_history:
+            substring = self.cmd_line.get_text()
+            matchstr = '^(' + substring + ')'
+            self.sub_history = [substring]
+            for cmd in self.cmd_history:
+                if re.match(matchstr, cmd):
+                    self.sub_history.append(cmd)
+        # Move and set the text
         if down:
             self.cmd_pos -= 1
         else:
             self.cmd_pos += 1
-        self.cmd_pos = self.cmd_pos % (len(self.cmd_history))
-        self.cmd_line.set_text(self.cmd_history[self.cmd_pos])
+        self.cmd_pos = self.cmd_pos % (len(self.sub_history))
+        self.cmd_line.set_text(self.sub_history[self.cmd_pos])
         self.cmd_line.set_position(-1)
+        # Reconnect when done
+        self.cmd_line.connect("changed", self.cmd_check_close)
 
     def cmd_line_focus(self):
         """ Open and focus the command line """
+        # Colon for text
+        self.cmd_line.set_text(":")
         # Show the statusbar
         if self.sbar:
             self.leftbox.show()
@@ -2035,6 +2053,7 @@ class Vimiv(Gtk.Window):
         else:
             self.last_focused = "im"
         self.cmd_line.grab_focus()
+        self.cmd_line.set_position(-1)
 
     def cmd_line_leave(self):
         """ Close the command line """
@@ -2057,9 +2076,17 @@ class Vimiv(Gtk.Window):
         if self.sbar:
             self.leftbox.hide()
 
+    def cmd_check_close(self, entry):
+        """ Close the entry if the colon/slash is deleted """
+        self.sub_history = []
+        text = entry.get_text()
+        if not text or text[0] not in ":/":
+            self.cmd_line_leave()
+
     def cmd_complete(self):
         """ Simple autocompletion for the command line """
         command = self.cmd_line.get_text()
+        command = command.lstrip(":")
         # Strip prepending numbers
         numstr = ""
         while True:
@@ -2131,6 +2158,7 @@ class Vimiv(Gtk.Window):
                         output += char
                     else:
                         break
+            output = ":" + output
             self.cmd_line.set_text(output)
             self.cmd_line.set_position(-1)
         else:
@@ -2160,7 +2188,7 @@ class Vimiv(Gtk.Window):
             if os.path.isdir(os.path.expanduser(fil)):
                 filelist.append(fil + "/")
             # Acceptable file
-            elif mimetypes.guess_type(fil)[0] in self.types:
+            elif mimetypes.guess_type(fil)[0] in self.types or command:
                 filelist.append(fil)
         return filelist
 
@@ -2191,12 +2219,12 @@ class Vimiv(Gtk.Window):
     def cmd_search(self):
         """ Prepend search to the cmd_line and open it """
         self.cmd_line_focus()
-        self.cmd_line.set_text("search ")
+        self.cmd_line.set_text("/")
         self.cmd_line.set_position(-1)
 
     def search(self, searchstr):
         """ Run a search on the appropriate filelist """
-        searchstr = str(searchstr)
+        # searchstr = str(searchstr)
         if self.library_focused:
             for i, fil in enumerate(self.files):
                 if searchstr in fil:
@@ -2383,6 +2411,7 @@ class Vimiv(Gtk.Window):
         self.cmd_line.connect("activate", self.cmd_handler)
         self.cmd_line.connect("key_press_event",
                               self.handle_key_press, "cmd_line")
+        self.cmd_line.connect("changed", self.cmd_check_close)
         self.cmd_line_info = Gtk.Label()
         self.cmd_line_info.set_max_width_chars(self.winsize[0]/16)
         self.cmd_line_info.set_ellipsize(Pango.EllipsizeMode.END)
