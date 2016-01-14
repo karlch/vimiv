@@ -1,4 +1,5 @@
 # Configuration file for the vimiv image viewer
+# Please refer to the man-page for further information
 
 # General settings #############################################################
 start_fullscreen = False
@@ -8,9 +9,9 @@ shuffle = False
 display_bar = True
 thumbsize = (128, 128)
 geometry = "800x600"
-recursive = False  # Search directory recursively for images
+recursive = False
 rescale_svg = True
-overzoom = False  # Scale images up to fit the window
+overzoom = False
 
 # Library settings #############################################################
 show_library = False
@@ -23,6 +24,8 @@ show_hidden = False
 # Keybindings ##################################################################
 # Modifiers: Shift (through uppercase) Ctrl (through ^), Alt (through Alt+)
 key_quit = "q"
+key_command = "colon"
+key_search = "slash"
 
 key_fullscreen_toggle = "f"
 key_statusbar_toggle = "b"
@@ -30,13 +33,13 @@ key_slideshow_toggle = "s"
 key_thumbnail_toggle = "t"
 key_library_toggle = "o"
 key_library_toggle_focus= "O"
-key_animation_toggle = "space"  # Toggle animation of Gifs
+key_animation_toggle = "space"
 key_rescale_toggle = "r"
 key_hidden_toggle = "t"
 key_move_up = "u"
 
-key_slideshow_inc = "period"  # Increase slideshow delay
-key_slideshow_dec = "comma"  # Decrease slideshow delay
+key_slideshow_inc = "period"
+key_slideshow_dec = "comma"
 
 key_scroll_left = "h"
 key_scroll_down = "j"
@@ -73,3 +76,7 @@ key_edit = "c"
 
 key_cmd_history_up = "^k"
 key_cmd_history_down = "^j"
+
+# External Commands ############################################################
+external_commands = ["gimp", "mv", "rm", "feh --bg-scale", "feh --bg-fill",
+                     "feh --bg-tile", "cp"]

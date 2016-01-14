@@ -35,3 +35,7 @@ an email to "christian dot karl at protonmail dot com" to ask if I would like to
 see it implemented. Otherwise you might be disappointed afterwards if I do not
 accept your pull request. In general though I am very happy about any interest
 in vimiv!
+
+## Open issues
+Another great way to help is to work on open issues. Some of these obviously
+overlap with my TODO list.

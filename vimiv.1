@@ -37,6 +37,9 @@ more editing options. These feature the change of brightness, contrast and
 sharpness of the image and a button called "optimize". This button uses
 imagemagick to optimize contrast, gamma and level of the image. This tends to
 work well with photographs.
+.P
+Additionally vimiv features a command line. All actions can be accessed via
+commands as well. A full list of command is included at the end of the manual.
 
 .SH OPTIONS
 .TP
@@ -84,6 +87,12 @@ Toggle fullscreen.
 .TP
 .BR b
 Toggle the statusbar.
+.TP
+.BR :
+Open the command line.
+.TP
+.BR /
+Open the command line for searching.
 .TP
 .BR q
 Quit vimiv.
@@ -254,26 +263,14 @@ Increase the library size.
 .BR u
 Move up a directory.
 .TP
-.BR i
-Focus the cmd_handler.
-.TP
-.BR Escape
-Unfocus the cmd_handler.
-.TP
 .BR O
 Focus the image.
-.TP
-.BR ^k
-Go up in history of the cmd_handler.
-.TP
-.BR ^j
-Go down in history of the cmd_handler.
 .TP
 .BR o
 Toggle status of the library.
 .TP
 .BR t
-Toggle show hidden files.
+Toggle showing and hiding of hidden files.
 .TP
 .BR space
 Select the current path. If it is an image open it and close the library.
@@ -312,6 +309,23 @@ Cancel changes and close the manipulation bar.
 .TP
 .BR Return
 Accept changes and close the manipulation bar.
+
+.SH KEYBOARD COMMANDS IN THE COMMAND LINE
+.TP
+.BR ^k
+Go up in history.
+.TP
+.BR ^j
+Go down in history.
+.TP
+.BR Tab
+Autocomplete.
+.TP
+.BR Escape
+Abort command and leave.
+.TP
+.BR Return
+Run command and leave.
 
 .SH CONFIGURATION
 All keyboard commands and some additional settings can be configured in
@@ -371,6 +385,11 @@ Color of the border separating library and image, must be given in the form
 .TP
 .BR show_hidden\ (Bool)
 If True show hidden files.
+.TP
+.BR external_commands\ (List\ of\ strings)
+These external commands will be tab-completed when prepending a command with !.
+If you know any commands that are generally useful for images feel free to
+contact me so I can add them to the default list. 
 
 .SH THUMBNAIL CACHING
 Thumbnails are cached under "~/.vimiv/Thumbnails" so they can be loaded a lot
@@ -391,21 +410,115 @@ filelist with all images in the same directory, close the library viewer  and
 focus the selected image. If a directory is selected, all accessible files in
 that directory will be shown in the library.
 
-Additionally there is a small text entry at the bottom. This is called the
-cmd_handler. One can type the absolute or relative path of an image/directory
-and this path will be focused. If one only types a string this string will be
-searched for in all files in the current directory. If it is a substring of a
-filename that file will be focused. Consider e.g. the case where the files
-"image_001", "image_002" and "image_003" are in current directory. If one enters
-"3", "image_003" will be focused.
+.SH COMMAND LINE
+Similar to many keyboard centered programs vimiv has the possibility to run
+commands in a command line. If an absolute or relative path of an 
+image/directory is entered this path will be focused. These are recognized if 
+the users prepends the input with "./" or "/".
 
 If the input is prepended with "!" the following string will be sent to the
 shell and executed. Here "%" is substituted with the currently selected file and
 "*" is substituted with all files in the current directory. So if "image" is
 selected and one enters "!gimp %", "image" will be opened in gimp.
 
-The cmd_handler remembers entered commands during one session. This is mainly
-done so one can quickly edit typos.
+In all other cases the input will be handled as internal command. If denoted 
+these can be prepended with COUNT to be executed multiple times.
+
+.SH COMMANDS
+.TP
+.B autorotate
+Autorotate all files according to EXIF data.
+.TP
+.B center\ \ 
+Center the current image.
+.TP
+.B clear_trash
+Clear all files in ~/.vimiv/Trash/
+.TP
+.B clear_thumbs
+Clear all files in ~/.vimiv/Thumbnails/
+.TP
+.B delete
+Delete the current image or all marked images.
+.TP
+.B flip (1/0)
+Flip the current image. If 1 is appended flip horizontally, if 0 is appended
+flip vertically.
+.TP
+.B format "formatstring"
+Format all currently open filenames. This will rename all currently open images 
+in the form of "formatstring001.ending", "formatstring002.ending" and so on. If 
+all currently open images support exif data the formatstring can include "%Y", 
+"%m", "%d", "%H", "%M", and "%S". See man date if you aren't sure what these 
+mean.
+.TP
+.B manipulate
+Toggles the manipulate toolbar.
+.TP
+.B [COUNT]move
+Focus the last image or image number [COUNT].
+.TP
+.B [COUNT]next
+Focus the [COUNT] next image in filelist.
+.TP
+.B optimize
+Run imagemagick optimization on the current image.
+.TP
+.B [COUNT]prev
+Focus the [COUNT] previous image in filelist.
+.TP
+.B q\ \ \ \ \ \ 
+Quit vimiv.
+.TP
+.B reload_lib
+Reload the library.
+.TP
+.B rotate Int
+Rotate the image (Int % 4)-times counter-clockwise.
+.TP
+.B search "string"
+Search for "string" in either all currently open images or all files in the 
+library, depending on which is focused. If "string" is substring of any file 
+this file will be focused.
+.TP
+.B set animation!
+Toggle the animation status.
+.TP
+.B set brightness Int
+Set the brightness of the current image to Int. Defaults to 0.
+.TP
+.B set contrast Int
+Set the contrast of the current image to Int. Defaults to 0.
+.TP
+.B set fullscreen!
+Toggle fullscreen.
+.TP
+.B set library_width Int
+Set the library width to Int.
+.TP
+.B set rescale_svg!
+Toggle the rescaling of vector graphics.
+.TP
+.B set sharpness Int
+Set the sharpness of the current image to Int. Defaults to 0.
+.TP
+.B set show_hidden!
+Toggle showing and hiding of hidden files.
+.TP
+.B set slideshow_delay Float.
+Set the slideshow_delay to Float.
+.TP
+.B set statusbar!
+Toggle the statusbar.
+.TP
+.B set thumbnail!
+Toggle thumbnail mode.
+.TP
+.B [COUNT]slideshow
+Toggle the slideshow. If prefixed by [COUNT] set the slideshow delay to [COUNT]
+.TP
+.B zoom_to Float.
+Zoom to Float.
 
 .SH MARKING
 If images are marked the simple manipulations (rotating, flipping and deleting)

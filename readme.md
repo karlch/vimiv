@@ -1,16 +1,17 @@
 ### vimiv, an image viewer with vim-like keybindings
 
-## Version 0.3
+## Version 0.4
 
 ## Features
 * vim-like keybindings
 * thumbnail mode (supports caching of thumbnails)
 * simple library browser (browse through folders and open images)
-* run external commands
 * basic image editing (rotate, flip, brightness, contrast and optimize)
 * search directory recursively for images
 * slideshow mode
 * marking of images
+* command line with tab-completion
+* run external commands
 
 ## Screenshots
 
@@ -33,6 +34,7 @@ modify that file instead (recommended).
 * gtk3
 * python-pillow
 * imagemagick (optional for the optimization of images)
+* jhead (optional for much better autorotation depending on EXIF data)
 
 ## Installation
 Be sure to install the dependencies first. A simple `sudo make` should then
