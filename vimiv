@@ -364,6 +364,7 @@ class Vimiv(Gtk.Window):
         except:
             histfile = open(histfile, 'w')
             histfile.write("")
+        histfile.close()
         self.cmd_pos = 0
 
         Gtk.Window.__init__(self)
@@ -421,6 +422,7 @@ class Vimiv(Gtk.Window):
         for cmd in self.cmd_history[1:]:
             cmd += "\n"
             histfile.write(cmd)
+        histfile.close()
 
         Gtk.main_quit()
 
@@ -1872,7 +1874,7 @@ class Vimiv(Gtk.Window):
         # Save the cmd to a list
         if command in self.cmd_history:
             self.cmd_history.remove(command)
-        self.cmd_history.insert(1, command)
+        self.cmd_history.insert(0, command)
         self.cmd_pos = 0
 
     def run_external_command(self, cmd):
