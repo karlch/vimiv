@@ -24,7 +24,8 @@ desktop_start_dir = "~"
 
 # Keybindings ##################################################################
 # Modifiers: Shift (through uppercase) Ctrl (through ^), Alt (through Alt+)
-key_quit = "q"
+# Lists of keybindings are possible
+key_quit = ["q", "^q"]
 key_command = "colon"
 key_search = "slash"
 
@@ -42,10 +43,10 @@ key_move_up = "u"
 key_slideshow_inc = "period"
 key_slideshow_dec = "comma"
 
-key_scroll_left = "h"
-key_scroll_down = "j"
-key_scroll_up = "k"
-key_scroll_right = "l"
+key_scroll_left = ["h", "Left"]
+key_scroll_down = ["j", "Down"]
+key_scroll_up = ["k", "Up"]
+key_scroll_right = ["l", "Right"]
 
 key_scroll_left_page = "H"
 key_scroll_down_page = "J"
@@ -75,5 +76,5 @@ key_flipv = "Y"
 key_delete = "x"
 key_edit = "c"
 
-key_cmd_history_up = "Up"
-key_cmd_history_down = "Down"
+key_cmd_history_up = ["Up", "^k"]
+key_cmd_history_down = ["Down", "^j"]

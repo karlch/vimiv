@@ -97,6 +97,7 @@ class Vimiv(Gtk.Window):
                 self.external_commands.append("!" + cmd)
         except:
             print("List of external commands could not be generated")
+        self.external_commands = tuple(self.external_commands)
 
         try:
             # The configruations from vimivrc
@@ -155,7 +156,6 @@ class Vimiv(Gtk.Window):
 
             self.mainbinds = (
                 (settings.key_quit, self.quit),
-                ("^q", self.quit),
                 (settings.key_command, self.cmd_line_focus),
                 (settings.key_search, self.cmd_search),
 
@@ -169,7 +169,7 @@ class Vimiv(Gtk.Window):
                 (settings.key_rescale_toggle, self.toggle_rescale_svg),
                 (settings.key_move_up, self.move_up),
 
-                # if True, scroll in the horizontal direction.
+                # If True, scroll in the horizontal direction.
                 (settings.key_scroll_left, self.scroll,
                  Gtk.ScrollType.STEP_BACKWARD, True),
                 (settings.key_scroll_down, self.scroll,
@@ -178,16 +178,7 @@ class Vimiv(Gtk.Window):
                  Gtk.ScrollType.STEP_BACKWARD, False),
                 (settings.key_scroll_right, self.scroll,
                  Gtk.ScrollType.STEP_FORWARD, True),
-                # Also with the arrow keys
-                ("Left", self.scroll,
-                 Gtk.ScrollType.STEP_BACKWARD, True),
-                ("Down", self.scroll,
-                 Gtk.ScrollType.STEP_FORWARD, False),
-                ("Up", self.scroll,
-                 Gtk.ScrollType.STEP_BACKWARD, False),
-                ("Right", self.scroll,
-                 Gtk.ScrollType.STEP_FORWARD, True),
-
+                # Larger scrolls
                 (settings.key_scroll_left_page, self.scroll,
                  Gtk.ScrollType.START, True),
                 (settings.key_scroll_down_page, self.scroll,
@@ -200,7 +191,6 @@ class Vimiv(Gtk.Window):
                 (settings.key_zoom_out, self.zoom_delta, -.25),
                 (settings.key_zoom_in, self.zoom_delta, +.25),
                 (settings.key_fit, self.zoom_to, 0),
-                ("equal", self.zoom_to, self.num_str),
                 (settings.key_fit_horiz, self.zoom_to, 0, True, False),
                 (settings.key_fit_vert, self.zoom_to, 0, False, True),
                 (settings.key_center, self.center_window),
@@ -240,7 +230,6 @@ class Vimiv(Gtk.Window):
 
             self.libbinds = (
                 (settings.key_quit, self.quit),
-                ("^q", self.quit),
                 (settings.key_command, self.cmd_line_focus),
                 (settings.key_search, self.cmd_search),
 
@@ -256,11 +245,6 @@ class Vimiv(Gtk.Window):
                 (settings.key_scroll_down, self.library_scroll, "j"),
                 (settings.key_scroll_up, self.library_scroll, "k"),
                 (settings.key_scroll_right, self.library_scroll, "l"),
-                # Also with the arrow keys
-                ("Left", self.library_scroll, "h"),
-                ("Down", self.library_scroll, "j"),
-                ("Up", self.library_scroll, "k"),
-                ("Right", self.library_scroll, "l"),
 
                 # Resizing
                 (settings.key_scroll_left_page, self.resize_lib, None, False),
@@ -313,7 +297,6 @@ class Vimiv(Gtk.Window):
 
             self.manbinds = (
                 (settings.key_quit, self.quit),
-                ("^q", self.quit),
                 (settings.key_command, self.cmd_line_focus),
                 (settings.key_search, self.cmd_search),
 
@@ -325,10 +308,10 @@ class Vimiv(Gtk.Window):
                 ("b", self.focus_slider, "bri"),
                 ("c", self.focus_slider, "con"),
                 ("s", self.focus_slider, "sha"),
-                ("h", self.change_slider, True, False),
-                ("l", self.change_slider, False, False),
-                ("H", self.change_slider, True, True),
-                ("L", self.change_slider, False, True),
+                (settings.key_scroll_left, self.change_slider, True, False),
+                (settings.key_scroll_right, self.change_slider, False, False),
+                (settings.key_scroll_left_page, self.change_slider, True, True),
+                (settings.key_scroll_right_page, self.change_slider, False, True),
                 ("o", self.button_opt_clicked, "widget"),
 
                 ("1", self.num_append, "1"),
@@ -1453,7 +1436,7 @@ class Vimiv(Gtk.Window):
                 args = self.filelist_create(directory)
                 for i, arg in enumerate(args):
                     args[i] = os.path.join(directory, arg)
-            elif os.path.isdir(arg):
+            elif os.path.isdir(arg) and not self.recursive:
                 # Open dir in library browser
                 self.move_up(arg, True)
                 return 0
@@ -1464,9 +1447,7 @@ class Vimiv(Gtk.Window):
             if os.path.isfile(path):
                 self.paths.append(path)
             elif os.path.isdir(path) and self.recursive:
-                paths = sorted([os.path.join(path, x)
-                                for x in os.listdir(path)])
-                self.paths.extend(paths)
+                self.recursive_search(path)
         # Remove unsupported files
         self.paths = [possible_path for possible_path in self.paths
                       if mimetypes.guess_type(possible_path)[0] in self.types]
@@ -1487,6 +1468,16 @@ class Vimiv(Gtk.Window):
             self.scrolled_win.show()
 
         return len(self.paths)
+
+    def recursive_search(self, dir):
+        """ Searchs a given directory recursively for images """
+        paths = self.filelist_create(dir)
+        for path in paths:
+            path = os.path.join(dir, path)
+            if os.path.isfile(path):
+                self.paths.append(path)
+            else:
+                self.recursive_search(path)
 
     def mark(self):
         """ Marks the current image """
@@ -2089,6 +2080,7 @@ class Vimiv(Gtk.Window):
     def cmd_check_close(self, entry):
         """ Close the entry if the colon/slash is deleted """
         self.sub_history = []
+        self.cmd_pos = 0
         text = entry.get_text()
         if not text or text[0] not in ":/":
             self.cmd_line_leave()
@@ -2308,8 +2300,19 @@ class Vimiv(Gtk.Window):
             keyname = '^{}'.format(keyname)
         if event.get_state() & Gdk.ModifierType.MOD1_MASK:
             keyname = 'Alt+{}'.format(keyname)
-        # Loop through binds until found (Calls for improvements)
+        # Add all bindings checking for multiple bindings to one command
+        bindings = []
         for bind in self.binds[window]:
+            if isinstance(bind[0], list):
+                for key in bind[0]:
+                    # Add all arguments
+                    binding = [key, bind[1], *bind[2:]]
+                    bindings.append(tuple(binding))
+            else:
+                bindings.append(bind)
+        bindings = tuple(bindings)
+        # Loop through binds until found (Calls for improvements)
+        for bind in bindings:
             if keyname == bind[0]:
                 funk = bind[1]
                 args = bind[2:]
