@@ -39,6 +39,7 @@ class Vimiv(Gtk.Window):
         # Default values
         self.animation_toggled = False
         self.thumbnail_toggled = False
+        self.desktop = False
         self.paths = []
         self.types = []  # Get supported mimetypes
         for pixbuf_format in GdkPixbuf.Pixbuf.get_formats():
@@ -111,6 +112,13 @@ class Vimiv(Gtk.Window):
             self.recursive = bool(settings.recursive)
             self.rescale_svg = bool(settings.rescale_svg)
             self.overzoom = bool(settings.overzoom)  # Scale images up
+
+            # Desktop starting directory
+            self.desktop_start_dir = os.path.expanduser(str(settings.desktop_start_dir))
+            if not os.path.isdir(self.desktop_start_dir):
+                print("Starting directory is not a directory")
+                self.desktop_start_dir = os.path.expanduser("~")
+            self.desktop_start_dir = [self.desktop_start_dir]
 
             # Window size
             try:
@@ -419,7 +427,7 @@ class Vimiv(Gtk.Window):
         # Save the history
         histfile = os.path.expanduser("~/.vimiv/history")
         histfile = open(histfile, 'w')
-        for cmd in self.cmd_history[1:]:
+        for cmd in self.cmd_history:
             cmd += "\n"
             histfile.write(cmd)
         histfile.close()
@@ -2343,6 +2351,9 @@ class Vimiv(Gtk.Window):
         parser.add_argument("--slideshow", action="store_true",
                             help="start slideshow immediately",
                             default=self.slideshow)
+        parser.add_argument("--start-from-desktop", action="store_true",
+                            help="start using the desktop_start_dir as path",
+                            dest="desktop", default=self.desktop)
         parser.add_argument("--slideshow-delay", type=float,
                             help="set the slideshow delay",
                             default=self.slideshow_delay)
@@ -2360,8 +2371,12 @@ class Vimiv(Gtk.Window):
         self.slideshow_delay = args.slideshow_delay
         self.slideshow = args.slideshow
         self.geometry = args.geometry
+        self.desktop = args.desktop
 
-        self.populate(args.path, True)
+        if self.desktop:
+            self.populate(self.desktop_start_dir, True)
+        else:
+            self.populate(args.path, True)
 
     def main(self):
         # Create vimiv directory if it doesn't exist

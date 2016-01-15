@@ -20,6 +20,7 @@ expand_lib = True
 border_width = 0
 border_color = "#000000"
 show_hidden = False
+desktop_start_dir = "~"
 
 # Keybindings ##################################################################
 # Modifiers: Shift (through uppercase) Ctrl (through ^), Alt (through Alt+)

@@ -61,6 +61,9 @@ search the directory recursively for images
 .B \-s
 shuffle the filelist
 .TP
+.B \--start-from-desktop
+start using the desktop_start_dir as path
+.TP
 .B \--slideshow
 start in slideshow mode
 .TP
@@ -385,6 +388,9 @@ Color of the border separating library and image, must be given in the form
 .TP
 .BR show_hidden\ (Bool)
 If True show hidden files.
+.TP
+.BR desktop_start_dir\ (String)
+The directory in which vimiv should start if invoked via the desktop file.
 
 .SH THUMBNAIL CACHING
 Thumbnails are cached under "~/.vimiv/Thumbnails" so they can be loaded a lot
