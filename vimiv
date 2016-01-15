@@ -604,7 +604,7 @@ class Vimiv(Gtk.Window):
                 self.zoom_to(0)
 
     def toggle_statusbar(self):
-        if not self.sbar:
+        if not self.sbar and not self.cmd_line.is_visible():
             self.leftbox.hide()
         else:
             self.leftbox.show()
