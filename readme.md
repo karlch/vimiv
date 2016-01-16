@@ -10,8 +10,10 @@
 * search directory recursively for images
 * slideshow mode
 * marking of images
+* simple tag system
 * command line with tab-completion
 * run external commands
+* pipe external commands to vimiv
 
 ## Screenshots
 

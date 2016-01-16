@@ -230,9 +230,6 @@ Focus [COUNT] images up.
 .BR l
 Focus [COUNT] right.
 .TP
-.BR space
-Select the current image and return to image mode.
-.TP
 .BR return
 Select the current image and return to image mode.
 
@@ -422,6 +419,19 @@ shell and executed. Here "%" is substituted with the currently selected file and
 "*" is substituted with all files in the current directory. So if "image" is
 selected and one enters "!gimp %", "image" will be opened in gimp.
 
+It is also possible to "pipe commands to vimiv" by appending "|" to an external
+command. The output will then be sent to vimiv line by line. If the first line
+is a file vimiv will open all images in the output. Useful example: "!find
+~/Images -ctime -5 -type f |" which will open all files in ~/Images younger than
+5 days.  If the first line is a directory that directory will be opened in the
+library.
+
+Note: Files and directories have to be proper paths from the current working
+directory of vimiv. So if you are in ~/Images/2016 and run "!ls ~ |" the output
+will not be recognized as proper files or directories whereas "!realpath ~/\\* |"
+will. Also note the escaping of the "*" character as it would be interpreted as
+all the files otherwise.
+
 In all other cases the input will be handled as internal command. If denoted 
 these can be prepended with COUNT to be executed multiple times.
 
@@ -526,6 +536,22 @@ If images are marked the simple manipulations (rotating, flipping and deleting)
 are executed for all marked images and not for the current image. In thumbnail
 mode those actions will always work on marked images. If there are none, no
 manipulation will be done.
+
+.SH TAGGING
+Vimiv has a simple built-in tag system which is controlled by three commands.
+All tagfiles are saved under "~/.vimiv/Tags".
+.TP
+.B tag_write\ tagname
+Write the names of all currently marked images to the tagfile "tagname". If the
+file doesn't exist, it will be created. If it does, the names will be appended
+if they aren't in the tagfile already.
+.TP
+.B tag_load\ tagname
+Load all images in the tagfile "tagname" into the current filelist in image
+mode.
+.TP
+.B tag_remove\ tagname
+Delete the tagfile "tagname".
 
 .SH BUGS
 Probably. Please contact me under <christian dot karl at protonmail dot com>.

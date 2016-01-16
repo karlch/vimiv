@@ -52,6 +52,7 @@ class Vimiv(Gtk.Window):
         self.num_str = ""  # used to prepend actions with numbers
         self.dir_pos = {}  # Remembers positions in the library browser
         self.error = []
+        self.tagdir = os.path.expanduser("~/.vimiv/Tags")
         # Dictionary with command names and the corresponding functions
         self.commands = {"autorotate": "self.rotate_auto()",
                          "center": "self.center_window()",
@@ -61,6 +62,7 @@ class Vimiv(Gtk.Window):
                          "flip": "self.flip",
                          "format": "self.format_files",
                          "manipulate": "self.manipulate_toggle()",
+                         "mark_all": "self.mark_all()",
                          "move":  "self.move_pos()",
                          "next": "self.move_index(True, True)",
                          "next!": "self.move_index(True, True, 1, True)",
@@ -84,6 +86,9 @@ class Vimiv(Gtk.Window):
                          "set statusbar!": "self.toggle_statusbar()",
                          "set thumbnail!": "self.thumbnail_toggle()",
                          "slideshow": "self.toggle_slideshow()",
+                         "tag_load": "self.tag_load",
+                         "tag_remove": "self.tag_remove",
+                         "tag_write": "self.tag_write",
                          "zoom_to": "self.zoom_to"}
 
         # A list of all external commands
@@ -255,6 +260,7 @@ class Vimiv(Gtk.Window):
                 (settings.key_last_image, self.move_pos_lib, True),
 
                 (settings.key_mark, self.mark_lib),
+                (settings.key_mark_toggle, self.mark_toggle),
                 (settings.key_delete, self.delete_lib),
 
                 # Some keybindings for the image which don't hurt the library
@@ -1510,6 +1516,29 @@ class Vimiv(Gtk.Window):
             self.marked, self.marked_bak = self.marked_bak, self.marked
         self.update_info()
 
+    def mark_all(self):
+        """ Marks all images """
+        # Get the correct filelist
+        if self.library_focused:
+            files = []
+            for fil in self.files:
+                files.append(os.path.abspath(fil))
+        elif self.paths:
+            files = self.paths
+        else:
+            self.err_message("No image to mark")
+        # Add all to the marks
+        for fil in files:
+            if os.path.isfile(fil) and fil not in self.marked:
+                self.marked.append(fil)
+        self.marked_bak = []
+        self.update_info()
+        # Update lib
+        if self.library_toggled:
+            self.remember_pos(".", self.treepos)
+            self.reload(".")
+            self.update_info()
+
     def library(self):
         """ Starts the library browser """
         # Librarybox
@@ -1560,7 +1589,8 @@ class Vimiv(Gtk.Window):
             self.animation_toggled = True  # Do not play Gifs with the lib
             self.library_toggled = not self.library_toggled
             self.library_focus(True)
-            self.reload(".")  # Markings and other stuff might have changed
+            # Markings and other stuff might have changed
+            self.reload(os.path.abspath("."))
         if not self.user_zoomed and self.paths:
             self.zoom_to(0)  # Always rezoom the image
         #  Change the toggle state of animation
@@ -1618,13 +1648,14 @@ class Vimiv(Gtk.Window):
     def datalist_create(self):
         """ Returns the list of data for the file_filter model """
         self.datalist = list()
-        # Remove unsupported files
-        files = self.filelist_create()
-        self.files = [
-            possible_file
-            for possible_file in files
-            if mimetypes.guess_type(possible_file)[0] in self.types
-            or os.path.isdir(possible_file)]
+        self.files = self.filelist_create()
+        # Remove unsupported files if one isn't in the tagdir
+        if os.path.abspath(".") != self.tagdir:
+            self.files = [
+                possible_file
+                for possible_file in self.files
+                if mimetypes.guess_type(possible_file)[0] in self.types
+                or os.path.isdir(possible_file)]
         # Add all the supported files
         for fil in self.files:
             size = self.filesize[fil]
@@ -1683,6 +1714,11 @@ class Vimiv(Gtk.Window):
             fil = "".join(fil)
             fil = os.path.realpath(fil)
             self.move_up(os.path.dirname(fil))
+        # Tags
+        if os.path.abspath(".") == self.tagdir:
+            self.tag_load(fil)
+            return
+        # Rest
         if os.path.isdir(fil):  # Open the directory
             self.move_up(fil)
         else:  # Focus the image and populate a new list from the dir
@@ -1768,17 +1804,23 @@ class Vimiv(Gtk.Window):
         return True
 
     def mark_lib(self):
+        """ Mark currently selected library file """
         current = self.files[self.treepos]
         current = os.path.abspath(current)
-        if current in self.marked:
-            self.marked.remove(current)
+        # Check if it is a file
+        if os.path.isfile(current):
+            if current in self.marked:
+                self.marked.remove(current)
+            else:
+                self.marked.append(current)
+            self.remember_pos(".", self.treepos)
+            self.reload(".")
+            self.update_info()
         else:
-            self.marked.append(current)
-        self.remember_pos(".", self.treepos)
-        self.reload(".")
-        self.update_info()
+            self.err_message("Marking directories is not supported")
 
     def delete_lib(self):
+        """ Delete currently selected library file """
         current = self.files[self.treepos]
         if os.path.isdir(current):
             self.err_message("Deleting directories is not supported")
@@ -1831,6 +1873,54 @@ class Vimiv(Gtk.Window):
         self.show_hidden = not self.show_hidden
         self.reload('.')
 
+    def tag_load(self, name):
+        """ Load all images in tag 'name' as current filelist """
+        # Read file and get all tagged images as list
+        os.chdir(self.tagdir)
+        filename = os.path.join(self.tagdir, name)
+        tagged_images = []
+        try:
+            tagfile = open(filename, 'r')
+            for line in tagfile:
+                tagged_images.append(line.rstrip("\n"))
+        except:
+            self.err_message("Tagfile %s does not exist" % (filename))
+            return
+        # Populate filelist
+        self.paths = []
+        self.populate(tagged_images)
+        self.scrolled_win.show()
+        self.move_index(False, False, 0)
+        # Close library if necessary
+        if self.library_toggled:
+            self.library_toggle()
+
+    def tag_write(self, name):
+        """ Append marked images to the tag 'name' """
+        # First create the tag directory if it doesn't exist
+        if not os.path.isdir(self.tagdir):
+            os.mkdir(os.path.expanduser(self.tagdir))
+        # Open the file checking for content
+        filename = os.path.join(self.tagdir, name)
+        tagged_images = []
+        if os.path.isfile(filename):
+            tagfile = open(filename, 'r')
+            for line in tagfile:
+                tagged_images.append(line.rstrip("\n"))
+        tagfile = open(filename, 'a')
+        # Write each marked image to the file if it isn't there
+        for im in self.marked:
+            if im not in tagged_images:
+                tagfile.write(im + "\n")
+
+    def tag_remove(self, name):
+        """ Remove tag 'name' """
+        filename = os.path.join(self.tagdir, name)
+        if os.path.isfile(filename):
+            os.remove(filename)
+        else:
+            self.err_message("Tagfile %s does not exist" % (filename))
+
     def auto_resize(self, w):
         """ Automatically resize image when window is resized """
         if self.win.get_size() != self.winsize:
@@ -1879,12 +1969,15 @@ class Vimiv(Gtk.Window):
     def run_external_command(self, cmd):
         """ Run the entered command in the terminal """
         # Check on which file(s) % and * should operate
-        if self.last_focused == "lib":
+        if self.last_focused == "lib" and self.files:
             filelist = self.files
             fil = self.files[self.treepos]
-        else:
+        elif self.paths:
             filelist = self.paths
             fil = self.paths[self.index]
+        else:
+            filelist = []
+            fil = ""
         # Remove the !
         cmd = cmd[1:]
         # Substitute % and * with escaping
@@ -1899,13 +1992,21 @@ class Vimiv(Gtk.Window):
     def thread_for_external(self, cmd, dir):
         """ Starting a new thread for external commands """
         try:
-            p = Popen(cmd, stderr=PIPE, shell=True)
+            # Possibility to "pipe to vimiv"
+            if cmd[-1] == "|":
+                cmd = cmd.rstrip("|")
+                p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+                pipe = True
+            else:
+                p = Popen(cmd, stderr=PIPE, shell=True)
+                pipe = False
+            # Get output and error and run the command
             out, err = p.communicate()
             if err:
                 err = err.decode('utf-8').split("\n")[0]
                 self.err_message(err)
             else:
-                GLib.timeout_add(1, self.reload_changes, dir)
+                GLib.timeout_add(1, self.reload_changes, dir, pipe, out)
             # Reload everything after an external command if we haven't moved,
             # you never know what happend ...
             # Must be in a timer because not all Gtk stuff can be accessed from
@@ -1915,8 +2016,9 @@ class Vimiv(Gtk.Window):
             cmd = e.split()[-1]
             self.err_message("Command %s not found" % (cmd))
 
-    def reload_changes(self, dir):
-        if dir == os.path.abspath("."):
+    def reload_changes(self, dir, pipe=False, input=None):
+        """ Reload everything, meaning filelist in library and image """
+        if dir == os.path.abspath(".") and dir != self.tagdir:
             if self.library_toggled:
                 self.reload(".")
             if self.paths:
@@ -1925,7 +2027,47 @@ class Vimiv(Gtk.Window):
                 self.paths = []
                 self.populate(files)
                 self.move_pos()
+        # Run the pipe
+        if pipe:
+            self.pipe(input)
         return False  # To stop the timer
+
+    def pipe(self, input):
+        """ Run output of external command in a pipe
+            This checks for directories, files and vimiv commands """
+        # Leave if no input came
+        if not input:
+            self.err_message("No input from pipe")
+            return
+        # Make the input a file
+        input = input.decode('utf-8')
+        input = input.split("\n")[:-1]  # List of commands without empty line
+        startout = input[0]
+        # Do different stuff depending on the first line of input
+        if os.path.isdir(startout):
+            self.move_up(startout)
+        elif os.path.isfile(startout):
+            # Remember oldfile if no image was in filelist
+            if self.paths:
+                old_pos = [self.paths[self.index]]
+                self.paths = []
+            else:
+                old_pos = ""
+            # Populate filelist
+            self.populate(input)
+            if self.paths:  # Images were found
+                self.scrolled_win.show()
+                self.move_index(False, False, 0)
+                # Close library if necessary
+                if self.library_toggled:
+                    self.library_toggle()
+            elif old_pos:  # Nothing found, go back
+                self.populate(old_pos)
+                self.err_message("No image found")
+        else:
+            # Run every line as an internal command
+            for cmd in input:
+                self.run_command(cmd)
 
     def cmd_path(self, path):
         """ Run a path command, namely populate files or focus directory """
@@ -2006,7 +2148,7 @@ class Vimiv(Gtk.Window):
                 function = function.replace(arg, argstr)
                 exec(function)
         else:
-            self.err_message("No such command")
+            self.err_message("No such command: %s" % (cmd))
 
     def history(self, down):
         """ Update the cmd_handler text with history """
@@ -2127,6 +2269,15 @@ class Vimiv(Gtk.Window):
                 comp_type = "path"
                 commandlist = sorted(self.cmd_complete_path(command))
 
+        # Tag completion
+        if comp_type == "int":
+            if re.match(r'^(tag_(write|remove|load) )', command):
+                tags = os.listdir(os.path.expanduser("~/.vimiv/Tags"))
+                commandlist = []
+                for tag in tags:
+                    commandlist.append(command.split()[0] + " " + tag)
+                comp_type = "tag"  # Chop the command in the info
+
         # Check if the entered text matches the beginning of a command
         for cmd in commandlist:
             matchstr = '^(' + command + ')'
@@ -2151,6 +2302,9 @@ class Vimiv(Gtk.Window):
                             completions[i] = comp.split("/")[-2] + "/"
                         else:
                             completions[i] = comp.split("/")[-1]
+                elif comp_type == "tag":  # And only the tags if completing tags
+                    for i, comp in enumerate(completions):
+                        completions[i] = " ".join(comp.split()[1:])
                 # A string with possible completions for the info
                 compstr = "  " + "  ".join(completions)
                 self.cmd_line_info.set_text(compstr)
@@ -2226,19 +2380,20 @@ class Vimiv(Gtk.Window):
 
     def search(self, searchstr):
         """ Run a search on the appropriate filelist """
-        # searchstr = str(searchstr)
         if self.library_focused:
             for i, fil in enumerate(self.files):
                 if searchstr in fil:
                     self.file_select("alt", fil, "b", False)
-                    break
+                    return
         else:
             for i, fil in enumerate(self.paths):
                 if searchstr in fil:
                     print(fil)
                     self.num_str = str(i+1)
                     self.move_pos()
-                    break
+                    return
+        # Nothing found
+        self.err_message("No matching file")
 
     def listdir_nohidden(self, path):
         """ Reimplementation of os.listdir which doesn't show hidden files """
@@ -2281,6 +2436,8 @@ class Vimiv(Gtk.Window):
                 outstring = outstring.replace("%H", time[0])  # hour
                 outstring = outstring.replace("%M", time[1])  # minute
                 outstring = outstring.replace("%S", time[2])  # second
+            else:
+                outstring = string
             # Ending
             outstring += num + "." + ending
             shutil.move(fil, outstring)
