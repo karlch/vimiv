@@ -31,7 +31,7 @@ All options and keybindings can be configured in the file
 modify that file instead (recommended).
 
 ## Dependencies
-* python3
+* python3.5
 * python-gobject
 * gtk3
 * python-pillow
