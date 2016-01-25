@@ -36,6 +36,11 @@ except NameError as e:
 class Vimiv(Gtk.Window):
 
     def __init__(self):
+        # Create vimiv directory if it doesn't exist
+        vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
+        if not os.path.isdir(vimivdir):
+            os.mkdir(vimivdir)
+
         # Default values
         self.animation_toggled = False
         self.thumbnail_toggled = False
@@ -2539,11 +2544,6 @@ class Vimiv(Gtk.Window):
             self.populate(args.path, True)
 
     def main(self):
-        # Create vimiv directory if it doesn't exist
-        vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
-        if not os.path.isdir(vimivdir):
-            os.mkdir(vimivdir)
-
         # Off we go
         self.parse_args()
 

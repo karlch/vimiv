@@ -39,3 +39,8 @@ in vimiv!
 ## Open issues
 Another great way to help is to work on open issues. Some of these obviously
 overlap with my TODO list.
+
+## Testing and bug reporting
+Fairly obvious. Just open an issue or send me an email. If you feel adventurous,
+you can test the unreleased branches depending on whether a new version is
+currently under development.
