@@ -1,0 +1,25 @@
+# Configuration file for the vimiv image viewer
+# Please refer to vimivrc(5) for further information
+
+[GENERAL] ######################################################################
+start_fullscreen: no
+start_slideshow: no
+slideshow_delay: 2
+shuffle: no
+display_bar: yes
+thumbsize: (128, 128)
+geometry: 800x600
+recursive: no
+rescale_svg: yes
+overzoom: no
+
+[LIBRARY] ######################################################################
+show_library: no
+library_width: 300
+expand_lib: yes
+border_width: 0
+border_color: #000000
+show_hidden: no
+desktop_start_dir: ~
+
+# vim:ft=dosini

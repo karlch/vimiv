@@ -1,6 +1,6 @@
 ### vimiv, an image viewer with vim-like keybindings
 
-## Version 0.4
+## Version 0.5
 
 ## Features
 * vim-like keybindings
@@ -26,12 +26,14 @@
 ![Image](https://raw.githubusercontent.com/karlch/vimiv/gh-pages/vimiv-thumb.jpg "Thumbnail mode")
 
 ## Configuration
-All options and keybindings can be configured in the file
-`/etc/vimiv/vimivrc.py`. You can copy the file to `~/.vimiv/vimivrc.py` and
-modify that file instead (recommended).
+Vimiv comes with two configuration files. The vimivrc for general settings and
+the keys.conf for all keybindings. See vimivrc(5) for further information.
+
+The old configuration file vimivrc.py used in versions up to 0.4 is now
+deprecated and can be deleted.
 
 ## Dependencies
-* python3.5
+* python3
 * python-gobject
 * gtk3
 * python-pillow
@@ -39,11 +41,14 @@ modify that file instead (recommended).
 * jhead (optional for much better autorotation depending on EXIF data)
 
 ## Installation
-Be sure to install the dependencies first. A simple `sudo make` should then
-suffice. For arch-users there is an AUR package called vimiv-git.
+Be sure to install the dependencies first. A simple `sudo make (install)` should
+then suffice. For arch-users there is an AUR package called vimiv-git.
+
+To remove vimiv the standard `sudo make uninstall` works.
 
 ## Documentation
-Vimiv comes with a man-page for further documentation.
+Vimiv comes with two man-page for further documentation: vimiv(1) for general
+information and vimivrc(5) for the configuration files.
 
 ## Thanks to
 James Campos, author of Pim https://github.com/Narrat/Pim upon which vimiv is

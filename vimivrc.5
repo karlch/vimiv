@@ -1,0 +1,331 @@
+.TH VIMIVRC 5
+.SH NAME
+vimivrc \- configuration files for the vimiv image viewer
+
+.SH SYNOPSIS
+/etc/vimiv/vimivrc, ~/.vimiv/vimivrc, /etc/vimiv/keys.conf, ~/.vimiv/keys.conf
+
+.SH DESCRIPTION
+The vimivrc is the configuration file for the vimiv image viewer, the keys.conf
+the file to configure all the keybindings. If the files exist in
+~/.vimiv/, they are read. Otherwise vimiv falls back to the system-wide files in
+/etc/vimiv/.  It is considered best-practice to keep the default files and to
+configure the files in ~/.vimiv to ones liking.
+
+.SH VIMIVRC
+The vimivrc file is split into two sections with various settings. What each
+setting means is explained below:
+
+.TP
+.BR start_fullscreen\ (Bool)
+If yes start in fullscreen mode.
+.TP
+.BR start_slideshow\ (Bool)
+If yes start in slideshow mode.
+.TP
+.BR slideshow_delay\ (Float)
+Specify the delay in slideshow mode.
+.TP
+.BR shuffle\ (Bool)
+If yes shuffle the images in filelist.
+.TP
+.BR display_bar\ (Bool)
+If yes show the statusbar.
+.TP
+.BR thumbsize\ (tuple)
+Size for the thumbnails.
+.TP
+.BR geometry\ (string)
+A string of the form "WIDTHxHEIGHT" which sets the default size for the image.
+.TP
+.BR recursive\ (Bool)
+If yes search the given directory recursively for images.
+.TP
+.BR rescale_svg\ (Bool)
+If yes rescale vector graphics automatically by reloading the image. Otherwise
+simply zoom as if it were a normal image.
+.TP
+.BR overzoom\ (Bool)
+If yes scale images smaller than the current window size up to fit the screen.
+.TP
+.BR show_library\ (Bool)
+If yes show the library at startup.
+.TP
+.BR library_width\ (Int)
+The default width of the library.
+.TP
+.BR expand_lib\ (Bool)
+If yes automatically expand the library to full window size if now image is
+open.
+.TP
+.BR border_width\ (Int)
+Width of the border separating library and image.
+.TP
+.BR border_color\ (String)
+Color of the border separating library and image, must be given in the form
+"#XXYYZZ".
+.TP
+.BR show_hidden\ (Bool)
+If yes show hidden files.
+.TP
+.BR desktop_start_dir\ (String)
+The directory in which vimiv should start if invoked via the desktop file.
+
+.SH KEYS.CONF
+The keys.conf file is split into sections with each section standing for a
+widget/mode that can be active. The specified keybindings in each section will
+apply only in that widget/mode and are written in the form:
+
+"keyname":      "commandname"
+
+The keynames can be prepended by the modifiers Control (via ^"keyname"),
+Alt (via Alt+"keyname") and Shift (via Shift+"keyname").
+
+All commands can be bound to keys.
+The following commands can additionally be run from the command line.
+
+.SH COMMANDS
+
+.TP
+.BR accept_changes
+Accept changes made in the manipulation bar and close the bar.
+.TP
+.BR autorotate
+Rotate all images in the current filelist automatically according to EXIF data.
+.TP
+.BR center\ 
+Scroll to the center of the image.
+.TP
+.BR clear_trash
+Delete all files in ~/.vimiv/Trash.
+.TP
+.BR clear_thumbs
+Delete all files in ~/.vimiv/Thumbnails/.
+.TP
+.BR command
+Enter the command line.
+.TP
+.BR delete\ 
+Delete the current image
+.TP
+.BR discard_changes
+Discard changes made in the manipulation bar and close the bar.
+.TP
+.BR first\ \ 
+Move to the first image in filelist of Image/Thumbnail mode.
+.TP
+.BR first_lib
+Move to the first file in the library.
+.TP
+.BR fit\ \ \ \ 
+Fit the image into the window. If the image is smaller than the window it will
+not increase size to fit by default. Change the overzoom setting to adjust this
+behavior.
+.TP
+.BR fit_horiz
+Fit the image horizontally into the window.
+.TP
+.BR fit_vert
+Fit the image vertically into the window.
+.TP
+.BR flip\ (1/0)
+If 1 is appended, flip horizontally. If 0 is appended, flip vertically.
+.TP
+.BR format\ "formatstring"
+Format all currently open filenames. This will rename all currently open images 
+in the form of "formatstring001.ending", "formatstring002.ending" and so on. If 
+all currently open images support exif data the formatstring can include "%Y", 
+"%m", "%d", "%H", "%M", and "%S". See date(1) if you aren't sure what these 
+mean.
+.TP
+.BR grow_lib
+Increase the library width by 20.
+.TP
+.BR last\ \ \ 
+Move to the last image in filelist of Image/Thumbnail mode.
+.TP
+.BR last_lib
+Move to the last file in the library.
+.TP
+.BR library
+Toggle the visibility of the library.
+.TP
+.BR library_focus
+Focus the library. This will open the library if it isn't visible.
+.TP
+.BR library_unfocus
+Unfocus the library without closing it.
+.TP
+.BR manipulate
+Open the manipulation toolbar and focus it.
+.TP
+.BR mark\ \ \ 
+Mark the current image.
+.TP
+.BR mark_all
+Mark all images in the current filelist.
+.TP
+.BR mark_between
+Mark all images between the last two marked images.
+.TP
+.BR mark_toggle
+Toggle the current mark status. If images are marked, all images are unmarked.
+Otherwise the last list of marked images is remarked
+.TP
+.BR move_up
+Move up one directory in the library. The library is opened if it is not
+visible.
+.TP
+.BR [COUNT]next
+Focus the [COUNT] next image.
+.TP
+.BR [COUNT]next!
+Focus the [COUNT] next image discarding any changes made in the manipulation
+bar.
+.TP
+.BR optimize
+Run imagemagick optimization on the current image. This needs imagemagick to be
+installed.
+.TP
+.BR [COUNT]prev
+Focus the [COUNT] previous image.
+.TP
+.BR [COUNT]prev!
+Focus the [COUNT] previous image discarding any changes made in the manipulation
+bar.
+.TP
+.BR q\ \ \ \ \ \ 
+Quit vimiv.
+.TP
+.BR q!\ \ \ \ \ 
+Quit vimiv discarding any changes made in the manipulation bar.
+.TP
+.BR reload_lib
+Reload the current library.
+.TP
+.BR rotate Int
+Rotate the image (Int % 4)-times counter-clockwise.
+.TP
+.BR set\ animation!
+Toggle the animation status of animated Gifs.
+.TP
+.BR set\ brightness\ Int
+Set the brightness of the current image to Int. Defaults to 0.
+.TP
+.BR set\ contrast\ Int
+Set the contrast of the current image to Int. Defaults to 0.
+.TP
+.BR set\ library_width\ Int
+Set the library width to Int.
+.TP
+.BR set\ overzoom!
+Toggle the overzoom setting.
+.TP
+.BR set\ rescale_svg!
+Toggle the rescaling of vector graphics.
+.TP
+.BR set\ sharpness
+Set the sharpness of the current image to Int. Defaults to 0.
+.TP
+.BR set\ show_hidden!
+Toggle showing and hiding of hidden files.
+.TP
+.BR set\ slideshow_delay\ Float.
+Set the slideshow_delay to Float.
+.TP
+.BR set\ statusbar!
+Toggle the statusbar.
+.TP
+.BR shrink_lib
+Shrink the library width by 20. .\\\\" TODO
+.TP
+.BR [COUNT]slideshow
+Toggle the slideshow. If prefixed by [COUNT] set the slideshow delay to [COUNT]
+.TP
+.BR slideshow_inc
+Increase the slideshow delay by 0.2.
+.TP
+.BR slideshow_dec
+Decrease the slideshow delay by 0.2.
+.TP
+.BR tag_write\ tagname
+Write the names of all currently marked images to the tagfile "tagname". If the
+file doesn't exist, it will be created. If it does, the names will be appended
+if they aren't in the tagfile already.
+.TP
+.BR tag_load\ tagname
+Load all images in the tagfile "tagname" into the current filelist in image
+mode.
+.TP
+.BR tag_remove\ tagname
+Delete the tagfile "tagname".
+.TP
+.BR thumbnail
+Toggle thumbnail mode.
+.TP
+.BR zoom_in
+Zoom in.
+.TP
+.BR zoom_out
+Zoom out.
+.TP
+.BR zoom_to\ Float.
+Zoom to Float.
+
+.SH KEY-COMMANDS
+The following commands can only be bound to keys. These commands either only
+make sense in one section or are typical keybindings.
+.TP
+.BR bri_focus
+Focus the brightness slider. Only makes sense in MANIPULATION section.
+.TP
+.BR con_focus
+Focus the contrast slider. Only makes sense in MANIPULATION section.
+.TP
+.BR sha_focus
+Focus the sharpness slider. Only makes sense in MANIPULATION section.
+.TP
+.BR slider_dec
+Decrease the currently focused slider by 1. Only makes sense in MANIPULATION
+section.
+.TP
+.BR slider_inc
+Increase the currently focused slider by 1. Only makes sense in MANIPULATION
+section.
+.TP
+.BR slider_dec_large
+Decrease the currently focused slider by 10. Only makes sense in MANIPULATION
+section.
+.TP
+.BR slider_inc_large
+Increase the currently focused slider by 10. Only makes sense in MANIPULATION
+section.
+.TP
+.BR cmd_history_up
+Go up by one in command history. Only makes sense in COMMAND section.
+.TP
+.BR cmd_history_down
+Go down by one in command history. Only makes sense in COMMAND section.
+.TP
+.BR discard_command
+Leave the command line discarding currently entered text. Only makes sense in
+COMMAND section.
+.TP
+.BR complete
+Start command line completion. Only makes sense in COMMAND section.
+.TP
+.BR fullscreen
+Toggle fullscreen.
+.TP
+.BR $direction
+$direction is one of left, down, up or right.
+Scroll image or thumbnail $direction.
+.TP
+.BR $direction_page
+Scroll image or thumbnail to the far $direction end.
+.TP
+.BR $direction_lib
+Move $direction in the library.
+
+.SH SEE ALSO
+vimiv(1), date(1)

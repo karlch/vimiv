@@ -13,8 +13,8 @@ vimiv \- an image viewer with vim-like keybindings
 .IR FILE[S]
 
 .SH DESCRIPTION
-Vimiv is an image viewer with vim-like keybindings for X. It is written in
-python and works well with tiling window managers.
+Vimiv is an image viewer with vim-like keybindings. It is written in
+python and the Gtk3 toolkit and works well with tiling window managers.
 .P
 Vimiv features two different modes of operation: image and thumbnail mode.
 Additionally one can open a library and a manipulation toolbar. If a file is
@@ -39,7 +39,7 @@ imagemagick to optimize contrast, gamma and level of the image. This tends to
 work well with photographs.
 .P
 Additionally vimiv features a command line. All actions can be accessed via
-commands as well. A full list of command is included at the end of the manual.
+commands as well. A full list of commands is included in vimivrc(5).
 
 .SH OPTIONS
 .TP
@@ -78,316 +78,9 @@ same as \-g
 .TP
 All capitals negate the setting, so e.g. -B means do not display the statusbar.
 
-.SH KEYBOARD COMMANDS
-General keyboard commands that always apply.
-.TP
-.BR 0 \- 9
-Prefix the next command with a COUNT. If this is possible for a command it is
-denoted.
-.TP
-.BR f
-Toggle fullscreen.
-.TP
-.BR b
-Toggle the statusbar.
-.TP
-.BR :
-Open the command line.
-.TP
-.BR /
-Open the command line for searching.
-.TP
-.BR q
-Quit vimiv.
-
-.SH MAIN KEYBOARD COMMANDS
-These keyboard commands apply when the image is focused and in thumbnail mode.
-.TP
-.BR g
-Focus the first image or image number [COUNT].
-.TP
-.BR G
-Focus the last image or image number [COUNT].
-.TP
-.BR m
-Mark the current image, marked images will be printed to stdout on exit.
-.TP
-.BR M
-Toggle the mark status. If images are marked, all marks will be removed,
-otherwise the last list of marked images will be marked again.
-.TP
-.BR t
-Toggle thumbnail mode.
-.TP
-.BR o
-Toggle library.
-.TP
-.BR u
-Open library and move up a directory.
-.TP
-.BR O
-Focus the library.
-.TP
-.BR >
-Rotate image clockwise.
-.TP
-.BR <
-Rotate image counter-clockwise.
-.TP
-.BR a
-Rotate all images in the current filelist automatically according to EXIF data.
-.TP
-.BR y
-Flip image horizontally.
-.TP
-.BR Y
-Flip image vertically.
-.TP
-.BR x
-Delete image, this moves the file to "~/.vimiv/Trash".
-
-.SH IMAGE KEYBOARD COMMANDS
-These keyboard commands apply when the image is focused.
-.TP
-.BR h
-Scroll to the left.
-.TP
-.BR j
-Scroll down.
-.TP
-.BR k
-Scroll up.
-.TP
-.BR l
-Scroll to the right.
-.TP
-.BR H
-Scroll to the left end.
-.TP
-.BR J
-Scroll to the bottom.
-.TP
-.BR K
-Scroll to the top.
-.TP
-.BR L
-Scroll to the right end.
-.TP
-.BR n
-Focus the [COUNT] next image in filelist.
-.TP
-.BR p
-Focus the [COUNT] previous image in filelist.
-.TP
-.BR +
-Zoom in.
-.TP
-.BR -
-Zoom out.
-.TP
-.BR w
-Fit the image to the current window size or zoom to [COUNT]. If [COUNT] begins
-with 0 zoom to 1/[COUNT].
-.TP
-.BR W
-Center the current image.
-.TP
-.BR e
-Fit the image to the current window size horizontally.
-.TP
-.BR E
-Fit the image to the current window size vertically.
-.TP
-.BR r
-Toggle the rescaling of vector graphics.
-.TP
-.BR s
-Toggle the slideshow. If prefixed by [COUNT] set the slideshow delay to [COUNT]
-.TP
-.BR ,
-Decrease slideshow delay by 0.2
-.TP
-.BR .
-Increase slideshow delay by 0.2
-.TP
-.BR space
-Toggle animation state of animated images (e.g. Gifs).
-.TP
-.BR c
-Open manipulation toolbar.
-
-.SH KEYBOARD COMMANDS IN THUMBNAIL MODE
-.TP
-.BR h
-Focus [COUNT] images left.
-.TP
-.BR j
-Focus [COUNT] images down.
-.TP
-.BR k
-Focus [COUNT] images up.
-.TP
-.BR l
-Focus [COUNT] right.
-.TP
-.BR return
-Select the current image and return to image mode.
-
-.SH KEYBOARD COMMANDS IN THE LIBRARY
-.TP
-.BR h
-Move up a directory.
-.TP
-.BR j
-Focus [COUNT] down.
-.TP
-.BR k
-Focus [COUNT] up.
-.TP
-.BR l
-Select the current path. If it is an image show it first, if selected again open
-the image and close the library.
-.TP
-.BR g
-Focus the first image or image number [COUNT].
-.TP
-.BR G
-Focus the last image or image number [COUNT].
-.TP
-.BR H
-Decrease the library size.
-.TP
-.BR L
-Increase the library size.
-.TP
-.BR u
-Move up a directory.
-.TP
-.BR O
-Focus the image.
-.TP
-.BR o
-Toggle status of the library.
-.TP
-.BR t
-Toggle showing and hiding of hidden files.
-.TP
-.BR space
-Select the current path. If it is an image open it and close the library.
-.TP
-.BR return
-Select the current path. If it is an image open it and close the library.
-
-.SH KEYBOARD COMMANDS IN THE MANIPULATION BAR
-.TP
-.BR b
-Focus the brightness slider.
-.TP
-.BR c
-Focus the contrast slider.
-.TP
-.BR s
-Focus the sharpness slider.
-.TP
-.BR h
-Decrease slider value by 1 or by [COUNT].
-.TP
-.BR l
-Increase slider value by 1 or by [COUNT].
-.TP
-.BR H
-Decrease slider value by 10 or by [COUNT].
-.TP
-.BR L
-Increase slider value by 10 or by [COUNT].
-.TP
-.BR o
-Optimize the image.
-.TP
-.BR Escape
-Cancel changes and close the manipulation bar.
-.TP
-.BR Return
-Accept changes and close the manipulation bar.
-
-.SH KEYBOARD COMMANDS IN THE COMMAND LINE
-.TP
-.BR Up
-Go up in history.
-.TP
-.BR Down
-Go down in history.
-.TP
-.BR Tab
-Autocomplete.
-.TP
-.BR Escape
-Abort command and leave.
-.TP
-.BR Return
-Run command and leave.
-
 .SH CONFIGURATION
-All keyboard commands and some additional settings can be configured in
-"/etc/vimivrc.py" or in "~/.vimiv/vimivrc.py" (recommended). This file is python
-code which declares variables used in the actual program. Since python code is
-very readable this should not be an issue. The following settings can be
-configured:
-
-.TP
-.BR start_fullscreen\ (Bool)
-If True start in fullscreen mode.
-.TP
-.BR start_slideshow\ (Bool)
-If True start in slideshow mode.
-.TP
-.BR slideshow_delay\ (Float)
-Specify the delay in slideshow mode.
-.TP
-.BR shuffle\ (Bool)
-If True shuffle the images in filelist.
-.TP
-.BR display_bar\ (Bool)
-If True show the statusbar.
-.TP
-.BR thumbsize\ (tuple)
-Size for the thumbnails.
-.TP
-.BR geometry\ (string)
-A string of the form "WIDTHxHEIGHT" which sets the default size for the image.
-.TP
-.BR recursive\ (Bool)
-If True search the given directory recursively for images.
-.TP
-.BR rescale_svg\ (Bool)
-If True rescale vector graphics automatically by reloading the image. Otherwise
-simply zoom as if it were a normal image.
-.TP
-.BR overzoom\ (Bool)
-If True scale images smaller than the current window size up to fit the screen.
-.TP
-.BR show_library\ (Bool)
-If True show the library at startup.
-.TP
-.BR library_width\ (Int)
-The default width of the library.
-.TP
-.BR expand_lib\ (Bool)
-If True automatically expand the library to full window size if now image is
-open.
-.TP
-.BR border_width\ (Int)
-Width of the border separating library and image.
-.TP
-.BR border_color\ (String)
-Color of the border separating library and image, must be given in the form
-"#XXYYZZ".
-.TP
-.BR show_hidden\ (Bool)
-If True show hidden files.
-.TP
-.BR desktop_start_dir\ (String)
-The directory in which vimiv should start if invoked via the desktop file.
+All keyboard commands can be configured in the file keys.conf. Default settings
+are configured in the vimivrc. See vimivrc(5) for more information.
 
 .SH THUMBNAIL CACHING
 Thumbnails are cached under "~/.vimiv/Thumbnails" so they can be loaded a lot
@@ -412,119 +105,36 @@ that directory will be shown in the library.
 Similar to many keyboard centered programs vimiv has the possibility to run
 commands in a command line. If an absolute or relative path of an 
 image/directory is entered this path will be focused. These are recognized if 
-the users prepends the input with "./" or "/".
-
+the users prepends the input with "./", "/", or "~".
+.TP
+Example:\ ~/Images
+Open the folder ~/Images in the library.
+.PP
 If the input is prepended with "!" the following string will be sent to the
 shell and executed. Here "%" is substituted with the currently selected file and
-"*" is substituted with all files in the current directory. So if "image" is
-selected and one enters "!gimp %", "image" will be opened in gimp.
-
+"*" is substituted with all files in the current filelist or all marked images
+if any.
+.TP
+Example:\ !gimp %
+Open the currently selected image in gimp.
+.PP
 It is also possible to "pipe commands to vimiv" by appending "|" to an external
 command. The output will then be sent to vimiv line by line. If the first line
-is a file vimiv will open all images in the output. Useful example: "!find
-~/Images -ctime -5 -type f |" which will open all files in ~/Images younger than
-5 days.  If the first line is a directory that directory will be opened in the
-library.
+is a file vimiv will open all images in the output. If the first line is a
+directory that directory will be opened in the library.
+.TP
+Example: !find ~/Images -ctime -5 -type f |
+Open all files in ~/Images younger than five days.
+.PP
 
 Note: Files and directories have to be proper paths from the current working
 directory of vimiv. So if you are in ~/Images/2016 and run "!ls ~ |" the output
 will not be recognized as proper files or directories whereas "!realpath ~/\\* |"
 will. Also note the escaping of the "*" character as it would be interpreted as
-all the files otherwise.
+all the files in the vimiv filelist otherwise.
 
-In all other cases the input will be handled as internal command. If denoted 
-these can be prepended with COUNT to be executed multiple times.
-
-.SH COMMANDS
-.TP
-.B autorotate
-Autorotate all files according to EXIF data.
-.TP
-.B center\ \ 
-Center the current image.
-.TP
-.B clear_trash
-Clear all files in ~/.vimiv/Trash/
-.TP
-.B clear_thumbs
-Clear all files in ~/.vimiv/Thumbnails/
-.TP
-.B delete
-Delete the current image or all marked images.
-.TP
-.B flip (1/0)
-Flip the current image. If 1 is appended flip horizontally, if 0 is appended
-flip vertically.
-.TP
-.B format "formatstring"
-Format all currently open filenames. This will rename all currently open images 
-in the form of "formatstring001.ending", "formatstring002.ending" and so on. If 
-all currently open images support exif data the formatstring can include "%Y", 
-"%m", "%d", "%H", "%M", and "%S". See man date if you aren't sure what these 
-mean.
-.TP
-.B manipulate
-Toggles the manipulate toolbar.
-.TP
-.B [COUNT]move
-Focus the last image or image number [COUNT].
-.TP
-.B [COUNT]next
-Focus the [COUNT] next image in filelist.
-.TP
-.B optimize
-Run imagemagick optimization on the current image.
-.TP
-.B [COUNT]prev
-Focus the [COUNT] previous image in filelist.
-.TP
-.B q\ \ \ \ \ \ 
-Quit vimiv.
-.TP
-.B reload_lib
-Reload the library.
-.TP
-.B rotate Int
-Rotate the image (Int % 4)-times counter-clockwise.
-.TP
-.B set animation!
-Toggle the animation status.
-.TP
-.B set brightness Int
-Set the brightness of the current image to Int. Defaults to 0.
-.TP
-.B set contrast Int
-Set the contrast of the current image to Int. Defaults to 0.
-.TP
-.B set fullscreen!
-Toggle fullscreen.
-.TP
-.B set library_width Int
-Set the library width to Int.
-.TP
-.B set rescale_svg!
-Toggle the rescaling of vector graphics.
-.TP
-.B set sharpness Int
-Set the sharpness of the current image to Int. Defaults to 0.
-.TP
-.B set show_hidden!
-Toggle showing and hiding of hidden files.
-.TP
-.B set slideshow_delay Float.
-Set the slideshow_delay to Float.
-.TP
-.B set statusbar!
-Toggle the statusbar.
-.TP
-.B set thumbnail!
-Toggle thumbnail mode.
-.TP
-.B [COUNT]slideshow
-Toggle the slideshow. If prefixed by [COUNT] set the slideshow delay to [COUNT]
-.TP
-.B zoom_to Float.
-Zoom to Float.
+In all other cases the input will be handled as internal command. See vimivrc(5)
+for a complete list of internal commands.
 
 .SH SEARCHING
 Search for "string" in either all currently open images or all files in the
@@ -532,7 +142,7 @@ library, depending on which is focused. If "string" is substring of any file
 this file will be focused.
 
 .SH MARKING
-If images are marked the simple manipulations (rotating, flipping and deleting)
+If images are marked, the simple manipulations (rotating, flipping and deleting)
 are executed for all marked images and not for the current image. In thumbnail
 mode those actions will always work on marked images. If there are none, no
 manipulation will be done.
@@ -543,7 +153,7 @@ All tagfiles are saved under "~/.vimiv/Tags".
 .TP
 .B tag_write\ tagname
 Write the names of all currently marked images to the tagfile "tagname". If the
-file doesn't exist, it will be created. If it does, the names will be appended
+file doesn't exist, it will be created. If it does, the names will be appended,
 if they aren't in the tagfile already.
 .TP
 .B tag_load\ tagname
@@ -554,7 +164,11 @@ mode.
 Delete the tagfile "tagname".
 
 .SH BUGS
-Probably. Please contact me under <christian dot karl at protonmail dot com>.
+Probably. Please contact me under <christian dot karl at protonmail dot com> or
+open an issue on the github homepage.
+
+.SH SEE ALSO
+vimivrc(5)
 
 .SH THANKS TO
 James Campos, author of Pim https://github.com/Narrat/Pim upon which vimiv is
