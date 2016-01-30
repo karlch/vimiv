@@ -47,7 +47,7 @@ then suffice. For arch-users there is an AUR package called vimiv-git.
 To remove vimiv the standard `sudo make uninstall` works.
 
 ## Documentation
-Vimiv comes with two man-page for further documentation: vimiv(1) for general
+Vimiv comes with two man-pages for further documentation: vimiv(1) for general
 information and vimivrc(5) for the configuration files.
 
 ## Thanks to
