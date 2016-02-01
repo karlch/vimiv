@@ -44,6 +44,7 @@ class Vimiv(Gtk.Window):
         self.types = []  # Get supported mimetypes
         for pixbuf_format in GdkPixbuf.Pixbuf.get_formats():
             self.types.extend(pixbuf_format.get_mime_types())
+        self.types.append("image/x-ms-bmp")
         self.marked = []
         self.marked_bak = []  # saves marked images after marked toggle
         self.manipulate_toggled = False
@@ -2427,7 +2428,7 @@ class Vimiv(Gtk.Window):
                 self.files.append(line.rstrip("\n"))
         else:
             self.files = self.filelist_create()
-        parser.add_argument("path", nargs='*', default=self.files)
+        parser.add_argument("path", nargs='*', default=[])
         args = parser.parse_args()
         self.sbar = args.sbar
         self.library_toggled = args.library
@@ -2439,10 +2440,12 @@ class Vimiv(Gtk.Window):
         self.geometry = args.geometry
         self.desktop = args.desktop
 
-        if self.desktop:
+        if args.path:
+            self.populate(args.path, True)
+        elif self.desktop:
             self.populate(self.desktop_start_dir, True)
         else:
-            self.populate(args.path, True)
+            self.populate(self.files, True)
 
     def main(self):
         # Off we go

@@ -4,5 +4,5 @@ Name=vimiv
 GenericName=Image Viewer
 Comment=PyGobject based image viewer with vim like keybindings
 Icon=image-x-generic
-Exec=vimiv --start-from-desktop
+Exec=vimiv --start-from-desktop %f
 MimeType=image/bmp;image/gif;image/jpeg;image/jp2;image/jpeg2000;image/jpx;image/png;image/svg;image/tiff;
