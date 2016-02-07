@@ -27,24 +27,11 @@ except ImportError as e:
 class Vimiv(Gtk.Window):
 
     def __init__(self):
-        # Create vimiv directory if it doesn't exist
-        vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
-        trash = os.path.join(vimivdir, "Trash")
-        thumbs = os.path.join(vimivdir, "Thumbnails")
-        tags = os.path.join(vimivdir, "Tags")
-        for path in [vimivdir, trash, thumbs, tags]:
-            if not os.path.isdir(path):
-                os.mkdir(path)
-
         # Default values
         self.animation_toggled = False
         self.thumbnail_toggled = False
         self.desktop = False
         self.paths = []
-        self.types = []  # Get supported mimetypes
-        for pixbuf_format in GdkPixbuf.Pixbuf.get_formats():
-            self.types.extend(pixbuf_format.get_mime_types())
-        self.types.append("image/x-ms-bmp")
         self.marked = []
         self.marked_bak = []  # saves marked images after marked toggle
         self.manipulate_toggled = False
@@ -143,104 +130,7 @@ class Vimiv(Gtk.Window):
                           "fullscreen": [self.toggle_fullscreen]}
         self.functions.update(self.commands)
 
-        # Dictionary with all the scrolling
-        self.scrolltypes = {}
-        self.scrolltypes["h"] = (Gtk.ScrollType.STEP_BACKWARD, True)
-        self.scrolltypes["j"] = (Gtk.ScrollType.STEP_FORWARD, False)
-        self.scrolltypes["k"] = (Gtk.ScrollType.STEP_BACKWARD, False)
-        self.scrolltypes["l"] = (Gtk.ScrollType.STEP_FORWARD, True)
-        self.scrolltypes["H"] = (Gtk.ScrollType.START, True)
-        self.scrolltypes["J"] = (Gtk.ScrollType.END, False)
-        self.scrolltypes["K"] = (Gtk.ScrollType.START, False)
-        self.scrolltypes["L"] = (Gtk.ScrollType.END, True)
-
-        # A list of all external commands
-        external_commands = []
-        try:
-            p = Popen('echo $PATH | tr \':\' \'\n\' | xargs -n 1 ls -1',
-                      stdout=PIPE, stderr=PIPE, shell=True)
-            out, err = p.communicate()
-            out = out.decode('utf-8').split()
-            for cmd in sorted(list(set(out))):
-                external_commands.append("!" + cmd)
-        except:
-            print("List of external commands could not be generated")
-        self.external_commands = tuple(external_commands)
-
         # The configruations from vimivrc
-        config = configparser.ConfigParser()
-        if os.path.isfile(os.path.expanduser("~/.vimiv/vimivrc")):
-            configfile = os.path.expanduser("~/.vimiv/vimivrc")
-        elif os.path.isfile("/etc/vimiv/vimivrc"):
-            configfile = "/etc/vimiv/vimivrc"
-        else:
-            print("No config file found. Exiting.")
-            sys.exit(1)
-        config.read(configfile)
-        try:
-            general = config["GENERAL"]
-            library = config["LIBRARY"]
-            # General
-            self.fullscreen_toggled = general.getboolean("start_fullscreen")
-            self.slideshow = general.getboolean("start_slideshow")
-            self.slideshow_delay = float(general["slideshow_delay"])
-            self.shuffle = general.getboolean("shuffle")
-            self.sbar = general.getboolean("display_bar")
-            self.geometry = general["geometry"]
-            self.recursive = general.getboolean("recursive")
-            self.rescale_svg = general.getboolean("rescale_svg")
-            self.overzoom = general.getboolean("overzoom")
-            self.thumbsize = general["thumbsize"]
-            # Library
-            self.library_toggled = library.getboolean("show_library")
-            self.library_default_width = int(library["library_width"])
-            self.library_width = self.library_default_width
-            self.expand_lib = library.getboolean("expand_lib")
-            self.border_width = int(library["border_width"])
-            self.border_color = library["border_color"]
-            self.show_hidden = library.getboolean("show_hidden")
-            self.desktop_start_dir = os.path.expanduser(library["desktop_start_dir"])
-        except KeyError as e:
-            print("Missing module", e, "in", configfile,
-                  ", please refer to vimivrc(5) to fix your config.")
-            sys.exit(1)
-
-        # Correct directory?
-        if not os.path.isdir(self.desktop_start_dir):
-            print("Starting directory is not a directory")
-            self.desktop_start_dir = os.path.expanduser("~")
-        self.desktop_start_dir = [self.desktop_start_dir]
-
-        # Window size
-        try:
-            self.winsize = (int(self.geometry.split("x")[0]),
-                            int(self.geometry.split("x")[1]))
-        except:
-            print("Must be a correct geometry in the form of "
-                  "800x600, falling back to default")
-            self.winsize = (800, 600)
-        # Thumbnail size
-        self.thumbsize = self.thumbsize.lstrip("(").rstrip(")")
-        self.thumbsize = list(self.thumbsize.split(","))
-        try:
-            self.thumbsize[0] = int(self.thumbsize[0])
-            self.thumbsize[1] = int(self.thumbsize[1])
-            if len(self.thumbsize) != 2:
-                raise ValueError
-        except ValueError:
-            print("The Type of your thumbsize tuple is wrong. It should be "
-                  "of the form (Int, Int). Falling back to default.")
-            self.thumbsize = (128, 128)
-        # Border color
-        try:
-            if len(self.border_color) != 7 or self.border_color[0] != "#":
-                raise ValueError
-            self.border_color = Gdk.color_parse(self.border_color)
-        except:
-            print("Border color in config not given in the correct form,",
-                  "falling back to default.")
-            self.border_color = Gdk.color_parse("#000000")
-
         # Keybindings
         self.keys = configparser.ConfigParser()
         if os.path.isfile(os.path.expanduser("~/.vimiv/keys.conf")):
