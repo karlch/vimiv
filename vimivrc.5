@@ -48,6 +48,9 @@ simply zoom as if it were a normal image.
 .BR overzoom\ (Bool)
 If yes scale images smaller than the current window size up to fit the screen.
 .TP
+.BR search_case_sensitive\ (Bool)
+If yes search case sensitively, ignore case if no.
+.TP
 .BR show_library\ (Bool)
 If yes show the library at startup.
 .TP
@@ -286,20 +289,20 @@ Focus the contrast slider. Only makes sense in MANIPULATION section.
 Focus the sharpness slider. Only makes sense in MANIPULATION section.
 .TP
 .BR slider_dec
-Decrease the currently focused slider by 1. Only makes sense in MANIPULATION
-section.
+Decrease the currently focused slider by 1 or by [COUNT]. Only makes sense in
+MANIPULATION section.
 .TP
 .BR slider_inc
-Increase the currently focused slider by 1. Only makes sense in MANIPULATION
-section.
+Increase the currently focused slider by 1 or by [COUNT]. Only makes sense in
+MANIPULATION section.
 .TP
 .BR slider_dec_large
-Decrease the currently focused slider by 10. Only makes sense in MANIPULATION
-section.
+Decrease the currently focused slider by 10 or by [COUNT]. Only makes sense in
+MANIPULATION section.
 .TP
 .BR slider_inc_large
-Increase the currently focused slider by 10. Only makes sense in MANIPULATION
-section.
+Increase the currently focused slider by 10 or by [COUNT]. Only makes sense in
+MANIPULATION section.
 .TP
 .BR cmd_history_up
 Go up by one in command history. Only makes sense in COMMAND section.
@@ -313,6 +316,12 @@ COMMAND section.
 .TP
 .BR complete
 Start command line completion. Only makes sense in COMMAND section.
+.TP
+.BR search_next
+Navigate to [COUNT] next search result.
+.TP
+.BR search_prev
+Navigate to [COUNT] previous search result.
 .TP
 .BR fullscreen
 Toggle fullscreen.

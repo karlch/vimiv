@@ -140,6 +140,8 @@ class Vimiv(Gtk.Window):
                           "up_lib": [self.scroll_lib, "k"],
                           "up_page": [self.scroll, "K"],
                           "search": [self.cmd_search],
+                          "search_next": [self.search_move, 1],
+                          "search_prev": [self.search_move, 1, False],
                           "fullscreen": [self.toggle_fullscreen]}
         self.functions.update(self.commands)
 
@@ -191,6 +193,7 @@ class Vimiv(Gtk.Window):
             self.rescale_svg = general.getboolean("rescale_svg")
             self.overzoom = general.getboolean("overzoom")
             self.thumbsize = general["thumbsize"]
+            self.search_case = general.getboolean("search_case_sensitive")
             # Library
             self.library_toggled = library.getboolean("show_library")
             self.library_default_width = int(library["library_width"])
@@ -1351,6 +1354,7 @@ class Vimiv(Gtk.Window):
             if self.expand_lib:
                 self.grid.set_size_request(self.winsize[0], 10)
 
+        self.reset_search()
         return len(self.paths)
 
     def recursive_search(self, dir):
@@ -1612,6 +1616,7 @@ class Vimiv(Gtk.Window):
             else:
                 self.filesize[filename] = fil[4]
 
+        self.reset_search()
         return files
 
     def file_select(self, alternative, count, b, close):
@@ -2263,19 +2268,56 @@ class Vimiv(Gtk.Window):
     def search(self, searchstr):
         """ Run a search on the appropriate filelist """
         if self.library_focused:
-            for i, fil in enumerate(self.files):
-                if searchstr in fil:
-                    self.file_select("alt", fil, "b", False)
-                    return
+            paths = self.files
         else:
-            for i, fil in enumerate(self.paths):
+            paths = self.paths
+        self.search_results = []
+        self.search_pos = 0
+
+        if self.search_case:
+            for i, fil in enumerate(paths):
                 if searchstr in fil:
-                    print(fil)
-                    self.num_str = str(i+1)
-                    self.move_pos()
-                    return
-        # Nothing found
-        self.err_message("No matching file")
+                    self.search_results.append((i, fil))
+        else:
+            for i, fil in enumerate(paths):
+                if searchstr.lower() in fil.lower():
+                    self.search_results.append((i, fil))
+
+        # Move to first result or throw an error
+        if self.search_results:
+            self.search_move()
+        else:
+            self.err_message("No matching file")
+
+    def search_move(self, index=0, forward=True):
+        """ Move to the next/previous search """
+        # Correct handling of index
+        if self.num_str:
+            index = int(self.num_str)
+            self.num_str = ""
+        if forward:
+            self.search_pos += index
+        else:
+            self.search_pos -= index
+        self.search_pos = self.search_pos % len(self.search_results)
+
+        # Select file depending on library
+        if self.library_toggled:
+            if len(self.search_results) == 1:
+                self.file_select("alt", self.search_results[self.search_pos][1],
+                                "b", False)
+            else:
+                path = self.search_results[self.search_pos][0]
+                self.treeview.set_cursor(Gtk.TreePath(path), None, False)
+                self.treepos = path
+        else:
+            self.num_str = str(self.search_results[self.search_pos][0]+1)
+            self.move_pos()
+
+    def reset_search(self):
+        """ Simply resets all search parameters to null """
+        self.search_results = []
+        self.search_pos = 0
 
     def listdir_nohidden(self, path):
         """ Reimplementation of os.listdir which doesn't show hidden files """

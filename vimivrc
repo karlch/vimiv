@@ -12,6 +12,7 @@ geometry: 800x600
 recursive: no
 rescale_svg: yes
 overzoom: no
+search_case_sensitive: yes
 
 [LIBRARY] ######################################################################
 show_library: no
