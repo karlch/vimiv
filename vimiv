@@ -2285,7 +2285,12 @@ class Vimiv(Gtk.Window):
                 yield fil
 
     def format_files(self, string):
-        if not self.paths:
+        """ Reformat files in the current pathlist """
+        if self.library_focused:
+            paths = self.files
+        else:
+            paths = self.paths
+        if not paths:
             self.err_message("No files in path")
             return
 
@@ -2293,7 +2298,7 @@ class Vimiv(Gtk.Window):
         tofind = ("%" in string)
         if tofind:
             try:
-                for fil in self.paths:
+                for fil in paths:
                     im = Image.open(fil)
                     exif = im._getexif()
                     if not (exif and 306 in exif):
@@ -2302,7 +2307,7 @@ class Vimiv(Gtk.Window):
                 self.err_message("No exif data for %s available" % (fil))
                 return
 
-        for i, fil in enumerate(self.paths):
+        for i, fil in enumerate(paths):
             ending = fil.split(".")[-1]
             num = "%03d" % (i+1)
             # Exif stuff
