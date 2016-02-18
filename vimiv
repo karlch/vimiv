@@ -41,6 +41,8 @@ class Vimiv(Gtk.Window):
         self.thumbnail_toggled = False
         self.desktop = False
         self.paths = []
+        self.search_names = []
+        self.search_positions = []
         self.types = []  # Get supported mimetypes
         for pixbuf_format in GdkPixbuf.Pixbuf.get_formats():
             self.types.extend(pixbuf_format.get_mime_types())
@@ -201,6 +203,7 @@ class Vimiv(Gtk.Window):
             self.expand_lib = library.getboolean("expand_lib")
             self.border_width = int(library["border_width"])
             self.border_color = library["border_color"]
+            self.markup = library["markup"]
             self.show_hidden = library.getboolean("show_hidden")
             self.desktop_start_dir = os.path.expanduser(library["desktop_start_dir"])
         except KeyError as e:
@@ -1354,7 +1357,6 @@ class Vimiv(Gtk.Window):
             if self.expand_lib:
                 self.grid.set_size_request(self.winsize[0], 10)
 
-        self.reset_search()
         return len(self.paths)
 
     def recursive_search(self, dir):
@@ -1526,8 +1528,12 @@ class Vimiv(Gtk.Window):
         # Update info for the current mode
         self.update_info()
 
-    def treeview_create(self):
-        # Tree View
+    def treeview_create(self, search=False):
+        # The search parameter is necessary to highlight searches after a search
+        # and to delete search items if a new directory is entered
+        if not search:
+            self.search_reset()
+        # Tree View created with the specific datalist functions
         current_file_filter = self.filestore(self.datalist_create())
         self.treeview = Gtk.TreeView.new_with_model(current_file_filter)
         # Needed for the movement keys
@@ -1576,13 +1582,16 @@ class Vimiv(Gtk.Window):
                     os.path.isdir(possible_file))]
         # Add all the supported files
         for fil in self.files:
+            markup_string = fil
             size = self.filesize[fil]
             marked = ""
             if os.path.abspath(fil) in self.marked:
                 marked = "[*]"
             if os.path.isdir(fil):
-                fil = "<b>" + fil + "</b>"
-            self.datalist.append([fil, size, marked])
+                markup_string = "<b>" + markup_string + "</b>"
+            if fil in self.search_names:
+                markup_string = self.markup + markup_string + '</span>'
+            self.datalist.append([markup_string, size, marked])
 
         return self.datalist
 
@@ -1616,7 +1625,6 @@ class Vimiv(Gtk.Window):
             else:
                 self.filesize[filename] = fil[4]
 
-        self.reset_search()
         return files
 
     def file_select(self, alternative, count, b, close):
@@ -1679,10 +1687,10 @@ class Vimiv(Gtk.Window):
     def remember_pos(self, dir, count):
         self.dir_pos[dir] = count
 
-    def reload(self, dir, curdir=""):
+    def reload(self, dir, curdir="", search=False):
         """ Reloads the treeview """
         self.scrollable_treelist.remove(self.treeview)
-        self.treeview_create()
+        self.treeview_create(search)
         self.scrollable_treelist.add(self.treeview)
         self.library_focus(True)
         # Check if there is a saved position
@@ -1691,6 +1699,7 @@ class Vimiv(Gtk.Window):
                                      None, False)
             self.treepos = self.dir_pos[dir]
         # Check if the last directory is in the current one
+        # -> Focus where we came from
         else:
             curdir = curdir.split("/")[-1]
             for i, fil in enumerate(self.files):
@@ -2271,20 +2280,26 @@ class Vimiv(Gtk.Window):
             paths = self.files
         else:
             paths = self.paths
-        self.search_results = []
+        self.search_names = []
+        self.search_positions = []
         self.search_pos = 0
 
         if self.search_case:
             for i, fil in enumerate(paths):
                 if searchstr in fil:
-                    self.search_results.append((i, fil))
+                    self.search_names.append(fil)
+                    self.search_positions.append(i)
         else:
             for i, fil in enumerate(paths):
                 if searchstr.lower() in fil.lower():
-                    self.search_results.append((i, fil))
+                    self.search_names.append(fil)
+                    self.search_positions.append(i)
+
+        if self.library_focused:
+            self.reload(".", "", search=True)
 
         # Move to first result or throw an error
-        if self.search_results:
+        if self.search_names:
             self.search_move()
         else:
             self.err_message("No matching file")
@@ -2299,25 +2314,27 @@ class Vimiv(Gtk.Window):
             self.search_pos += index
         else:
             self.search_pos -= index
-        self.search_pos = self.search_pos % len(self.search_results)
+        self.search_pos = self.search_pos % len(self.search_names)
 
         # Select file depending on library
         if self.library_toggled:
-            if len(self.search_results) == 1:
-                self.file_select("alt", self.search_results[self.search_pos][1],
+            if len(self.search_names) == 1:
+                self.file_select("alt", self.search_names[self.search_pos],
                                 "b", False)
             else:
-                path = self.search_results[self.search_pos][0]
+                path = self.search_positions[self.search_pos]
                 self.treeview.set_cursor(Gtk.TreePath(path), None, False)
                 self.treepos = path
         else:
-            self.num_str = str(self.search_results[self.search_pos][0]+1)
+            self.num_str = str(self.search_positions[self.search_pos]+1)
             self.move_pos()
 
-    def reset_search(self):
+    def search_reset(self):
         """ Simply resets all search parameters to null """
-        self.search_results = []
+        self.search_names = []
+        self.search_positions = []
         self.search_pos = 0
+        return
 
     def listdir_nohidden(self, path):
         """ Reimplementation of os.listdir which doesn't show hidden files """

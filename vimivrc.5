@@ -68,6 +68,12 @@ Width of the border separating library and image.
 Color of the border separating library and image, must be given in the form
 "#XXYYZZ".
 .TP
+.BR markup (String)
+Markup to be used to highlight search results. This must be a correct markup and
+only consist of one <span ...> element, otherwise the library will break down
+when searching. See e.g. http://www.gtk.org/api/2.6/pango/PangoMarkupFormat.html
+for further information.
+.TP
 .BR show_hidden\ (Bool)
 If yes show hidden files.
 .TP

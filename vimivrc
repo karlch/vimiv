@@ -20,7 +20,8 @@ library_width: 300
 expand_lib: yes
 border_width: 0
 border_color: #000000
+markup: <span foreground="#00FF00">
 show_hidden: no
 desktop_start_dir: ~
 
-# vim:ft=dosini
+# vim:ft=config

@@ -11,6 +11,7 @@
 * slideshow mode
 * marking of images
 * simple tag system
+* searching with search highlight
 * command line with tab-completion
 * run external commands
 * pipe external commands to vimiv
