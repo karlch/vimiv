@@ -12,6 +12,7 @@ geometry: 800x600
 recursive: no
 rescale_svg: yes
 overzoom: no
+search_case_sensitive: yes
 
 [LIBRARY] ######################################################################
 show_library: no
@@ -19,7 +20,8 @@ library_width: 300
 expand_lib: yes
 border_width: 0
 border_color: #000000
+markup: <span foreground="#875FFF">
 show_hidden: no
 desktop_start_dir: ~
 
-# vim:ft=dosini
+# vim:ft=config

@@ -1,0 +1,7 @@
+#!/usr/bin/python
+# encoding: utf-8
+# Vimiv executable
+import vimiv
+import sys
+
+sys.exit(vimiv.main())

@@ -1,37 +1,42 @@
 #!/usr/bin/python3
 # encoding: utf-8
 
-try:
-    import argparse
-    import configparser
-    import mimetypes
-    import os
-    import re
-    import shutil
-    import signal
-    import sys
-    from gi import require_version
-    require_version('Gtk', '3.0')
-    from gi.repository import GLib, Gtk, Gdk, GdkPixbuf, Pango
-    from random import shuffle
-    from subprocess import Popen, PIPE
-    from threading import Thread
-    from PIL import Image, ImageEnhance
+import mimetypes
+import os
+import re
+import shutil
+import signal
+from gi import require_version
+require_version('Gtk', '3.0')
+from gi.repository import GLib, Gtk, Gdk, GdkPixbuf, Pango
+from random import shuffle
+from subprocess import Popen, PIPE
+from threading import Thread
+from PIL import Image
+from vimiv.helpers import read_file
+from vimiv.variables import types, scrolltypes, external_commands
+from vimiv.fileactions import populate, delete
+from vimiv.parser import parse_keys
+from vimiv import imageactions
 
-except ImportError as e:
-    print(e)
-    print("Are all dependencies installed?")
-    sys.exit(1)
+# Directories
+vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
+trashdir = os.path.join(vimivdir, "Trash")
+thumbdir = os.path.join(vimivdir, "Thumbnails")
+tagdir = os.path.join(vimivdir, "Tags")
 
 
 class Vimiv(Gtk.Window):
+    """ Actual vimiv class as a Gtk Window """
 
-    def __init__(self):
+    def __init__(self, settings, paths, index):
+
+        self.paths = paths
+        self.index = index
+
         # Default values
         self.animation_toggled = False
         self.thumbnail_toggled = False
-        self.desktop = False
-        self.paths = []
         self.marked = []
         self.marked_bak = []  # saves marked images after marked toggle
         self.manipulate_toggled = False
@@ -41,7 +46,8 @@ class Vimiv(Gtk.Window):
         self.num_str = ""  # used to prepend actions with numbers
         self.dir_pos = {}  # Remembers positions in the library browser
         self.error = []
-        self.tagdir = os.path.expanduser("~/.vimiv/Tags")
+        self.search_names = []
+        self.search_positions = []
         # Dictionary for all the possible editing
         self.manipulations = [1, 1, 1, False]
         # Dictionary with command names and the corresponding functions
@@ -127,62 +133,58 @@ class Vimiv(Gtk.Window):
                           "up_lib": [self.scroll_lib, "k"],
                           "up_page": [self.scroll, "K"],
                           "search": [self.cmd_search],
+                          "search_next": [self.search_move, 1],
+                          "search_prev": [self.search_move, 1, False],
                           "fullscreen": [self.toggle_fullscreen]}
         self.functions.update(self.commands)
 
         # The configruations from vimivrc
+        general = settings["GENERAL"]
+        library = settings["LIBRARY"]
+        # General
+        self.fullscreen_toggled = general["start_fullscreen"]
+        self.slideshow = general["start_slideshow"]
+        self.slideshow_delay = general["slideshow_delay"]
+        self.shuffle = general["shuffle"]
+        self.sbar = general["display_bar"]
+        self.winsize = general["geometry"]
+        self.recursive = general["recursive"]
+        self.rescale_svg = general["rescale_svg"]
+        self.overzoom = general["overzoom"]
+        self.thumbsize = general["thumbsize"]
+        # Library
+        self.library_toggled = library["show_library"]
+        self.library_default_width = library["library_width"]
+        self.library_width = self.library_default_width
+        self.expand_lib = library["expand_lib"]
+        self.border_width = library["border_width"]
+        self.search_case = general["search_case_insensitive"]
+        self.border_color = library["border_color"]
+        self.markup = library["markup"]
+        self.show_hidden = library["show_hidden"]
+        self.desktop_start_dir = library["desktop_start_dir"]
+
         # Keybindings
-        self.keys = configparser.ConfigParser()
-        if os.path.isfile(os.path.expanduser("~/.vimiv/keys.conf")):
-            self.keys.read(os.path.expanduser("~/.vimiv/keys.conf"))
-        elif os.path.isfile("/etc/vimiv/keys.conf"):
-            self.keys.read("/etc/vimiv/keys.conf")
-        else:
-            print("Keyfile not found. Exiting.")
-            sys.exit(1)
+        self.keys = parse_keys()
 
         # Cmd history from file
-        self.cmd_history = []  # Remember cmd history
-        histfile = os.path.expanduser("~/.vimiv/history")
-        try:
-            histfile = open(histfile, 'r')
-            for line in histfile:
-                self.cmd_history.append(line.rstrip("\n"))
-        except:
-            histfile = open(histfile, 'w')
-            histfile.write("")
-        histfile.close()
+        self.cmd_history = read_file(os.path.expanduser("~/.vimiv/history"))
         self.cmd_pos = 0
 
         Gtk.Window.__init__(self)
 
     def delete(self):
         """ Delete all marked images or the current one """
-        # Create the directory if it isn't there yet
-        deldir = os.path.expanduser("~/.vimiv/Trash")
-        if not os.path.isdir(deldir):
-            os.mkdir(deldir)
         # Get all images
         images = self.manipulated_images("Deleted")
-        for i, im in enumerate(images):
-            if os.path.isdir(im):
-                self.err_message("Deleting directories is not supported")
-                return
-            if os.path.exists(im):
-                # Check if there is already a file with that name in the trash
-                delfile = os.path.join(deldir, os.path.basename(im))
-                if os.path.exists(delfile):
-                    backnum = 1
-                    ndelfile = delfile+"."+str(backnum)
-                    while os.path.exists(ndelfile):
-                        backnum += 1
-                        ndelfile = delfile+"."+str(backnum)
-                    shutil.move(delfile, ndelfile)
-                shutil.move(im, deldir)
-        self.reload_changes(os.path.abspath("."))
         self.marked = []
+        if delete(images):
+            self.err_message("Deleting directories is not supported")
+        else:
+            self.reload_changes(os.path.abspath("."))
 
     def quit(self, force=False):
+        """ Quit the main loop, printing marked files and saving history """
         for image in self.marked:
             print(image)
         # Check if image has been edited
@@ -215,8 +217,8 @@ class Vimiv(Gtk.Window):
             self.thumbnail_move(direction)
         else:
             self.scrolled_win.emit('scroll-child',
-                                   self.scrolltypes[direction][0],
-                                   self.scrolltypes[direction][1])
+                                   scrolltypes[direction][0],
+                                   scrolltypes[direction][1])
         return True  # Deactivates default bindings (here for Arrows)
 
     def scroll_lib(self, direction):
@@ -259,7 +261,7 @@ class Vimiv(Gtk.Window):
             self.thumbpos += step
         else:
             self.thumbpos += self.columns*step
-        # Do not scroll to paths that don't exist
+        # Do not scroll to self.paths that don't exist
         if self.thumbpos < 0:
             self.thumbpos = 0
         elif self.thumbpos > (len(self.files)-len(self.errorpos)-1):
@@ -284,7 +286,7 @@ class Vimiv(Gtk.Window):
             Gtk.Adjustment.set_step_increment(
                 self.viewport.get_vadjustment(), (self.thumbsize[1]+30)*step)
             self.scrolled_win.emit('scroll-child',
-                                   self.scrolltypes[direction][0], False)
+                                   scrolltypes[direction][0], False)
         # Horizontal (tricky because one might reach a new column)
         else:
             start = target - step
@@ -294,12 +296,12 @@ class Vimiv(Gtk.Window):
             Gtk.Adjustment.set_step_increment(self.viewport.get_vadjustment(),
                                               (self.thumbsize[1]+30)*toscroll)
             self.scrolled_win.emit('scroll-child',
-                                   self.scrolltypes[direction][0], False)
+                                   scrolltypes[direction][0], False)
 
     def toggle_slideshow(self):
         """ Toggles the slideshow or updates the delay """
         if not self.paths:
-            self.err_message("No valid paths, starting slideshow failed")
+            self.err_message("No valid self.paths, starting slideshow failed")
             return
         if self.thumbnail_toggled:
             self.err_message("Slideshow makes no sense in thumbnail mode")
@@ -381,14 +383,6 @@ class Vimiv(Gtk.Window):
     def toggle_overzoom(self):
         self.overzoom = not self.overzoom
 
-    def save_image(self, im, filename):
-        """ Saves the PIL image name with all the keys that exist """
-        argstr = "filename"
-        for key in im.info.keys():
-            argstr += ", " + key + "=" + str(im.info[key])
-        func = "im.save(" + argstr + ")"
-        exec(func)
-
     def manipulated_images(self, message):
         """ Returns the images which should be manipulated - either the
             currently focused one or all marked images """
@@ -439,20 +433,10 @@ class Vimiv(Gtk.Window):
     def thread_for_rotate(self, images, cwise):
         """ Rotate all image files in an extra thread """
         try:
-            to_reload = []
-            for image in images:
-                im = Image.open(image)
-                if cwise == 1:
-                    im = im.transpose(Image.ROTATE_90)
-                elif cwise == 2:
-                    im = im.transpose(Image.ROTATE_180)
-                elif cwise == 3:
-                    im = im.transpose(Image.ROTATE_270)
-                self.save_image(im, image)
-                to_reload.append([image, self.paths.index(image)])
+            imageactions.rotate_file(images, cwise)
             if self.thumbnail_toggled:
-                for image in to_reload:
-                    self.thumb_reload(image[0], image[1])
+                for image in images:
+                    self.thumb_reload(image, self.paths.index(image))
         except:
             self.err_message("Error: Rotation of file failed")
 
@@ -471,69 +455,26 @@ class Vimiv(Gtk.Window):
         except:
             self.err_message("Warning: Object cannot be flipped")
 
-    def thread_for_flip(self, images, dir):
+    def thread_for_flip(self, images, horizontal):
         """ Flip all image files in an extra thread """
         try:
-            for image in images:
-                im = Image.open(image)
-                if dir:
-                    im = im.transpose(Image.FLIP_LEFT_RIGHT)
-                else:
-                    im = im.transpose(Image.FLIP_TOP_BOTTOM)
-                self.save_image(im, image)
-                if self.thumbnail_toggled:
+            imageactions.flip_file(images, horizontal)
+            if self.thumbnail_toggled:
+                for image in images:
                     self.thumb_reload(image, self.paths.index(image))
         except:
             self.err_message("Error: Flipping of file failed")
 
     def rotate_auto(self):
         """ This function autorotates all pictures in the current pathlist """
-        rotated_images = 0
-        # jhead does this better
-        try:
-            cmd = ["jhead", "-autorot", "-ft"] + self.paths
-            p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-            out, err = p.communicate()
-            out = out.decode(encoding='UTF-8')
-            err = err.decode(encoding='UTF-8')
-            # Find out how many images were rotated
-            for line in out.split("\n"):
-                if "Modified" in line and line.split()[1] not in err:
-                    rotated_images += 1
-            # Added to the message displayed when done
-            method = "jhead"
-        # If it isn't there fall back to PIL
-        except:
-            for path in self.paths:
-                im = Image.open(path)
-                exif = im._getexif()
-                orientation_key = 274  # cf ExifTags
-                rotated = True
-
-                # Only do something if orientation info is there
-                if exif and orientation_key in exif:
-                    orientation = exif[orientation_key]
-                    # Rotate and save the image
-                    if orientation == 3:
-                        im = im.transpose(Image.ROTATE_180)
-                    elif orientation == 6:
-                        im = im.transpose(Image.ROTATE_270)
-                    elif orientation == 8:
-                        im = im.transpose(Image.ROTATE_90)
-                    else:
-                        rotated = False
-                    if rotated:
-                        self.save_image(im, path)
-                        rotated_images += 1
-                method = "PIL"
-        # Reload current image and display a message if something was done
-        if rotated_images:
+        amount, method = imageactions.autorotate(self.paths)
+        if amount:
             self.move_index(True, False, 0)
-            message = "Autorotated %d image(s) using %s." % (rotated_images,
-                                                             method)
+            message = "Autorotated %d image(s) using %s." % (amount, method)
         else:
             message = "No image rotated. Tried using %s." % (method)
         self.err_message(message)
+
 
     def manipulate(self):
         """ Starts a toolbar with basic image manipulation """
@@ -618,29 +559,18 @@ class Vimiv(Gtk.Window):
             out = "-EDIT.".join(self.paths[self.index].rsplit(".", 1))
             orig = out.replace("EDIT", "EDIT-ORIG")
             im.thumbnail(self.imsize, Image.ANTIALIAS)
-            self.save_image(im, out)
+            imageactions.save_image(im, out)
             self.paths[self.index] = out
             # Save the original to work with
-            self.save_image(im, orig)
+            imageactions.save_image(im, orig)
         else:
             out = self.paths[self.index]
             orig = out.replace("EDIT", "EDIT-ORIG")
         # Apply all manipulations
-        if self.manipulations[3]:  # Optimize
-            try:
-                Popen(["mogrify", "-contrast", "-auto-gamma", "-auto-level",
-                       orig], shell=False).communicate()
-            except:
-                err = "Optimize exited with status 1, is imagemagick installed?"
-                self.err_message(err)
-                return
-        im = Image.open(orig)
-        # Enhance all three values
-        im = ImageEnhance.Brightness(im).enhance(self.manipulations[0])
-        im = ImageEnhance.Contrast(im).enhance(self.manipulations[1])
-        im = ImageEnhance.Sharpness(im).enhance(self.manipulations[2])
-        # Write
-        self.save_image(im, out)
+        if imageactions.manipulate_all(orig, out, self.manipulations):
+            self.err_message("Optimize failed. Is imagemagick installed?")
+        # Reset optimize so it isn't repeated all the time
+        self.manipulations[3] = False
 
         # Show the edited image
         self.image.clear()
@@ -733,34 +663,13 @@ class Vimiv(Gtk.Window):
             self.update_image()
 
     def thumbnails(self):
-        imlist = []
-
-        # Create thumbnail directory if necessary
-        thumbdir = os.path.expanduser("~/.vimiv/Thumbnails")
-        if not os.path.isdir(thumbdir):
-            os.mkdir(thumbdir)
-        # Get all thumbnails
-        thumbnails = os.listdir(thumbdir)
-
-        self.errorpos = []  # Catch errors to focus images correctly later
-        # Create thumbnails for all images in the path
-        for i, infile in enumerate(self.paths):
-            outfile = ".".join(infile.split(".")[:-1]) + ".thumbnail" + ".png"
-            outfile = outfile.split("/")[-1]
-            outfile = os.path.join(thumbdir, outfile)
-            # Only if they aren't cached already
-            if outfile.split("/")[-1] not in thumbnails:
-                try:
-                    im = Image.open(infile)
-                    im.thumbnail(self.thumbsize, Image.ANTIALIAS)
-                    self.save_image(im, outfile)
-                    imlist.append(outfile)
-                except:
-                    err = "Error: thumbnail creation for " + outfile + " failed"
-                    self.err_message(err)
-                    self.errorpos.append(i)
-            else:
-                imlist.append(outfile)
+        """ Creates the Gtk elements necessary for thumbnail mode, fills them
+        and focuses the iconview """
+        thumblist, errlist = imageactions.thumbnails_create(self.paths, self.thumbsize)
+        self.errorpos = errlist[0]
+        if errlist:
+            failed_files = ", ".join(errlist[1])
+            self.err_message("Thumbnail creation for %s failed" %(failed_files))
 
         # Create the liststore and iconview
         self.liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str)
@@ -779,7 +688,7 @@ class Vimiv(Gtk.Window):
         self.iconview.set_markup_column(1)
 
         # Add all thumbnails to the liststore
-        for i, thumb in enumerate(imlist):
+        for i, thumb in enumerate(thumblist):
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(thumb)
             name = thumb.split("/")[-1].split(".")[0]
             if self.paths[i] in self.marked:
@@ -841,17 +750,10 @@ class Vimiv(Gtk.Window):
         iter = self.liststore.get_iter(index)
         self.liststore.remove(iter)
         try:
-            # Recreate the thumbnail
-            outfile = ".".join(thumb.split(".")[:-1]) + ".thumbnail" + ".png"
-            outfile = outfile.split("/")[-1]
-            thumbdir = os.path.expanduser("~/.vimiv/Thumbnails")
-            outfile = os.path.join(thumbdir, outfile)
             if reload_image:
-                im = Image.open(thumb)
-                im.thumbnail(self.thumbsize)
-                self.save_image(im, outfile)
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file(outfile)
-            name = outfile.split("/")[-1].split(".")[0]
+                thumblist, errlist = imageactions.thumbnails_create([thumb])
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file(thumblist[0])
+            name = thumblist[0].split("/")[-1].split(".")[0]
             if thumb in self.marked:
                 name = name + " [*]"
             self.liststore.insert(index, [pixbuf, name])
@@ -1102,7 +1004,6 @@ class Vimiv(Gtk.Window):
         path = self.paths[self.index]
         try:
             if not os.path.exists(path):
-                print("Error: Couldn't open", path)
                 self.delete()
                 return
             else:
@@ -1191,62 +1092,10 @@ class Vimiv(Gtk.Window):
         self.num_str = ""
         self.update_info()
 
-    def populate(self, args, start=False):
-        """ Generate a list of paths from the given arguments """
-
-        # If only one path is passed do special stuff
-        single = None
-        if len(args) == 1:
-            arg = args[0]
-            if os.path.isfile(arg):
-                # Use parent directory and realpath
-                single = os.path.realpath(arg)
-                directory = os.path.dirname(single)
-                args = self.filelist_create(directory)
-                for i, arg in enumerate(args):
-                    args[i] = os.path.join(directory, arg)
-            elif os.path.isdir(arg) and not self.recursive:
-                # Open dir in library browser
-                self.move_up(arg, True)
-                return 0
-
-        # Add everything
-        for arg in args:
-            path = os.path.abspath(arg)
-            if os.path.isfile(path):
-                self.paths.append(path)
-            elif os.path.isdir(path) and self.recursive:
-                self.recursive_search(path)
-        # Remove unsupported files
-        self.paths = [possible_path for possible_path in self.paths
-                      if mimetypes.guess_type(possible_path)[0] in self.types]
-
-        # Shuffle
-        if self.shuffle:
-            shuffle(self.paths)
-
-        # Complete special stuff for single arg
-        if single and single in self.paths:
-            self.index = self.paths.index(single)
-        else:
-            self.index = 0
-
-        # Show the image as soon as possible
-        if self.paths and not start:
-            self.grid.set_size_request(self.library_width-self.border_width, 10)
-            self.scrolled_win.show()
-        elif not (self.paths or start):  # No images
-            self.scrolled_win.hide()
-            self.library_focus(True)
-            if self.expand_lib:
-                self.grid.set_size_request(self.winsize[0], 10)
-
-        return len(self.paths)
-
     def recursive_search(self, dir):
         """ Searchs a given directory recursively for images """
-        paths = self.filelist_create(dir)
-        for path in paths:
+        self.paths = self.filelist_create(dir)
+        for path in self.paths:
             path = os.path.join(dir, path)
             if os.path.isfile(path):
                 self.paths.append(path)
@@ -1412,7 +1261,11 @@ class Vimiv(Gtk.Window):
         # Update info for the current mode
         self.update_info()
 
-    def treeview_create(self):
+    def treeview_create(self, search=False):
+        # The search parameter is necessary to highlight searches after a search
+        # and to delete search items if a new directory is entered
+        if not search:
+            self.reset_search()
         # Tree View
         current_file_filter = self.filestore(self.datalist_create())
         self.treeview = Gtk.TreeView.new_with_model(current_file_filter)
@@ -1454,21 +1307,24 @@ class Vimiv(Gtk.Window):
         self.datalist = list()
         self.files = self.filelist_create()
         # Remove unsupported files if one isn't in the tagdir
-        if os.path.abspath(".") != self.tagdir:
+        if os.path.abspath(".") != tagdir:
             self.files = [
                 possible_file
                 for possible_file in self.files
-                if (mimetypes.guess_type(possible_file)[0] in self.types or
+                if (mimetypes.guess_type(possible_file)[0] in types or
                     os.path.isdir(possible_file))]
         # Add all the supported files
         for fil in self.files:
+            markup_string = fil
             size = self.filesize[fil]
             marked = ""
             if os.path.abspath(fil) in self.marked:
                 marked = "[*]"
             if os.path.isdir(fil):
-                fil = "<b>" + fil + "</b>"
-            self.datalist.append([fil, size, marked])
+                markup_string = "<b>" + markup_string + "</b>"
+            if fil in self.search_names:
+                markup_string = self.markup + markup_string + '</span>'
+            self.datalist.append([markup_string, size, marked])
 
         return self.datalist
 
@@ -1495,7 +1351,7 @@ class Vimiv(Gtk.Window):
                     subfiles = [
                         possible_file
                         for possible_file in subfiles
-                        if mimetypes.guess_type(possible_file)[0] in self.types]
+                        if mimetypes.guess_type(possible_file)[0] in types]
                     self.filesize[filename] = str(len(subfiles))
                 except:
                     self.filesize[filename] = "N/A"
@@ -1519,7 +1375,7 @@ class Vimiv(Gtk.Window):
             fil = os.path.realpath(fil)
             self.move_up(os.path.dirname(fil))
         # Tags
-        if os.path.abspath(".") == self.tagdir:
+        if os.path.abspath(".") == tagdir:
             self.tag_load(fil)
             return
         # Rest
@@ -1528,24 +1384,23 @@ class Vimiv(Gtk.Window):
         else:  # Focus the image and populate a new list from the dir
             if self.paths and fil in self.paths[self.index]:
                 close = True  # Close if file selected twice
-            self.paths = []
-            count = 0  # Filter directories
             path = 0  # Reload the path, could have changed (symlinks)
             for f in self.files:
                 if f == fil:
                     break
                 else:
                     path += 1
-                    if not os.path.isdir(f):
-                        count += 1
             self.treeview.set_cursor(Gtk.TreePath(path), None, False)
             self.treepos = path
-            self.populate(self.files)
+            self.paths, self.index = populate(self.files)
+            if self.paths:
+                self.grid.set_size_request(self.library_width-self.border_width, 10)
+                self.scrolled_win.show()
             # Show the selected file, if thumbnail toggled go out
             if self.thumbnail_toggled:
                 self.thumbnail_toggle()
                 self.treeview.grab_focus()
-            self.move_index(True, False, count)
+            self.move_index(delta=count)
             # Close the library depending on key and repeat
             if close:
                 self.library_toggle()
@@ -1564,10 +1419,10 @@ class Vimiv(Gtk.Window):
     def remember_pos(self, dir, count):
         self.dir_pos[dir] = count
 
-    def reload(self, dir, curdir=""):
+    def reload(self, dir, curdir="", search=False):
         """ Reloads the treeview """
         self.scrollable_treelist.remove(self.treeview)
-        self.treeview_create()
+        self.treeview_create(search)
         self.scrollable_treelist.add(self.treeview)
         self.library_focus(True)
         # Check if there is a saved position
@@ -1638,8 +1493,8 @@ class Vimiv(Gtk.Window):
     def tag_load(self, name):
         """ Load all images in tag 'name' as current filelist """
         # Read file and get all tagged images as list
-        os.chdir(self.tagdir)
-        filename = os.path.join(self.tagdir, name)
+        os.chdir(tagdir)
+        filename = os.path.join(tagdir, name)
         tagged_images = []
         try:
             tagfile = open(filename, 'r')
@@ -1650,7 +1505,8 @@ class Vimiv(Gtk.Window):
             return
         # Populate filelist
         self.paths = []
-        if self.populate(tagged_images):
+        self.paths = populate(tagged_images)
+        if self.paths:
             self.scrolled_win.show()
             self.move_index(False, False, 0)
             # Close library if necessary
@@ -1662,11 +1518,8 @@ class Vimiv(Gtk.Window):
 
     def tag_write(self, name):
         """ Append marked images to the tag 'name' """
-        # First create the tag directory if it doesn't exist
-        if not os.path.isdir(self.tagdir):
-            os.mkdir(os.path.expanduser(self.tagdir))
         # Open the file checking for content
-        filename = os.path.join(self.tagdir, name)
+        filename = os.path.join(tagdir, name)
         tagged_images = []
         if os.path.isfile(filename):
             tagfile = open(filename, 'r')
@@ -1680,7 +1533,7 @@ class Vimiv(Gtk.Window):
 
     def tag_remove(self, name):
         """ Remove tag 'name' """
-        filename = os.path.join(self.tagdir, name)
+        filename = os.path.join(tagdir, name)
         if os.path.isfile(filename):
             os.remove(filename)
         else:
@@ -1792,7 +1645,7 @@ class Vimiv(Gtk.Window):
 
     def reload_changes(self, dir, reload_path=True, pipe=False, input=None):
         """ Reload everything, meaning filelist in library and image """
-        if (dir == os.path.abspath(".") and dir != self.tagdir and
+        if (dir == os.path.abspath(".") and dir != tagdir and
                 self.library_toggled):
             if self.treepos >= 0 and self.treepos <= len(self.files):
                 self.remember_pos(dir, self.treepos)
@@ -1804,7 +1657,7 @@ class Vimiv(Gtk.Window):
                 files[i] = os.path.join(pathdir, fil)
             self.num_str = str(self.index + 1)  # Remember current pos
             self.paths = []
-            self.populate(files)
+            self.paths = populate(files)
             self.move_pos()
             if self.expand_lib and not self.paths:
                 self.grid.set_size_request(self.winsize[0], 10)
@@ -1838,7 +1691,7 @@ class Vimiv(Gtk.Window):
             else:
                 old_pos = []
             # Populate filelist
-            self.populate(input)
+            self.paths = populate(input)
             if self.paths:  # Images were found
                 self.scrolled_win.show()
                 self.move_index(False, False, 0)
@@ -1846,7 +1699,7 @@ class Vimiv(Gtk.Window):
                 if self.library_toggled:
                     self.library_toggle()
             elif old_pos:  # Nothing found, go back
-                self.populate(old_pos)
+                self.paths = populate(old_pos)
                 self.err_message("No image found")
         else:
             # Run every line as an internal command
@@ -1869,7 +1722,7 @@ class Vimiv(Gtk.Window):
             else:
                 # If it is an image open it
                 self.paths = []
-                self.populate([path])
+                self.paths = populate([path])
                 self.move_index(True, False, 0)
                 #  Reload library in lib mode, do not open it in image mode
                 abspath = os.path.dirname(path)
@@ -2035,7 +1888,7 @@ class Vimiv(Gtk.Window):
                             commandlist.append(cmd + " " + fil)
                         commandlist = sorted(commandlist)
                 else:
-                    commandlist = self.external_commands
+                    commandlist = external_commands
             # Path
             elif command[0] == "/" or command[0] == "~" or command[0] == ".":
                 comp_type = "path"
@@ -2067,7 +1920,7 @@ class Vimiv(Gtk.Window):
             else:
                 first = completions[0]
                 last = completions[-1]
-                # Only show the filename if completing paths
+                # Only show the filename if completing self.paths
                 if comp_type == "path":
                     for i, comp in enumerate(completions):
                         if comp.endswith("/"):
@@ -2116,7 +1969,7 @@ class Vimiv(Gtk.Window):
             if os.path.isdir(os.path.expanduser(fil)):
                 filelist.append(fil + "/")
             # Acceptable file
-            elif mimetypes.guess_type(fil)[0] in self.types or command:
+            elif mimetypes.guess_type(fil)[0] in types or command:
                 filelist.append(fil)
         return filelist
 
@@ -2153,19 +2006,62 @@ class Vimiv(Gtk.Window):
     def search(self, searchstr):
         """ Run a search on the appropriate filelist """
         if self.library_focused:
-            for i, fil in enumerate(self.files):
-                if searchstr in fil:
-                    self.file_select("alt", fil, "b", False)
-                    return
+            paths = self.files
         else:
-            for i, fil in enumerate(self.paths):
+            paths = self.paths
+        self.search_names = []
+        self.search_positions = []
+        self.search_pos = 0
+
+        if self.search_case:
+            for i, fil in enumerate(paths):
                 if searchstr in fil:
-                    print(fil)
-                    self.num_str = str(i+1)
-                    self.move_pos()
-                    return
-        # Nothing found
-        self.err_message("No matching file")
+                    self.search_names.append(fil)
+                    self.search_positions.append(i)
+        else:
+            for i, fil in enumerate(paths):
+                if searchstr.lower() in fil.lower():
+                    self.search_names.append(fil)
+                    self.search_positions.append(i)
+
+        # Move to first result or throw an error
+        if self.search_names:
+            self.search_move()
+        else:
+            self.err_message("No matching file")
+
+    def search_move(self, index=0, forward=True):
+        """ Move to the next/previous search """
+        # Correct handling of index
+        if self.num_str:
+            index = int(self.num_str)
+            self.num_str = ""
+        if forward:
+            self.search_pos += index
+        else:
+            self.search_pos -= index
+        self.search_pos = self.search_pos % len(self.search_names)
+
+        # Select file depending on library
+        if self.library_toggled:
+            if len(self.search_names) == 1:
+                self.file_select("alt", self.search_names[self.search_pos],
+                                "b", False)
+            else:
+                self.reload(".", search=True)
+                path = self.search_positions[self.search_pos]
+                self.treeview.set_cursor(Gtk.TreePath(path), None, False)
+                self.treepos = path
+        else:
+            self.num_str = str(self.search_positions[self.search_pos]+1)
+            self.move_pos()
+
+    def reset_search(self):
+        """ Simply resets all search parameters to null """
+        self.search_names = []
+        self.search_positions = []
+        self.search_pos = 0
+        return
 
     def listdir_nohidden(self, path):
         """ Reimplementation of os.listdir which doesn't show hidden files """
@@ -2242,12 +2138,6 @@ class Vimiv(Gtk.Window):
                 # Get the relevant keybindings for the window from the various
                 # sections in the keys.conf file
                 keys = self.keys[window]
-                if window in ["IMAGE", "THUMBNAIL", "LIBRARY"]:
-                    keys.update(self.keys["GENERAL"])
-                if window in ["IMAGE", "THUMBNAIL"]:
-                    keys.update(self.keys["IM_THUMB"])
-                if window in ["IMAGE", "LIBRARY"]:
-                    keys.update(self.keys["IM_LIB"])
 
                 # Get the command to which the pressed key is bound
                 func = keys[keyname]
@@ -2267,83 +2157,14 @@ class Vimiv(Gtk.Window):
             except:
                 return False
 
-    def parse_args(self):
-        usage = '%(prog)s [options] [paths ...]'
-        parser = argparse.ArgumentParser(usage=usage)
-        parser.add_argument("-b", "--bar", action="store_true", dest="sbar",
-                            help="display statusbar", default=self.sbar)
-        parser.add_argument("-B", "--no-bar", action="store_false", dest="sbar",
-                            help="hide statusbar", default=self.sbar)
-        parser.add_argument("-l", "--library", action="store_true",
-                            dest="library", help="display library",
-                            default=self.library_toggled)
-        parser.add_argument("-L", "--no-library", action="store_false",
-                            dest="library", help="don't display library",
-                            default=self.library_toggled)
-        parser.add_argument("-f", "--fullscreen", action="store_true",
-                            dest="fullscreen", help="start in fullscreen",
-                            default=self.fullscreen_toggled)
-        parser.add_argument("-F", "--no-fullscreen", action="store_false",
-                            dest="fullscreen", help="don't start in fullscreen",
-                            default=self.fullscreen_toggled)
-        parser.add_argument("-s", "--shuffle", action="store_true",
-                            dest="shuffle", help="shuffle filelist",
-                            default=self.shuffle)
-        parser.add_argument("-S", "--no-shuffle", action="store_false",
-                            dest="shuffle", help="don't shuffle the filelist")
-        parser.add_argument("-r", "--recursive", action="store_true",
-                            dest="recursive",
-                            help="search given directories recursively",
-                            default=self.recursive)
-        parser.add_argument("-R", "--no-recursive", action="store_false",
-                            dest="recursive",
-                            help="don't search given directories recursively",
-                            default=self.recursive)
-        parser.add_argument("--slideshow", action="store_true",
-                            help="start slideshow immediately",
-                            default=self.slideshow)
-        parser.add_argument("--start-from-desktop", action="store_true",
-                            help="start using the desktop_start_dir as path",
-                            dest="desktop", default=self.desktop)
-        parser.add_argument("--slideshow-delay", type=float,
-                            help="set the slideshow delay",
-                            default=self.slideshow_delay)
-        parser.add_argument("-g", "--geometry", dest="geometry",
-                            help="set the starting geometry",
-                            default=self.geometry)
-        # Be able to read paths from stdin
-        if not sys.stdin.isatty():
-            self.files = []
-            for line in sys.stdin:
-                self.files.append(line.rstrip("\n"))
-        else:
-            self.files = self.filelist_create()
-        parser.add_argument("path", nargs='*', default=[])
-        args = parser.parse_args()
-        self.sbar = args.sbar
-        self.library_toggled = args.library
-        self.recursive = args.recursive
-        self.fullscreen_toggled = args.fullscreen
-        self.shuffle = args.shuffle
-        self.slideshow_delay = args.slideshow_delay
-        self.slideshow = args.slideshow
-        self.geometry = args.geometry
-        self.desktop = args.desktop
-
-        if args.path:
-            self.populate(args.path, True)
-        elif self.desktop:
-            self.populate(self.desktop_start_dir, True)
-        else:
-            self.populate(self.files, True)
-
     def main(self):
-        # Off we go
-        self.parse_args()
-
-        # Move to the directory of the image
         if self.paths:
-            os.chdir(os.path.dirname(self.paths[self.index]))
+            # Move to the directory of the image
+            if isinstance(self.paths, list):
+                os.chdir(os.path.dirname(self.paths[self.index]))
+            else:
+                os.chdir(self.paths)
+                self.paths = []
 
         # Screen
         screen = Gdk.Screen()
@@ -2429,7 +2250,7 @@ class Vimiv(Gtk.Window):
         self.hboxman.hide()
         self.cmd_line_box.hide()
 
-        # Show images, if a path was given
+        # Show the image if an imagelist exists
         if self.paths:
             self.move_index(True, False, 0)
             # Show library at the beginning?
@@ -2445,13 +2266,14 @@ class Vimiv(Gtk.Window):
                 self.slideshow = False
                 self.toggle_slideshow()
             self.toggle_statusbar()
+        # Just open the library if no paths were given
         else:
             self.slideshow = False  # Slideshow without paths makes no sense
             self.toggle_statusbar()
             self.library_focus(True)
             if self.expand_lib:
                 self.grid.set_size_request(self.winsize[0], 10)
-            self.err_message("No valid paths, opening library viewer")
+            self.err_message("No valid self.paths, opening library viewer")
 
         # Finally show the main window
         Gtk.main()

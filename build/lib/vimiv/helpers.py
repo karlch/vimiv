@@ -26,4 +26,19 @@ def listdir_wrapper(path, show_hidden=False):
             if not fil.startswith("."):
                 yield fil
 
-    return files
+    return sorted(list(files))
+
+
+def read_file(filename):
+    """ Reads the contents of a file into a list and returns it. If the file
+    doesn't exist it will be created and an empty list returned. """
+    content = []
+    try:
+        fil = open(filename, "r")
+        for line in fil:
+            content.append(line.rstrip("\n"))
+    except:
+        fil = open(filename, "w")
+        fil.write("")
+    fil.close()
+    return content
