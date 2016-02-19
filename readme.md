@@ -1,5 +1,14 @@
 ### vimiv, an image viewer with vim-like keybindings
 
+This is the development branch of the code rebase mentioned in issue #12.
+New features and tests will be written for this branch, although it is nowhere
+near stable.
+
+TODO:
+* move as much as possible out of the main class in gtk.py into other files
+* cleanup the code
+* write tests
+
 ## Version 0.5
 
 ## Features

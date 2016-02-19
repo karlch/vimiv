@@ -2024,6 +2024,9 @@ class Vimiv(Gtk.Window):
                     self.search_names.append(fil)
                     self.search_positions.append(i)
 
+        if self.library_focused:
+            self.reload(".", search=True)
+
         # Move to first result or throw an error
         if self.search_names:
             self.search_move()
@@ -2048,7 +2051,6 @@ class Vimiv(Gtk.Window):
                 self.file_select("alt", self.search_names[self.search_pos],
                                 "b", False)
             else:
-                self.reload(".", search=True)
                 path = self.search_positions[self.search_pos]
                 self.treeview.set_cursor(Gtk.TreePath(path), None, False)
                 self.treepos = path
