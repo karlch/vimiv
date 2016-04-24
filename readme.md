@@ -43,7 +43,8 @@ deprecated and can be deleted.
 
 ## Installation
 Be sure to install the dependencies first. A simple `sudo make (install)` should
-then suffice. For arch-users there is an AUR package called vimiv-git.
+then suffice. For arch-users there is an AUR package called vimiv for the latest
+stable version and vimiv-git for the developing branch.
 
 To remove vimiv the standard `sudo make uninstall` works.
 
