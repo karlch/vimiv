@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name = "vimiv",
-    version = "0.5",
+    version = "0.6",
     packages = ['vimiv'],
     scripts = ['vimiv/vimiv'],
 )

@@ -178,6 +178,7 @@ class Vimiv(Gtk.Window):
         # Get all images
         images = self.manipulated_images("Deleted")
         self.marked = []
+        # TODO name overridden?
         if delete(images):
             self.err_message("Deleting directories is not supported")
         else:
@@ -350,6 +351,7 @@ class Vimiv(Gtk.Window):
             self.timer_id = GLib.timeout_add_seconds(5, self.toggle_statusbar)
 
     def error_false(self):
+        """ Strip one error and update the statusbar if no more errors remain"""
         self.error = self.error[0:-1]
         if not self.error:
             self.update_info()
@@ -1417,6 +1419,7 @@ class Vimiv(Gtk.Window):
             self.err_message("Error: directory not accessible")
 
     def remember_pos(self, dir, count):
+        """ Write the current position in dir to the dir_pos dictionary """
         self.dir_pos[dir] = count
 
     def reload(self, dir, curdir="", search=False):
@@ -1854,6 +1857,7 @@ class Vimiv(Gtk.Window):
 
     def cmd_complete(self):
         """ Simple autocompletion for the command line """
+        # TODO move completion into an extra file
         command = self.cmd_line.get_text()
         command = command.lstrip(":")
         # Strip prepending numbers
@@ -1949,6 +1953,7 @@ class Vimiv(Gtk.Window):
 
     def cmd_complete_path(self, path, command=False):
         """ Completion for files in a specific path """
+        # TODO move completion to an extra file
         # Directory of the path
         dir = "/".join(path.split("/")[:-1])
         if not dir:
@@ -2073,6 +2078,8 @@ class Vimiv(Gtk.Window):
                 yield fil
 
     def format_files(self, string):
+        """ Format the image names in the filelist according to a formatstring
+            nicely numbering them """
         if not self.paths:
             self.err_message("No files in path")
             return
