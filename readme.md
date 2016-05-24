@@ -1,13 +1,14 @@
 ### vimiv, an image viewer with vim-like keybindings
 
-This is the development branch of the code rebase mentioned in issue #12.
-New features and tests will be written for this branch, although it is nowhere
-near stable.
+This is the development branch of the code rebase mentioned in issue #12. New
+features and tests will be written as soon as this branch has been merged into
+master. The rebase currently has priority and will take some time.
 
 TODO:
 * move as much as possible out of the main class in gtk.py into other files
 * cleanup the code
 * write tests
+* have a nice setup.py and Makefile
 
 ## Version 0.5
 
@@ -52,7 +53,8 @@ deprecated and can be deleted.
 
 ## Installation
 Be sure to install the dependencies first. A simple `sudo make (install)` should
-then suffice. For arch-users there is an AUR package called vimiv-git.
+then suffice. For arch-users there is an AUR package called vimiv for the latest
+stable version and vimiv-git for the developing branch.
 
 To remove vimiv the standard `sudo make uninstall` works.
 
