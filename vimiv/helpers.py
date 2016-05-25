@@ -21,12 +21,17 @@ def listdir_wrapper(path, show_hidden=False):
     if show_hidden:
         files = os.listdir(os.path.expanduser(path))
     else:
-        files = os.listdir(os.path.expanduser(path))
-        for fil in files:
-            if not fil.startswith("."):
-                yield fil
+        files = listdir_nohidden(path)
 
     return sorted(list(files))
+
+
+def listdir_nohidden(path):
+    """ The nohidden part of listdir_wrapper """
+    files = os.listdir(os.path.expanduser(path))
+    for fil in files:
+        if not fil.startswith("."):
+            yield fil
 
 
 def read_file(filename):
