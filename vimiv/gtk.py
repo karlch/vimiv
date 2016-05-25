@@ -14,10 +14,11 @@ from subprocess import Popen, PIPE
 from threading import Thread
 from PIL import Image
 from vimiv.helpers import read_file
-from vimiv.variables import types, scrolltypes, external_commands
+from vimiv.variables import types, scrolltypes
 from vimiv.fileactions import populate, delete
 from vimiv.parser import parse_keys
 from vimiv import imageactions
+from vimiv.completions import Completion
 
 # Directories
 vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
@@ -1857,7 +1858,6 @@ class Vimiv(Gtk.Window):
 
     def cmd_complete(self):
         """ Simple autocompletion for the command line """
-        # TODO move completion into an extra file
         command = self.cmd_line.get_text()
         command = command.lstrip(":")
         # Strip prepending numbers
@@ -1869,114 +1869,17 @@ class Vimiv(Gtk.Window):
                 command = command[1:]
             except:
                 break
-        completions = []
+        # Generate completion class and get completions
         commandlist = sorted(list(self.commands.keys()))
+        completion = Completion(command, commandlist)
+        output, compstr = completion.complete()
 
-        # Check if the first part is a shell command or a path
-        comp_type = "int"
-        if command:
-            if command[0] == "!":
-                comp_type = "ext"
-                # Check if path completion would be useful
-                if len(command.split()) > 1:
-                    if command.split()[-1][0] != "-":
-                        comp_type = "path"
-                        # Path to be completed is last argument
-                        path = command.split()[-1]
-                        files = self.cmd_complete_path(path, True)
-                        # Command is everything ahead
-                        cmd = " ".join(command.split()[:-1])
-                        commandlist = []
-                        # Join both for a commandlist
-                        for fil in files:
-                            commandlist.append(cmd + " " + fil)
-                        commandlist = sorted(commandlist)
-                else:
-                    commandlist = external_commands
-            # Path
-            elif command[0] == "/" or command[0] == "~" or command[0] == ".":
-                comp_type = "path"
-                commandlist = sorted(self.cmd_complete_path(command))
-
-        # Tag completion
-        if comp_type == "int":
-            if re.match(r'^(tag_(write|remove|load) )', command):
-                tags = os.listdir(os.path.expanduser("~/.vimiv/Tags"))
-                commandlist = []
-                for tag in tags:
-                    commandlist.append(command.split()[0] + " " + tag)
-                comp_type = "tag"  # Chop the command in the info
-
-        # Check if the entered text matches the beginning of a command
-        for cmd in commandlist:
-            matchstr = '^(' + command + ')'
-            if re.match(matchstr, cmd):
-                completions.append(cmd)
-
-        if completions:
-            # Reinsert the prepending numbers
-            output = numstr
-            # If there is only one completion insert it
-            if len(completions) == 1:
-                output += completions[0]
-                self.cmd_line_info.set_text("")
-            # Else complete until last equal character and show all completions
-            else:
-                first = completions[0]
-                last = completions[-1]
-                # Only show the filename if completing self.paths
-                if comp_type == "path":
-                    for i, comp in enumerate(completions):
-                        if comp.endswith("/"):
-                            completions[i] = comp.split("/")[-2] + "/"
-                        else:
-                            completions[i] = comp.split("/")[-1]
-                elif comp_type == "tag":  # And only the tags if completing tags
-                    for i, comp in enumerate(completions):
-                        completions[i] = " ".join(comp.split()[1:])
-                # A string with possible completions for the info
-                compstr = "  " + "  ".join(completions)
-                self.cmd_line_info.set_text(compstr)
-                # Find last equal character
-                for i, char in enumerate(first):
-                    if char == last[i]:
-                        output += char
-                    else:
-                        break
-            output = ":" + output
-            self.cmd_line.set_text(output)
-            self.cmd_line.set_position(-1)
-        else:
-            self.cmd_line_info.set_text("  No matching completion")
+        # Set text
+        self.cmd_line.set_text(output)
+        self.cmd_line_info.set_text(compstr)
+        self.cmd_line.set_position(-1)
 
         return True  # Deactivates default bindings (here for Tab)
-
-    def cmd_complete_path(self, path, command=False):
-        """ Completion for files in a specific path """
-        # TODO move completion to an extra file
-        # Directory of the path
-        dir = "/".join(path.split("/")[:-1])
-        if not dir:
-            dir = path[0]
-            if not os.path.exists(os.path.expanduser(dir)):
-                dir = "."
-        # Get entries
-        if self.show_hidden:
-            files = sorted(os.listdir(dir))
-        else:
-            files = sorted(self.listdir_nohidden(dir))
-        # Format them neatly depending on directory and type
-        filelist = []
-        for fil in files:
-            if dir != "." or not command:
-                fil = os.path.join(dir, fil)
-            # Directory
-            if os.path.isdir(os.path.expanduser(fil)):
-                filelist.append(fil + "/")
-            # Acceptable file
-            elif mimetypes.guess_type(fil)[0] in types or command:
-                filelist.append(fil)
-        return filelist
 
     def clear(self, dir):
         """ Remove all files in dir (Trash or Thumbnails) """
