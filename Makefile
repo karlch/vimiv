@@ -23,7 +23,7 @@ help:
 	@printf "make uninstall: 	Uninstall $(SRC).\n"
 
 install:
-	python setup.py install --root=$(DESTDIR)
+	python setup.py install --root=$(DESTDIR) --record=install_log.txt
 	mkdir -p $(DESTDIR)etc/vimiv
 	cp config/vimivrc $(DESTDIR)etc/vimiv/
 	cp config/keys.conf $(DESTDIR)etc/vimiv/
@@ -44,6 +44,8 @@ uninstall:
 	rm -f $(DESTDIR)$(MANPREFIX)man1/vimiv.1.gz
 	rm -f $(DESTDIR)$(MANPREFIX)man5/vimivrc.5
 	rm -f $(DESTDIR)$(MANPREFIX)man5/vimivrc.5.gz
-	@printf "python-setuptools does not provide an uninstall option. "
+	@printf "python-setuptools does not provide an uninstall option.\n"
 	@printf "To completely remove vimiv you will have to remove all related"
-	@printf " files from /usr/lib/python3.x/site-packages/\n"
+	@printf " files from /usr/lib/python3.x/site-packages/.\n"
+	@printf "A list of files should have been generated during make install"
+	@printf " in install_log.txt.\n"
