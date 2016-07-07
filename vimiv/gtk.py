@@ -5,7 +5,6 @@ import mimetypes
 import os
 import re
 import shutil
-import signal
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import GLib, Gtk, Gdk, GdkPixbuf, Pango
@@ -2189,8 +2188,3 @@ class Vimiv(Gtk.Window):
 
         # Finally show the main window
         Gtk.main()
-
-
-if __name__ == '__main__':
-    signal.signal(signal.SIGINT, signal.SIG_DFL)
-    Vimiv().main()
