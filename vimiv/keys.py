@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 """ Handles key_press in vimiv """
 from gi.repository import Gdk

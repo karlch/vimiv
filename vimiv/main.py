@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: utf-8
 """ Main function for the vimiv image browser
 Parses the necessary stuff and starts the Gtk instance """
