@@ -3,14 +3,8 @@
 """ Contains a few standard variables of vimiv """
 
 from subprocess import Popen, PIPE
-from gi.repository import GdkPixbuf, Gtk
+from gi.repository import Gtk
 
-
-# Supported mimetypes
-types = []
-for pixbuf_format in GdkPixbuf.Pixbuf.get_formats():
-    types.extend(pixbuf_format.get_mime_types())
-types.append("image/x-ms-bmp")
 
 # Dictionary with all the scrolling
 scrolltypes = {}

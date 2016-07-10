@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 
-import mimetypes
 import os
 import re
 import shutil
@@ -13,8 +12,8 @@ from subprocess import Popen, PIPE
 from threading import Thread
 from PIL import Image
 from vimiv.helpers import read_file
-from vimiv.variables import types, scrolltypes
-from vimiv.fileactions import populate, delete
+from vimiv.variables import scrolltypes
+from vimiv.fileactions import populate, delete, is_image
 from vimiv.parser import parse_keys
 from vimiv import imageactions
 from vimiv.completions import Completion
@@ -1211,8 +1210,7 @@ class Vimiv(Gtk.Window):
             self.files = [
                 possible_file
                 for possible_file in self.files
-                if (mimetypes.guess_type(possible_file)[0] in types or
-                    os.path.isdir(possible_file))]
+                if (is_image(possible_file) or os.path.isdir(possible_file))]
         # Add all the supported files
         for fil in self.files:
             markup_string = fil
@@ -1248,10 +1246,9 @@ class Vimiv(Gtk.Window):
             if os.path.isdir(filename):
                 try:
                     subfiles = os.listdir(filename)
-                    subfiles = [
-                        possible_file
+                    subfiles = [ possible_file
                         for possible_file in subfiles
-                        if mimetypes.guess_type(possible_file)[0] in types]
+                        if is_image(possible_file)]
                     self.filesize[filename] = str(len(subfiles))
                 except:
                     self.filesize[filename] = "N/A"
@@ -1314,6 +1311,7 @@ class Vimiv(Gtk.Window):
             if not start:
                 self.reload(os.path.abspath("."), curdir)
         except:
+            print("this error")
             self.err_message("Error: directory not accessible")
 
     def remember_pos(self, dir, count):

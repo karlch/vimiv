@@ -2,11 +2,11 @@
 # encoding: utf-8
 """ The command line completion for vimiv """
 
-import mimetypes
 import os
 import re
 from vimiv.helpers import listdir_wrapper
-from vimiv.variables import types, external_commands
+from vimiv.variables import external_commands
+from vimiv.fileactions import is_image
 
 class Completion():
 
@@ -145,6 +145,6 @@ class Completion():
             if os.path.isdir(os.path.expanduser(fil)):
                 filelist.append(fil + "/")
             # Acceptable file
-            elif mimetypes.guess_type(fil)[0] in types or external_command:
+            elif is_image(fil) or external_command:
                 filelist.append(fil)
         return filelist

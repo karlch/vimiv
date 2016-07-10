@@ -2,12 +2,11 @@
 # encoding: utf-8
 """ Return a list of images for vimiv """
 
-import mimetypes
+import imghdr
 import os
 import shutil
 from random import shuffle
 from vimiv.helpers import listdir_wrapper
-from vimiv.variables import types
 
 
 def recursive_search(directory):
@@ -59,7 +58,7 @@ def populate(args, recursive=False, shuffle_paths=False):
             paths = recursive_search(path)
     # Remove unsupported files
     paths = [possible_path for possible_path in paths
-             if mimetypes.guess_type(possible_path)[0] in types]
+             if is_image(possible_path)]
 
     # Shuffle
     if shuffle_paths:
@@ -100,3 +99,25 @@ def delete(filelist):
             shutil.move(im, deldir)
 
         return 0  # Success
+
+def test_svg(h, b):
+    """ svg data """
+    try:
+        last_line = b.readlines()[-1].decode("utf-8")
+        if last_line == '</svg>\n':
+            return "svg"
+    except:
+        return None
+
+def is_image(filename):
+    """ Checks whether the file is an image """
+    imghdr.tests.append(test_svg)
+    complete_name = os.path.abspath(os.path.expanduser(filename))
+    if not os.path.exists(complete_name):
+        return False
+    elif os.path.isdir(complete_name):
+        return False
+    elif imghdr.what(complete_name):
+        return True
+    else:
+        return False
