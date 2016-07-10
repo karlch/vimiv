@@ -7,12 +7,19 @@ from gi.repository import Gdk
 class FullscreenToggler(object):
     """ Toggles fullscreen properly for vimiv """
 
-    def __init__(self, window, start_fullscreen):
+    def __init__(self, window, settings):
         self.window = window
         self.window_is_fullscreen = False
         self.window.connect_object('window-state-event',
                                    FullscreenToggler.on_window_state_change,
                                    self)
+
+        # The configruations from vimivrc
+        general = settings["GENERAL"]
+        # library = settings["LIBRARY"]
+
+        # General
+        start_fullscreen = general["start_fullscreen"]
         if start_fullscreen:
             self.toggle()
 
@@ -31,3 +38,21 @@ class FullscreenToggler(object):
                 self.window.update_image()
             else:
                 self.window.zoom_to(0)
+
+
+class VariableToggler(object):
+    """ Toggles different variables for vimiv """
+
+    def __init__(self, window, settings):
+        self.window = window
+        # The configruations from vimivrc
+        general = settings["GENERAL"]
+        self.overzoom = general["overzoom"]
+        self.rescale_svg = general["rescale_svg"]
+        # library = settings["LIBRARY"]
+
+    def toggle_rescale_svg(self):
+        self.rescale_svg = not self.rescale_svg
+
+    def toggle_overzoom(self):
+        self.overzoom = not self.overzoom

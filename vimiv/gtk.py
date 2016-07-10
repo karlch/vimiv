@@ -18,8 +18,8 @@ from vimiv.fileactions import populate, delete
 from vimiv.parser import parse_keys
 from vimiv import imageactions
 from vimiv.completions import Completion
-from vimiv.tags import tag_read, tag_write, tag_remove
-from vimiv.toggle import FullscreenToggler
+from vimiv.toggle import FullscreenToggler, VariableToggler
+from vimiv.commands import Commands
 
 # Directories
 vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
@@ -56,15 +56,12 @@ class Vimiv(Gtk.Window):
         general = settings["GENERAL"]
         library = settings["LIBRARY"]
         # General
-        fullscreen_toggled = general["start_fullscreen"]
         self.slideshow = general["start_slideshow"]
         self.slideshow_delay = general["slideshow_delay"]
         self.shuffle = general["shuffle"]
         self.sbar = general["display_bar"]
         self.winsize = general["geometry"]
         self.recursive = general["recursive"]
-        self.rescale_svg = general["rescale_svg"]
-        self.overzoom = general["overzoom"]
         self.thumbsize = general["thumbsize"]
         # Library
         self.library_toggled = library["show_library"]
@@ -86,97 +83,9 @@ class Vimiv(Gtk.Window):
         self.cmd_pos = 0
 
         Gtk.Window.__init__(self)
-        self.toggle_fullscreen = FullscreenToggler(self, fullscreen_toggled)
-
-        # Dictionary with command names and the corresponding functions
-        self.commands = {"accept_changes": [self.button_clicked, "w", True],
-                         "autorotate": [self.rotate_auto],
-                         "center": [self.center_window],
-                         "clear_trash": [self.clear, 'Trash'],
-                         "clear_thumbs": [self.clear, 'Thumbnails'],
-                         "command": [self.focus_cmd_line],
-                         "delete": [self.delete],
-                         "discard_changes": [self.button_clicked, "w", False],
-                         "first":  [self.move_pos, False],
-                         "first_lib":  [self.move_pos_lib, False],
-                         "fit": [self.zoom_to, 0],
-                         "fit_horiz": [self.zoom_to, 0, True, False],
-                         "fit_vert": [self.zoom_to, 0, False, True],
-                         "flip": [self.flip],
-                         "format": [self.format_files],
-                         "grow_lib": [self.resize_lib, None, True],
-                         "last":  [self.move_pos, True],
-                         "last_lib":  [self.move_pos_lib, True],
-                         "library": [self.toggle_library],
-                         "focus_library": [self.focus_library, True],
-                         "unfocus_library": [self.focus_library, False],
-                         "manipulate": [self.toggle_manipulate],
-                         "mark": [self.mark],
-                         "mark_all": [self.mark_all],
-                         "mark_between": [self.mark_between],
-                         "toggle_mark": [self.toggle_mark],
-                         "move_up": [self.move_up],
-                         "next": [self.move_index, True, True],
-                         "next!": [self.move_index, True, True, 1, True],
-                         "optimize": [self.cmd_edit, 'opt'],
-                         "prev": [self.move_index, False, True],
-                         "prev!": [self.move_index, False, True, 1, True],
-                         "q": [self.quit],
-                         "q!": [self.quit, True],
-                         "reload_lib": [self.reload, '.'],
-                         "rotate": [self.rotate],
-                         "set animation!": [self.toggle_animation],
-                         "set brightness": [self.cmd_edit, 'bri'],
-                         "set contrast": [self.cmd_edit, 'con'],
-                         "set library_width": [self.resize_lib],
-                         "set overzoom!": [self.toggle_overzoom],
-                         "set rescale_svg!": [self.toggle_rescale_svg],
-                         "set sharpness": [self.cmd_edit, 'sha'],
-                         "set show_hidden!": [self.toggle_hidden],
-                         "set slideshow_delay": [self.set_slideshow_delay],
-                         "set statusbar!": [self.toggle_statusbar],
-                         "shrink_lib": [self.resize_lib, None, False],
-                         "slideshow": [self.toggle_slideshow],
-                         "slideshow_inc": [self.set_slideshow_delay, 2, "+"],
-                         "slideshow_dec": [self.set_slideshow_delay, 2, "-"],
-                         "tag_load": [self.tag_load],
-                         "tag_remove": [tag_remove],
-                         "tag_write": [tag_write, self.marked],
-                         "thumbnail": [self.toggle_thumbnail],
-                         "zoom_in": [self.zoom_delta, +.25],
-                         "zoom_out": [self.zoom_delta, -.25],
-                         "zoom_to": [self.zoom_to]}
-
-        self.functions = {"focus_bri": [self.focus_slider, "bri"],
-                          "focus_con": [self.focus_slider, "con"],
-                          "focus_sha": [self.focus_slider, "sha"],
-                          "slider_dec": [self.change_slider, True, False],
-                          "slider_inc": [self.change_slider, False, False],
-                          "slider_dec_large": [self.change_slider, True, True],
-                          "slider_inc_large": [self.change_slider, False, True],
-                          "cmd_history_up": [self.history, False],
-                          "cmd_history_down": [self.history, True],
-                          "discard_command": [self.cmd_line_leave],
-                          "complete": [self.cmd_complete],
-                          "down": [self.scroll, "j"],
-                          "down_lib": [self.scroll_lib, "j"],
-                          "down_page": [self.scroll, "J"],
-                          "left": [self.scroll, "h"],
-                          "left_lib": [self.scroll_lib, "h"],
-                          "left_page": [self.scroll, "H"],
-                          "right": [self.scroll, "l"],
-                          "right_lib": [self.scroll_lib, "l"],
-                          "right_page": [self.scroll, "L"],
-                          "up": [self.scroll, "k"],
-                          "up_lib": [self.scroll_lib, "k"],
-                          "up_page": [self.scroll, "K"],
-                          "search": [self.cmd_search],
-                          "search_next": [self.search_move, 1],
-                          "search_prev": [self.search_move, 1, False],
-                          "fullscreen": [self.toggle_fullscreen.toggle]}
-        self.functions.update(self.commands)
-
-
+        self.toggle_fullscreen = FullscreenToggler(self, settings)
+        self.toggle_vars = VariableToggler(self, settings)
+        Commands(self)
 
     def delete(self):
         """ Delete all marked images or the current one """
@@ -370,12 +279,6 @@ class Vimiv(Gtk.Window):
         # Resize the image if necessary
         if not self.user_zoomed and self.paths and not self.thumbnail_toggled:
             self.zoom_to(0)
-
-    def toggle_rescale_svg(self):
-        self.rescale_svg = not self.rescale_svg
-
-    def toggle_overzoom(self):
-        self.overzoom = not self.overzoom
 
     def manipulated_images(self, message):
         """ Returns the images which should be manipulated - either the
@@ -781,7 +684,7 @@ class Vimiv(Gtk.Window):
 
         # Image is completely shown and user doesn't want overzoom
         if (pboWidth < self.imsize[0] and pboHeight < self.imsize[1] and
-                not (stickout or self.overzoom)):
+                not (stickout or self.toggle_vars.overzoom)):
             return 1
         # "Portrait" image
         elif (pboScale < wScale and not stickout) or zHeight:
@@ -802,7 +705,7 @@ class Vimiv(Gtk.Window):
             pbfHeight = int(pboHeight * self.zoom_percent)
             # Rescaling of svg
             ending = os.path.basename(self.paths[self.index]).split(".")[-1]
-            if ending == "svg" and self.rescale_svg:
+            if ending == "svg" and self.toggle_vars.rescale_svg:
                 pixbufFinal = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                     self.paths[self.index], -1, pbfHeight, True)
             else:
@@ -1371,7 +1274,7 @@ class Vimiv(Gtk.Window):
             self.move_up(os.path.dirname(fil))
         # Tags
         if os.path.abspath(".") == tagdir:
-            self.tag_load(fil)
+            self.tag_handler.tag_load(fil)
             return
         # Rest
         if os.path.isdir(fil):  # Open the directory
@@ -1485,25 +1388,6 @@ class Vimiv(Gtk.Window):
     def toggle_hidden(self):
         self.show_hidden = not self.show_hidden
         self.reload('.')
-
-    def tag_load(self, name):
-        """ Load all images in tag 'name' as current filelist """
-        # Read file and get all tagged images as list
-        tagged_images = tag_read(name)
-        # Populate filelist
-        self.paths = []
-        self.paths = populate(tagged_images)[0]
-        if self.paths:
-            self.scrolled_win.show()
-            self.move_index(False, False, 0)
-            # Close library if necessary
-            if self.library_toggled:
-                self.grid.set_size_request(self.library_width-self.border_width,
-                                           10)
-                self.toggle_library()
-        else:
-            err = "Tagfile '%s' has no valid images" % (name)
-            self.err_message(err)
 
     def auto_resize(self, w):
         """ Automatically resize image when window is resized """
