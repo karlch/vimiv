@@ -63,6 +63,7 @@ class Vimiv(Gtk.Window):
         self.winsize = general["geometry"]
         self.recursive = general["recursive"]
         self.thumbsize = general["thumbsize"]
+        self.cache_thumbs = general["cache_thumbnails"]
         # Library
         self.library_toggled = library["show_library"]
         self.library_default_width = library["library_width"]
@@ -610,6 +611,11 @@ class Vimiv(Gtk.Window):
         self.iconview.select_path(curpath)
         curthing = self.iconview.get_cells()[0]
         self.iconview.set_cursor(curpath, curthing, False)
+
+        # Remove the files again if the thumbnails should not be cached
+        if not self.cache_thumbs:
+            for thumb in thumblist:
+                os.remove(thumb)
 
     def iconview_clicked(self, w, count):
         # Move to the current position if the iconview is clicked

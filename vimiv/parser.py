@@ -103,7 +103,8 @@ def set_defaults():
                "search_case_insensitive": True,
                "recursive": False,
                "rescale_svg": True,
-               "overzoom": False}
+               "overzoom": False,
+               "cache_thumbnails": True}
     library = {"show_library": False,
                "library_width": 300,
                "expand_lib": True,
