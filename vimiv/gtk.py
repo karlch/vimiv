@@ -408,7 +408,7 @@ class Vimiv(Gtk.Window):
         thumbnails = os.listdir(thumbdir)
         for im in images:
             thumb = ".".join(im.split(".")[:-1]) + ".thumbnail" + ".png"
-            thumb = thumb.split("/")[-1]
+            thumb = os.path.basename(thumb)
             if thumb in thumbnails:
                 thumb = os.path.join(thumbdir, thumb)
                 shutil.os.remove(thumb)
@@ -693,7 +693,7 @@ class Vimiv(Gtk.Window):
         # Add all thumbnails to the liststore
         for i, thumb in enumerate(thumblist):
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(thumb)
-            name = thumb.split("/")[-1].split(".")[0]
+            name = os.path.basename(thumb).split(".")[0]
             if self.paths[i] in self.marked:
                 name = name + " [*]"
             self.liststore.append([pixbuf, name])
@@ -757,7 +757,7 @@ class Vimiv(Gtk.Window):
             if reload_image:
                 thumblist, errlist = imageactions.thumbnails_create([thumb])
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(thumblist[0])
-            name = thumblist[0].split("/")[-1].split(".")[0]
+            name = os.path.basename(thumblist[0]).split(".")[0]
             if thumb in self.marked:
                 name = name + " [*]"
             self.liststore.insert(index, [pixbuf, name])
@@ -809,7 +809,7 @@ class Vimiv(Gtk.Window):
             pbfWidth = int(pboWidth * self.zoom_percent)
             pbfHeight = int(pboHeight * self.zoom_percent)
             # Rescaling of svg
-            ending = self.paths[self.index].split("/")[-1].split(".")[-1]
+            ending = os.path.basename(self.paths[self.index]).split(".")[-1]
             if ending == "svg" and self.rescale_svg:
                 pixbufFinal = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                     self.paths[self.index], -1, pbfHeight, True)
@@ -839,13 +839,13 @@ class Vimiv(Gtk.Window):
                 self.left_label.set_text(os.path.abspath("."))
             # Position, name and thumbnail size in thumb mode
             elif self.thumbnail_toggled:
-                name = self.paths[self.thumbpos].split("/")[-1]
+                name = os.path.basename(self.paths[self.thumbpos])
                 message = "{0}/{1}  {2}  {3}".format(self.thumbpos+1,
                     len(self.paths), name, self.thumbsize)
                 self.left_label.set_text(message)
             # Image info in image mode
             else:
-                name = self.paths[self.index].split("/")[-1]
+                name = os.path.basename(self.paths[self.index])
                 message = "{0}/{1}  {2}  [{3:.0f}%]".format(self.index+1,
                     len(self.paths), name, self.zoom_percent*100)
                 self.left_label.set_text(message)
@@ -868,7 +868,7 @@ class Vimiv(Gtk.Window):
         self.right_label.set_markup(message)
         # Window title
         try:
-            name = self.paths[self.index].split("/")[-1]
+            name = os.path.basename(self.paths[self.index])
             self.set_title("vimiv - "+name)
         except:
             self.set_title("vimiv")
@@ -1237,8 +1237,7 @@ class Vimiv(Gtk.Window):
             if not self.paths:
                 self.scrolled_win.hide()
             else:  # Try to focus the current image in the library
-                path = self.paths[self.index].split("/")[:-1]
-                path = "/".join(path)
+                path = os.path.dirname(self.paths[self.index])
                 if path == os.path.abspath("."):
                     self.treeview.set_cursor(Gtk.TreePath([self.index]),
                                              None, False)
@@ -1437,7 +1436,7 @@ class Vimiv(Gtk.Window):
             self.treepos = self.dir_pos[dir]
         # Check if the last directory is in the current one
         else:
-            curdir = curdir.split("/")[-1]
+            curdir = os.path.basename(curdir)
             for i, fil in enumerate(self.files):
                 if curdir == fil:
                     self.treeview.set_cursor(Gtk.TreePath([i]), None, False)

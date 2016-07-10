@@ -72,7 +72,7 @@ class Completion():
                     if comp.endswith("/"):
                         completions[i] = comp.split("/")[-2] + "/"
                     else:
-                        completions[i] = comp.split("/")[-1]
+                        completions[i] = os.path.basename(comp)
             # And only the tags if completing tags
             elif comp_type == "tag":
                 for i, comp in enumerate(completions):
