@@ -1508,7 +1508,7 @@ class Vimiv(Gtk.Window):
             return
         # Populate filelist
         self.paths = []
-        self.paths = populate(tagged_images)
+        self.paths = populate(tagged_images)[0]
         if self.paths:
             self.scrolled_win.show()
             self.move_index(False, False, 0)
@@ -1660,7 +1660,7 @@ class Vimiv(Gtk.Window):
                 files[i] = os.path.join(pathdir, fil)
             self.num_str = str(self.index + 1)  # Remember current pos
             self.paths = []
-            self.paths = populate(files)
+            self.paths, self.index = populate(files)
             self.move_pos()
             if self.expand_lib and not self.paths:
                 self.grid.set_size_request(self.winsize[0], 10)
@@ -1694,7 +1694,7 @@ class Vimiv(Gtk.Window):
             else:
                 old_pos = []
             # Populate filelist
-            self.paths = populate(input)
+            self.paths, self.index = populate(input)
             if self.paths:  # Images were found
                 self.scrolled_win.show()
                 self.move_index(False, False, 0)
@@ -1702,7 +1702,7 @@ class Vimiv(Gtk.Window):
                 if self.library_toggled:
                     self.toggle_library()
             elif old_pos:  # Nothing found, go back
-                self.paths = populate(old_pos)
+                self.paths, self.index = populate(old_pos)
                 self.err_message("No image found")
         else:
             # Run every line as an internal command
