@@ -18,6 +18,7 @@ from vimiv.fileactions import populate, delete
 from vimiv.parser import parse_keys
 from vimiv import imageactions
 from vimiv.completions import Completion
+from vimiv.tags import tag_read, tag_write, tag_remove
 
 # Directories
 vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
@@ -102,8 +103,8 @@ class Vimiv(Gtk.Window):
                          "slideshow_inc": [self.set_slideshow_delay, 2, "+"],
                          "slideshow_dec": [self.set_slideshow_delay, 2, "-"],
                          "tag_load": [self.tag_load],
-                         "tag_remove": [self.tag_remove],
-                         "tag_write": [self.tag_write],
+                         "tag_remove": [tag_remove],
+                         "tag_write": [tag_write, self.marked],
                          "thumbnail": [self.toggle_thumbnail],
                          "zoom_in": [self.zoom_delta, +.25],
                          "zoom_out": [self.zoom_delta, -.25],
@@ -1497,16 +1498,7 @@ class Vimiv(Gtk.Window):
     def tag_load(self, name):
         """ Load all images in tag 'name' as current filelist """
         # Read file and get all tagged images as list
-        os.chdir(tagdir)
-        filename = os.path.join(tagdir, name)
-        tagged_images = []
-        try:
-            tagfile = open(filename, 'r')
-            for line in tagfile:
-                tagged_images.append(line.rstrip("\n"))
-        except:
-            self.err_message("Tagfile %s does not exist" % (filename))
-            return
+        tagged_images = tag_read(name)
         # Populate filelist
         self.paths = []
         self.paths = populate(tagged_images)[0]
@@ -1515,33 +1507,12 @@ class Vimiv(Gtk.Window):
             self.move_index(False, False, 0)
             # Close library if necessary
             if self.library_toggled:
+                self.grid.set_size_request(self.library_width-self.border_width,
+                                           10)
                 self.toggle_library()
         else:
             err = "Tagfile '%s' has no valid images" % (name)
             self.err_message(err)
-
-    def tag_write(self, name):
-        """ Append marked images to the tag 'name' """
-        # Open the file checking for content
-        filename = os.path.join(tagdir, name)
-        tagged_images = []
-        if os.path.isfile(filename):
-            tagfile = open(filename, 'r')
-            for line in tagfile:
-                tagged_images.append(line.rstrip("\n"))
-        tagfile = open(filename, 'a')
-        # Write each marked image to the file if it isn't there
-        for im in self.marked:
-            if im not in tagged_images:
-                tagfile.write(im + "\n")
-
-    def tag_remove(self, name):
-        """ Remove tag 'name' """
-        filename = os.path.join(tagdir, name)
-        if os.path.isfile(filename):
-            os.remove(filename)
-        else:
-            self.err_message("Tagfile %s does not exist" % (filename))
 
     def auto_resize(self, w):
         """ Automatically resize image when window is resized """
