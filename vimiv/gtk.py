@@ -56,7 +56,7 @@ class Vimiv(Gtk.Window):
                          "center": [self.center_window],
                          "clear_trash": [self.clear, 'Trash'],
                          "clear_thumbs": [self.clear, 'Thumbnails'],
-                         "command": [self.cmd_line_focus],
+                         "command": [self.focus_cmd_line],
                          "delete": [self.delete],
                          "discard_changes": [self.button_clicked, "w", False],
                          "first":  [self.move_pos, False],
@@ -69,14 +69,14 @@ class Vimiv(Gtk.Window):
                          "grow_lib": [self.resize_lib, None, True],
                          "last":  [self.move_pos, True],
                          "last_lib":  [self.move_pos_lib, True],
-                         "library": [self.library_toggle],
-                         "library_focus": [self.library_focus, True],
-                         "library_unfocus": [self.library_focus, False],
-                         "manipulate": [self.manipulate_toggle],
+                         "library": [self.toggle_library],
+                         "focus_library": [self.focus_library, True],
+                         "unfocus_library": [self.focus_library, False],
+                         "manipulate": [self.toggle_manipulate],
                          "mark": [self.mark],
                          "mark_all": [self.mark_all],
                          "mark_between": [self.mark_between],
-                         "mark_toggle": [self.mark_toggle],
+                         "toggle_mark": [self.toggle_mark],
                          "move_up": [self.move_up],
                          "next": [self.move_index, True, True],
                          "next!": [self.move_index, True, True, 1, True],
@@ -87,14 +87,14 @@ class Vimiv(Gtk.Window):
                          "q!": [self.quit, True],
                          "reload_lib": [self.reload, '.'],
                          "rotate": [self.rotate],
-                         "set animation!": [self.animation_toggle],
+                         "set animation!": [self.toggle_animation],
                          "set brightness": [self.cmd_edit, 'bri'],
                          "set contrast": [self.cmd_edit, 'con'],
                          "set library_width": [self.resize_lib],
                          "set overzoom!": [self.toggle_overzoom],
                          "set rescale_svg!": [self.toggle_rescale_svg],
                          "set sharpness": [self.cmd_edit, 'sha'],
-                         "set show_hidden!": [self.hidden_toggle],
+                         "set show_hidden!": [self.toggle_hidden],
                          "set slideshow_delay": [self.set_slideshow_delay],
                          "set statusbar!": [self.toggle_statusbar],
                          "shrink_lib": [self.resize_lib, None, False],
@@ -104,14 +104,14 @@ class Vimiv(Gtk.Window):
                          "tag_load": [self.tag_load],
                          "tag_remove": [self.tag_remove],
                          "tag_write": [self.tag_write],
-                         "thumbnail": [self.thumbnail_toggle],
+                         "thumbnail": [self.toggle_thumbnail],
                          "zoom_in": [self.zoom_delta, +.25],
                          "zoom_out": [self.zoom_delta, -.25],
                          "zoom_to": [self.zoom_to]}
 
-        self.functions = {"bri_focus": [self.focus_slider, "bri"],
-                          "con_focus": [self.focus_slider, "con"],
-                          "sha_focus": [self.focus_slider, "sha"],
+        self.functions = {"focus_bri": [self.focus_slider, "bri"],
+                          "focus_con": [self.focus_slider, "con"],
+                          "focus_sha": [self.focus_slider, "sha"],
                           "slider_dec": [self.change_slider, True, False],
                           "slider_inc": [self.change_slider, False, False],
                           "slider_dec_large": [self.change_slider, True, True],
@@ -528,7 +528,7 @@ class Vimiv(Gtk.Window):
                      button_no]:
             self.hboxman.add(item)
 
-    def manipulate_toggle(self):
+    def toggle_manipulate(self):
         if self.manipulate_toggled:
             self.manipulate_toggled = False
             self.hboxman.hide()
@@ -651,7 +651,7 @@ class Vimiv(Gtk.Window):
             self.zoom_percent = self.get_zoom_percent()
             self.update_image()
         # Done
-        self.manipulate_toggle()
+        self.toggle_manipulate()
         self.update_info()
 
     def button_opt_clicked(self, widget):
@@ -659,7 +659,7 @@ class Vimiv(Gtk.Window):
         self.manipulations[3] = True
         self.manipulate_image()
 
-    def animation_toggle(self):
+    def toggle_animation(self):
         if self.paths and not self.thumbnail_toggled:
             self.animation_toggled = not self.animation_toggled
             self.update_image()
@@ -716,7 +716,7 @@ class Vimiv(Gtk.Window):
 
     def iconview_clicked(self, w, count):
         # Move to the current position if the iconview is clicked
-        self.thumbnail_toggle()
+        self.toggle_thumbnail()
         count = count.get_indices()[0] + 1
         self.num_clear()
         for i in self.errorpos:
@@ -725,7 +725,7 @@ class Vimiv(Gtk.Window):
         self.num_str = str(count)
         self.move_pos()
 
-    def thumbnail_toggle(self):
+    def toggle_thumbnail(self):
         if self.thumbnail_toggled:
             self.viewport.remove(self.iconview)
             self.viewport.add(self.image)
@@ -738,7 +738,7 @@ class Vimiv(Gtk.Window):
             if self.library_focused:
                 self.treeview.grab_focus()
             if self.manipulate_toggled:
-                self.manipulate_toggle()
+                self.toggle_manipulate()
         else:
             self.err_message("No open image")
         # Update info for the current mode
@@ -1129,7 +1129,7 @@ class Vimiv(Gtk.Window):
         else:
             self.err_message("Marking directories is not supported")
 
-    def mark_toggle(self):
+    def toggle_mark(self):
         if self.marked:
             self.marked_bak = self.marked
             self.marked = []
@@ -1222,14 +1222,14 @@ class Vimiv(Gtk.Window):
         self.treeview_create()
         self.scrollable_treelist.add(self.treeview)
 
-    def library_toggle(self):
+    def toggle_library(self):
         """ Toggles the library """
         if self.library_toggled:
             self.remember_pos(os.path.abspath("."), self.treepos)
             self.boxlib.hide()
             self.animation_toggled = False  # Now play Gifs
             self.library_toggled = not self.library_toggled
-            self.library_focus(False)
+            self.focus_library(False)
         else:
             self.boxlib.show()
             if not self.paths:
@@ -1243,7 +1243,7 @@ class Vimiv(Gtk.Window):
                     self.treepos = self.index
             self.animation_toggled = True  # Do not play Gifs with the lib
             self.library_toggled = not self.library_toggled
-            self.library_focus(True)
+            self.focus_library(True)
             # Markings and other stuff might have changed
             self.reload(os.path.abspath("."))
         if not self.user_zoomed and self.paths:
@@ -1251,10 +1251,10 @@ class Vimiv(Gtk.Window):
         #  Change the toggle state of animation
         self.update_image()
 
-    def library_focus(self, library=True):
+    def focus_library(self, library=True):
         if library:
             if not self.library_toggled:
-                self.library_toggle()
+                self.toggle_library()
             self.treeview.grab_focus()
             self.library_focused = True
         else:
@@ -1400,12 +1400,12 @@ class Vimiv(Gtk.Window):
                 self.scrolled_win.show()
             # Show the selected file, if thumbnail toggled go out
             if self.thumbnail_toggled:
-                self.thumbnail_toggle()
+                self.toggle_thumbnail()
                 self.treeview.grab_focus()
             self.move_index(delta=count)
             # Close the library depending on key and repeat
             if close:
-                self.library_toggle()
+                self.toggle_library()
                 self.update_image()
 
     def move_up(self, dir="..", start=False):
@@ -1427,7 +1427,7 @@ class Vimiv(Gtk.Window):
         self.scrollable_treelist.remove(self.treeview)
         self.treeview_create(search)
         self.scrollable_treelist.add(self.treeview)
-        self.library_focus(True)
+        self.focus_library(True)
         # Check if there is a saved position
         if dir in self.dir_pos.keys():
             self.treeview.set_cursor(Gtk.TreePath(self.dir_pos[dir]),
@@ -1489,7 +1489,7 @@ class Vimiv(Gtk.Window):
         if not self.user_zoomed and self.paths:
             self.zoom_to(0)
 
-    def hidden_toggle(self):
+    def toggle_hidden(self):
         self.show_hidden = not self.show_hidden
         self.reload('.')
 
@@ -1514,7 +1514,7 @@ class Vimiv(Gtk.Window):
             self.move_index(False, False, 0)
             # Close library if necessary
             if self.library_toggled:
-                self.library_toggle()
+                self.toggle_library()
         else:
             err = "Tagfile '%s' has no valid images" % (name)
             self.err_message(err)
@@ -1700,7 +1700,7 @@ class Vimiv(Gtk.Window):
                 self.move_index(False, False, 0)
                 # Close library if necessary
                 if self.library_toggled:
-                    self.library_toggle()
+                    self.toggle_library()
             elif old_pos:  # Nothing found, go back
                 self.paths = populate(old_pos)
                 self.err_message("No image found")
@@ -1801,7 +1801,7 @@ class Vimiv(Gtk.Window):
         # Reconnect when done
         self.cmd_line.connect("changed", self.cmd_check_close)
 
-    def cmd_line_focus(self):
+    def focus_cmd_line(self):
         """ Open and focus the command line """
         # Colon for text
         self.cmd_line.set_text(":")
@@ -1836,7 +1836,7 @@ class Vimiv(Gtk.Window):
         self.cmd_line.set_text("")
         # Refocus the remembered widget
         if self.last_focused == "lib":
-            self.library_focus(True)
+            self.focus_library(True)
         elif self.last_focused == "man":
             self.scale_bri.grab_focus()
         elif self.last_focused == "thu":
@@ -1894,7 +1894,7 @@ class Vimiv(Gtk.Window):
                 self.err_message("No image to manipulate")
                 return
             else:
-                self.manipulate_toggle()
+                self.toggle_manipulate()
         if man == "opt":
             self.button_opt_clicked("button_widget")
         else:
@@ -1906,7 +1906,7 @@ class Vimiv(Gtk.Window):
 
     def cmd_search(self):
         """ Prepend search to the cmd_line and open it """
-        self.cmd_line_focus()
+        self.focus_cmd_line()
         self.cmd_line.set_text("/")
         self.cmd_line.set_position(-1)
 
@@ -2181,7 +2181,7 @@ class Vimiv(Gtk.Window):
         else:
             self.slideshow = False  # Slideshow without paths makes no sense
             self.toggle_statusbar()
-            self.library_focus(True)
+            self.focus_library(True)
             if self.expand_lib:
                 self.grid.set_size_request(self.winsize[0], 10)
             self.err_message("No valid paths, opening library viewer")
