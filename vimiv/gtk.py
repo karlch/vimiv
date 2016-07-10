@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
+""" Main class of vimiv, inherits from Gtk.Window """
 
 import os
 import re
@@ -273,6 +274,7 @@ class Vimiv(Gtk.Window):
             self.update_info()
 
     def toggle_statusbar(self):
+        """ Toggles statusbar resizing image if necessary """
         if not self.sbar and not self.cmd_line.is_visible():
             self.leftbox.hide()
         else:
@@ -301,7 +303,6 @@ class Vimiv(Gtk.Window):
                 err = "%s %d marked images" % (message, len(images))
             self.err_message(err)
         # Delete all thumbnails of manipulated images
-        thumbdir = os.path.expanduser("~/.vimiv/Thumbnails")
         thumbnails = os.listdir(thumbdir)
         for im in images:
             thumb = ".".join(im.split(".")[:-1]) + ".thumbnail" + ".png"
@@ -319,7 +320,7 @@ class Vimiv(Gtk.Window):
             cwise = cwise % 4
             # Rotate the image shown
             if self.paths[self.index] in images:
-                self.pixbufOriginal = self.pixbufOriginal.rotate_simple(
+                self.pixbuf_original = self.pixbuf_original.rotate_simple(
                     (90 * cwise))
                 self.update_image(False)
             # Rotate all files in external thread
@@ -339,17 +340,17 @@ class Vimiv(Gtk.Window):
         except:
             self.err_message("Error: Rotation of file failed")
 
-    def flip(self, dir):
+    def flip(self, directory):
         try:
-            dir = int(dir)
+            directory = int(directory)
             images = self.manipulated_images("Flipped")
             # Flip the image shown
             if self.paths[self.index] in images:
-                self.pixbufOriginal = self.pixbufOriginal.flip(dir)
+                self.pixbuf_original = self.pixbuf_original.flip(directory)
                 self.update_image(False)
             # Flip all files in an extra thread
             flip_thread = Thread(target=self.thread_for_flip, args=(images,
-                                                                    dir))
+                                                                    directory))
             flip_thread.start()
         except:
             self.err_message("Warning: Object cannot be flipped")
@@ -433,7 +434,7 @@ class Vimiv(Gtk.Window):
             self.update_info()
         elif self.paths and not(self.thumbnail_toggled or self.library_focused):
             try:
-                self.pixbufOriginal.is_static_image()
+                self.pixbuf_original.is_static_image()
                 self.err_message("Manipulating Gifs is not supported")
             except:
                 self.manipulate_toggled = True
@@ -473,8 +474,8 @@ class Vimiv(Gtk.Window):
 
         # Show the edited image
         self.image.clear()
-        self.pixbufOriginal = GdkPixbuf.PixbufAnimation.new_from_file(out)
-        self.pixbufOriginal = self.pixbufOriginal.get_static_image()
+        self.pixbuf_original = GdkPixbuf.PixbufAnimation.new_from_file(out)
+        self.pixbuf_original = self.pixbuf_original.get_static_image()
         if not self.toggle_fullscreen.window_is_fullscreen:
             self.imsize = self.image_size()
         self.zoom_percent = self.get_zoom_percent()
@@ -540,8 +541,8 @@ class Vimiv(Gtk.Window):
             os.remove(orig)
             # Show the original image
             self.image.clear()
-            self.pixbufOriginal = GdkPixbuf.PixbufAnimation.new_from_file(path)
-            self.pixbufOriginal = self.pixbufOriginal.get_static_image()
+            self.pixbuf_original = GdkPixbuf.PixbufAnimation.new_from_file(path)
+            self.pixbuf_original = self.pixbuf_original.get_static_image()
             self.paths[self.index] = path
             if not self.toggle_fullscreen.window_is_fullscreen:
                 self.imsize = self.image_size()
@@ -618,6 +619,7 @@ class Vimiv(Gtk.Window):
                 os.remove(thumb)
 
     def iconview_clicked(self, w, count):
+        """ Selects image when thumbnail was selected """
         # Move to the current position if the iconview is clicked
         self.toggle_thumbnail()
         count = count.get_indices()[0] + 1
@@ -629,6 +631,7 @@ class Vimiv(Gtk.Window):
         self.move_pos()
 
     def toggle_thumbnail(self):
+        """ Toggles thumbnail mode """
         if self.thumbnail_toggled:
             self.viewport.remove(self.iconview)
             self.viewport.add(self.image)
@@ -653,11 +656,12 @@ class Vimiv(Gtk.Window):
         for i in self.errorpos:
             if index > i:
                 index -= 1
-        iter = self.liststore.get_iter(index)
-        self.liststore.remove(iter)
+        liststore_iter = self.liststore.get_iter(index)
+        self.liststore.remove(liststore_iter)
         try:
             if reload_image:
-                thumblist, errlist = imageactions.thumbnails_create([thumb])
+                thumblist = imageactions.thumbnails_create([thumb],
+                                                           self.thumbsize)[0]
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(thumblist[0])
             name = os.path.basename(thumblist[0]).split(".")[0]
             if thumb in self.marked:
@@ -679,55 +683,55 @@ class Vimiv(Gtk.Window):
         self.scrolled_win.emit('scroll-child',
                                Gtk.ScrollType.STEP_FORWARD, False)
 
-    def get_zoom_percent(self, zWidth=False, zHeight=False):
+    def get_zoom_percent(self, z_width=False, z_height=False):
         """ returns the current zoom factor """
         # Size of the file
-        pboWidth = self.pixbufOriginal.get_width()
-        pboHeight = self.pixbufOriginal.get_height()
-        pboScale = pboWidth / pboHeight
+        pbo_width = self.pixbuf_original.get_width()
+        pbo_height = self.pixbuf_original.get_height()
+        pbo_scale = pbo_width / pbo_height
         # Size of the image to be shown
-        wScale = self.imsize[0] / self.imsize[1]
-        stickout = zWidth | zHeight
+        w_scale = self.imsize[0] / self.imsize[1]
+        stickout = z_width | z_height
 
         # Image is completely shown and user doesn't want overzoom
-        if (pboWidth < self.imsize[0] and pboHeight < self.imsize[1] and
+        if (pbo_width < self.imsize[0] and pbo_height < self.imsize[1] and
                 not (stickout or self.toggle_vars.overzoom)):
             return 1
         # "Portrait" image
-        elif (pboScale < wScale and not stickout) or zHeight:
-            return self.imsize[1] / pboHeight
+        elif (pbo_scale < w_scale and not stickout) or z_height:
+            return self.imsize[1] / pbo_height
         # "Panorama/landscape" image
         else:
-            return self.imsize[0] / pboWidth
+            return self.imsize[0] / pbo_width
 
     def update_image(self, update_info=True, update_gif=True):
         """ Show the final image """
         if not self.paths:
             return
-        pboWidth = self.pixbufOriginal.get_width()
-        pboHeight = self.pixbufOriginal.get_height()
+        pbo_width = self.pixbuf_original.get_width()
+        pbo_height = self.pixbuf_original.get_height()
 
         try:  # If possible scale the image
-            pbfWidth = int(pboWidth * self.zoom_percent)
-            pbfHeight = int(pboHeight * self.zoom_percent)
+            pbf_width = int(pbo_width * self.zoom_percent)
+            pbf_height = int(pbo_height * self.zoom_percent)
             # Rescaling of svg
             ending = os.path.basename(self.paths[self.index]).split(".")[-1]
             if ending == "svg" and self.toggle_vars.rescale_svg:
-                pixbufFinal = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                    self.paths[self.index], -1, pbfHeight, True)
+                pixbuf_final = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+                    self.paths[self.index], -1, pbf_height, True)
             else:
-                pixbufFinal = self.pixbufOriginal.scale_simple(
-                    pbfWidth, pbfHeight, GdkPixbuf.InterpType.BILINEAR)
-            self.image.set_from_pixbuf(pixbufFinal)
+                pixbuf_final = self.pixbuf_original.scale_simple(
+                    pbf_width, pbf_height, GdkPixbuf.InterpType.BILINEAR)
+            self.image.set_from_pixbuf(pixbuf_final)
         except:  # If not it must me an animation
             # TODO actual pause and play of Gifs
             self.zoom_percent = 1
             if update_gif:
                 if not self.animation_toggled:
-                    self.image.set_from_animation(self.pixbufOriginal)
+                    self.image.set_from_animation(self.pixbuf_original)
                 else:
-                    pixbufFinal = self.pixbufOriginal.get_static_image()
-                    self.image.set_from_pixbuf(pixbufFinal)
+                    pixbuf_final = self.pixbuf_original.get_static_image()
+                    self.image.set_from_pixbuf(pixbuf_final)
         # Update the statusbar if required
         if update_info:
             self.update_info()
@@ -808,8 +812,8 @@ class Vimiv(Gtk.Window):
         try:
             self.zoom_percent = self.zoom_percent * (1 + delta)
             # Catch some unreasonable zooms
-            if (self.pixbufOriginal.get_height()*self.zoom_percent < 5 or
-                    self.pixbufOriginal.get_height()*self.zoom_percent >
+            if (self.pixbuf_original.get_height()*self.zoom_percent < 5 or
+                    self.pixbuf_original.get_height()*self.zoom_percent >
                     self.screensize[0]*5):
                 raise ValueError
             self.user_zoomed = True
@@ -818,7 +822,7 @@ class Vimiv(Gtk.Window):
             self.zoom_percent = self.zoom_percent / (1 + delta)
             self.err_message("Warning: Object cannot be zoomed (further)")
 
-    def zoom_to(self, percent, zWidth=False, zHeight=False):
+    def zoom_to(self, percent, z_width=False, z_height=False):
         """ Zooms to a given percentage """
         if self.thumbnail_toggled:
             return
@@ -841,10 +845,10 @@ class Vimiv(Gtk.Window):
         try:
             self.imsize = self.image_size()
             self.zoom_percent = (percent if percent
-                                 else self.get_zoom_percent(zWidth, zHeight))
+                                 else self.get_zoom_percent(z_width, z_height))
             # Catch some unreasonable zooms
-            if (self.pixbufOriginal.get_height()*self.zoom_percent < 5 or
-                    self.pixbufOriginal.get_height()*self.zoom_percent >
+            if (self.pixbuf_original.get_height()*self.zoom_percent < 5 or
+                    self.pixbuf_original.get_height()*self.zoom_percent >
                     self.screensize[0]*5):
                 self.zoom_percent = before
                 raise ValueError
@@ -858,9 +862,9 @@ class Vimiv(Gtk.Window):
         if not self.paths or self.thumbnail_toggled:
             return
         # Vertical
-        pboHeight = self.pixbufOriginal.get_height()
+        pbo_height = self.pixbuf_original.get_height()
         vadj = self.viewport.get_vadjustment().get_value()
-        vact = self.zoom_percent * pboHeight
+        vact = self.zoom_percent * pbo_height
         diff = vact - self.imsize[1]
         if diff > 0:
             toscroll = (diff - 2*vadj) / 2
@@ -872,9 +876,9 @@ class Vimiv(Gtk.Window):
             Gtk.Adjustment.set_step_increment(self.viewport.get_vadjustment(),
                                               100)
         # Horizontal
-        pboWidth = self.pixbufOriginal.get_width()
+        pbo_width = self.pixbuf_original.get_width()
         hadj = self.viewport.get_hadjustment().get_value()
-        hact = self.zoom_percent * pboWidth
+        hact = self.zoom_percent * pbo_width
         if diff > 0:
             diff = hact - self.imsize[0]
             toscroll = (diff - 2*hadj) / 2
@@ -913,10 +917,10 @@ class Vimiv(Gtk.Window):
                 self.delete()
                 return
             else:
-                self.pixbufOriginal = GdkPixbuf.PixbufAnimation.new_from_file(
+                self.pixbuf_original = GdkPixbuf.PixbufAnimation.new_from_file(
                     path)
-            if self.pixbufOriginal.is_static_image():
-                self.pixbufOriginal = self.pixbufOriginal.get_static_image()
+            if self.pixbuf_original.is_static_image():
+                self.pixbuf_original = self.pixbuf_original.get_static_image()
                 self.imsize = self.image_size()
                 self.zoom_percent = self.get_zoom_percent()
             else:
@@ -943,24 +947,24 @@ class Vimiv(Gtk.Window):
                 raise ValueError
         except:
             return
-        max = len(self.paths)
+        max_pos = len(self.paths)
         if self.thumbnail_toggled:
             current = self.thumbpos % len(self.paths)
-            max = max - len(self.errorpos)
+            max_pos = max_pos - len(self.errorpos)
         else:
             current = (self.index) % len(self.paths)
         # Move to definition by keys or end/beg
         if self.num_str:
             pos = int(self.num_str)
         elif forward:
-            pos = max
+            pos = max_pos
         else:
             pos = 1
         # Catch exceptions
         try:
             current = int(current)
-            max = int(max)
-            if pos < 0 or pos > max:
+            max_pos = int(max_pos)
+            if pos < 0 or pos > max_pos:
                 raise ValueError
         except:
             self.err_message("Warning: Unsupported index")
@@ -998,11 +1002,11 @@ class Vimiv(Gtk.Window):
         self.num_str = ""
         self.update_info()
 
-    def recursive_search(self, dir):
-        """ Searchs a given directory recursively for images """
-        self.paths = self.filelist_create(dir)
+    def recursive_search(self, directory):
+        """ Searchs a given directoryectory recursively for images """
+        self.paths = self.filelist_create(directory)
         for path in self.paths:
-            path = os.path.join(dir, path)
+            path = os.path.join(directory, path)
             if os.path.isfile(path):
                 self.paths.append(path)
             else:
@@ -1034,6 +1038,8 @@ class Vimiv(Gtk.Window):
             self.err_message("Marking directories is not supported")
 
     def toggle_mark(self):
+        """ Toggles mark status: if images are marked all marks are removed,
+            otherwise the last marked images are re-marked """
         if self.marked:
             self.marked_bak = self.marked
             self.marked = []
@@ -1086,7 +1092,8 @@ class Vimiv(Gtk.Window):
             self.marked.insert(-1, files[i])
         self.mark_reload()
 
-    def mark_reload(self, all=True, current=None):
+    def mark_reload(self, reload_all=True, current=None):
+        """ Reload all information which contains marks """
         self.update_info()
         # Update lib
         if self.library_toggled:
@@ -1095,7 +1102,7 @@ class Vimiv(Gtk.Window):
             self.update_info()
         if self.thumbnail_toggled:
             for i, image in enumerate(self.paths):
-                if all or image in current:
+                if reload_all or image in current:
                     self.thumb_reload(image, i, False)
 
     def library(self):
@@ -1155,6 +1162,7 @@ class Vimiv(Gtk.Window):
         self.update_image()
 
     def focus_library(self, library=True):
+        """ Focused library object """
         if library:
             if not self.library_toggled:
                 self.toggle_library()
@@ -1167,6 +1175,7 @@ class Vimiv(Gtk.Window):
         self.update_info()
 
     def treeview_create(self, search=False):
+        """ Creates all the gtk widgets for the treeview """
         # The search parameter is necessary to highlight searches after a search
         # and to delete search items if a new directory is entered
         if not search:
@@ -1216,7 +1225,7 @@ class Vimiv(Gtk.Window):
             self.files = [
                 possible_file
                 for possible_file in self.files
-                if (is_image(possible_file) or os.path.isdir(possible_file))]
+                if is_image(possible_file) or os.path.isdir(possible_file)]
         # Add all the supported files
         for fil in self.files:
             markup_string = fil
@@ -1232,14 +1241,16 @@ class Vimiv(Gtk.Window):
 
         return self.datalist
 
-    def filelist_create(self, dir="."):
-        """ Create a filelist from all files in dir """
+    def filelist_create(self, directory="."):
+        """ Create a filelist from all files in directory """
         # Get data from ls -lh and parse it correctly
         if self.show_hidden:
-            p = Popen(['ls', '-lAhL', dir], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            p = Popen(['ls', '-lAhL', directory], stdin=PIPE, stdout=PIPE,
+                      stderr=PIPE)
         else:
-            p = Popen(['ls', '-lhL', dir], stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        data, err = p.communicate()
+            p = Popen(['ls', '-lhL', directory], stdin=PIPE, stdout=PIPE,
+                      stderr=PIPE)
+        data = p.communicate()[0]
         data = data.decode(encoding='UTF-8').split("\n")[1:-1]
         files = []
         self.filesize = {}
@@ -1248,11 +1259,11 @@ class Vimiv(Gtk.Window):
             # Catch stupid filenames with whitespaces
             filename = " ".join(fil[8:])
             files.append(filename)
-            # Number of images in dir as filesize
+            # Number of images in directory as filesize
             if os.path.isdir(filename):
                 try:
                     subfiles = os.listdir(filename)
-                    subfiles = [ possible_file
+                    subfiles = [possible_file
                         for possible_file in subfiles
                         if is_image(possible_file)]
                     self.filesize[filename] = str(len(subfiles))
@@ -1273,7 +1284,7 @@ class Vimiv(Gtk.Window):
             self.remember_pos(os.path.abspath("."), count)
         # Tags
         if os.path.abspath(".") == tagdir:
-            self.tag_handler.tag_load(fil)
+            self.tag_handler.tag_load(fil)  # TODO fix
             return
         # Rest
         if os.path.isdir(fil):  # Open the directory
@@ -1291,7 +1302,8 @@ class Vimiv(Gtk.Window):
             self.treepos = path
             self.paths, self.index = populate(self.files)
             if self.paths:
-                self.grid.set_size_request(self.library_width-self.border_width, 10)
+                self.grid.set_size_request(self.library_width-self.border_width,
+                                           10)
                 self.scrolled_win.show()
             # Show the selected file, if thumbnail toggled go out
             if self.thumbnail_toggled:
@@ -1303,31 +1315,31 @@ class Vimiv(Gtk.Window):
                 self.toggle_library()
                 self.update_image()
 
-    def move_up(self, dir="..", start=False):
-        """ move (up/to) dir in the library """
+    def move_up(self, directory="..", start=False):
+        """ move (up/to) directory in the library """
         try:
             curdir = os.path.abspath(".")
-            os.chdir(dir)
+            os.chdir(directory)
             if not start:
                 self.reload(os.path.abspath("."), curdir)
         except:
             self.err_message("Error: directory not accessible")
 
-    def remember_pos(self, dir, count):
+    def remember_pos(self, directory, count):
         """ Write the current position in dir to the dir_pos dictionary """
-        self.dir_pos[dir] = count
+        self.dir_pos[directory] = count
 
-    def reload(self, dir, curdir="", search=False):
+    def reload(self, directory, curdir="", search=False):
         """ Reloads the treeview """
         self.scrollable_treelist.remove(self.treeview)
         self.treeview_create(search)
         self.scrollable_treelist.add(self.treeview)
         self.focus_library(True)
         # Check if there is a saved position
-        if dir in self.dir_pos.keys():
-            self.treeview.set_cursor(Gtk.TreePath(self.dir_pos[dir]),
+        if directory in self.dir_pos.keys():
+            self.treeview.set_cursor(Gtk.TreePath(self.dir_pos[directory]),
                                      None, False)
-            self.treepos = self.dir_pos[dir]
+            self.treepos = self.dir_pos[directory]
         # Check if the last directory is in the current one
         else:
             curdir = os.path.basename(curdir)
@@ -1340,14 +1352,14 @@ class Vimiv(Gtk.Window):
 
     def move_pos_lib(self, forward=True):
         """ Move to pos in lib """
-        max = len(self.files) - 1
+        max_pos = len(self.files) - 1
         if self.num_str:
             pos = int(self.num_str) - 1
-            if pos < 0 or pos > max:
+            if pos < 0 or pos > max_pos:
                 self.err_message("Warning: Unsupported index")
                 return False
         elif forward:
-            pos = max
+            pos = max_pos
         else:
             pos = 0
         try:
@@ -1398,13 +1410,14 @@ class Vimiv(Gtk.Window):
                 self.grid.set_size_request(self.winsize[0], 10)
             self.cmd_line_info.set_max_width_chars(self.winsize[0]/16)
 
-    def reload_changes(self, dir, reload_path=True, pipe=False, input=None):
+    def reload_changes(self, directory, reload_path=True, pipe=False,
+                       pipe_input=None):
         """ Reload everything, meaning filelist in library and image """
-        if (dir == os.path.abspath(".") and dir != tagdir and
+        if (directory == os.path.abspath(".") and directory != tagdir and
                 self.library_toggled):
             if self.treepos >= 0 and self.treepos <= len(self.files):
-                self.remember_pos(dir, self.treepos)
-            self.reload(dir)
+                self.remember_pos(directory, self.treepos)
+            self.reload(directory)
         if self.paths and reload_path:
             pathdir = os.path.dirname(self.paths[self.index])
             files = sorted(os.listdir(pathdir))
@@ -1421,7 +1434,7 @@ class Vimiv(Gtk.Window):
                     self.thumb_reload(image, i, False)
         # Run the pipe
         if pipe:
-            self.commandline.pipe(input)
+            self.commandline.pipe(pipe_input)
         return False  # To stop the timer
 
     def history(self, down):
@@ -1526,9 +1539,8 @@ class Vimiv(Gtk.Window):
 
         return True  # Deactivates default bindings (here for Tab)
 
-    def clear(self, dir):
-        """ Remove all files in dir (Trash or Thumbnails) """
-        trashdir = os.path.join(os.path.expanduser("~/.vimiv"), dir)
+    def clear(self, directory):
+        """ Remove all files in directory (Trash or Thumbnails) """
         for fil in os.listdir(trashdir):
             fil = os.path.join(trashdir, fil)
             os.remove(fil)
@@ -1671,6 +1683,7 @@ class Vimiv(Gtk.Window):
         self.reload_changes(os.path.abspath("."), True)
 
     def handle_key_press(self, widget, event, window):
+        """ Runs the correct function per keypress """
         keyval = event.keyval
         keyname = Gdk.keyval_name(keyval)
         shiftkeys = ["space", "Return", "Tab", "Escape", "BackSpace",
@@ -1679,7 +1692,7 @@ class Vimiv(Gtk.Window):
         if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
             keyname = "^" + keyname
         if event.get_state() & Gdk.ModifierType.MOD1_MASK:
-            keyname = "Alt+".format(keyname)
+            keyname = "Alt+" + keyname
         # Shift+ for all letters and for keys that don't support it
         if (event.get_state() & Gdk.ModifierType.SHIFT_MASK and
                 (len(keyname) < 2 or keyname in shiftkeys)):

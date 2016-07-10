@@ -11,7 +11,8 @@ class Commands(object):
         self.vimiv.tag_handler = TagHandler(vimiv)
 
         # Dictionary with command names and the corresponding functions
-        self.vimiv.commands = {"accept_changes": [self.vimiv.button_clicked, "w", True],
+        self.vimiv.commands = {
+            "accept_changes": [self.vimiv.button_clicked, "w", True],
             "autorotate": [self.vimiv.rotate_auto],
             "center": [self.vimiv.center_window],
             "clear_trash": [self.vimiv.clear, 'Trash'],

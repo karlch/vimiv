@@ -5,7 +5,9 @@ import re
 import os
 from threading import Thread
 from subprocess import Popen, PIPE
-from gi.repository import GLib, Gtk
+from gi import require_version
+require_version('Gtk', '3.0')
+from gi.repository import Gtk, GLib
 from vimiv.fileactions import populate
 
 # Directories
@@ -77,32 +79,34 @@ class CommandLine(object):
         cmd = re.sub(r'(?<!\\)(\*)', " ".join(filelist), cmd)
         cmd = re.sub(r'(\\)(?!\\)', '', cmd)
         # Run the command in an extra thread
-        dir = os.path.abspath(".")
-        cmd_thread = Thread(target=self.thread_for_external, args=(cmd, dir))
+        directory = os.path.abspath(".")
+        cmd_thread = Thread(target=self.thread_for_external, args=(cmd,
+                                                                   directory))
         cmd_thread.start()
         # Undo the escaping
         fil = fil.replace("\\\\\\\\ ", " ")
         for i, f in enumerate(filelist):
             filelist[i] = f.replace("\\\\\\\\ ", " ")
 
-    def thread_for_external(self, cmd, dir):
+    def thread_for_external(self, cmd, directory):
         """ Starting a new thread for external commands """
         try:
             # Possibility to "pipe to vimiv"
             if cmd[-1] == "|":
                 cmd = cmd.rstrip("|")
                 p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-                pipe = True
+                from_pipe = True
             else:
                 p = Popen(cmd, stderr=PIPE, shell=True)
-                pipe = False
+                from_pipe = False
             # Get output and error and run the command
             out, err = p.communicate()
             if p.returncode:
                 err = err.decode('utf-8').split("\n")[0]
                 self.vimiv.err_message(err)
             else:
-                GLib.timeout_add(1, self.vimiv.reload_changes, dir, True, pipe, out)
+                GLib.timeout_add(1, self.vimiv.reload_changes, directory, True,
+                                 from_pipe, out)
             # Reload everything after an external command if we haven't moved,
             # you never know what happend ...
             # Must be in a timer because not all Gtk stuff can be accessed from
@@ -112,18 +116,20 @@ class CommandLine(object):
             cmd = e.split()[-1]
             self.vimiv.err_message("Command %s not found" % (cmd))
 
-    def pipe(self, input):
+
+    def pipe(self, pipe_input):
         """ Run output of external command in a pipe
             This checks for directories, files and vimiv commands """
-        # Leave if no input came
-        if not input:
-            self.vimiv.err_message("No input from pipe")
+        # Leave if no pipe_input came
+        if not pipe_input:
+            self.vimiv.err_message("No pipe_input from pipe")
             return
-        # Make the input a file
-        input = input.decode('utf-8')
-        input = input.split("\n")[:-1]  # List of commands without empty line
-        startout = input[0]
-        # Do different stuff depending on the first line of input
+        # Make the pipe_input a file
+        pipe_input = pipe_input.decode('utf-8')
+        # List of commands without empty line
+        pipe_input = pipe_input.split("\n")[:-1]
+        startout = pipe_input[0]
+        # Do different stuff depending on the first line of pipe_input
         if os.path.isdir(startout):
             self.vimiv.move_up(startout)
         elif os.path.isfile(startout):
@@ -134,7 +140,7 @@ class CommandLine(object):
             else:
                 old_pos = []
             # Populate filelist
-            self.vimiv.paths, self.vimiv.index = populate(input)
+            self.vimiv.paths, self.vimiv.index = populate(pipe_input)
             if self.vimiv.paths:  # Images were found
                 self.vimiv.scrolled_win.show()
                 self.vimiv.move_index(False, False, 0)
@@ -146,8 +152,9 @@ class CommandLine(object):
                 self.vimiv.err_message("No image found")
         else:
             # Run every line as an internal command
-            for cmd in input:
+            for cmd in pipe_input:
                 self.run_command(cmd)
+
 
     def cmd_path(self, path):
         """ Run a path command, namely populate files or focus directory """

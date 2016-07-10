@@ -123,41 +123,35 @@ def overwrite_section(key, config, settings):
     section = config[key]
     for setting in section.keys():
         # Parse the setting so it gets the correct value
-        if setting == "geometry":
-            try:
+        try:
+            if setting == "geometry":
                 file_set = (int(section[setting].split("x")[0]),
                             int(section[setting].split("x")[1]))
-            except ValueError:
-                continue
-        elif setting == "thumbsize":
-            file_set = section[setting].lstrip("(").rstrip(")")
-            file_set = file_set.split(",")
-            try:
+            elif setting == "thumbsize":
+                file_set = section[setting].lstrip("(").rstrip(")")
+                file_set = file_set.split(",")
                 file_set[0] = int(file_set[0])
                 file_set[1] = int(file_set[1])
                 if len(file_set) != 2:
                     raise ValueError
-            except ValueError:
-                continue
-        elif setting in ["library_width", "slideshow_delay"]:
-            # Must be an integer
-            try:
+            elif setting in ["library_width", "slideshow_delay"]:
+                # Must be an integer
                 file_set = int(section[setting])
-            except ValueError:
-                continue
-        elif setting == "border_color":
-            pass
-        elif setting == "desktop_start_dir":
-            file_set = os.path.expanduser(section[setting])
-            # Do not change the setting if the directory doesn't exist
-            if not os.path.isdir(file_set):
-                continue
-        elif setting == "markup":
-            file_set = section[setting]
-        else:
-            file_set = section.getboolean(setting)
+            elif setting == "border_color":
+                pass
+            elif setting == "desktop_start_dir":
+                file_set = os.path.expanduser(section[setting])
+                # Do not change the setting if the directory doesn't exist
+                if not os.path.isdir(file_set):
+                    continue
+            elif setting == "markup":
+                file_set = section[setting]
+            else:
+                file_set = section.getboolean(setting)
 
-        settings[key][setting] = file_set
+            settings[key][setting] = file_set
+        except ValueError:
+            continue
 
     return settings
 

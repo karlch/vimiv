@@ -81,7 +81,7 @@ def delete(filelist):
         os.mkdir(deldir)
 
     # Loop over every file
-    for i, im in enumerate(filelist):
+    for im in filelist:
         if os.path.isdir(im):
             return 1  # Error
         if os.path.exists(im):

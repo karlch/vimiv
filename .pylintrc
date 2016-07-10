@@ -1,0 +1,63 @@
+# vim: ft=dosini fileencoding=utf-8:
+
+[MASTER]
+
+[MESSAGES CONTROL]
+enable=all
+disable=no-self-use,
+        fixme,
+        global-statement,
+        locally-disabled,
+        too-many-ancestors,
+        too-few-public-methods,
+        too-many-public-methods,
+        cyclic-import,
+        bad-continuation,
+        too-many-instance-attributes,
+        blacklisted-name,
+        too-many-lines,
+        logging-format-interpolation,
+        broad-except,
+        bare-except,
+        catching-non-exception,
+        eval-used,
+        exec-used,
+        file-ignored,
+        wrong-import-order,
+        wrong-import-position,
+        ungrouped-imports,
+        redefined-variable-type,
+        suppressed-message,
+        too-many-return-statements,
+        unused-argument,
+        protected-access
+
+[BASIC]
+function-rgx=[a-z_][a-z0-9_]{2,50}$
+const-rgx=[A-Za-z_][A-Za-z0-9_]{0,30}$
+method-rgx=[a-z_][A-Za-z0-9_]{2,50}$
+attr-rgx=[a-z_][a-z0-9_]{0,30}$
+argument-rgx=[a-z_][a-z0-9_]{0,30}$
+variable-rgx=[a-z_][a-z0-9_]{0,30}$
+docstring-min-length=3
+no-docstring-rgx=(^_|^main$)
+
+[FORMAT]
+max-line-length=80
+max-module-lines=2000
+ignore-long-lines=(<?https?://|^# Copyright 201\d|# (pylint|flake8): disable=)
+expected-line-ending-format=LF
+
+[SIMILARITIES]
+min-similarity-lines=8
+
+[VARIABLES]
+dummy-variables-rgx=_.*
+
+[DESIGN]
+max-args=10
+
+[CLASSES]
+valid-metaclass-classmethod-first-arg=cls
+
+[TYPECHECK]

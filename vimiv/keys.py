@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 """ Handles key_press in vimiv """
+from gi import require_version
+require_version('Gdk', '3.0')
 from gi.repository import Gdk
 
 

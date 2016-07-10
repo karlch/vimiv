@@ -84,7 +84,7 @@ def autorotate(filelist):
     return rotated_images, method
 
 
-def thumbnails_create(filelist , thumbsize):
+def thumbnails_create(filelist, thumbsize):
     """ Creates thumbnails for all images in filelist if they don't exist """
     # Create thumbnail directory if necessary
     thumbdir = os.path.expanduser("~/.vimiv/Thumbnails")

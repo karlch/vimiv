@@ -54,36 +54,7 @@ class Completion():
 
         # Find the best matching completion as output
         if completions:
-            # Output, start with : and the prepended numbers
-            output = ":" + self.repeat
-            # Find last equal character
-            first = completions[0]
-            last = completions[-1]
-            for i, char in enumerate(first):
-                if char == last[i]:
-                    output += char
-                else:
-                    break
-
-            # Only show the filename if completing self.paths
-            # TODO
-            if comp_type == "path":
-                for i, comp in enumerate(completions):
-                    if comp.endswith("/"):
-                        completions[i] = comp.split("/")[-2] + "/"
-                    else:
-                        completions[i] = os.path.basename(comp)
-            # And only the tags if completing tags
-            elif comp_type == "tag":
-                for i, comp in enumerate(completions):
-                    completions[i] = " ".join(comp.split()[1:])
-
-            # A string with possible completions for the info if here is more
-            # than one completion
-            if len(completions) > 1:
-                compstr = "  " + "  ".join(completions)
-            else:
-                compstr = ""
+            compstr, output = self.best_match(completions, comp_type)
 
         else:
             compstr = "  No matching completion"
@@ -92,6 +63,42 @@ class Completion():
         # Return the best matching completion and the string with all
         # suggestions
         return output, compstr
+
+    def best_match(self, completions, comp_type):
+        """ Finds the best matching completion and returns the formatted
+            completions and the best match"""
+        # Output, start with : and the prepended numbers
+        output = ":" + self.repeat
+        # Find last equal character
+        first = completions[0]
+        last = completions[-1]
+        for i, char in enumerate(first):
+            if char == last[i]:
+                output += char
+            else:
+                break
+
+        # Only show the filename if completing self.paths
+        # TODO
+        if comp_type == "path":
+            for i, comp in enumerate(completions):
+                if comp.endswith("/"):
+                    completions[i] = comp.split("/")[-2] + "/"
+                else:
+                    completions[i] = os.path.basename(comp)
+        # And only the tags if completing tags
+        elif comp_type == "tag":
+            for i, comp in enumerate(completions):
+                completions[i] = " ".join(comp.split()[1:])
+
+        # A string with possible completions for the info if here is more
+        # than one completion
+        if len(completions) > 1:
+            compstr = "  " + "  ".join(completions)
+        else:
+            compstr = ""
+
+        return compstr, output
 
     def complete_internal(self):
         pass

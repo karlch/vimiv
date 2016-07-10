@@ -3,6 +3,8 @@
 """ Contains a few standard variables of vimiv """
 
 from subprocess import Popen, PIPE
+from gi import require_version
+require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
 

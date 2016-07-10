@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 # encoding: utf-8
+""" vimiv init: tests some imports and imports main """
+
+import sys
 
 try:
     from gi import require_version

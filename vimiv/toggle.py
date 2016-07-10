@@ -2,6 +2,8 @@
 # encoding: utf-8
 """ Toggles fullscreen properly for vimiv """
 
+from gi import require_version
+require_version('Gdk', '3.0')
 from gi.repository import Gdk
 
 class FullscreenToggler(object):
@@ -28,6 +30,7 @@ class FullscreenToggler(object):
             Gdk.WindowState.FULLSCREEN & event.new_window_state)
 
     def toggle(self):
+        """ Toggles fullscreen """
         if self.window_is_fullscreen:
             self.window.unfullscreen()
         else:
