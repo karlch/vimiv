@@ -131,9 +131,9 @@ class Completion():
             If not running within an external command it will sort out
             unsupported filetypes """
         # Directory of the path, default to .
-        directory = os.path.dirname(path)
+        directory = os.path.dirname(path) if os.path.dirname(path) else path
         if not os.path.exists(os.path.expanduser(directory)):
-            directory = path + "/"
+            directory = "."
         # Files in that directory
         files = listdir_wrapper(directory, self.show_hidden)
         # Format them neatly depending on directory and type
