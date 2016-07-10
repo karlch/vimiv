@@ -302,7 +302,7 @@ class Vimiv(Gtk.Window):
     def toggle_slideshow(self):
         """ Toggles the slideshow or updates the delay """
         if not self.paths:
-            self.err_message("No valid self.paths, starting slideshow failed")
+            self.err_message("No valid paths, starting slideshow failed")
             return
         if self.thumbnail_toggled:
             self.err_message("Slideshow makes no sense in thumbnail mode")
@@ -2184,7 +2184,7 @@ class Vimiv(Gtk.Window):
             self.library_focus(True)
             if self.expand_lib:
                 self.grid.set_size_request(self.winsize[0], 10)
-            self.err_message("No valid self.paths, opening library viewer")
+            self.err_message("No valid paths, opening library viewer")
 
         # Finally show the main window
         Gtk.main()
