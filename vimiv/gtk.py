@@ -1725,8 +1725,9 @@ class Vimiv(Gtk.Window):
             else:
                 # If it is an image open it
                 self.paths = []
-                self.paths = populate([path])
-                self.move_index(True, False, 0)
+                self.paths, index = populate([path])
+                self.index = 0
+                self.move_index(True, False, index)
                 #  Reload library in lib mode, do not open it in image mode
                 abspath = os.path.dirname(path)
                 if self.last_focused == "lib":
@@ -1739,6 +1740,10 @@ class Vimiv(Gtk.Window):
                                                      None, False)
                             self.treepos = i
                             break
+                    # Show the image
+                    self.grid.set_size_request(self.library_width-
+                                               self.border_width, 10)
+                    self.scrolled_win.show()
                 else:
                     self.move_up(abspath, True)
         except:
