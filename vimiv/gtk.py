@@ -1230,9 +1230,9 @@ class Vimiv(Gtk.Window):
         """ Create a filelist from all files in dir """
         # Get data from ls -lh and parse it correctly
         if self.show_hidden:
-            p = Popen(['ls', '-lAh', dir], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            p = Popen(['ls', '-lAhL', dir], stdin=PIPE, stdout=PIPE, stderr=PIPE)
         else:
-            p = Popen(['ls', '-lh', dir], stdin=PIPE, stdout=PIPE, stderr=PIPE)
+            p = Popen(['ls', '-lhL', dir], stdin=PIPE, stdout=PIPE, stderr=PIPE)
         data, err = p.communicate()
         data = data.decode(encoding='UTF-8').split("\n")[1:-1]
         files = []
@@ -1265,12 +1265,6 @@ class Vimiv(Gtk.Window):
             count = count.get_indices()[0]
             fil = self.files[count]
             self.remember_pos(os.path.abspath("."), count)
-        # Catch symbolic links
-        if "->" in fil:
-            fil = "".join(fil.split(">")[:-1]).split(" ")[:-1]
-            fil = "".join(fil)
-            fil = os.path.realpath(fil)
-            self.move_up(os.path.dirname(fil))
         # Tags
         if os.path.abspath(".") == tagdir:
             self.tag_handler.tag_load(fil)
@@ -1311,7 +1305,6 @@ class Vimiv(Gtk.Window):
             if not start:
                 self.reload(os.path.abspath("."), curdir)
         except:
-            print("this error")
             self.err_message("Error: directory not accessible")
 
     def remember_pos(self, dir, count):

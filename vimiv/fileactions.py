@@ -25,9 +25,8 @@ def recursive_search(directory):
 def populate_single(arg, recursive):
     """ Populate a complete filelist if only one path is given """
     if os.path.isfile(arg):
-        # Use parent directory and realpath
-        single = os.path.realpath(arg)
-        directory = os.path.dirname(single)
+        # Use parent directory
+        directory = os.path.dirname(arg)
         args = listdir_wrapper(directory)
         for i, arg in enumerate(args):
             args[i] = os.path.join(directory, arg)
