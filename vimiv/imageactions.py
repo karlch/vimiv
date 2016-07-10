@@ -93,27 +93,29 @@ def thumbnails_create(filelist , thumbsize):
     # Get all thumbnails that were already created
     thumbnails = os.listdir(thumbdir)
     thumblist = []  # List of all files with thumbnails
-    errlist = []    # List of all files for which thumbnail creation failed
+    errtuple = ([], [])    # Tuple containing all files for which thumbnail
+                           # creation failed and their position
 
     # Loop over all files
     for i, infile in enumerate(filelist):
         # Correct name
-        outfile = ".".join(infile.split(".")[:-1]) + ".thumbnail" + ".png"
-        outfile = outfile.split("/")[-1]
-        outfile = os.path.join(thumbdir, outfile)
+        outfile_ext = ".".join(infile.split(".")[:-1]) + ".thumbnail" + ".png"
+        outfile_base = os.path.basename(outfile_ext)
+        outfile = os.path.join(thumbdir, outfile_base)
         # Only if they aren't cached already
-        if outfile.split("/")[-1] not in thumbnails:
+        if outfile_base not in thumbnails:
             try:
                 im = Image.open(infile)
                 im.thumbnail(thumbsize, Image.ANTIALIAS)
                 save_image(im, outfile)
                 thumblist.append(outfile)
             except:
-                errlist.append([i, infile])
+                errtuple[0].append(i)
+                errtuple[1].append(os.path.basename(infile))
         else:
             thumblist.append(outfile)
 
-    return thumblist, errlist
+    return thumblist, errtuple
 
 
 def manipulate_all(image, outfile, manipulations):

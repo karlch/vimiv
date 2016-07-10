@@ -667,10 +667,11 @@ class Vimiv(Gtk.Window):
     def thumbnails(self):
         """ Creates the Gtk elements necessary for thumbnail mode, fills them
         and focuses the iconview """
-        thumblist, errlist = imageactions.thumbnails_create(self.paths, self.thumbsize)
-        self.errorpos = errlist[0]
-        if errlist:
-            failed_files = ", ".join(errlist[1])
+        thumblist, errtuple = imageactions.thumbnails_create(self.paths,
+                                                             self.thumbsize)
+        self.errorpos = errtuple[0]
+        if self.errorpos:
+            failed_files = ", ".join(errtuple[1])
             self.err_message("Thumbnail creation for %s failed" %(failed_files))
 
         # Create the liststore and iconview
@@ -742,7 +743,8 @@ class Vimiv(Gtk.Window):
         else:
             self.err_message("No open image")
         # Update info for the current mode
-        self.update_info()
+        if not self.errorpos:
+            self.update_info()
 
     def thumb_reload(self, thumb, index, reload_image=True):
         """ Reloads the thumbnail of manipulated images """
