@@ -69,7 +69,14 @@ def parse_args(parser, settings):
         settings["LIBRARY"]["show_library"] = args.library
 
     settings["GENERAL"]["start_from_desktop"] = args.desktop
-    settings["GENERAL"]["paths"] = args.path
+    # Be able to read files from a stdin pipe
+    if not sys.stdin.isatty():
+        paths = []
+        for line in sys.stdin:
+            paths.append(line.rstrip("\n"))
+    else:
+        paths = args.path
+    settings["GENERAL"]["paths"] = paths
 
     return settings
 
