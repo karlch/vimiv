@@ -19,6 +19,7 @@ from vimiv.parser import parse_keys
 from vimiv import imageactions
 from vimiv.completions import Completion
 from vimiv.tags import tag_read, tag_write, tag_remove
+from vimiv.toggle import FullscreenToggler
 
 # Directories
 vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
@@ -51,6 +52,42 @@ class Vimiv(Gtk.Window):
         self.search_positions = []
         # Dictionary for all the possible editing
         self.manipulations = [1, 1, 1, False]
+        # The configruations from vimivrc
+        general = settings["GENERAL"]
+        library = settings["LIBRARY"]
+        # General
+        fullscreen_toggled = general["start_fullscreen"]
+        self.slideshow = general["start_slideshow"]
+        self.slideshow_delay = general["slideshow_delay"]
+        self.shuffle = general["shuffle"]
+        self.sbar = general["display_bar"]
+        self.winsize = general["geometry"]
+        self.recursive = general["recursive"]
+        self.rescale_svg = general["rescale_svg"]
+        self.overzoom = general["overzoom"]
+        self.thumbsize = general["thumbsize"]
+        # Library
+        self.library_toggled = library["show_library"]
+        self.library_default_width = library["library_width"]
+        self.library_width = self.library_default_width
+        self.expand_lib = library["expand_lib"]
+        self.border_width = library["border_width"]
+        self.search_case = general["search_case_insensitive"]
+        self.border_color = library["border_color"]
+        self.markup = library["markup"]
+        self.show_hidden = library["show_hidden"]
+        self.desktop_start_dir = library["desktop_start_dir"]
+
+        # Keybindings
+        self.keys = parse_keys()
+
+        # Cmd history from file
+        self.cmd_history = read_file(os.path.expanduser("~/.vimiv/history"))
+        self.cmd_pos = 0
+
+        Gtk.Window.__init__(self)
+        self.toggle_fullscreen = FullscreenToggler(self, fullscreen_toggled)
+
         # Dictionary with command names and the corresponding functions
         self.commands = {"accept_changes": [self.button_clicked, "w", True],
                          "autorotate": [self.rotate_auto],
@@ -136,43 +173,10 @@ class Vimiv(Gtk.Window):
                           "search": [self.cmd_search],
                           "search_next": [self.search_move, 1],
                           "search_prev": [self.search_move, 1, False],
-                          "fullscreen": [self.toggle_fullscreen]}
+                          "fullscreen": [self.toggle_fullscreen.toggle]}
         self.functions.update(self.commands)
 
-        # The configruations from vimivrc
-        general = settings["GENERAL"]
-        library = settings["LIBRARY"]
-        # General
-        self.fullscreen_toggled = general["start_fullscreen"]
-        self.slideshow = general["start_slideshow"]
-        self.slideshow_delay = general["slideshow_delay"]
-        self.shuffle = general["shuffle"]
-        self.sbar = general["display_bar"]
-        self.winsize = general["geometry"]
-        self.recursive = general["recursive"]
-        self.rescale_svg = general["rescale_svg"]
-        self.overzoom = general["overzoom"]
-        self.thumbsize = general["thumbsize"]
-        # Library
-        self.library_toggled = library["show_library"]
-        self.library_default_width = library["library_width"]
-        self.library_width = self.library_default_width
-        self.expand_lib = library["expand_lib"]
-        self.border_width = library["border_width"]
-        self.search_case = general["search_case_insensitive"]
-        self.border_color = library["border_color"]
-        self.markup = library["markup"]
-        self.show_hidden = library["show_hidden"]
-        self.desktop_start_dir = library["desktop_start_dir"]
 
-        # Keybindings
-        self.keys = parse_keys()
-
-        # Cmd history from file
-        self.cmd_history = read_file(os.path.expanduser("~/.vimiv/history"))
-        self.cmd_pos = 0
-
-        Gtk.Window.__init__(self)
 
     def delete(self):
         """ Delete all marked images or the current one """
@@ -356,19 +360,6 @@ class Vimiv(Gtk.Window):
         self.error = self.error[0:-1]
         if not self.error:
             self.update_info()
-
-    def toggle_fullscreen(self):
-        self.fullscreen_toggled = not self.fullscreen_toggled
-        if self.fullscreen_toggled:
-            self.fullscreen()
-        else:
-            self.unfullscreen()
-        # Adjust the image if necessary
-        if self.paths:
-            if self.user_zoomed:
-                self.update_image()
-            else:
-                self.zoom_to(0)
 
     def toggle_statusbar(self):
         if not self.sbar and not self.cmd_line.is_visible():
@@ -579,7 +570,7 @@ class Vimiv(Gtk.Window):
         self.image.clear()
         self.pixbufOriginal = GdkPixbuf.PixbufAnimation.new_from_file(out)
         self.pixbufOriginal = self.pixbufOriginal.get_static_image()
-        if not self.fullscreen_toggled:
+        if not self.toggle_fullscreen.window_is_fullscreen:
             self.imsize = self.image_size()
         self.zoom_percent = self.get_zoom_percent()
         self.update_image()
@@ -647,7 +638,7 @@ class Vimiv(Gtk.Window):
             self.pixbufOriginal = GdkPixbuf.PixbufAnimation.new_from_file(path)
             self.pixbufOriginal = self.pixbufOriginal.get_static_image()
             self.paths[self.index] = path
-            if not self.fullscreen_toggled:
+            if not self.toggle_fullscreen.window_is_fullscreen:
                 self.imsize = self.image_size()
             self.zoom_percent = self.get_zoom_percent()
             self.update_image()
@@ -890,7 +881,7 @@ class Vimiv(Gtk.Window):
     def image_size(self):
         """ Returns the size of the image depending on what other widgets
         are visible and if fullscreen or not """
-        if self.fullscreen_toggled:
+        if self.toggle_fullscreen.window_is_fullscreen:
             size = self.screensize
         else:
             size = self.get_size()
@@ -2130,8 +2121,6 @@ class Vimiv(Gtk.Window):
 
         # Set the window size
         self.resize(self.winsize[0], self.winsize[1])
-        if self.fullscreen_toggled:
-            self.fullscreen()
 
         self.show_all()
         # Hide the manipulate bar and the command line
@@ -2147,8 +2136,6 @@ class Vimiv(Gtk.Window):
             else:
                 self.boxlib.hide()
             self.scrolled_win.grab_focus()
-            if self.fullscreen_toggled:
-                self.fullscreen()
             # Start in slideshow mode?
             if self.slideshow:
                 self.slideshow = False
