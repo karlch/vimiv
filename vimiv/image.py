@@ -320,6 +320,6 @@ class Image(object):
 
     def toggle_animation(self):
         """ Toggles animation status of Gifs """
-        if self.vimiv.paths and not self.vimiv.thumbnail_toggled:
-            self.vimiv.animation_toggled = not self.vimiv.animation_toggled
-            self.vimiv.update_image()
+        if self.vimiv.paths and not self.vimiv.thumbnail.toggled:
+            self.animation_toggled = not self.animation_toggled
+            self.update()
