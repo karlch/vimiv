@@ -28,6 +28,10 @@ class Library(object):
         self.expand = library["expand_lib"]
         self.border_width = library["border_width"]
         self.border_color = library["border_color"]
+        try:
+            self.border_color = Gdk.color_parse(self.border_color)
+        except:
+            self.border_color = Gdk.color_parse("#000000")
         self.markup = library["markup"]
         self.show_hidden = library["show_hidden"]
         self.desktop_start_dir = library["desktop_start_dir"]

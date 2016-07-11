@@ -148,7 +148,12 @@ def overwrite_section(key, config, settings):
                 # Must be an integer
                 file_set = int(section[setting])
             elif setting == "border_color":
-                pass
+                border_color = section[setting]
+                if len(border_color) != 7 or border_color != "#":
+                    raise ValueError
+                file_set = border_color
+            elif setting == "border_width":
+                file_set = int(section[setting])
             elif setting == "desktop_start_dir":
                 file_set = os.path.expanduser(section[setting])
                 # Do not change the setting if the directory doesn't exist
