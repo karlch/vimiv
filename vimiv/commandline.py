@@ -132,7 +132,7 @@ class CommandLine(object):
             out, err = p.communicate()
             if p.returncode:
                 err = err.decode('utf-8').split("\n")[0]
-                self.vimiv.err_message(err)
+                self.vimiv.statusbar.err_message(err)
             else:
                 GLib.timeout_add(1, self.vimiv.fileextras.reload_changes,
                                  directory, True, from_pipe, out)
