@@ -54,10 +54,10 @@ class Window(object):
             self.vimiv.winsize = self.vimiv.get_size()
             if self.vimiv.paths and not self.vimiv.image.user_zoomed:
                 self.vimiv.image.zoom_to(0)
-            elif not self.vimiv.paths and self.vimiv.library.expand_lib:
+            elif not self.vimiv.paths and self.vimiv.library.expand:
                 self.vimiv.library.grid.set_size_request(self.vimiv.winsize[0],
                                                          10)
-            self.vimiv.commandline.cmd_line_info.set_max_width_chars(self.vimiv.winsize[0]/16)
+            self.vimiv.commandline.info.set_max_width_chars(self.vimiv.winsize[0]/16)
 
 
 
@@ -73,7 +73,7 @@ class KeyHandler(object):
         self.num_str = ""
         self.keys = parse_keys()
 
-    def handle_key_press(self, widget, event, window):
+    def run(self, widget, event, window):
         """ Runs the correct function per keypress """
         keyval = event.keyval
         keyname = Gdk.keyval_name(keyval)
@@ -121,7 +121,7 @@ class KeyHandler(object):
     def scroll(self, direction):
         """ Scroll the correct object """
         if self.vimiv.thumbnail.toggled:
-            self.vimiv.thumbnail.thumbnail_move(direction)
+            self.vimiv.thumbnail.move(direction)
         else:
             self.vimiv.image.scrolled_win.emit('scroll-child',
                                                scrolltypes[direction][0],
@@ -130,12 +130,12 @@ class KeyHandler(object):
 
     def num_append(self, num):
         """ Adds a new char to the num_str """
-        self.vimiv.keyhandler.num_str += num
+        self.num_str += num
         # RISKY
         GLib.timeout_add_seconds(1, self.num_clear)
         self.vimiv.statusbar.update_info()
 
     def num_clear(self):
         """ Clears the num_str """
-        self.vimiv.keyhandler.num_str = ""
+        self.num_str = ""
         self.vimiv.statusbar.update_info()

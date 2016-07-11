@@ -79,7 +79,6 @@ class Completion():
                 break
 
         # Only show the filename if completing self.paths
-        # TODO
         if comp_type == "path":
             for i, comp in enumerate(completions):
                 if comp.endswith("/"):
@@ -162,9 +161,9 @@ class VimivComplete(object):
     def __init__(self, vimiv):
         self.vimiv = vimiv
 
-    def cmd_complete(self):
+    def complete(self):
         """ Simple autocompletion for the command line """
-        command = self.vimiv.commandline.cmd_line.get_text()
+        command = self.vimiv.commandline.entry.get_text()
         command = command.lstrip(":")
         # Strip prepending numbers
         numstr = ""
@@ -181,8 +180,8 @@ class VimivComplete(object):
         output, compstr = completion.complete()
 
         # Set text
-        self.vimiv.commandline.cmd_line.set_text(output)
-        self.vimiv.commandline.cmd_line_info.set_text(compstr)
-        self.vimiv.commandline.cmd_line.set_position(-1)
+        self.vimiv.commandline.entry.set_text(output)
+        self.vimiv.commandline.info.set_text(compstr)
+        self.vimiv.commandline.entry.set_position(-1)
 
         return True  # Deactivates default bindings (here for Tab)

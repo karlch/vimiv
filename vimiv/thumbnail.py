@@ -20,13 +20,13 @@ class Thumbnail(object):
 
         # Settings
         self.toggled = False
-        self.thumbsize = general["thumbsize"]
-        self.cache_thumbs = general["cache_thumbnails"]
+        self.size = general["thumbsize"]
+        self.cache = general["cache_thumbnails"]
         self.directory = os.path.join(self.vimiv.directory, "Thumbnails")
         self.timer_id = GLib.Timeout
         self.errorpos = 0
-        self.thumbpos = 0
-        self.thumblist = []
+        self.pos = 0
+        self.elements = []
 
         # Creates the Gtk elements necessary for thumbnail mode, fills them
         # and focuses the iconview
@@ -34,7 +34,7 @@ class Thumbnail(object):
         self.liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str)
         self.iconview = Gtk.IconView.new()
         self.iconview.connect("item-activated", self.iconview_clicked)
-        self.iconview.connect("key_press_event", self.vimiv.keyhandler.handle_key_press,
+        self.iconview.connect("key_press_event", self.vimiv.keyhandler.run,
                             "THUMBNAIL")
         self.iconview.set_model(self.liststore)
         self.columns = 0
@@ -49,7 +49,7 @@ class Thumbnail(object):
     def iconview_clicked(self, w, count):
         """ Selects image when thumbnail was selected """
         # Move to the current position if the iconview is clicked
-        self.toggle_thumbnail()
+        self.toggle()
         count = count.get_indices()[0] + 1
         self.vimiv.keyhandler.vimiv.keyhandler.num_clear()
         for i in self.errorpos:
@@ -58,16 +58,16 @@ class Thumbnail(object):
         self.vimiv.keyhandler.vimiv.keyhandler.num_str = str(count)
         self.vimiv.image.move_pos()
 
-    def toggle_thumbnail(self):
+    def toggle(self):
         """ Toggles thumbnail mode """
         if self.toggled:
             self.vimiv.image.viewport.remove(self.iconview)
             self.vimiv.image.viewport.add(self.vimiv.image.image)
-            self.vimiv.image.update_image()
+            self.vimiv.image.update()
             self.vimiv.image.scrolled_win.grab_focus()
             self.toggled = False
         elif self.vimiv.paths:
-            self.thumbnail_show()
+            self.show()
             # Scroll to thumb
             self.timer_id = GLib.timeout_add(1, self.scroll_to_thumb)
             # Let the library keep focus
@@ -75,26 +75,26 @@ class Thumbnail(object):
                 self.vimiv.library.treeview.grab_focus()
             # Manipulate bar is useless in thumbnail mode
             if self.vimiv.manipulate.toggled:
-                self.vimiv.manipulate.toggle_manipulate()
+                self.vimiv.manipulate.toggle()
         else:
             self.vimiv.statusbar.vimiv.statusbar.err_message("No open image")
         # Update info for the current mode
         if not self.errorpos:
             self.vimiv.statusbar.update_info()
 
-    def thumbnail_show(self):
+    def show(self):
         """ Shows thumbnail mode when called from toggle """
         # Clean liststore
         self.liststore.clear()
         # Create thumbnails
-        self.thumblist, errtuple = thumbnails_create(self.vimiv.paths, self.thumbsize)
+        self.elements, errtuple = thumbnails_create(self.vimiv.paths, self.size)
         self.errorpos = errtuple[0]
         if self.errorpos:
             failed_files = ", ".join(errtuple[1])
             self.vimiv.statusbar.err_message("Thumbnail creation for %s failed" %(failed_files))
 
         # Add all thumbnails to the liststore
-        for i, thumb in enumerate(self.thumblist):
+        for i, thumb in enumerate(self.elements):
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(thumb)
             name = os.path.basename(thumb)
             name = name.split(".")[0]
@@ -103,7 +103,7 @@ class Thumbnail(object):
             self.liststore.append([pixbuf, name])
 
         # Set columns
-        self.columns = int(self.vimiv.image.imsize[0]/(self.thumbsize[0]+30))
+        self.columns = int(self.vimiv.image.imsize[0]/(self.size[0]+30))
         self.iconview.set_columns(self.columns)
 
         # Draw the icon view instead of the image
@@ -116,21 +116,21 @@ class Thumbnail(object):
 
         # Focus the current immage
         self.iconview.grab_focus()
-        self.thumbpos = (self.vimiv.index) % len(self.vimiv.paths)
+        self.pos = (self.vimiv.index) % len(self.vimiv.paths)
         for i in self.errorpos:
-            if self.thumbpos > i:
-                self.thumbpos -= 1
-        curpath = Gtk.TreePath.new_from_string(str(self.thumbpos))
+            if self.pos > i:
+                self.pos -= 1
+        curpath = Gtk.TreePath.new_from_string(str(self.pos))
         self.iconview.select_path(curpath)
         curthing = self.iconview.get_cells()[0]
         self.iconview.set_cursor(curpath, curthing, False)
 
         # Remove the files again if the thumbnails should not be cached
-        if not self.cache_thumbs:
-            for thumb in self.thumblist:
+        if not self.cache:
+            for thumb in self.elements:
                 os.remove(thumb)
 
-    def thumb_reload(self, thumb, index, reload_image=True):
+    def reload(self, thumb, index, reload_image=True):
         """ Reloads the thumbnail of manipulated images """
         for i in self.errorpos:
             if index > i:
@@ -139,16 +139,16 @@ class Thumbnail(object):
         self.liststore.remove(liststore_iter)
         try:
             if reload_image:
-                self.thumblist = thumbnails_create([thumb], self.thumbsize)[0]
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.thumblist[index])
+                self.elements = thumbnails_create([thumb], self.size)[0]
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.elements[index])
 
-            name = os.path.basename(self.thumblist[index])
+            name = os.path.basename(self.elements[index])
             name = name.split(".")[0]
 
             if thumb in self.vimiv.mark.marked:
                 name = name + " [*]"
             self.liststore.insert(index, [pixbuf, name])
-            path = Gtk.TreePath.new_from_string(str(self.thumbpos))
+            path = Gtk.TreePath.new_from_string(str(self.pos))
             self.iconview.select_path(path)
             curthing = self.iconview.get_cells()[0]
             self.iconview.set_cursor(path, curthing, False)
@@ -159,13 +159,13 @@ class Thumbnail(object):
     def scroll_to_thumb(self):
         """ Function which scrolls to the currently selected thumbnail """
         # TODO
-        scrollamount = int(self.thumbpos / self.columns) * self.thumbsize[1]
+        scrollamount = int(self.pos / self.columns) * self.size[1]
         Gtk.Adjustment.set_step_increment(
             self.vimiv.image.viewport.get_vadjustment(), scrollamount)
         self.vimiv.image.scrolled_win.emit('scroll-child',
                                            Gtk.ScrollType.STEP_FORWARD, False)
 
-    def thumbnail_move(self, direction):
+    def move(self, direction):
         """ Select thumbnails correctly and scroll """
         # Check for a user prefixed step
         if self.vimiv.keyhandler.num_str:
@@ -174,29 +174,29 @@ class Thumbnail(object):
             step = 1
         # Check for the specified thumbnail and handle exceptons
         if direction == "h":
-            self.thumbpos -= step
+            self.pos -= step
         elif direction == "k":
-            self.thumbpos -= self.columns*step
+            self.pos -= self.columns*step
         elif direction == "l":
-            self.thumbpos += step
+            self.pos += step
         else:
-            self.thumbpos += self.columns*step
+            self.pos += self.columns*step
         # Do not scroll to self.vimiv.paths that don't exist
-        if self.thumbpos < 0:
-            self.thumbpos = 0
-        elif self.thumbpos > (len(self.vimiv.library.files)-len(self.errorpos)-1):
-            self.thumbpos = len(self.vimiv.library.files)-len(self.errorpos)-1
+        if self.pos < 0:
+            self.pos = 0
+        elif self.pos > (len(self.vimiv.library.files)-len(self.errorpos)-1):
+            self.pos = len(self.vimiv.library.files)-len(self.errorpos)-1
         # Move
-        path = Gtk.TreePath.new_from_string(str(self.thumbpos))
+        path = Gtk.TreePath.new_from_string(str(self.pos))
         self.iconview.select_path(path)
         curthing = self.iconview.get_cells()[0]
         self.iconview.set_cursor(path, curthing, False)
         # Actual scrolling TODO
-        self.thumbnail_scroll(direction, step, self.thumbpos)
+        self.scroll(direction, step, self.pos)
         # Clear the user prefixed step
         self.vimiv.keyhandler.num_clear()
 
-    def thumbnail_scroll(self, direction, step, target):
+    def scroll(self, direction, step, target):
         """ Handles the actual scrolling """
         # TODO
         if step == 0:
@@ -204,7 +204,7 @@ class Thumbnail(object):
         # Vertical
         if direction == "k" or direction == "j":
             Gtk.Adjustment.set_step_increment(
-                self.vimiv.image.viewport.get_vadjustment(), (self.thumbsize[1]+30)*step)
+                self.vimiv.image.viewport.get_vadjustment(), (self.size[1]+30)*step)
             self.vimiv.image.scrolled_win.emit('scroll-child',
                                    scrolltypes[direction][0], False)
         # Horizontal (tricky because one might reach a new column)
@@ -214,6 +214,6 @@ class Thumbnail(object):
             endcol = int(target / self.columns)
             toscroll = endcol - startcol
             Gtk.Adjustment.set_step_increment(self.vimiv.image.viewport.get_vadjustment(),
-                                              (self.thumbsize[1]+30)*toscroll)
+                                              (self.size[1]+30)*toscroll)
             self.vimiv.image.scrolled_win.emit('scroll-child',
                                    scrolltypes[direction][0], False)

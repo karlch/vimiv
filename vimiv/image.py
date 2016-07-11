@@ -29,7 +29,7 @@ class Image(object):
         self.image = Gtk.Image()
         self.viewport.add(self.image)
         self.scrolled_win.connect("key_press_event",
-                                  self.vimiv.keyhandler.handle_key_press,
+                                  self.vimiv.keyhandler.run,
                                   "IMAGE")
 
         # Settings
@@ -75,7 +75,7 @@ class Image(object):
         else:
             return self.imsize[0] / pbo_width
 
-    def update_image(self, update_info=True, update_gif=True):
+    def update(self, update_info=True, update_gif=True):
         """ Show the final image """
         if not self.vimiv.paths:
             return
@@ -107,7 +107,7 @@ class Image(object):
         if update_info:
             self.vimiv.statusbar.update_info()
 
-    def image_size(self):
+    def get_size(self):
         """ Returns the size of the image depending on what other widgets
         are visible and if fullscreen or not """
         if self.vimiv.window.fullscreen:
@@ -115,9 +115,9 @@ class Image(object):
         else:
             size = self.vimiv.get_size()
         if self.vimiv.library.toggled:
-            size = (size[0] - self.vimiv.library.library_width, size[1])
-        if not self.vimiv.statusbar.sbar:
-            size = (size[0], size[1] - self.vimiv.statusbar.statusbar_size - 24)
+            size = (size[0] - self.vimiv.library.width, size[1])
+        if not self.vimiv.statusbar.visible:
+            size = (size[0], size[1] - self.vimiv.statusbar.size - 24)
         return size
 
     def zoom_delta(self, delta):
@@ -132,7 +132,7 @@ class Image(object):
                     self.vimiv.screensize[0]*5):
                 raise ValueError
             self.user_zoomed = True
-            self.update_image(update_gif=False)
+            self.update(update_gif=False)
         except:
             self.zoom_percent = self.zoom_percent / (1 + delta)
             self.vimiv.commandline.err_message("Warning: Object cannot be zoomed (further)")
@@ -158,7 +158,7 @@ class Image(object):
                 return
             self.vimiv.keyhandler.num_str = ""
         try:
-            self.imsize = self.image_size()
+            self.imsize = self.get_size()
             self.zoom_percent = (percent if percent
                                  else self.get_zoom_percent(z_width, z_height))
             # Catch some unreasonable zooms
@@ -167,7 +167,7 @@ class Image(object):
                     self.vimiv.screensize[0]*5):
                 self.zoom_percent = before
                 raise ValueError
-            self.update_image(update_gif=False)
+            self.update(update_gif=False)
         except:
             self.vimiv.commandline.err_message("Warning: Object cannot be zoomed (further)")
 
@@ -236,15 +236,15 @@ class Image(object):
                     path)
             if self.pixbuf_original.is_static_image():
                 self.pixbuf_original = self.pixbuf_original.get_static_image()
-                self.imsize = self.image_size()
+                self.imsize = self.get_size()
                 self.zoom_percent = self.get_zoom_percent()
             else:
                 self.zoom_percent = 1
             # If one simply reloads the file the info shouldn't be updated
             if delta:
-                self.update_image()
+                self.update()
             else:
-                self.update_image(False)
+                self.update(False)
 
         except GLib.Error:  # File not accessible
             self.vimiv.paths.remove(path)
@@ -264,7 +264,7 @@ class Image(object):
             return
         max_pos = len(self.vimiv.paths)
         if self.vimiv.thumbnail.toggled:
-            current = self.vimiv.thumbnail.thumbpos % len(self.vimiv.paths)
+            current = self.vimiv.thumbnail.pos % len(self.vimiv.paths)
             max_pos = max_pos - len(self.vimiv.thumbnail.errorpos)
         else:
             current = (self.vimiv.index) % len(self.vimiv.paths)
@@ -288,7 +288,7 @@ class Image(object):
         dif = pos - current - 1
         if self.vimiv.thumbnail.toggled:
             pos -= 1
-            self.vimiv.thumbnail.thumbpos = pos
+            self.vimiv.thumbnail.pos = pos
             path = Gtk.TreePath.new_from_string(str(pos))
             self.vimiv.thumbnail.iconview.select_path(path)
             curthing = self.vimiv.thumbnail.iconview.get_cells()[0]

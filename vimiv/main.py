@@ -99,13 +99,13 @@ class Vimiv(Gtk.Window):
         Commands(self)
 
         # Pack library and manipulate
-        self.hbox.pack_start(self.library.boxlib, False, False, 0)
-        self.vbox.pack_end(self.manipulate.hboxman, False, False, 0)
+        self.hbox.pack_start(self.library.box, False, False, 0)
+        self.vbox.pack_end(self.manipulate.hbox, False, False, 0)
 
         # Box with the statusbar and the command line
         self.bbox = Gtk.VBox(False, 0)
         self.bbox.pack_start(self.statusbar.bar, False, False, 0)
-        self.bbox.pack_end(self.commandline.cmd_line_box, False, False, 0)
+        self.bbox.pack_end(self.commandline.box, False, False, 0)
         self.bbox.set_border_width(12)
         self.vbox.pack_end(self.bbox, False, False, 0)
 
@@ -119,7 +119,7 @@ class Vimiv(Gtk.Window):
         # Save the history
         histfile = os.path.expanduser("~/.vimiv/history")
         histfile = open(histfile, 'w')
-        for cmd in self.commandline.cmd_history:
+        for cmd in self.commandline.history:
             cmd += "\n"
             histfile.write(cmd)
         histfile.close()
@@ -137,30 +137,30 @@ class Vimiv(Gtk.Window):
 
         # Show everything and then hide whatever needs to be hidden
         self.show_all()
-        self.manipulate.hboxman.hide()
-        self.commandline.cmd_line_box.hide()
+        self.manipulate.hbox.hide()
+        self.commandline.box.hide()
 
         # Show the image if an imagelist exists
         if self.paths:
             self.image.move_index(True, False, 0)
             # Show library at the beginning?
             if self.library.toggled:
-                self.library.boxlib.show()
+                self.library.box.show()
             else:
-                self.library.boxlib.hide()
+                self.library.box.hide()
             self.image.scrolled_win.grab_focus()
             # Start in slideshow mode?
             if self.slideshow.running:
                 self.slideshow.running = False
-                self.slideshow.toggle_slideshow()
-            self.statusbar.toggle_statusbar()
+                self.slideshow.toggle()
+            self.statusbar.toggle()
         # Just open the library if no paths were given
         else:
             # Slideshow without paths makes no sense
             self.slideshow.running = False
-            self.statusbar.toggle_statusbar()
-            self.library.focus_library(True)
-            if self.library.expand_lib:
+            self.statusbar.toggle()
+            self.library.focus(True)
+            if self.library.expand:
                 self.library.grid.set_size_request(self.winsize[0], 10)
             self.statusbar.err_message("No valid paths, opening library viewer")
 

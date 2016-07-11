@@ -201,15 +201,14 @@ class FileExtras(object):
                 files[i] = os.path.join(pathdir, fil)
             # Remember current pos
             self.vimiv.keyhandler.num_str = str(self.vimiv.index + 1)
-            self.vimiv.paths = []  # TODO needed?
             self.vimiv.paths, self.vimiv.index = populate(files)
             self.vimiv.image.move_pos()
-            if self.vimiv.library.expand_lib and not self.vimiv.paths:
+            if self.vimiv.library.expand and not self.vimiv.paths:
                 self.vimiv.library.grid.set_size_request(self.vimiv.winsize[0],
                                                          10)
             if self.vimiv.thumbnail.toggled:
                 for i, image in self.vimiv.paths:
-                    self.vimiv.thumbnail.thumb_reload(image, i, False)
+                    self.vimiv.thumbnail.reload(image, i, False)
         # Run the pipe
         if pipe:
             self.vimiv.commandline.pipe(pipe_input)

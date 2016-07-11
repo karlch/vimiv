@@ -22,9 +22,9 @@ class Library(object):
         self.focused = False
         self.dir_pos = {}  # Remembers positions in the library browser
         self.toggled = library["show_library"]
-        self.library_default_width = library["library_width"]
-        self.library_width = self.library_default_width
-        self.expand_lib = library["expand_lib"]
+        self.default_width = library["library_width"]
+        self.width = self.default_width
+        self.expand = library["expand_lib"]
         self.border_width = library["border_width"]
         self.border_color = library["border_color"]
         self.markup = library["markup"]
@@ -39,13 +39,13 @@ class Library(object):
         self.filelist = []
 
         # Librarybox
-        self.boxlib = Gtk.HBox()
+        self.box = Gtk.HBox()
         # Set up the self.grid in which the file info will be positioned
         self.grid = Gtk.Grid()
         self.grid.set_column_homogeneous(True)
         self.grid.set_row_homogeneous(True)
-        if self.vimiv.paths or not self.expand_lib:
-            self.grid.set_size_request(self.library_width-self.border_width, 10)
+        if self.vimiv.paths or not self.expand:
+            self.grid.set_size_request(self.width-self.border_width, 10)
         else:
             self.grid.set_size_request(self.vimiv.winsize[0], 10)
         # A simple border
@@ -53,27 +53,27 @@ class Library(object):
             border = Gtk.Box()
             border.set_size_request(self.border_width, 0)
             border.modify_bg(Gtk.StateType.NORMAL, self.border_color)
-            self.boxlib.pack_end(border, False, False, 0)
+            self.box.pack_end(border, False, False, 0)
         # Entering content
         self.scrollable_treelist = Gtk.ScrolledWindow()
         self.scrollable_treelist.set_vexpand(True)
         self.grid.attach(self.scrollable_treelist, 0, 0, 4, 10)
         # Pack everything
-        self.boxlib.pack_start(self.grid, True, True, 0)
+        self.box.pack_start(self.grid, True, True, 0)
         # Call the function to create the treeview
         self.treeview_create()
         self.scrollable_treelist.add(self.treeview)
 
-    def toggle_library(self):
+    def toggle(self):
         """ Toggles the library """
         if self.toggled:
             self.remember_pos(os.path.abspath("."), self.treepos)
-            self.boxlib.hide()
+            self.box.hide()
             self.vimiv.image.animation_toggled = False  # Now play Gifs
             self.toggled = not self.toggled
-            self.focus_library(False)
+            self.focus(False)
         else:
-            self.boxlib.show()
+            self.box.show()
             if not self.vimiv.paths:
                 self.vimiv.image.vimiv.image.scrolled_win.hide()
             else:  # Try to focus the current image in the library
@@ -85,19 +85,19 @@ class Library(object):
             # Do not play Gifs with the lib
             self.vimiv.image.animation_toggled = True
             self.toggled = not self.toggled
-            self.focus_library(True)
+            self.focus(True)
             # Markings and other stuff might have changed
             self.reload(os.path.abspath("."))
         if not self.vimiv.image.user_zoomed and self.vimiv.paths:
             self.vimiv.image.zoom_to(0)  # Always rezoom the image
         #  Change the toggle state of animation
-        self.vimiv.image.update_image()
+        self.vimiv.image.update()
 
-    def focus_library(self, library=True):
+    def focus(self, library=True):
         """ Focused library object """
         if library:
             if not self.toggled:
-                self.toggle_library()
+                self.toggle()
             self.treeview.grab_focus()
             self.focused = True
         else:
@@ -123,7 +123,7 @@ class Library(object):
         # Handle key events
         self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK)
         self.treeview.connect("key_press_event",
-                              self.vimiv.keyhandler.handle_key_press, "LIBRARY")
+                              self.vimiv.keyhandler.run, "LIBRARY")
         # Add the columns
         for i, name in enumerate(["Num", "Name", "Size", "M"]):
             renderer = Gtk.CellRendererText()
@@ -183,12 +183,12 @@ class Library(object):
             self.remember_pos(os.path.abspath("."), count)
         # Tags
         if os.path.abspath(".") == self.vimiv.tags.directory:
-            self.vimiv.tags.tag_load(fil)
+            self.vimiv.tags.load(fil)
             # Close if selected twice
-            if fil == self.vimiv.tags.last_tag:
-                self.toggle_library()
+            if fil == self.vimiv.tags.last:
+                self.toggle()
             # Remember last tag selected
-            self.vimiv.tags.last_tag = fil
+            self.vimiv.tags.last = fil
             return
         # Rest
         if os.path.isdir(fil):  # Open the directory
@@ -206,18 +206,18 @@ class Library(object):
             self.treepos = path
             self.vimiv.paths, self.vimiv.index = populate(self.files)
             if self.vimiv.paths:
-                self.grid.set_size_request(self.library_width-self.border_width,
+                self.grid.set_size_request(self.width-self.border_width,
                                            10)
                 self.vimiv.image.vimiv.image.scrolled_win.show()
             # Show the selected file, if thumbnail toggled go out
             if self.vimiv.thumbnail.toggled:
-                self.vimiv.thumbnail.toggle_thumbnail()
+                self.vimiv.thumbnail.toggle()
                 self.treeview.grab_focus()
             self.vimiv.image.move_index(delta=count)
             # Close the library depending on key and repeat
             if close:
-                self.toggle_library()
-                self.vimiv.image.update_image()
+                self.toggle()
+                self.vimiv.image.update()
 
     def move_up(self, directory="..", start=False):
         """ move (up/to) directory in the library """
@@ -238,7 +238,7 @@ class Library(object):
         self.scrollable_treelist.remove(self.treeview)
         self.treeview_create(search)
         self.scrollable_treelist.add(self.treeview)
-        self.focus_library(True)
+        self.focus(True)
         # Check if there is a saved position
         if directory in self.dir_pos.keys():
             self.treeview.set_cursor(Gtk.TreePath(self.dir_pos[directory]),
@@ -252,9 +252,9 @@ class Library(object):
                     self.treeview.set_cursor(Gtk.TreePath([i]), None, False)
                     self.treepos = i
                     break
-        self.boxlib.show_all()
+        self.box.show_all()
 
-    def move_pos_lib(self, forward=True):
+    def move_pos(self, forward=True):
         """ Move to pos in lib """
         max_pos = len(self.files) - 1
         if self.vimiv.keyhandler.num_str:
@@ -276,26 +276,26 @@ class Library(object):
         self.vimiv.keyhandler.num_clear()
         return True
 
-    def resize_lib(self, val=None, inc=True):
+    def resize(self, val=None, inc=True):
         """ Resize the library and update the image if necessary """
         if isinstance(val, int):
             # The default 0 passed by arguments
             if not val:
                 val = 300
-            self.library_width = self.library_default_width
+            self.width = self.default_width
         elif val:  # A non int was given as library width
             self.vimiv.statusbar.err_message("Library width must be an integer")
             return
         elif inc:
-            self.library_width += 20
+            self.width += 20
         else:
-            self.library_width -= 20
+            self.width -= 20
         # Set some reasonable limits to the library size
-        if self.library_width > self.vimiv.winsize[0]-200:
-            self.library_width = self.vimiv.winsize[0]-200
-        elif self.library_width < 100:
-            self.library_width = 100
-        self.grid.set_size_request(self.library_width-self.border_width, 10)
+        if self.width > self.vimiv.winsize[0]-200:
+            self.width = self.vimiv.winsize[0]-200
+        elif self.width < 100:
+            self.width = 100
+        self.grid.set_size_request(self.width-self.border_width, 10)
         # Rezoom image
         if not self.vimiv.image.user_zoomed and self.vimiv.paths:
             self.vimiv.image.zoom_to(0)
@@ -338,7 +338,7 @@ class Library(object):
 
         return files
 
-    def scroll_lib(self, direction):
+    def scroll(self, direction):
         """ Scroll the library viewer and select if necessary """
         # Handle the specific keys
         if direction == "h":  # Behave like ranger

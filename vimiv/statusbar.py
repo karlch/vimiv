@@ -15,12 +15,12 @@ class Statusbar(object):
         general = settings["GENERAL"]
 
         # Default values
-        self.sbar = general["display_bar"]
+        self.visible = general["display_bar"]
         self.error = []  # Errors for statusbar
         self.search_names = []
         self.search_positions = []
         self.timer_id = GLib.Timeout
-        self.statusbar_size = 0
+        self.size = 0
 
         # Statusbar on the bottom
         self.bar = Gtk.HBox(False, 0)
@@ -44,13 +44,13 @@ class Statusbar(object):
         self.error.append(1)
         mes = "<b>" + mes + "</b>"
         self.timer_id = GLib.timeout_add_seconds(5, self.error_false)
-        if not self.sbar:
+        if not self.visible:
             self.left_label.set_markup(mes)
         else:  # Show bar if it isn't there
-            self.toggle_statusbar()
+            self.toggle()
             self.left_label.set_markup(mes)
             self.timer_id = GLib.timeout_add_seconds(5,
-                            self.toggle_statusbar)
+                            self.toggle)
 
     def error_false(self):
         """ Strip one error and update the statusbar if no more errors remain"""
@@ -67,14 +67,14 @@ class Statusbar(object):
                 self.left_label.set_text(os.path.abspath("."))
             # Position, name and thumbnail size in thumb mode
             elif self.vimiv.thumbnail.toggled:
-                pos = self.vimiv.thumbnail.thumbpos
+                pos = self.vimiv.thumbnail.pos
                 for i in self.vimiv.thumbnail.errorpos:
                     if pos >= i:
                         pos += 1
                 name = os.path.basename(self.vimiv.paths[pos])
-                message = "{0}/{1}  {2}  {3}".format(self.vimiv.thumbnail.thumbpos+1,
+                message = "{0}/{1}  {2}  {3}".format(self.vimiv.thumbnail.pos+1,
                     len(self.vimiv.paths)-len(self.vimiv.thumbnail.errorpos),
-                    name, self.vimiv.thumbnail.thumbsize)
+                    name, self.vimiv.thumbnail.size)
                 self.left_label.set_text(message)
             # Image info in image mode
             else:
@@ -90,7 +90,7 @@ class Statusbar(object):
         else:
             mark = ""
         if self.vimiv.slideshow.running:
-            slideshow = "[slideshow - {0:.1f}s]".format(self.vimiv.slideshow.slideshow_delay)
+            slideshow = "[slideshow - {0:.1f}s]".format(self.vimiv.slideshow.delay)
         else:
             slideshow = ""
         message = "{0}  {1}".format(mark, slideshow)
@@ -106,7 +106,7 @@ class Statusbar(object):
         except:
             self.vimiv.set_title("vimiv")
         # Size of statusbar for resizing image
-        self.statusbar_size = self.vimiv.statusbar.bar.get_allocated_height()
+        self.size = self.vimiv.statusbar.bar.get_allocated_height()
 
     def get_mode(self):
         """ Returns which widget is currently focused """
@@ -119,13 +119,13 @@ class Statusbar(object):
         else:
             return "<b>-- IMAGE --</b>"
 
-    def toggle_statusbar(self):
+    def toggle(self):
         """ Toggles statusbar resizing image if necessary """
-        if not self.sbar and not self.vimiv.commandline.cmd_line.is_visible():
+        if not self.visible and not self.vimiv.commandline.entry.is_visible():
             self.vimiv.bbox.hide()
         else:
             self.vimiv.bbox.show()
-        self.sbar = not self.sbar
+        self.visible = not self.visible
         # Resize the image if necessary
         if not self.vimiv.image.user_zoomed and self.vimiv.paths and not self.vimiv.thumbnail.toggled:
             self.vimiv.image.zoom_to(0)

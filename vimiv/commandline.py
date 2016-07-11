@@ -23,36 +23,36 @@ class CommandLine(object):
         general = settings["GENERAL"]
 
         # Command line
-        self.cmd_line_box = Gtk.HBox(False, 0)
-        self.cmd_line = Gtk.Entry()
-        self.cmd_line.connect("activate", self.cmd_handler)
-        self.cmd_line.connect("key_press_event",
-                              self.vimiv.keyhandler.handle_key_press, "COMMAND")
-        self.cmd_line.connect("changed", self.cmd_check_close)
-        self.cmd_line_info = Gtk.Label()
-        self.cmd_line_info.set_max_width_chars(self.vimiv.winsize[0]/16)
-        self.cmd_line_info.set_ellipsize(Pango.EllipsizeMode.END)
-        self.cmd_line_box.pack_start(self.cmd_line, True, True, 0)
-        self.cmd_line_box.pack_end(self.cmd_line_info, False, False, 0)
+        self.box = Gtk.HBox(False, 0)
+        self.entry = Gtk.Entry()
+        self.entry.connect("activate", self.handler)
+        self.entry.connect("key_press_event",
+                              self.vimiv.keyhandler.run, "COMMAND")
+        self.entry.connect("changed", self.check_close)
+        self.info = Gtk.Label()
+        self.info.set_max_width_chars(self.vimiv.winsize[0]/16)
+        self.info.set_ellipsize(Pango.EllipsizeMode.END)
+        self.box.pack_start(self.entry, True, True, 0)
+        self.box.pack_end(self.info, False, False, 0)
 
         # Cmd history from file
-        self.cmd_history = read_file(os.path.expanduser("~/.vimiv/history"))
+        self.history = read_file(os.path.expanduser("~/.vimiv/history"))
 
         # Defaults
-        self.cmd_pos = 0
+        self.pos = 0
         self.sub_history = []
         self.search_pos = 0
         self.search_positions = []
         self.search_names = []
         self.search_case = general["search_case_insensitive"]
 
-    def cmd_handler(self, entry):
+    def handler(self, entry):
         """ Handles input from the entry, namely if it is a path to be focused
         or a (external) command to be run """
         # cmd from input
         command = entry.get_text()
         # And close the cmd line
-        self.cmd_line_leave()
+        self.leave()
         if command[0] == "/":  # Search
             self.search(command.lstrip("/"))
         else:  # Run a command
@@ -64,7 +64,7 @@ class CommandLine(object):
             if cmd[0] == "!":
                 self.run_external_command(cmd)
             elif cmd[0] == "~" or cmd[0] == "." or cmd[0] == "/":
-                self.cmd_path(cmd)
+                self.run_path(cmd)
             else:
                 self.vimiv.keyhandler.num_str = ""  # Be able to repeat commands
                 while True:
@@ -76,10 +76,10 @@ class CommandLine(object):
                         break
                 self.run_command(cmd)
         # Save the cmd to a list
-        if command in self.cmd_history:
-            self.cmd_history.remove(command)
-        self.cmd_history.insert(0, command)
-        self.cmd_pos = 0
+        if command in self.history:
+            self.history.remove(command)
+        self.history.insert(0, command)
+        self.pos = 0
 
     def run_external_command(self, cmd):
         """ Run the entered command in the terminal """
@@ -172,7 +172,7 @@ class CommandLine(object):
                 self.vimiv.image.move_index(False, False, 0)
                 # Close library if necessary
                 if self.vimiv.library.toggled:
-                    self.vimiv.library.toggle_library()
+                    self.vimiv.library.toggle()
             elif old_pos:  # Nothing found, go back
                 self.vimiv.paths, self.vimiv.index = populate(old_pos)
                 self.vimiv.statusbar.err_message("No image found")
@@ -182,7 +182,7 @@ class CommandLine(object):
                 self.run_command(cmd)
 
 
-    def cmd_path(self, path):
+    def run_path(self, path):
         """ Run a path command, namely populate files or focus directory """
         # Expand home
         if path[0] == "~":
@@ -213,7 +213,7 @@ class CommandLine(object):
                             self.vimiv.library.treepos = i
                             break
                     # Show the image
-                    self.vimiv.library.grid.set_size_request(self.vimiv.library.library_width-
+                    self.vimiv.library.grid.set_size_request(self.vimiv.library.width-
                                                 self.vimiv.library.border_width, 10)
                     self.vimiv.image.scrolled_win.show()
                 else:
@@ -255,40 +255,40 @@ class CommandLine(object):
         else:  # Through an error
             self.vimiv.statusbar.err_message("No such command: %s" % (cmd))
 
-    def history(self, down):
+    def history_search(self, down):
         """ Update the cmd_handler text with history """
         # Shortly disconnect the change signal
-        self.cmd_line.disconnect_by_func(self.cmd_check_close)
+        self.entry.disconnect_by_func(self.check_close)
         # Only parts of the history that match the entered text
         if not self.sub_history:
-            substring = self.cmd_line.get_text()
+            substring = self.entry.get_text()
             matchstr = '^(' + substring + ')'
             self.sub_history = [substring]
-            for cmd in self.cmd_history:
+            for cmd in self.history:
                 if re.match(matchstr, cmd):
                     self.sub_history.append(cmd)
         # Move and set the text
         if down:
-            self.cmd_pos -= 1
+            self.pos -= 1
         else:
-            self.cmd_pos += 1
-        self.cmd_pos = self.cmd_pos % (len(self.sub_history))
-        self.cmd_line.set_text(self.sub_history[self.cmd_pos])
-        self.cmd_line.set_position(-1)
+            self.pos += 1
+        self.pos = self.pos % (len(self.sub_history))
+        self.entry.set_text(self.sub_history[self.pos])
+        self.entry.set_position(-1)
         # Reconnect when done
-        self.cmd_line.connect("changed", self.cmd_check_close)
+        self.entry.connect("changed", self.check_close)
 
-    def focus_cmd_line(self):
+    def focus(self):
         """ Open and focus the command line """
         # Colon for text
-        self.cmd_line.set_text(":")
+        self.entry.set_text(":")
         # Show the statusbar
-        if self.vimiv.statusbar.sbar:
+        if self.vimiv.statusbar.visible:
             self.vimiv.bbox.show()
         # Remove old error messages
         self.vimiv.statusbar.update_info()
         # Show/hide the relevant stuff
-        self.cmd_line_box.show()
+        self.box.show()
         self.vimiv.statusbar.bar.hide()
         self.vimiv.bbox.set_border_width(10)
         # Remember what widget was focused before
@@ -300,20 +300,20 @@ class CommandLine(object):
             self.vimiv.window.last_focused = "thu"
         else:
             self.vimiv.window.last_focused = "im"
-        self.cmd_line.grab_focus()
-        self.cmd_line.set_position(-1)
+        self.entry.grab_focus()
+        self.entry.set_position(-1)
 
-    def cmd_line_leave(self):
+    def leave(self):
         """ Close the command line """
-        self.cmd_line_box.hide()
+        self.box.hide()
         self.vimiv.statusbar.bar.show()
         self.vimiv.bbox.set_border_width(12)
         # Remove all completions shown and the text currently inserted
-        self.cmd_line_info.set_text("")
-        self.cmd_line.set_text("")
+        self.info.set_text("")
+        self.entry.set_text("")
         # Refocus the remembered widget
         if self.vimiv.window.last_focused == "lib":
-            self.vimiv.library.focus_library(True)
+            self.vimiv.library.focus(True)
         elif self.vimiv.window.last_focused == "man":
             self.vimiv.manipulate.scale_bri.grab_focus()
         elif self.vimiv.window.last_focused == "thu":
@@ -321,22 +321,22 @@ class CommandLine(object):
         else:
             self.vimiv.image.scrolled_win.grab_focus()
         # Rehide the command line
-        if self.vimiv.statusbar.sbar:
+        if self.vimiv.statusbar.visible:
             self.vimiv.bbox.hide()
 
-    def cmd_check_close(self, entry):
+    def check_close(self, entry):
         """ Close the entry if the colon/slash is deleted """
         self.sub_history = []
-        self.cmd_pos = 0
+        self.pos = 0
         text = entry.get_text()
         if not text or text[0] not in ":/":
-            self.cmd_line_leave()
+            self.leave()
 
     def cmd_search(self):
         """ Prepend search to the cmd_line and open it """
-        self.focus_cmd_line()
-        self.cmd_line.set_text("/")
-        self.cmd_line.set_position(-1)
+        self.focus()
+        self.entry.set_text("/")
+        self.entry.set_position(-1)
 
     def search(self, searchstr):
         """ Run a search on the appropriate filelist """

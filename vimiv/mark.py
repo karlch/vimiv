@@ -18,7 +18,7 @@ class Mark(object):
         if self.vimiv.library.focused:
             current = os.path.abspath(self.vimiv.library.files[self.vimiv.library.treepos])
         elif self.vimiv.thumbnail.toggled:
-            index = self.vimiv.thumbnail.thumbpos
+            index = self.vimiv.thumbnail.pos
             pathindex = index
             # Remove errors and reload the thumb_name
             for i in self.vimiv.thumbnail.errorpos:
@@ -101,6 +101,6 @@ class Mark(object):
         if self.vimiv.thumbnail.toggled:
             for i, image in enumerate(self.vimiv.paths):
                 if reload_all or image in current:
-                    self.vimiv.thumbnail.thumb_reload(image, i, False)
+                    self.vimiv.thumbnail.reload(image, i, False)
 
         self.vimiv.statusbar.update_info()
