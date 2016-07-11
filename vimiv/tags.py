@@ -8,6 +8,7 @@ from gi.repository import Gtk
 from vimiv.helpers import read_file
 from vimiv.fileactions import populate
 
+
 class TagHandler(object):
     """ Handles tags """
 
@@ -54,8 +55,9 @@ class TagHandler(object):
             self.vimiv.image.move_index(False, False, 0)
             # Focus in library if it is open
             if self.vimiv.library.toggled:
-                self.vimiv.library.grid.set_size_request(self.vimiv.library.width
-                                                 -self.vimiv.library.border_width, 10)
+                self.vimiv.library.grid.set_size_request(
+                    self.vimiv.library.width - self.vimiv.library.border_width,
+                    10)
                 # Find out tag position
                 # self.vimiv.library.remember_pos(self.directory, 2)
                 self.vimiv.library.reload(self.directory)
@@ -64,5 +66,5 @@ class TagHandler(object):
                                                        None, False)
                 self.vimiv.library.treepos = tag_pos
         else:
-            err = "Tagfile '%s' has no valid images" % (tagname)
-            self.vimiv.statusbar.err_message(err)
+            message = "Tagfile '%s' has no valid images" % (tagname)
+            self.vimiv.statusbar.err_message(message)

@@ -9,6 +9,7 @@ require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 from vimiv.fileactions import is_image, populate
 
+
 class Library(object):
     """ Library class for self.vimiv
         includes the treeview with the library and all actions that apply to
@@ -45,7 +46,7 @@ class Library(object):
         self.grid.set_column_homogeneous(True)
         self.grid.set_row_homogeneous(True)
         if self.vimiv.paths or not self.expand:
-            self.grid.set_size_request(self.width-self.border_width, 10)
+            self.grid.set_size_request(self.width - self.border_width, 10)
         else:
             self.grid.set_size_request(self.vimiv.winsize[0], 10)
         # A simple border
@@ -206,7 +207,7 @@ class Library(object):
             self.treepos = path
             self.vimiv.paths, self.vimiv.index = populate(self.files)
             if self.vimiv.paths:
-                self.grid.set_size_request(self.width-self.border_width,
+                self.grid.set_size_request(self.width - self.border_width,
                                            10)
                 self.vimiv.image.vimiv.image.scrolled_win.show()
             # Show the selected file, if thumbnail toggled go out
@@ -291,11 +292,11 @@ class Library(object):
         else:
             self.width -= 20
         # Set some reasonable limits to the library size
-        if self.width > self.vimiv.winsize[0]-200:
-            self.width = self.vimiv.winsize[0]-200
+        if self.width > self.vimiv.winsize[0] - 200:
+            self.width = self.vimiv.winsize[0] - 200
         elif self.width < 100:
             self.width = 100
-        self.grid.set_size_request(self.width-self.border_width, 10)
+        self.grid.set_size_request(self.width - self.border_width, 10)
         # Rezoom image
         if not self.vimiv.image.user_zoomed and self.vimiv.paths:
             self.vimiv.image.zoom_to(0)
@@ -328,8 +329,8 @@ class Library(object):
                 try:
                     subfiles = os.listdir(filename)
                     subfiles = [subfile
-                        for subfile in subfiles
-                        if is_image(os.path.join(filename, subfile))]
+                                for subfile in subfiles
+                                if is_image(os.path.join(filename, subfile))]
                     self.filesize[filename] = str(len(subfiles))
                 except:
                     self.filesize[filename] = "N/A"

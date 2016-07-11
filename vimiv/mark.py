@@ -4,6 +4,7 @@
 
 import os
 
+
 class Mark(object):
     """ Handles marking of images """
 
@@ -16,7 +17,8 @@ class Mark(object):
         """ Marks the current image """
         # Check which image
         if self.vimiv.library.focused:
-            current = os.path.abspath(self.vimiv.library.files[self.vimiv.library.treepos])
+            current = os.path.abspath(self.vimiv.library.files[
+                self.vimiv.library.treepos])
         elif self.vimiv.thumbnail.toggled:
             index = self.vimiv.thumbnail.pos
             pathindex = index
@@ -35,7 +37,8 @@ class Mark(object):
                 self.marked.append(current)
             self.mark_reload(False, [current])
         else:
-            self.vimiv.statusbar.err_message("Marking directories is not supported")
+            self.vimiv.statusbar.err_message(
+                "Marking directories is not supported")
 
     def toggle_mark(self):
         """ Toggles mark status: if images are marked all marks are removed,
@@ -88,7 +91,7 @@ class Mark(object):
                 start = i
             elif image == end:
                 end = i
-        for i in range(start+1, end):
+        for i in range(start + 1, end):
             self.marked.insert(-1, files[i])
         self.mark_reload()
 

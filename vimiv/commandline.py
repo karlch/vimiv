@@ -15,6 +15,7 @@ from vimiv.helpers import read_file
 vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
 tagdir = os.path.join(vimivdir, "Tags")
 
+
 class CommandLine(object):
     """ Commandline of vimiv """
 
@@ -27,10 +28,10 @@ class CommandLine(object):
         self.entry = Gtk.Entry()
         self.entry.connect("activate", self.handler)
         self.entry.connect("key_press_event",
-                              self.vimiv.keyhandler.run, "COMMAND")
+                           self.vimiv.keyhandler.run, "COMMAND")
         self.entry.connect("changed", self.check_close)
         self.info = Gtk.Label()
-        self.info.set_max_width_chars(self.vimiv.winsize[0]/16)
+        self.info.set_max_width_chars(self.vimiv.winsize[0] / 16)
         self.info.set_ellipsize(Pango.EllipsizeMode.END)
         self.box.pack_start(self.entry, True, True, 0)
         self.box.pack_end(self.info, False, False, 0)
@@ -70,7 +71,8 @@ class CommandLine(object):
                 while True:
                     try:
                         num = int(cmd[0])
-                        self.vimiv.keyhandler.num_str = self.vimiv.keyhandler.num_str + str(num)
+                        self.vimiv.keyhandler.num_str = \
+                            self.vimiv.keyhandler.num_str + str(num)
                         cmd = cmd[1:]
                     except:
                         break
@@ -93,7 +95,8 @@ class CommandLine(object):
         else:
             filelist = []
             fil = ""
-        if self.vimiv.mark.marked:  # Always operate on marked files if they exist
+        # Always operate on marked files if they exist
+        if self.vimiv.mark.marked:
             filelist = self.vimiv.mark.marked
         # Escape spaces for the shell
         fil = fil.replace(" ", "\\\\\\\\ ")
@@ -142,7 +145,6 @@ class CommandLine(object):
             cmd = e.split()[-1]
             self.vimiv.statusbar.err_message("Command %s not found" % (cmd))
 
-
     def pipe(self, pipe_input):
         """ Run output of external command in a pipe
             This checks for directories, files and vimiv commands """
@@ -181,7 +183,6 @@ class CommandLine(object):
             for cmd in pipe_input:
                 self.run_command(cmd)
 
-
     def run_path(self, path):
         """ Run a path command, namely populate files or focus directory """
         # Expand home
@@ -208,13 +209,14 @@ class CommandLine(object):
                     # Focus it in the treeview so it can be accessed via "l"
                     for i, fil in enumerate(self.vimiv.library.files):
                         if fil in path:
-                            self.vimiv.library.treeview.set_cursor(Gtk.TreePath(i),
-                                                        None, False)
+                            self.vimiv.library.treeview.set_cursor(
+                                Gtk.TreePath(i), None, False)
                             self.vimiv.library.treepos = i
                             break
                     # Show the image
-                    self.vimiv.library.grid.set_size_request(self.vimiv.library.width-
-                                                self.vimiv.library.border_width, 10)
+                    self.vimiv.library.grid.set_size_request(
+                        self.vimiv.library.width -
+                        self.vimiv.library.border_width, 10)
                     self.vimiv.image.scrolled_win.show()
                 else:
                     self.vimiv.library.move_up(abspath, True)
@@ -385,16 +387,17 @@ class CommandLine(object):
             if len(self.search_names) == 1:
                 self.vimiv.library.file_select("alt",
                                                self.search_names
-                                                   [self.search_pos],
+                                               [self.search_pos],
                                                "b",
                                                False)
             else:
                 path = self.search_positions[self.search_pos]
                 self.vimiv.library.treeview.set_cursor(Gtk.TreePath(path),
-                                                         None, False)
+                                                       None, False)
                 self.vimiv.library.treepos = path
         else:
-            self.vimiv.keyhandler.num_str = str(self.search_positions[self.search_pos]+1)
+            self.vimiv.keyhandler.num_str = str(
+                self.search_positions[self.search_pos] + 1)
             self.vimiv.image.move_pos()
 
     def reset_search(self):

@@ -170,7 +170,7 @@ def parse_config():
     """ Checks each configfile for settings and returns them accordingly """
     settings = set_defaults()
     configfiles = check_configs(["/etc/vimiv/vimivrc",
-                                os.path.expanduser("~/.vimiv/vimivrc")])
+                                 os.path.expanduser("~/.vimiv/vimivrc")])
 
     # Iterate through the configfiles overwriting settings accordingly
     for configfile in configfiles:

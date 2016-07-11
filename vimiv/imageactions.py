@@ -94,7 +94,7 @@ def thumbnails_create(filelist, thumbsize):
     thumbnails = os.listdir(thumbdir)
     thumblist = []  # List of all files with thumbnails
     errtuple = ([], [])    # Tuple containing all files for which thumbnail
-                           # creation failed and their position
+    # creation failed and their position
 
     # Loop over all files
     for i, infile in enumerate(filelist):

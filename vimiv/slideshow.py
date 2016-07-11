@@ -4,6 +4,7 @@
 
 from gi.repository import GLib
 
+
 class Slideshow(object):
     """ Handles everything related to slideshow for vimiv """
 
@@ -30,7 +31,7 @@ class Slideshow(object):
         else:
             self.running = not self.running
             if self.running:
-                self.timer_id_s = GLib.timeout_add(1000*self.delay,
+                self.timer_id_s = GLib.timeout_add(1000 * self.delay,
                                                    self.vimiv.image.move_index,
                                                    True, False, 1)
             else:
@@ -50,7 +51,7 @@ class Slideshow(object):
         # If slideshow was running reload it
         if self.running:
             GLib.source_remove(self.timer_id_s)
-            self.timer_id_s = GLib.timeout_add(1000*self.delay,
+            self.timer_id_s = GLib.timeout_add(1000 * self.delay,
                                                self.vimiv.image.move_index,
                                                True, False, 1)
             self.vimiv.statusbar.update_info()

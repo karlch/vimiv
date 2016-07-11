@@ -7,6 +7,7 @@ from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import GLib, Gtk
 
+
 class Statusbar(object):
     """ Creates the statusbar and handles all events for it """
 
@@ -50,7 +51,7 @@ class Statusbar(object):
             self.toggle()
             self.left_label.set_markup(mes)
             self.timer_id = GLib.timeout_add_seconds(5,
-                            self.toggle)
+                                                     self.toggle)
 
     def error_false(self):
         """ Strip one error and update the statusbar if no more errors remain"""
@@ -72,25 +73,31 @@ class Statusbar(object):
                     if pos >= i:
                         pos += 1
                 name = os.path.basename(self.vimiv.paths[pos])
-                message = "{0}/{1}  {2}  {3}".format(self.vimiv.thumbnail.pos+1,
-                    len(self.vimiv.paths)-len(self.vimiv.thumbnail.errorpos),
-                    name, self.vimiv.thumbnail.size)
+                message = "{0}/{1}  {2}  {3}". \
+                    format(self.vimiv.thumbnail.pos + 1,
+                           len(self.vimiv.paths) -
+                           len(self.vimiv.thumbnail.errorpos),
+                           name, self.vimiv.thumbnail.size)
                 self.left_label.set_text(message)
             # Image info in image mode
             else:
                 name = os.path.basename(self.vimiv.paths[self.vimiv.index])
-                message = "{0}/{1}  {2}  [{3:.0f}%]".format(self.vimiv.index+1,
-                    len(self.vimiv.paths), name, self.vimiv.image.zoom_percent*100)
+                message = "{0}/{1}  {2}  [{3:.0f}%]". \
+                    format(self.vimiv.index + 1, len(self.vimiv.paths), name,
+                           self.vimiv.image.zoom_percent * 100)
                 self.left_label.set_text(message)
         except:
             self.left_label.set_text("No open images")
         # Center
-        if not (self.vimiv.thumbnail.toggled or self.vimiv.library.focused) and self.vimiv.paths:
-            mark = "[*]" if self.vimiv.paths[self.vimiv.index] in self.vimiv.mark.marked else ""
+        if not (self.vimiv.thumbnail.toggled or self.vimiv.library.focused) \
+                and self.vimiv.paths:
+            mark = "[*]" if self.vimiv.paths[self.vimiv.index] \
+                in self.vimiv.mark.marked else ""
         else:
             mark = ""
         if self.vimiv.slideshow.running:
-            slideshow = "[slideshow - {0:.1f}s]".format(self.vimiv.slideshow.delay)
+            slideshow = "[slideshow - {0:.1f}s]".format(
+                self.vimiv.slideshow.delay)
         else:
             slideshow = ""
         message = "{0}  {1}".format(mark, slideshow)
@@ -102,7 +109,7 @@ class Statusbar(object):
         # Window title
         try:
             name = os.path.basename(self.vimiv.paths[self.vimiv.index])
-            self.vimiv.set_title("vimiv - "+name)
+            self.vimiv.set_title("vimiv - " + name)
         except:
             self.vimiv.set_title("vimiv")
         # Size of statusbar for resizing image
@@ -127,5 +134,6 @@ class Statusbar(object):
             self.vimiv.bbox.show()
         self.visible = not self.visible
         # Resize the image if necessary
-        if not self.vimiv.image.user_zoomed and self.vimiv.paths and not self.vimiv.thumbnail.toggled:
+        if not self.vimiv.image.user_zoomed and self.vimiv.paths and \
+                not self.vimiv.thumbnail.toggled:
             self.vimiv.image.zoom_to(0)

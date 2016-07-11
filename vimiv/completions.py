@@ -8,6 +8,7 @@ from vimiv.helpers import listdir_wrapper
 from vimiv.helpers import external_commands
 from vimiv.fileactions import is_image
 
+
 class Completion():
 
     """ Class for the command line completion
@@ -158,6 +159,7 @@ class Completion():
 
 class VimivComplete(object):
     """ Inherits from vimiv to communicate with the widget """
+
     def __init__(self, vimiv):
         self.vimiv = vimiv
 

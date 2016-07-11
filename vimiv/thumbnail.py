@@ -9,6 +9,7 @@ from gi.repository import Gtk, GdkPixbuf, GLib
 from vimiv.imageactions import thumbnails_create
 from vimiv.helpers import scrolltypes
 
+
 class Thumbnail(object):
     """ Thumbnail class for vimiv
         includes the iconview with the thumnbails and all actions that apply to
@@ -35,7 +36,7 @@ class Thumbnail(object):
         self.iconview = Gtk.IconView.new()
         self.iconview.connect("item-activated", self.iconview_clicked)
         self.iconview.connect("key_press_event", self.vimiv.keyhandler.run,
-                            "THUMBNAIL")
+                              "THUMBNAIL")
         self.iconview.set_model(self.liststore)
         self.columns = 0
         self.iconview.set_spacing(0)
@@ -44,7 +45,6 @@ class Thumbnail(object):
         self.iconview.set_pixbuf_column(0)
         self.iconview.set_border_width(1)
         self.iconview.set_markup_column(1)
-
 
     def iconview_clicked(self, w, count):
         """ Selects image when thumbnail was selected """
@@ -91,7 +91,8 @@ class Thumbnail(object):
         self.errorpos = errtuple[0]
         if self.errorpos:
             failed_files = ", ".join(errtuple[1])
-            self.vimiv.statusbar.err_message("Thumbnail creation for %s failed" %(failed_files))
+            self.vimiv.statusbar.err_message(
+                "Thumbnail creation for %s failed" % (failed_files))
 
         # Add all thumbnails to the liststore
         for i, thumb in enumerate(self.elements):
@@ -103,7 +104,7 @@ class Thumbnail(object):
             self.liststore.append([pixbuf, name])
 
         # Set columns
-        self.columns = int(self.vimiv.image.imsize[0]/(self.size[0]+30))
+        self.columns = int(self.vimiv.image.imsize[0] / (self.size[0] + 30))
         self.iconview.set_columns(self.columns)
 
         # Draw the icon view instead of the image
@@ -176,16 +177,17 @@ class Thumbnail(object):
         if direction == "h":
             self.pos -= step
         elif direction == "k":
-            self.pos -= self.columns*step
+            self.pos -= self.columns * step
         elif direction == "l":
             self.pos += step
         else:
-            self.pos += self.columns*step
+            self.pos += self.columns * step
         # Do not scroll to self.vimiv.paths that don't exist
         if self.pos < 0:
             self.pos = 0
-        elif self.pos > (len(self.vimiv.library.files)-len(self.errorpos)-1):
-            self.pos = len(self.vimiv.library.files)-len(self.errorpos)-1
+        elif self.pos > \
+                (len(self.vimiv.library.files) - len(self.errorpos) - 1):
+            self.pos = len(self.vimiv.library.files) - len(self.errorpos) - 1
         # Move
         path = Gtk.TreePath.new_from_string(str(self.pos))
         self.iconview.select_path(path)
@@ -204,16 +206,18 @@ class Thumbnail(object):
         # Vertical
         if direction == "k" or direction == "j":
             Gtk.Adjustment.set_step_increment(
-                self.vimiv.image.viewport.get_vadjustment(), (self.size[1]+30)*step)
+                self.vimiv.image.viewport.get_vadjustment(),
+                (self.size[1] + 30) * step)
             self.vimiv.image.scrolled_win.emit('scroll-child',
-                                   scrolltypes[direction][0], False)
+                                               scrolltypes[direction][0], False)
         # Horizontal (tricky because one might reach a new column)
         else:
             start = target - step
             startcol = int(start / self.columns)
             endcol = int(target / self.columns)
             toscroll = endcol - startcol
-            Gtk.Adjustment.set_step_increment(self.vimiv.image.viewport.get_vadjustment(),
-                                              (self.size[1]+30)*toscroll)
+            Gtk.Adjustment.set_step_increment(
+                self.vimiv.image.viewport.get_vadjustment(),
+                (self.size[1] + 30) * toscroll)
             self.vimiv.image.scrolled_win.emit('scroll-child',
-                                   scrolltypes[direction][0], False)
+                                               scrolltypes[direction][0], False)

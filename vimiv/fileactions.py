@@ -13,11 +13,13 @@ from vimiv.helpers import listdir_wrapper
 vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
 trashdir = os.path.join(vimivdir, "Trash")
 
+
 def recursive_search(directory):
     """ Search a directory recursively for images """
     for root, dirs, files in os.walk(directory):
         for fil in files:
             yield os.path.join(root, fil)
+
 
 def populate_single(arg, recursive):
     """ Populate a complete filelist if only one path is given """
@@ -94,14 +96,15 @@ def delete(filelist):
             delfile = os.path.join(deldir, os.path.basename(im))
             if os.path.exists(delfile):
                 backnum = 1
-                ndelfile = delfile+"."+str(backnum)
+                ndelfile = delfile + "." + str(backnum)
                 while os.path.exists(ndelfile):
                     backnum += 1
-                    ndelfile = delfile+"."+str(backnum)
+                    ndelfile = delfile + "." + str(backnum)
                 shutil.move(delfile, ndelfile)
             shutil.move(im, deldir)
 
         return 0  # Success
+
 
 def test_svg(h, b):
     """ svg data """
@@ -111,6 +114,7 @@ def test_svg(h, b):
             return "svg"
     except:
         return None
+
 
 def is_image(filename):
     """ Checks whether the file is an image """
@@ -124,6 +128,7 @@ def is_image(filename):
         return True
     else:
         return False
+
 
 class FileExtras(object):
     """ Extra fileactions for vimiv """
@@ -160,7 +165,7 @@ class FileExtras(object):
 
         for i, fil in enumerate(self.vimiv.paths):
             ending = fil.split(".")[-1]
-            num = "%03d" % (i+1)
+            num = "%03d" % (i + 1)
             # Exif stuff
             if tofind:
                 im = Image.open(fil)

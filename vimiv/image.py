@@ -8,10 +8,11 @@ from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib
 
+
 class Image(object):
     """ Image class for vimiv
-        includes the scrollable window with the image and all actions that apply to
-        it """
+        includes the scrollable window with the image and all actions that apply
+        to it """
 
     def __init__(self, vimiv, settings):
         self.vimiv = vimiv
@@ -51,7 +52,8 @@ class Image(object):
                     self.vimiv.manipulate.button_clicked(False)
                     return 0
                 else:
-                    self.vimiv.commandline.err_message("Image has been edited, add ! to force")
+                    self.vimiv.commandline.err_message(
+                        "Image has been edited, add ! to force")
                     return 1
 
     def get_zoom_percent(self, z_width=False, z_height=False):
@@ -86,7 +88,8 @@ class Image(object):
             pbf_width = int(pbo_width * self.zoom_percent)
             pbf_height = int(pbo_height * self.zoom_percent)
             # Rescaling of svg
-            ending = os.path.basename(self.vimiv.paths[self.vimiv.index]).split(".")[-1]
+            ending = os.path.basename(
+                self.vimiv.paths[self.vimiv.index]).split(".")[-1]
             if ending == "svg" and self.rescale_svg:
                 pixbuf_final = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                     self.vimiv.paths[self.vimiv.index], -1, pbf_height, True)
@@ -127,15 +130,16 @@ class Image(object):
         try:
             self.zoom_percent = self.zoom_percent * (1 + delta)
             # Catch some unreasonable zooms
-            if (self.pixbuf_original.get_height()*self.zoom_percent < 5 or
-                    self.pixbuf_original.get_height()*self.zoom_percent >
-                    self.vimiv.screensize[0]*5):
+            if (self.pixbuf_original.get_height() * self.zoom_percent < 5 or
+                    self.pixbuf_original.get_height() * self.zoom_percent >
+                    self.vimiv.screensize[0] * 5):
                 raise ValueError
             self.user_zoomed = True
             self.update(update_gif=False)
         except:
             self.zoom_percent = self.zoom_percent / (1 + delta)
-            self.vimiv.commandline.err_message("Warning: Object cannot be zoomed (further)")
+            self.vimiv.commandline.err_message(
+                "Warning: Object cannot be zoomed (further)")
 
     def zoom_to(self, percent, z_width=False, z_height=False):
         """ Zooms to a given percentage """
@@ -150,11 +154,12 @@ class Image(object):
             # If prefixed with a zero invert value
             try:
                 if percent[0] == "0":
-                    percent = 1/float(percent[1:])
+                    percent = 1 / float(percent[1:])
                 else:
                     percent = float(percent)
             except:
-                self.vimiv.commandline.err_message("Error: Zoom percentage not parseable")
+                self.vimiv.commandline.err_message(
+                    "Error: Zoom percentage not parseable")
                 return
             self.vimiv.keyhandler.num_str = ""
         try:
@@ -162,14 +167,15 @@ class Image(object):
             self.zoom_percent = (percent if percent
                                  else self.get_zoom_percent(z_width, z_height))
             # Catch some unreasonable zooms
-            if (self.pixbuf_original.get_height()*self.zoom_percent < 5 or
-                    self.pixbuf_original.get_height()*self.zoom_percent >
-                    self.vimiv.screensize[0]*5):
+            if (self.pixbuf_original.get_height() * self.zoom_percent < 5 or
+                    self.pixbuf_original.get_height() * self.zoom_percent >
+                    self.vimiv.screensize[0] * 5):
                 self.zoom_percent = before
                 raise ValueError
             self.update(update_gif=False)
         except:
-            self.vimiv.commandline.err_message("Warning: Object cannot be zoomed (further)")
+            self.vimiv.commandline.err_message(
+                "Warning: Object cannot be zoomed (further)")
 
     def center_window(self):
         """ Centers the image in the current window """
@@ -182,7 +188,7 @@ class Image(object):
         vact = self.zoom_percent * pbo_height
         diff = vact - self.imsize[1]
         if diff > 0:
-            toscroll = (diff - 2*vadj) / 2
+            toscroll = (diff - 2 * vadj) / 2
             Gtk.Adjustment.set_step_increment(
                 self.viewport.get_vadjustment(), toscroll)
             self.scrolled_win.emit('scroll-child',
@@ -196,7 +202,7 @@ class Image(object):
         hact = self.zoom_percent * pbo_width
         if diff > 0:
             diff = hact - self.imsize[0]
-            toscroll = (diff - 2*hadj) / 2
+            toscroll = (diff - 2 * hadj) / 2
             Gtk.Adjustment.set_step_increment(
                 self.viewport.get_hadjustment(), toscroll)
             self.scrolled_win.emit('scroll-child',

@@ -33,6 +33,7 @@ except:
     external_commands = []
 external_commands = tuple(external_commands)
 
+
 def import_wrapper(module):
     """ Wrapper function around the import statement with exception checking """
     try:

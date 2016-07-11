@@ -8,6 +8,7 @@ from gi.repository import Gdk, GLib
 from vimiv.helpers import scrolltypes
 from vimiv.parser import parse_keys
 
+
 class Window(object):
     """ Window class for vimiv
         handles fullscreen and resize """
@@ -16,8 +17,8 @@ class Window(object):
         self.vimiv = vimiv
         self.fullscreen = False
         self.vimiv.connect_object('window-state-event',
-                                   Window.on_window_state_change,
-                                   self)
+                                  Window.on_window_state_change,
+                                  self)
         self.last_focused = ""
 
         # The configruations from vimivrc
@@ -57,8 +58,8 @@ class Window(object):
             elif not self.vimiv.paths and self.vimiv.library.expand:
                 self.vimiv.library.grid.set_size_request(self.vimiv.winsize[0],
                                                          10)
-            self.vimiv.commandline.info.set_max_width_chars(self.vimiv.winsize[0]/16)
-
+            self.vimiv.commandline.info.set_max_width_chars(
+                self.vimiv.winsize[0] / 16)
 
 
 class KeyHandler(object):

@@ -3,6 +3,7 @@
 """ Contains all commands and functions for vimiv """
 from vimiv.tags import TagHandler
 
+
 class Commands(object):
     """ Creates the commands for vimiv """
 
@@ -19,7 +20,8 @@ class Commands(object):
             "clear_thumbs": [self.vimiv.fileextras.clear, 'Thumbnails'],
             "command": [self.vimiv.commandline.focus],
             "delete": [self.vimiv.manipulate.delete],
-            "discard_changes": [self.vimiv.manipulate.button_clicked, "w", False],
+            "discard_changes": [self.vimiv.manipulate.button_clicked, "w",
+                                False],
             "first":  [self.vimiv.image.move_pos, False],
             "first_lib":  [self.vimiv.library.move_pos, False],
             "fit": [self.vimiv.image.zoom_to, 0],
@@ -70,13 +72,16 @@ class Commands(object):
             "zoom_out": [self.vimiv.image.zoom_delta, -.25],
             "zoom_to": [self.vimiv.image.zoom_to]}
 
-        self.vimiv.functions = {"focus_bri": [self.vimiv.manipulate.focus_slider, "bri"],
+        self.vimiv.functions = {
+            "focus_bri": [self.vimiv.manipulate.focus_slider, "bri"],
             "focus_con": [self.vimiv.manipulate.focus_slider, "con"],
             "focus_sha": [self.vimiv.manipulate.focus_slider, "sha"],
             "slider_dec": [self.vimiv.manipulate.change_slider, True, False],
             "slider_inc": [self.vimiv.manipulate.change_slider, False, False],
-            "slider_dec_large": [self.vimiv.manipulate.change_slider, True, True],
-            "slider_inc_large": [self.vimiv.manipulate.change_slider, False, True],
+            "slider_dec_large": [self.vimiv.manipulate.change_slider, True,
+                                 True],
+            "slider_inc_large": [self.vimiv.manipulate.change_slider, False,
+                                 True],
             "cmd_history_up": [self.vimiv.commandline.history_search, False],
             "cmd_history_down": [self.vimiv.commandline.history_search, True],
             "discard_command": [self.vimiv.commandline.leave],

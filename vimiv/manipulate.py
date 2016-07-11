@@ -10,6 +10,7 @@ from gi.repository import Gtk, GdkPixbuf
 from vimiv import imageactions
 from PIL import Image
 
+
 class Manipulate(object):
     """ Manipulate class for vimiv
         includes the manipulation toolbar, all the actions that apply to it and
@@ -27,8 +28,8 @@ class Manipulate(object):
         # A vbox in which everything gets packed
         self.hbox = Gtk.HBox(spacing=5)
         self.hbox.connect("key_press_event",
-                             self.vimiv.keyhandler.run,
-                             "MANIPULATE")
+                          self.vimiv.keyhandler.run,
+                          "MANIPULATE")
 
         # A list to save the changes being done
         self.manipulations = [1, 1, 1, False]
@@ -102,7 +103,8 @@ class Manipulate(object):
         # Add the image shown
         if not self.vimiv.mark.marked and not self.vimiv.thumbnail.toggled:
             if self.vimiv.library.focused:
-                images.append(os.path.abspath(self.vimiv.library.files[self.vimiv.library.treepos]))
+                images.append(os.path.abspath(
+                    self.vimiv.library.files[self.vimiv.library.treepos]))
             else:
                 images.append(self.vimiv.paths[self.vimiv.index])
         # Add all marked images
@@ -131,15 +133,17 @@ class Manipulate(object):
             cwise = cwise % 4
             # Rotate the image shown
             if self.vimiv.paths[self.vimiv.index] in images:
-                self.vimiv.image.pixbuf_original = self.vimiv.image.pixbuf_original.rotate_simple(
-                    (90 * cwise))
+                self.vimiv.image.pixbuf_original = \
+                    self.vimiv.image.pixbuf_original.rotate_simple(
+                        (90 * cwise))
                 self.vimiv.image.update(False)
             # Rotate all vimiv.library.files in external thread
             rotate_thread = Thread(target=self.thread_for_rotate, args=(images,
                                                                         cwise))
             rotate_thread.start()
         except:
-            self.vimiv.statusbar.err_message("Warning: Object cannot be rotated")
+            self.vimiv.statusbar.err_message(
+                "Warning: Object cannot be rotated")
 
     def thread_for_rotate(self, images, cwise):
         """ Rotate all image vimiv.library.files in an extra thread """
@@ -147,7 +151,8 @@ class Manipulate(object):
             imageactions.rotate_file(images, cwise)
             if self.vimiv.thumbnail.toggled:
                 for image in images:
-                    self.vimiv.thumbnail.reload(image, self.vimiv.paths.index(image))
+                    self.vimiv.thumbnail.reload(
+                        image, self.vimiv.paths.index(image))
         except:
             self.vimiv.statusbar.err_message("Error: Rotation of file failed")
 
@@ -157,14 +162,17 @@ class Manipulate(object):
             images = self.get_manipulated_images("Flipped")
             # Flip the image shown
             if self.vimiv.paths[self.vimiv.index] in images:
-                self.vimiv.image.pixbuf_original = self.vimiv.image.pixbuf_original.flip(directory)
+                self.vimiv.image.pixbuf_original = \
+                    self.vimiv.image.pixbuf_original.flip(
+                        directory)
                 self.vimiv.image.update(False)
             # Flip all vimiv.library.files in an extra thread
             flip_thread = Thread(target=self.thread_for_flip, args=(images,
                                                                     directory))
             flip_thread.start()
         except:
-            self.vimiv.statusbar.err_message("Warning: Object cannot be flipped")
+            self.vimiv.statusbar.err_message(
+                "Warning: Object cannot be flipped")
 
     def thread_for_flip(self, images, horizontal):
         """ Flip all image vimiv.library.files in an extra thread """
@@ -172,7 +180,8 @@ class Manipulate(object):
             imageactions.flip_file(images, horizontal)
             if self.vimiv.thumbnail.toggled:
                 for image in images:
-                    self.vimiv.thumbnail.reload(image, self.vimiv.paths.index(image))
+                    self.vimiv.thumbnail.reload(
+                        image, self.vimiv.paths.index(image))
         except:
             self.vimiv.statusbar.err_message("Error: Flipping of file failed")
 
@@ -192,10 +201,12 @@ class Manipulate(object):
             self.hbox.hide()
             self.vimiv.image.scrolled_win.grab_focus()
             self.vimiv.statusbar.update_info()
-        elif self.vimiv.paths and not(self.vimiv.thumbnail.toggled or self.vimiv.library.focused):
+        elif self.vimiv.paths and not(self.vimiv.thumbnail.toggled
+                                      or self.vimiv.library.focused):
             try:
                 self.vimiv.image.pixbuf_original.is_static_image()
-                self.vimiv.statusbar.err_message("Manipulating Gifs is not supported")
+                self.vimiv.statusbar.err_message(
+                    "Manipulating Gifs is not supported")
             except:
                 self.toggled = True
                 self.hbox.show()
@@ -203,9 +214,11 @@ class Manipulate(object):
                 self.vimiv.statusbar.update_info()
         else:
             if self.vimiv.thumbnail.toggled:
-                self.vimiv.statusbar.err_message("Manipulate not supported in thumbnail mode")
+                self.vimiv.statusbar.err_message(
+                    "Manipulate not supported in thumbnail mode")
             elif self.vimiv.library.focused:
-                self.vimiv.statusbar.err_message("Manipulate not supported in library")
+                self.vimiv.statusbar.err_message(
+                    "Manipulate not supported in library")
             else:
                 self.vimiv.statusbar.err_message("No image open to edit")
 
@@ -216,7 +229,8 @@ class Manipulate(object):
         # A thumbnail for higher responsiveness
         elif "-EDIT" not in self.vimiv.paths[self.vimiv.index]:
             im = Image.open(self.vimiv.paths[self.vimiv.index])
-            out = "-EDIT.".join(self.vimiv.paths[self.vimiv.index].rsplit(".", 1))
+            out = "-EDIT.".join(
+                self.vimiv.paths[self.vimiv.index].rsplit(".", 1))
             orig = out.replace("EDIT", "EDIT-ORIG")
             im.thumbnail(self.vimiv.image.imsize, Image.ANTIALIAS)
             imageactions.save_image(im, out)
@@ -228,14 +242,18 @@ class Manipulate(object):
             orig = out.replace("EDIT", "EDIT-ORIG")
         # Apply all manipulations
         if imageactions.manipulate_all(orig, out, self.manipulations):
-            self.vimiv.statusbar.err_message("Optimize failed. Is imagemagick installed?")
+            self.vimiv.statusbar.err_message(
+                "Optimize failed. Is imagemagick installed?")
         # Reset optimize so it isn't repeated all the time
         self.manipulations[3] = False
 
         # Show the edited image
         self.vimiv.image.image.clear()
-        self.vimiv.image.pixbuf_original = GdkPixbuf.PixbufAnimation.new_from_file(out)
-        self.vimiv.image.pixbuf_original = self.vimiv.image.pixbuf_original.get_static_image()
+        self.vimiv.image.pixbuf_original = \
+            GdkPixbuf.PixbufAnimation.new_from_file(
+                out)
+        self.vimiv.image.pixbuf_original = \
+            self.vimiv.image.pixbuf_original.get_static_image()
         if not self.vimiv.window.fullscreen:
             self.vimiv.image.imsize = self.vimiv.image.get_size()
         self.vimiv.image.zoom_percent = self.vimiv.image.get_zoom_percent()
@@ -286,7 +304,8 @@ class Manipulate(object):
         """ Finishes manipulate mode """
         # Reload the real images if changes were made
         if "EDIT" in self.vimiv.paths[self.vimiv.index]:
-            out = self.vimiv.paths[self.vimiv.index]             # manipulated thumbnail
+            # manipulated thumbnail
+            out = self.vimiv.paths[self.vimiv.index]
             orig = out.replace("EDIT", "EDIT-ORIG")  # original thumbnail
             path = out.replace("-EDIT", "")          # real file
             # Edit the actual file if yes
@@ -301,8 +320,11 @@ class Manipulate(object):
             os.remove(orig)
             # Show the original image
             self.vimiv.image.image.clear()
-            self.vimiv.image.pixbuf_original = GdkPixbuf.PixbufAnimation.new_from_file(path)
-            self.vimiv.image.pixbuf_original = self.vimiv.image.pixbuf_original.get_static_image()
+            self.vimiv.image.pixbuf_original = \
+                GdkPixbuf.PixbufAnimation.new_from_file(
+                    path)
+            self.vimiv.image.pixbuf_original = \
+                self.vimiv.image.pixbuf_original.get_static_image()
             self.vimiv.paths[self.vimiv.index] = path
             if not self.vimiv.window.fullscreen:
                 self.vimiv.image.imsize = self.vimiv.image.get_size()
@@ -330,6 +352,7 @@ class Manipulate(object):
         else:
             self.focus_slider(man)
             self.vimiv.keyhandler.num_str = num
-            execstr = "self.scale_" + man + ".set_value(int(self.vimiv.keyhandler.num_str))"
+            execstr = "self.scale_" + man + \
+                ".set_value(int(self.vimiv.keyhandler.num_str))"
             exec(execstr)
         self.vimiv.keyhandler.num_str = ""
