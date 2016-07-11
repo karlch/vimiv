@@ -99,7 +99,7 @@ def thumbnails_create(filelist, thumbsize):
     # Loop over all files
     for i, infile in enumerate(filelist):
         # Correct name
-        outfile_ext = ".".join(infile.split(".")[:-1]) + ".thumbnail" + ".png"
+        outfile_ext = infile.split(".")[0] + ".thumbnail" + ".png"
         outfile_base = os.path.basename(outfile_ext)
         outfile = os.path.join(thumbdir, outfile_base)
         # Only if they aren't cached already

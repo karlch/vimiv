@@ -5,7 +5,7 @@
 import os
 import re
 from vimiv.helpers import listdir_wrapper
-from vimiv.variables import external_commands
+from vimiv.helpers import external_commands
 from vimiv.fileactions import is_image
 
 class Completion():
@@ -155,3 +155,34 @@ class Completion():
             elif is_image(fil) or external_command:
                 filelist.append(fil)
         return filelist
+
+
+class VimivComplete(object):
+    """ Inherits from vimiv to communicate with the widget """
+    def __init__(self, vimiv):
+        self.vimiv = vimiv
+
+    def cmd_complete(self):
+        """ Simple autocompletion for the command line """
+        command = self.vimiv.commandline.cmd_line.get_text()
+        command = command.lstrip(":")
+        # Strip prepending numbers
+        numstr = ""
+        while True:
+            try:
+                num = int(command[0])
+                numstr += str(num)
+                command = command[1:]
+            except:
+                break
+        # Generate completion class and get completions
+        commandlist = sorted(list(self.vimiv.commands.keys()))
+        completion = Completion(command, commandlist)
+        output, compstr = completion.complete()
+
+        # Set text
+        self.vimiv.commandline.cmd_line.set_text(output)
+        self.vimiv.commandline.cmd_line_info.set_text(compstr)
+        self.vimiv.commandline.cmd_line.set_position(-1)
+
+        return True  # Deactivates default bindings (here for Tab)
