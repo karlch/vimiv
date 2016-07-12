@@ -31,10 +31,10 @@ visible, even if they are not for the user.
 
 ## New features
 If you would like to implement a new feature it might be a good idea to send me
-an email to "christian dot karl at protonmail dot com" to ask if I would like to
-see it implemented. Otherwise you might be disappointed afterwards if I do not
-accept your pull request. In general though I am very happy about any interest
-in vimiv!
+an email to "christian dot karl at protonmail dot com" or open an issue to ask
+if I would like to see it implemented. Otherwise you might be disappointed
+afterwards if I do not accept your pull request. In general though I am very
+happy about any interest in vimiv!
 
 ## Open issues
 Another great way to help is to work on open issues. Some of these obviously
