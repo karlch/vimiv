@@ -16,13 +16,14 @@ class Statusbar(object):
         general = settings["GENERAL"]
 
         # Default values
-        self.visible = general["display_bar"]
+        self.hidden = general["display_bar"]
         self.error = []  # Errors for statusbar
         self.search_names = []
         self.search_positions = []
         self.timer_id = GLib.Timeout
         self.size = 0
         self.lock = False
+        self.was_hidden = False
 
         # Statusbar on the bottom
         self.bar = Gtk.HBox(False, 0)
@@ -46,13 +47,11 @@ class Statusbar(object):
         self.error.append(1)
         mes = "<b>" + mes + "</b>"
         self.timer_id = GLib.timeout_add_seconds(5, self.error_false)
-        if not self.visible:
-            self.left_label.set_markup(mes)
-        else:  # Show bar if it isn't there
+        # Show if is was hidden
+        if self.hidden:
             self.toggle()
-            self.left_label.set_markup(mes)
-            self.timer_id = GLib.timeout_add_seconds(5,
-                                                     self.toggle)
+            self.was_hidden = True
+        self.left_label.set_markup(mes)
 
     def error_false(self):
         """ Strip one error and update the statusbar if no more errors remain"""
@@ -65,6 +64,10 @@ class Statusbar(object):
         # Return if it is locked
         if self.lock:
             return
+        # Hide again if it was shown due to an error message
+        if self.was_hidden:
+            self.was_hidden = False
+            self.toggle()
         # Left side
         try:
             # Directory if library is focused
@@ -132,11 +135,11 @@ class Statusbar(object):
 
     def toggle(self):
         """ Toggles statusbar resizing image if necessary """
-        if not self.visible and not self.vimiv.commandline.entry.is_visible():
+        if not self.hidden and not self.vimiv.commandline.entry.is_visible():
             self.vimiv.bbox.hide()
         else:
             self.vimiv.bbox.show()
-        self.visible = not self.visible
+        self.hidden = not self.hidden
         # Resize the image if necessary
         if not self.vimiv.image.user_zoomed and self.vimiv.paths and \
                 not self.vimiv.thumbnail.toggled:

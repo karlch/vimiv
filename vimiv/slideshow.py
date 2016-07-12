@@ -36,8 +36,8 @@ class Slideshow(object):
             if self.running:
                 self.start_index = self.vimiv.index
                 self.timer_id = GLib.timeout_add(1000 * self.delay,
-                                                   self.vimiv.image.move_index,
-                                                   True, False, 1)
+                                                 self.vimiv.image.move_index,
+                                                 True, False, 1)
             else:
                 self.vimiv.statusbar.lock = False
                 GLib.source_remove(self.timer_id)

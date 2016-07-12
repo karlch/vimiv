@@ -285,7 +285,7 @@ class CommandLine(object):
         # Colon for text
         self.entry.set_text(":")
         # Show the statusbar
-        if self.vimiv.statusbar.visible:
+        if self.vimiv.statusbar.hidden:
             self.vimiv.bbox.show()
         # Remove old error messages
         self.vimiv.statusbar.update_info()
@@ -323,7 +323,7 @@ class CommandLine(object):
         else:
             self.vimiv.image.scrolled_win.grab_focus()
         # Rehide the command line
-        if self.vimiv.statusbar.visible:
+        if self.vimiv.statusbar.hidden:
             self.vimiv.bbox.hide()
 
     def check_close(self, entry):

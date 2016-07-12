@@ -119,7 +119,7 @@ class Image(object):
             size = self.vimiv.get_size()
         if self.vimiv.library.toggled:
             size = (size[0] - self.vimiv.library.width, size[1])
-        if not self.vimiv.statusbar.visible:
+        if not self.vimiv.statusbar.hidden:
             size = (size[0], size[1] - self.vimiv.statusbar.size - 24)
         return size
 
