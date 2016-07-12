@@ -12,10 +12,11 @@ class Slideshow(object):
         self.vimiv = vimiv
         general = settings["GENERAL"]
 
-        self.running = general["start_slideshow"]
+        self.at_start = general["start_slideshow"]
         self.delay = general["slideshow_delay"]
         self.timer_id = GLib.Timeout
         self.start_index = 0
+        self.running = False
 
     def toggle(self):
         """ Toggles the slideshow or updates the delay """

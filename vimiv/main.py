@@ -150,8 +150,7 @@ class Vimiv(Gtk.Window):
                 self.library.box.hide()
             self.image.scrolled_win.grab_focus()
             # Start in slideshow mode?
-            if self.slideshow.running:
-                self.slideshow.running = False
+            if self.slideshow.at_start:
                 self.slideshow.toggle()
             self.statusbar.toggle()
         # Just open the library if no paths were given
