@@ -257,6 +257,15 @@ class Image(object):
             self.vimiv.commandline.err_message("Error: file not accessible")
             self.move_pos(False)
 
+        # Info if slideshow returns to beginning
+        if self.vimiv.slideshow.running:
+            if self.vimiv.index is self.vimiv.slideshow.start_index:
+                message = "Info: back at beginning of slideshow"
+                self.vimiv.statusbar.lock = True
+                self.vimiv.statusbar.err_message(message)
+            else:
+                self.vimiv.statusbar.lock = False
+
         self.vimiv.keyhandler.num_clear()
         return True  # for the slideshow
 

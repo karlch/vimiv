@@ -22,6 +22,7 @@ class Statusbar(object):
         self.search_positions = []
         self.timer_id = GLib.Timeout
         self.size = 0
+        self.lock = False
 
         # Statusbar on the bottom
         self.bar = Gtk.HBox(False, 0)
@@ -61,6 +62,9 @@ class Statusbar(object):
 
     def update_info(self):
         """ Update the statusbar and the window title """
+        # Return if it is locked
+        if self.lock:
+            return
         # Left side
         try:
             # Directory if library is focused
