@@ -130,7 +130,7 @@ class Image(object):
         try:
             self.zoom_percent = self.zoom_percent * (1 + delta)
             # Catch some unreasonable zooms
-            if (self.pixbuf_original.get_height() * self.zoom_percent < 5 or
+            if (self.pixbuf_original.get_height() * self.zoom_percent < 50 or
                     self.pixbuf_original.get_height() * self.zoom_percent >
                     self.vimiv.screensize[0] * 5):
                 raise ValueError
