@@ -30,9 +30,6 @@
 Vimiv comes with two configuration files. The vimivrc for general settings and
 the keys.conf for all keybindings. See vimivrc(5) for further information.
 
-The old configuration file vimivrc.py used in versions up to 0.4 is now
-deprecated and can be deleted.
-
 ## Dependencies
 * python3
 * python-gobject
