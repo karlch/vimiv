@@ -5,8 +5,8 @@
 import imghdr
 import os
 import shutil
-from PIL import Image
 from random import shuffle
+from PIL import Image
 from vimiv.helpers import listdir_wrapper
 
 # Directory for trash
