@@ -151,6 +151,11 @@ class FileExtras(object):
     def format_files(self, string):
         """ Format the image names in the filelist according to a formatstring
             nicely numbering them """
+        # Catch problems
+        if self.vimiv.library.focused:
+            message = "Format only works on opened image files"
+            self.vimiv.statusbar.err_message(message)
+            return
         if not self.vimiv.paths:
             self.vimiv.statusbar.err_message("No files in path")
             return
@@ -170,7 +175,7 @@ class FileExtras(object):
                 return
 
         for i, fil in enumerate(self.vimiv.paths):
-            ending = fil.split(".")[-1]
+            ending = os.path.splitext(fil)[1]
             num = "%03d" % (i + 1)
             # Exif stuff
             if tofind:
@@ -188,7 +193,7 @@ class FileExtras(object):
             else:
                 outstring = string
             # Ending
-            outstring += num + "." + ending
+            outstring += num + ending
             shutil.move(fil, outstring)
 
         # Reload everything
