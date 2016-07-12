@@ -168,6 +168,9 @@ class Thumbnail(object):
 
     def move(self, direction):
         """ Select thumbnails correctly and scroll """
+        # Get last element
+        last = self.iconview.get_visible_range()[1]
+        last = int(last.to_string())
         # Check for a user prefixed step
         if self.vimiv.keyhandler.num_str:
             step = int(self.vimiv.keyhandler.num_str)
@@ -185,9 +188,8 @@ class Thumbnail(object):
         # Do not scroll to self.vimiv.paths that don't exist
         if self.pos < 0:
             self.pos = 0
-        elif self.pos > \
-                (len(self.vimiv.library.files) - len(self.errorpos) - 1):
-            self.pos = len(self.vimiv.library.files) - len(self.errorpos) - 1
+        elif self.pos > last:
+            self.pos = last
         # Move
         path = Gtk.TreePath.new_from_string(str(self.pos))
         self.iconview.select_path(path)
