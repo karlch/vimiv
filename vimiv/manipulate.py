@@ -4,11 +4,12 @@
 
 import os
 from threading import Thread
+from PIL import Image
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf
 from vimiv import imageactions
-from PIL import Image
+from vimiv.fileactions import move_to_trash
 
 
 class Manipulate(object):
@@ -80,21 +81,27 @@ class Manipulate(object):
         images = self.get_manipulated_images("Deleted")
         self.vimiv.mark.marked = []
         # Delete all images
-        for im in images:
+        for i, im in enumerate(images):
+            message = ""
             if not os.path.exists(im):
                 message = "Image %s does not exist" % (im)
-                self.vimiv.statusbar.err_message(message)
             elif os.path.isdir(im):
                 message = "Deleting directories is not supported"
+            if message:
                 self.vimiv.statusbar.err_message(message)
-            else:
-                os.remove(im)
+                images.remove(i)
+        move_to_trash(images)
+
         # Reload stuff if needed
         if self.vimiv.library.toggled:
             self.vimiv.library.reload(".")
         if self.vimiv.image.scrolled_win.is_focus():
             del self.vimiv.paths[self.vimiv.index]
-            self.vimiv.image.move_index()
+            if self.vimiv.paths:
+                self.vimiv.image.move_index()
+            else:
+                self.vimiv.library.focus(True)
+                self.vimiv.statusbar.err_message("No more images")
 
     def get_manipulated_images(self, message):
         """ Returns the images which should be manipulated - either the

@@ -84,7 +84,7 @@ def populate(args, recursive=False, shuffle_paths=False):
     return paths, index
 
 
-def delete(filelist):
+def move_to_trash(filelist):
     """ Moves every file in filelist to the Trash. If it is a directory, an
     error is thrown."""
     # Create the directory if it isn't there yet
@@ -106,7 +106,7 @@ def delete(filelist):
                 while os.path.exists(ndelfile):
                     backnum += 1
                     ndelfile = delfile + "." + str(backnum)
-                shutil.move(delfile, ndelfile)
+                os.rename(delfile, ndelfile)
             shutil.move(im, deldir)
 
         return 0  # Success
@@ -194,7 +194,7 @@ class FileExtras(object):
                 outstring = string
             # Ending
             outstring += num + ending
-            shutil.move(fil, outstring)
+            os.rename(fil, outstring)
 
         # Reload everything
         self.reload_changes(os.path.abspath("."), True)
