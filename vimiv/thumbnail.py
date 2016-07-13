@@ -150,7 +150,8 @@ class Thumbnail(object):
         self.liststore.remove(liststore_iter)
         try:
             if reload_image:
-                self.elements = thumbnails_create([thumb], self.size)[0]
+                new_thumb = thumbnails_create([thumb], self.size)[0]
+                self.elements[index] = new_thumb[0]
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.elements[index])
 
             name = os.path.basename(self.elements[index])

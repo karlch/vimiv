@@ -144,7 +144,7 @@ class Manipulate(object):
                     self.vimiv.image.pixbuf_original.rotate_simple(
                         (90 * cwise))
                 self.vimiv.image.update(False)
-            # Rotate all vimiv.library.files in external thread
+            # Rotate all files in external thread
             rotate_thread = Thread(target=self.thread_for_rotate, args=(images,
                                                                         cwise))
             rotate_thread.start()
@@ -153,7 +153,7 @@ class Manipulate(object):
                 "Warning: Object cannot be rotated")
 
     def thread_for_rotate(self, images, cwise):
-        """ Rotate all image vimiv.library.files in an extra thread """
+        """ Rotate all image files in an extra thread """
         try:
             imageactions.rotate_file(images, cwise)
             if self.vimiv.thumbnail.toggled:
