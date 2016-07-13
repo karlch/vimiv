@@ -30,6 +30,7 @@ class CommandLine(object):
         self.entry.connect("key_press_event",
                            self.vimiv.keyhandler.run, "COMMAND")
         self.entry.connect("changed", self.check_close)
+        self.entry.connect("changed", self.reset_tab_count)
         self.info = Gtk.Label()
         self.info.set_max_width_chars(self.vimiv.winsize[0] / 16)
         self.info.set_ellipsize(Pango.EllipsizeMode.END)
@@ -333,6 +334,11 @@ class CommandLine(object):
         text = entry.get_text()
         if not text or text[0] not in ":/":
             self.leave()
+
+    def reset_tab_count(self, entry):
+        """ Reset the amount of tab presses if anything else than a tab is
+            pressed """
+        self.vimiv.completions.tab_presses = 0
 
     def cmd_search(self):
         """ Prepend search to the cmd_line and open it """

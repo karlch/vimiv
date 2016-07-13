@@ -27,6 +27,7 @@ class Completion():
     def complete(self):
         """ Finds out which type of completion should be done and executes the
             correct function """
+        # Tab presses are remembered so one can tab through all the completions
         comp_type = "internal"
         # Generate list of possible completions depending on the type of
         # completion
@@ -63,7 +64,7 @@ class Completion():
 
         # Return the best matching completion and the string with all
         # suggestions
-        return output, compstr
+        return output, compstr, completions
 
     def best_match(self, completions, comp_type):
         """ Finds the best matching completion and returns the formatted
@@ -162,28 +163,62 @@ class VimivComplete(object):
 
     def __init__(self, vimiv):
         self.vimiv = vimiv
+        self.tab_presses = 0
+        self.completions = []
+        self.output = ""
+        self.compstr = ""
 
     def complete(self):
         """ Simple autocompletion for the command line """
-        command = self.vimiv.commandline.entry.get_text()
-        command = command.lstrip(":")
-        # Strip prepending numbers
-        numstr = ""
-        while True:
-            try:
-                num = int(command[0])
-                numstr += str(num)
-                command = command[1:]
-            except:
-                break
-        # Generate completion class and get completions
-        commandlist = sorted(list(self.vimiv.commands.keys()))
-        completion = Completion(command, commandlist)
-        output, compstr = completion.complete()
+        # Cycle through completions on multiple tab
+        if self.tab_presses:
+            command_position = (self.tab_presses-1) % len(self.completions)
+            ordered_completions = self.completions[command_position:] + \
+                                  self.completions[:command_position]
+            command = ordered_completions[0]
+            prepended = self.not_common(self.output, command)
+            new_text =  prepended + command
+            # Remember tab_presses because changing text resets
+            tab_presses = self.tab_presses
+            self.vimiv.commandline.entry.set_text(new_text)
+            self.tab_presses = tab_presses
+            self.vimiv.commandline.entry.set_position(-1)
+            # Set the completion string
+            highlight = "<b>" + command + "</b>"
+            ordered_completions[0] = highlight
+            compstr = self.compstr.replace(command, highlight)
+            self.vimiv.commandline.info.set_markup(compstr)
+        else:
+            command = self.vimiv.commandline.entry.get_text()
+            command = command.lstrip(":")
+            # Strip prepending numbers
+            numstr = ""
+            while True:
+                try:
+                    num = int(command[0])
+                    numstr += str(num)
+                    command = command[1:]
+                except:
+                    break
+            # Generate completion class and get completions
+            commandlist = sorted(list(self.vimiv.commands.keys()))
+            completion = Completion(command, commandlist)
+            self.output, self.compstr, self.completions = completion.complete()
 
-        # Set text
-        self.vimiv.commandline.entry.set_text(output)
-        self.vimiv.commandline.info.set_text(compstr)
-        self.vimiv.commandline.entry.set_position(-1)
+            # Set text
+            self.vimiv.commandline.entry.set_text(self.output)
+            self.vimiv.commandline.info.set_text(self.compstr)
+            self.vimiv.commandline.entry.set_position(-1)
 
+        # Count tab presses to be able to tab through results
+        self.tab_presses += 1
         return True  # Deactivates default bindings (here for Tab)
+
+    def not_common(self, output, completion):
+        """ Returns everything but the common match at the end of output """
+        for i in range(len(completion)):
+            end = len(completion) - i
+            possible_ending = completion[:end]
+            if output.endswith(possible_ending):
+                return output.rstrip(possible_ending)
+        return output
