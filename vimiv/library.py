@@ -201,24 +201,22 @@ class Library(object):
         else:  # Focus the image and populate a new list from the dir
             if self.vimiv.paths and fil in self.vimiv.paths[self.vimiv.index]:
                 close = True  # Close if file selected twice
-            path = 0  # Reload the path, could have changed (symlinks)
+            index = 0  # Catch directories to focus correctly
             for f in self.files:
                 if f == fil:
                     break
-                else:
-                    path += 1
-            self.treeview.set_cursor(Gtk.TreePath(path), None, False)
-            self.treepos = path
+                elif os.path.isfile(f):
+                    index += 1
             self.vimiv.paths, self.vimiv.index = populate(self.files)
             if self.vimiv.paths:
                 self.grid.set_size_request(self.width - self.border_width,
                                            10)
-                self.vimiv.image.vimiv.image.scrolled_win.show()
+                self.vimiv.image.scrolled_win.show()
             # Show the selected file, if thumbnail toggled go out
             if self.vimiv.thumbnail.toggled:
                 self.vimiv.thumbnail.toggle()
                 self.treeview.grab_focus()
-            self.vimiv.image.move_index(delta=count)
+            self.vimiv.image.move_index(delta=index)
             # Close the library depending on key and repeat
             if close:
                 self.toggle()

@@ -79,13 +79,20 @@ def parse_args(parser, settings):
         settings["LIBRARY"]["show_library"] = False
 
     settings["GENERAL"]["start_from_desktop"] = args.desktop
+    # Startup from desktop
+    if args.desktop:
+        if args.path:
+            paths = args.path
+        else:
+            paths = [settings["LIBRARY"]["desktop_start_dir"]]
     # Be able to read files from a stdin pipe
-    if not sys.stdin.isatty():
+    elif not sys.stdin.isatty():
         paths = []
         for line in sys.stdin:
             paths.append(line.rstrip("\n"))
     else:
         paths = args.path
+
     settings["GENERAL"]["paths"] = paths
 
     return settings

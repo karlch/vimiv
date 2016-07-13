@@ -26,9 +26,10 @@ def populate_single(arg, recursive):
     if os.path.isfile(arg):
         # Use parent directory
         directory = os.path.dirname(os.path.abspath(arg))
+        basename = os.path.basename(os.path.abspath(arg))
         args = listdir_wrapper(directory)
         # Set the argument to the beginning of the list
-        pos = args.index(arg)
+        pos = args.index(basename)
         args = args[pos:] + args[:pos]
         for i, arg in enumerate(args):
             args[i] = os.path.join(directory, arg)

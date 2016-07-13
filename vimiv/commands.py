@@ -73,9 +73,9 @@ class Commands(object):
             "zoom_to": [self.vimiv.image.zoom_to]}
 
         self.vimiv.functions = {
-            "focus_bri": [self.vimiv.manipulate.focus_slider, "bri"],
-            "focus_con": [self.vimiv.manipulate.focus_slider, "con"],
-            "focus_sha": [self.vimiv.manipulate.focus_slider, "sha"],
+            "bri_focus": [self.vimiv.manipulate.focus_slider, "bri"],
+            "con_focus": [self.vimiv.manipulate.focus_slider, "con"],
+            "sha_focus": [self.vimiv.manipulate.focus_slider, "sha"],
             "slider_dec": [self.vimiv.manipulate.change_slider, True, False],
             "slider_inc": [self.vimiv.manipulate.change_slider, False, False],
             "slider_dec_large": [self.vimiv.manipulate.change_slider, True,

@@ -22,7 +22,7 @@ help:
 	@printf "make uninstall: 	Uninstall $(SRC).\n"
 
 install:
-	python setup.py install --root=$(DESTDIR)/ --record=install_log.txt
+	python3 setup.py install --root=$(DESTDIR)/ --record=install_log.txt
 	mkdir -p $(DESTDIR)/etc/vimiv
 	cp config/vimivrc $(DESTDIR)/etc/vimiv/
 	cp config/keys.conf $(DESTDIR)/etc/vimiv/

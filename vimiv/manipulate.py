@@ -163,19 +163,19 @@ class Manipulate(object):
         except:
             self.vimiv.statusbar.err_message("Error: Rotation of file failed")
 
-    def flip(self, directory):
+    def flip(self, direction):
         try:
-            directory = int(directory)
+            direction = int(direction)
             images = self.get_manipulated_images("Flipped")
             # Flip the image shown
             if self.vimiv.paths[self.vimiv.index] in images:
                 self.vimiv.image.pixbuf_original = \
                     self.vimiv.image.pixbuf_original.flip(
-                        directory)
+                        direction)
                 self.vimiv.image.update(False)
             # Flip all vimiv.library.files in an extra thread
             flip_thread = Thread(target=self.thread_for_flip, args=(images,
-                                                                    directory))
+                                                                    direction))
             flip_thread.start()
         except:
             self.vimiv.statusbar.err_message(
