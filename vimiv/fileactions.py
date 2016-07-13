@@ -113,27 +113,27 @@ def move_to_trash(filelist):
         return 0  # Success
 
 
-def test_svg(h, b):
+def test_svg(h, f):
     """ svg data """
-    try:
-        last_line = b.readlines()[-1].decode("utf-8")
-        if last_line == '</svg>\n':
-            return "svg"
-    except:
-        return None
+    if h.startswith(b'<?xml'):
+        return "svg"
+
+imghdr.tests.append(test_svg)
 
 
 def is_image(filename):
     """ Checks whether the file is an image """
-    imghdr.tests.append(test_svg)
     complete_name = os.path.abspath(os.path.expanduser(filename))
-    if not os.path.exists(complete_name):
-        return False
-    elif os.path.isdir(complete_name):
-        return False
-    elif imghdr.what(complete_name):
-        return True
-    else:
+    try:
+        if not os.path.exists(complete_name):
+            return False
+        elif os.path.isdir(complete_name):
+            return False
+        elif imghdr.what(complete_name):
+            return True
+        else:
+            return False
+    except:
         return False
 
 

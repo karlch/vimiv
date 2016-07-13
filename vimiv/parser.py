@@ -129,7 +129,8 @@ def set_defaults():
                "border_color": "#000000",
                "markup": '<span foreground="#00FF00">',
                "show_hidden": False,
-               "desktop_start_dir": os.path.expanduser("~")}
+               "desktop_start_dir": os.path.expanduser("~"),
+               "file_check_amount": 30}
     settings = {"GENERAL": general, "LIBRARY": library}
     return settings
 
@@ -151,7 +152,8 @@ def overwrite_section(key, config, settings):
                 file_set[1] = int(file_set[1])
                 if len(file_set) != 2:
                     raise ValueError
-            elif setting in ["library_width", "slideshow_delay"]:
+            elif setting in ["library_width", "slideshow_delay",
+                             "file_check_amount"]:
                 # Must be an integer
                 file_set = int(section[setting])
             elif setting == "border_color":

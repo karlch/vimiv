@@ -81,6 +81,11 @@ If yes show hidden files.
 .TP
 .BR desktop_start_dir\ (String)
 The directory in which vimiv should start if invoked via the desktop file.
+.TP
+.BR file_check_amount\ (Int)
+The amount of files vimiv should check in a directory for whether they are
+images or not. This affects the size column of directories in the library. A
+higher number will increase precision at the cost of speed.
 
 .SH KEYS.CONF
 The keys.conf file is split into sections with each section standing for a

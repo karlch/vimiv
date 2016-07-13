@@ -24,5 +24,6 @@ border_color: #000000
 markup: <span foreground="#875FFF">
 show_hidden: no
 desktop_start_dir: ~
+file_check_amount: 30
 
 # vim:ft=config

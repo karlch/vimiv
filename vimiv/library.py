@@ -8,6 +8,7 @@ from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 from vimiv.fileactions import is_image, populate
+from vimiv.helpers import listdir_wrapper
 
 
 class Library(object):
@@ -28,6 +29,7 @@ class Library(object):
         self.expand = library["expand_lib"]
         self.border_width = library["border_width"]
         self.border_color = library["border_color"]
+        self.file_check_amount = library["file_check_amount"]
         try:
             self.border_color = Gdk.color_parse(self.border_color)
         except:
@@ -333,11 +335,18 @@ class Library(object):
             # Number of images in directory as filesize
             if os.path.isdir(filename):
                 try:
-                    subfiles = os.listdir(filename)
+                    subfiles = listdir_wrapper(filename, self.show_hidden)
+                    # Necessary to keep acceptable speed in library
+                    many = False
+                    if len(subfiles) > self.file_check_amount:
+                        many = True
                     subfiles = [subfile
-                                for subfile in subfiles
+                                for subfile in subfiles[:self.file_check_amount]
                                 if is_image(os.path.join(filename, subfile))]
-                    self.filesize[filename] = str(len(subfiles))
+                    amount = str(len(subfiles))
+                    if subfiles and many:
+                        amount += "+"
+                    self.filesize[filename] = amount
                 except:
                     self.filesize[filename] = "N/A"
             else:
