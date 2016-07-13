@@ -82,6 +82,17 @@ class Thumbnail(object):
         if not self.errorpos:
             self.vimiv.statusbar.update_info()
 
+    def calculate_columns(self):
+        """ Calculates how many columns fit into the current window and sets
+            them for the iconview """
+        window_width = self.vimiv.winsize[0]
+        if self.vimiv.library.toggled:
+            width = window_width - self.vimiv.library.width
+        else:
+            width = window_width
+        self.columns = int(width / (self.size[0] + 30))
+        self.iconview.set_columns(self.columns)
+
     def show(self):
         """ Shows thumbnail mode when called from toggle """
         # Clean liststore
@@ -104,8 +115,7 @@ class Thumbnail(object):
             self.liststore.append([pixbuf, name])
 
         # Set columns
-        self.columns = int(self.vimiv.image.imsize[0] / (self.size[0] + 30))
-        self.iconview.set_columns(self.columns)
+        self.calculate_columns()
 
         # Draw the icon view instead of the image
         self.vimiv.image.viewport.remove(self.vimiv.image.image)

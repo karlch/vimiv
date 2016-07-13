@@ -53,8 +53,11 @@ class Window(object):
         """ Automatically resize image when window is resized """
         if self.vimiv.get_size() != self.vimiv.winsize:
             self.vimiv.winsize = self.vimiv.get_size()
-            if self.vimiv.paths and not self.vimiv.image.user_zoomed:
-                self.vimiv.image.zoom_to(0)
+            if self.vimiv.paths:
+                if self.vimiv.thumbnail.toggled:
+                    self.vimiv.thumbnail.calculate_columns()
+                if not self.vimiv.image.user_zoomed:
+                    self.vimiv.image.zoom_to(0)
             elif not self.vimiv.paths and self.vimiv.library.expand:
                 self.vimiv.library.grid.set_size_request(self.vimiv.winsize[0],
                                                          10)

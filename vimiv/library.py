@@ -93,8 +93,12 @@ class Library(object):
             self.focus(True)
             # Markings and other stuff might have changed
             self.reload(os.path.abspath("."))
-        if not self.vimiv.image.user_zoomed and self.vimiv.paths:
-            self.vimiv.image.zoom_to(0)  # Always rezoom the image
+        # Resize image and grid if necessary
+        if self.vimiv.paths:
+            if self.vimiv.thumbnail.toggled:
+                self.vimiv.thumbnail.calculate_columns()
+            if not self.vimiv.image.user_zoomed:
+                self.vimiv.image.zoom_to(0)
         #  Change the toggle state of animation
         self.vimiv.image.update()
 
