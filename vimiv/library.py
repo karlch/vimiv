@@ -174,6 +174,8 @@ class Library(object):
             markup_string = fil
             size = self.filesize[fil]
             is_marked = ""
+            if os.path.islink(fil):
+                markup_string = markup_string + "  →  " + os.path.realpath(fil)
             if os.path.abspath(fil) in self.vimiv.mark.marked:
                 is_marked = "[*]"
             if os.path.isdir(fil):
