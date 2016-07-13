@@ -158,7 +158,7 @@ def overwrite_section(key, config, settings):
                 file_set = int(section[setting])
             elif setting == "border_color":
                 border_color = section[setting]
-                if len(border_color) != 7 or border_color != "#":
+                if len(border_color) != 7 or border_color[0] != "#":
                     raise ValueError
                 file_set = border_color
             elif setting == "border_width":
