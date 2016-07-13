@@ -52,7 +52,7 @@ class Image(object):
                     self.vimiv.manipulate.button_clicked(False)
                     return 0
                 else:
-                    self.vimiv.commandline.err_message(
+                    self.vimiv.statusbar.err_message(
                         "Image has been edited, add ! to force")
                     return 1
 
@@ -138,8 +138,8 @@ class Image(object):
             self.update(update_gif=False)
         except:
             self.zoom_percent = self.zoom_percent / (1 + delta)
-            self.vimiv.commandline.err_message(
-                "Warning: Object cannot be zoomed (further)")
+            message = "Warning: Object cannot be zoomed (further)"
+            self.vimiv.statusbar.err_message(message)
 
     def zoom_to(self, percent, z_width=False, z_height=False):
         """ Zooms to a given percentage """
@@ -158,7 +158,7 @@ class Image(object):
                 else:
                     percent = float(percent)
             except:
-                self.vimiv.commandline.err_message(
+                self.vimiv.statusbar.err_message(
                     "Error: Zoom percentage not parseable")
                 return
             self.vimiv.keyhandler.num_str = ""
@@ -174,7 +174,7 @@ class Image(object):
                 raise ValueError
             self.update(update_gif=False)
         except:
-            self.vimiv.commandline.err_message(
+            self.vimiv.statusbar.err_message(
                 "Warning: Object cannot be zoomed (further)")
 
     def center_window(self):
@@ -254,7 +254,7 @@ class Image(object):
 
         except GLib.Error:  # File not accessible
             self.vimiv.paths.remove(path)
-            self.vimiv.commandline.err_message("Error: file not accessible")
+            self.vimiv.statusbar.err_message("Error: file not accessible")
             self.move_pos(False)
 
         # Info if slideshow returns to beginning
@@ -297,7 +297,7 @@ class Image(object):
             if pos < 0 or pos > max_pos:
                 raise ValueError
         except:
-            self.vimiv.commandline.err_message("Warning: Unsupported index")
+            self.vimiv.statusbar.err_message("Warning: Unsupported index")
             return False
         # Do the math and move
         dif = pos - current - 1
