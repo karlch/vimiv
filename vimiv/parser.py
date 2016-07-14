@@ -90,6 +90,9 @@ def parse_args(parser, settings):
         paths = []
         for line in sys.stdin:
             paths.append(line.rstrip("\n"))
+        # Fall back to args.path if nothing was found
+        if not paths:
+            paths = args.path
     else:
         paths = args.path
 
