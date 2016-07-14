@@ -24,7 +24,7 @@ class CommandLine(object):
         general = settings["GENERAL"]
 
         # Command line
-        self.box = Gtk.HBox(False, 0)
+        self.box = Gtk.VBox(False, 10)
         self.entry = Gtk.Entry()
         self.entry.connect("activate", self.handler)
         self.entry.connect("key_press_event",
@@ -32,10 +32,14 @@ class CommandLine(object):
         self.entry.connect("changed", self.check_close)
         self.entry.connect("changed", self.reset_tab_count)
         self.info = Gtk.Label()
-        self.info.set_max_width_chars(self.vimiv.winsize[0] / 16)
-        self.info.set_ellipsize(Pango.EllipsizeMode.END)
-        self.box.pack_start(self.entry, True, True, 0)
-        self.box.pack_end(self.info, False, False, 0)
+        # self.info.set_ellipsize(Pango.EllipsizeMode.END)
+        self.info.set_alignment(0.0, 0.0)
+        self.box.pack_end(self.entry, True, True, 0)
+        self.box.pack_start(self.info, True, True, 0)
+
+        # Monospaced font
+        monospace = Pango.FontDescription("monospace")
+        self.info.modify_font(monospace)
 
         # Cmd history from file
         self.history = read_file(os.path.expanduser("~/.vimiv/history"))
@@ -51,6 +55,10 @@ class CommandLine(object):
     def handler(self, entry):
         """ Handles input from the entry, namely if it is a path to be focused
         or a (external) command to be run """
+        # Only close completions if the tabbing is open
+        if self.vimiv.completions.tab_presses:
+            self.vimiv.completions.reset()
+            return
         # cmd from input
         command = entry.get_text()
         # And close the cmd line
@@ -293,7 +301,6 @@ class CommandLine(object):
         # Show/hide the relevant stuff
         self.box.show()
         self.vimiv.statusbar.bar.hide()
-        self.vimiv.bbox.set_border_width(10)
         # Remember what widget was focused before
         if self.vimiv.library.focused:
             self.vimiv.window.last_focused = "lib"
@@ -310,7 +317,6 @@ class CommandLine(object):
         """ Close the command line """
         self.box.hide()
         self.vimiv.statusbar.bar.show()
-        self.vimiv.bbox.set_border_width(12)
         # Remove all completions shown and the text currently inserted
         self.info.set_text("")
         self.entry.set_text("")

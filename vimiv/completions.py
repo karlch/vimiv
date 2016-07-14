@@ -95,7 +95,7 @@ class Completion():
         # A string with possible completions for the info if here is more
         # than one completion
         if len(completions) > 1:
-            compstr = "  " + "  ".join(completions)
+            compstr = "  ".join(completions)
         else:
             compstr = ""
 
@@ -170,25 +170,9 @@ class VimivComplete(object):
 
     def complete(self):
         """ Simple autocompletion for the command line """
-        # Cycle through completions on multiple tab
-        if self.tab_presses:
-            command_position = (self.tab_presses-1) % len(self.completions)
-            ordered_completions = self.completions[command_position:] + \
-                                  self.completions[:command_position]
-            command = ordered_completions[0]
-            prepended = self.not_common(self.output, command)
-            new_text =  prepended + command
-            # Remember tab_presses because changing text resets
-            tab_presses = self.tab_presses
-            self.vimiv.commandline.entry.set_text(new_text)
-            self.tab_presses = tab_presses
-            self.vimiv.commandline.entry.set_position(-1)
-            # Set the completion string
-            highlight = "<b>" + command + "</b>"
-            ordered_completions[0] = highlight
-            compstr = self.compstr.replace(command, highlight)
-            self.vimiv.commandline.info.set_markup(compstr)
-        else:
+        # Remember old completion
+        previous_output = self.output
+        if not self.tab_presses:
             command = self.vimiv.commandline.entry.get_text()
             command = command.lstrip(":")
             # Strip prepending numbers
@@ -207,12 +191,39 @@ class VimivComplete(object):
 
             # Set text
             self.vimiv.commandline.entry.set_text(self.output)
-            self.vimiv.commandline.info.set_text(self.compstr)
+            self.vimiv.commandline.info.set_markup(self.compstr)
             self.vimiv.commandline.entry.set_position(-1)
 
-        # Count tab presses to be able to tab through results
-        self.tab_presses += 1
+        # Cycle through completions on multiple tab
+        if self.output == previous_output:
+            command_position = self.tab_presses % len(self.completions)
+            ordered_completions = self.completions[command_position:] + \
+                                self.completions[:command_position]
+            command = ordered_completions[0]
+            prepended = self.not_common(self.output, command)
+            new_text = prepended + command
+            # Remember tab_presses because changing text resets
+            tab_presses = self.tab_presses
+            self.vimiv.commandline.entry.set_text(new_text)
+            self.tab_presses = tab_presses
+            self.vimiv.commandline.entry.set_position(-1)
+            # Set the completion string
+            highlight = self.vimiv.library.markup + "<b>" + command + "</b></span>"
+            completions = list(self.completions)  # Pythonic list copy
+            completions[command_position] = highlight
+            compstr = "  ".join(completions)
+            # 
+            self.vimiv.commandline.info.set_markup(compstr)
+            self.tab_presses += 1
+
         return True  # Deactivates default bindings (here for Tab)
+
+    def reset(self):
+        """ Simply empty completions """
+        self.tab_presses = 0
+        self.completions = []
+        self.compstr = ""
+        self.vimiv.commandline.info.set_markup(self.compstr)
 
     def not_common(self, output, completion):
         """ Returns everything but the common match at the end of output """
