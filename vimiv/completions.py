@@ -194,6 +194,9 @@ class VimivComplete(object):
             self.vimiv.commandline.info.set_markup(self.compstr)
             self.vimiv.commandline.entry.set_position(-1)
 
+        if self.completions:
+            self.vimiv.commandline.info.show()
+
         # Cycle through completions on multiple tab
         if self.output == previous_output:
             command_position = self.tab_presses % len(self.completions)
@@ -214,6 +217,7 @@ class VimivComplete(object):
             compstr = "  ".join(completions)
             # 
             self.vimiv.commandline.info.set_markup(compstr)
+            self.vimiv.commandline.info.show()
             self.tab_presses += 1
 
         return True  # Deactivates default bindings (here for Tab)

@@ -24,7 +24,8 @@ class CommandLine(object):
         general = settings["GENERAL"]
 
         # Command line
-        self.box = Gtk.VBox(False, 10)
+        self.box = Gtk.VBox(False, 0)
+        # self.box.override_background_color(Gtk.StateType.NORMAL, border_color)
         self.entry = Gtk.Entry()
         self.entry.connect("activate", self.handler)
         self.entry.connect("key_press_event",
@@ -33,9 +34,15 @@ class CommandLine(object):
         self.entry.connect("changed", self.reset_tab_count)
         self.info = Gtk.Label()
         # self.info.set_ellipsize(Pango.EllipsizeMode.END)
-        self.info.set_alignment(0.0, 0.0)
-        self.box.pack_end(self.entry, True, True, 0)
-        self.box.pack_start(self.info, True, True, 0)
+        self.info.set_alignment(0.0, 0.5)
+        self.box.pack_end(self.entry, True, True, 5)
+        self.box.pack_start(self.info, False, False, 5)
+        # Make it nice
+        style = self.vimiv.get_style_context()
+        color = style.get_background_color(Gtk.StateType.NORMAL)
+        self.box.override_background_color(Gtk.StateType.NORMAL, color)
+        self.box.set_valign(Gtk.Align.END)
+        self.box.set_border_width(0)
 
         # Monospaced font
         monospace = Pango.FontDescription("monospace")
@@ -58,6 +65,7 @@ class CommandLine(object):
         # Only close completions if the tabbing is open
         if self.vimiv.completions.tab_presses:
             self.vimiv.completions.reset()
+            self.info.hide()
             return
         # cmd from input
         command = entry.get_text()
@@ -293,14 +301,10 @@ class CommandLine(object):
         """ Open and focus the command line """
         # Colon for text
         self.entry.set_text(":")
-        # Show the statusbar
-        if self.vimiv.statusbar.hidden:
-            self.vimiv.bbox.show()
         # Remove old error messages
         self.vimiv.statusbar.update_info()
         # Show/hide the relevant stuff
         self.box.show()
-        self.vimiv.statusbar.bar.hide()
         # Remember what widget was focused before
         if self.vimiv.library.focused:
             self.vimiv.window.last_focused = "lib"
@@ -316,7 +320,6 @@ class CommandLine(object):
     def leave(self):
         """ Close the command line """
         self.box.hide()
-        self.vimiv.statusbar.bar.show()
         # Remove all completions shown and the text currently inserted
         self.info.set_text("")
         self.entry.set_text("")
@@ -329,9 +332,6 @@ class CommandLine(object):
             self.vimiv.thumbnail.iconview.grab_focus()
         else:
             self.vimiv.image.scrolled_win.grab_focus()
-        # Rehide the command line
-        if self.vimiv.statusbar.hidden:
-            self.vimiv.bbox.hide()
 
     def check_close(self, entry):
         """ Close the entry if the colon/slash is deleted """
@@ -345,6 +345,7 @@ class CommandLine(object):
         """ Reset the amount of tab presses if anything else than a tab is
             pressed """
         self.vimiv.completions.tab_presses = 0
+        self.info.hide()
 
     def cmd_search(self):
         """ Prepend search to the cmd_line and open it """

@@ -38,6 +38,7 @@ class Statusbar(object):
         self.bar.pack_start(self.left_label, False, False, 0)
         self.bar.pack_start(self.center_label, True, True, 0)
         self.bar.pack_end(self.right_label, False, False, 0)
+        self.bar.set_border_width(10)
 
         # Size for resizing image
         self.size = self.bar.get_allocated_height()
@@ -136,9 +137,9 @@ class Statusbar(object):
     def toggle(self):
         """ Toggles statusbar resizing image if necessary """
         if not self.hidden and not self.vimiv.commandline.entry.is_visible():
-            self.vimiv.bbox.hide()
+            self.bar.hide()
         else:
-            self.vimiv.bbox.show()
+            self.bar.show()
         self.hidden = not self.hidden
         # Resize the image if necessary
         if not self.vimiv.image.user_zoomed and self.vimiv.paths and \

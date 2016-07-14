@@ -75,7 +75,6 @@ class Vimiv(Gtk.Window):
         # Horizontal Box with image and treeview
         self.hbox = Gtk.HBox(False, 0)
         self.vbox.pack_start(self.hbox, True, True, 0)
-        self.add(self.vbox)
 
         # Other classes
         self.keyhandler = KeyHandler(self, settings)
@@ -93,16 +92,17 @@ class Vimiv(Gtk.Window):
         self.manipulate = Manipulate(self, settings)
         Commands(self)
 
-        # Pack library and manipulate
+        # Pack library, statusbar and manipulate
         self.hbox.pack_start(self.library.box, False, False, 0)
+        self.vbox.pack_end(self.statusbar.bar, False, False, 0)
         self.vbox.pack_end(self.manipulate.hbox, False, False, 0)
 
-        # Box with the statusbar and the command line
-        self.bbox = Gtk.VBox(False, 0)
-        self.bbox.pack_start(self.statusbar.bar, False, False, 0)
-        self.bbox.pack_end(self.commandline.box, False, False, 0)
-        self.bbox.set_border_width(12)
-        self.vbox.pack_end(self.bbox, False, False, 0)
+        # Overlay contains vbox mainly and adds commandline as floating
+        self.overlay = Gtk.Overlay()
+        self.overlay.add(self.vbox)
+        self.overlay.add_overlay(self.commandline.box)
+        # self.overlay.set_opacity(0.3)
+        self.add(self.overlay)
 
     def quit(self, force=False):
         """ Quit the main loop, printing marked files and saving history """
@@ -134,6 +134,7 @@ class Vimiv(Gtk.Window):
         self.show_all()
         self.manipulate.hbox.hide()
         self.commandline.box.hide()
+        self.commandline.info.hide()
 
         # Show the image if an imagelist exists
         if self.paths:
