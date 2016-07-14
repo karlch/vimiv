@@ -2,11 +2,11 @@
 # encoding: utf-8
 """ Return a list of images for vimiv """
 
-import imghdr
 import os
 import shutil
 from random import shuffle
 from PIL import Image
+from gi.repository import GdkPixbuf
 from vimiv.helpers import listdir_wrapper
 
 # Directory for trash
@@ -113,23 +113,11 @@ def move_to_trash(filelist):
         return 0  # Success
 
 
-def test_svg(h, f):
-    """ svg data """
-    if h.startswith(b'<?xml'):
-        return "svg"
-
-imghdr.tests.append(test_svg)
-
-
 def is_image(filename):
     """ Checks whether the file is an image """
     complete_name = os.path.abspath(os.path.expanduser(filename))
     try:
-        if not os.path.exists(complete_name):
-            return False
-        elif os.path.isdir(complete_name):
-            return False
-        elif imghdr.what(complete_name):
+        if GdkPixbuf.Pixbuf.get_file_info(complete_name)[0]:
             return True
         else:
             return False
