@@ -9,6 +9,8 @@ listed under releases in github.
 * Handle symlinks neatly (-> do not follow them into their parent directory)
 * Open images regardless of extension
 * Inform when slideshow reaches beginning again
+* Automatically resize thumbnail grid
+* Much better tab completion
 
 #### v0.5
 * Let external shell handle external arguments, allows for pipes, ...
