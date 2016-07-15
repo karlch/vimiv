@@ -86,6 +86,7 @@ class Commands(object):
             "cmd_history_down": [self.vimiv.commandline.history_search, True],
             "discard_command": [self.vimiv.commandline.leave],
             "complete": [self.vimiv.completions.complete],
+            "complete_inverse": [self.vimiv.completions.complete, True],
             "down": [self.vimiv.keyhandler.scroll, "j"],
             "down_lib": [self.vimiv.library.scroll, "j"],
             "down_page": [self.vimiv.keyhandler.scroll, "J"],

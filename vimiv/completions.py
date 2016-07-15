@@ -164,15 +164,17 @@ class VimivComplete(object):
     def __init__(self, vimiv):
         self.vimiv = vimiv
         self.tab_presses = 0
+        self.cycling = False
         self.completions = []
+        self.completions_reordered = []
         self.output = ""
         self.compstr = ""
 
-    def complete(self):
+    def complete(self, inverse=False):
         """ Simple autocompletion for the command line """
         # Remember old completion
         previous_output = self.output
-        if not self.tab_presses:
+        if not self.cycling:
             command = self.vimiv.commandline.entry.get_text()
             command = command.lstrip(":")
             # Strip prepending numbers
@@ -188,21 +190,25 @@ class VimivComplete(object):
             commandlist = sorted(list(self.vimiv.commands.keys()))
             completion = Completion(command, commandlist)
             self.output, self.compstr, self.completions = completion.complete()
+            self.completions_reordered = self.completions
 
             # Set text
             self.vimiv.commandline.entry.set_text(self.output)
             self.vimiv.commandline.info.set_markup(self.compstr)
             self.vimiv.commandline.entry.set_position(-1)
 
-        if self.completions:
+        if len(self.completions) > 1:
             self.vimiv.commandline.info.show()
 
         # Cycle through completions on multiple tab
         if self.output == previous_output:
+            if self.cycling:
+                if inverse:
+                    self.tab_presses -= 1
+                else:
+                    self.tab_presses += 1
             command_position = self.tab_presses % len(self.completions)
-            ordered_completions = self.completions[command_position:] + \
-                                self.completions[:command_position]
-            command = ordered_completions[0]
+            command = self.completions[command_position]
             prepended = self.not_common(self.output, command)
             new_text = prepended + command
             # Remember tab_presses because changing text resets
@@ -210,21 +216,30 @@ class VimivComplete(object):
             self.vimiv.commandline.entry.set_text(new_text)
             self.tab_presses = tab_presses
             self.vimiv.commandline.entry.set_position(-1)
-            # Set the completion string
-            highlight = self.vimiv.library.markup + "<b>" + command + "</b></span>"
-            completions = list(self.completions)  # Pythonic list copy
-            completions[command_position] = highlight
+            # Get maximum and current pos to always show current completion
+            line_length = self.vimiv.commandline.info.get_max_width_chars()*2
+            cur_index = self.completions_reordered.index(command)
+            cur_pos = len("  ".join(self.completions_reordered[0:cur_index+1]))
+            # Rewrap if we are out of the displayable area
+            if cur_pos > line_length:
+                self.completions_reordered = self.completions[command_position:] + \
+                                             self.completions[:command_position]
+                cur_index = 0
+            highlight = self.vimiv.library.markup + \
+                        "<b>" + command + "</b></span>"
+            completions = list(self.completions_reordered)  # Pythonic list copy
+            completions[cur_index] = highlight
             compstr = "  ".join(completions)
-            # 
             self.vimiv.commandline.info.set_markup(compstr)
             self.vimiv.commandline.info.show()
-            self.tab_presses += 1
+            self.cycling = True
 
         return True  # Deactivates default bindings (here for Tab)
 
     def reset(self):
         """ Simply empty completions """
         self.tab_presses = 0
+        self.cycling = False
         self.completions = []
         self.compstr = ""
         self.vimiv.commandline.info.set_markup(self.compstr)

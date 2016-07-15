@@ -33,7 +33,6 @@ class CommandLine(object):
         self.entry.connect("changed", self.check_close)
         self.entry.connect("changed", self.reset_tab_count)
         self.info = Gtk.Label()
-        # self.info.set_ellipsize(Pango.EllipsizeMode.END)
         self.info.set_alignment(0.0, 0.5)
         self.box.pack_end(self.entry, True, True, 5)
         self.box.pack_start(self.info, False, False, 5)
@@ -345,6 +344,7 @@ class CommandLine(object):
         """ Reset the amount of tab presses if anything else than a tab is
             pressed """
         self.vimiv.completions.tab_presses = 0
+        self.vimiv.completions.cycling = False
         self.info.hide()
 
     def cmd_search(self):

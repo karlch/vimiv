@@ -92,6 +92,8 @@ class KeyHandler(object):
         if (event.get_state() & Gdk.ModifierType.SHIFT_MASK and
                 (len(keyname) < 2 or keyname in shiftkeys)):
             keyname = "Shift+" + keyname.lower()
+        if keyname == "ISO_Left_Tab":  # Tab is named really weird under shift
+            keyname = "Shift+Tab"
         try:  # Numbers for the num_str
             if window == "COMMAND":
                 raise ValueError
