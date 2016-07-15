@@ -62,7 +62,7 @@ class CommandLine(object):
         """ Handles input from the entry, namely if it is a path to be focused
         or a (external) command to be run """
         # Only close completions if the tabbing is open
-        if self.vimiv.completions.tab_presses:
+        if self.vimiv.completions.cycling:
             self.vimiv.completions.reset()
             self.info.hide()
             return
