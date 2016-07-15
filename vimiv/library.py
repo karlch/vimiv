@@ -63,13 +63,21 @@ class Library(object):
             self.box.pack_end(border, False, False, 0)
         # Entering content
         self.scrollable_treelist = Gtk.ScrolledWindow()
-        self.scrollable_treelist.set_vexpand(True)
         self.grid.attach(self.scrollable_treelist, 0, 0, 4, 10)
         # Pack everything
         self.box.pack_start(self.grid, True, True, 0)
-        # Call the function to create the treeview
-        self.treeview_create()
+        # Treeview
+        self.treeview = Gtk.TreeView()
         self.scrollable_treelist.add(self.treeview)
+        self.treeview.set_enable_search(False)
+        # Select file when row activated
+        self.treeview.connect("row-activated", self.file_select, True)
+        # Handle key events
+        self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK)
+        self.treeview.connect("key_press_event",
+                              self.vimiv.keyhandler.run, "LIBRARY")
+        # Call the function to create the treeview
+        self.update_treeview()
 
     def toggle(self):
         """ Toggles the library """
@@ -117,24 +125,20 @@ class Library(object):
         # Update info for the current mode
         self.vimiv.statusbar.update_info()
 
-    def treeview_create(self, search=False):
-        """ Creates all the gtk widgets for the treeview """
+    def update_treeview(self, search=False):
+        """ Renews the information in the treeview """
         # The search parameter is necessary to highlight searches after a search
         # and to delete search items if a new directory is entered
         if not search:
             self.vimiv.commandline.reset_search()
+        # Remove old columns
+        for column in self.treeview.get_columns():
+            self.treeview.remove_column(column)
         # Tree View
         current_file_filter = self.filestore(self.datalist_create())
-        self.treeview = Gtk.TreeView.new_with_model(current_file_filter)
+        self.treeview.set_model(current_file_filter)
         # Needed for the movement keys
         self.treepos = 0
-        self.treeview.set_enable_search(False)
-        # Select file when row activated
-        self.treeview.connect("row-activated", self.file_select, True)
-        # Handle key events
-        self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK)
-        self.treeview.connect("key_press_event",
-                              self.vimiv.keyhandler.run, "LIBRARY")
         # Add the columns
         for i, name in enumerate(["Num", "Name", "Size", "M"]):
             renderer = Gtk.CellRendererText()
@@ -246,9 +250,7 @@ class Library(object):
 
     def reload(self, directory, curdir="", search=False):
         """ Reloads the treeview """
-        self.scrollable_treelist.remove(self.treeview)
-        self.treeview_create(search)
-        self.scrollable_treelist.add(self.treeview)
+        self.update_treeview(search)
         self.focus(True)
         # Check if there is a saved position
         if directory in self.dir_pos.keys():
