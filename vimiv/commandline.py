@@ -397,17 +397,16 @@ class CommandLine(object):
 
         # Select file depending on library
         if self.vimiv.library.toggled:
+            path = self.search_positions[self.search_pos]
+            self.vimiv.library.treeview.set_cursor(Gtk.TreePath(path),
+                                                    None, False)
+            self.vimiv.library.treepos = path
             if len(self.search_names) == 1:
                 self.vimiv.library.file_select("alt",
                                                self.search_names
                                                [self.search_pos],
                                                "b",
                                                False)
-            else:
-                path = self.search_positions[self.search_pos]
-                self.vimiv.library.treeview.set_cursor(Gtk.TreePath(path),
-                                                       None, False)
-                self.vimiv.library.treepos = path
         else:
             self.vimiv.keyhandler.num_str = str(
                 self.search_positions[self.search_pos] + 1)
