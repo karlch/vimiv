@@ -3,7 +3,7 @@ The most important changes between the versions are listed here. Note that
 versions before 0.5 were not released properly as git tag and are therefore not
 listed under releases in github.
 
-#### v0.6 (unreleased)
+#### v0.6
 * Major rebase of code rewriting vimiv as python module
 * Add option to disable thumbnail cache
 * Handle symlinks neatly (-> do not follow them into their parent directory)
