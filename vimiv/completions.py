@@ -201,7 +201,7 @@ class VimivComplete(object):
             self.vimiv.commandline.info.show()
 
         # Cycle through completions on multiple tab
-        if self.output == previous_output:
+        if self.output == previous_output and self.completions:
             if self.cycling:
                 if inverse:
                     self.tab_presses -= 1
