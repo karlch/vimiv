@@ -56,7 +56,7 @@ class CommandLine(object):
         self.search_pos = 0
         self.search_positions = []
         self.search_names = []
-        self.search_case = general["search_case_insensitive"]
+        self.search_case = general["search_case_sensitive"]
 
     def handler(self, entry):
         """ Handles input from the entry, namely if it is a path to be focused

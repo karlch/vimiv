@@ -120,7 +120,7 @@ def set_defaults():
                "display_bar": True,
                "thumbsize": (128, 128),
                "geometry": (800, 600),
-               "search_case_insensitive": True,
+               "search_case_sensitive": True,
                "recursive": False,
                "rescale_svg": True,
                "overzoom": False,
