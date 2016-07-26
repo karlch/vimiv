@@ -3,3 +3,6 @@ vimiv.egg-info
 usr
 install_log.txt
 TODO
+tests/htmlcov
+*__pycache__*
+*.coverage*
