@@ -1,0 +1,10 @@
+[run]
+include = *vimiv*
+omit =
+    */__init__*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    if not running_tests:
+precision = 2

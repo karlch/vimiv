@@ -2,6 +2,6 @@
 verbosity=2
 with-coverage=1
 cover-erase=1
-cover-package=vimiv
 cover-html=1
 cover-html-dir=htmlcov
+where=tests
