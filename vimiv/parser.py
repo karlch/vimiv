@@ -48,9 +48,12 @@ def get_args():
     return parser
 
 
-def parse_args(parser, settings):
+def parse_args(parser, settings, arguments=[]):
     """ Parse the arguments and return the modified settings """
-    args = parser.parse_args()
+    if arguments:
+        args = parser.parse_args(arguments)
+    else:
+        args = parser.parse_args()
     if args.sbar:
         settings["GENERAL"]["display_bar"] = True
     if args.hide_sbar:
