@@ -5,4 +5,4 @@ import vimiv
 import sys
 
 if __name__ == '__main__':
-    sys.exit(vimiv.main())
+    sys.exit(vimiv.main.main())

@@ -16,9 +16,9 @@ class Window(object):
     def __init__(self, vimiv, settings):
         self.vimiv = vimiv
         self.fullscreen = False
-        self.vimiv.connect_object('window-state-event',
-                                  Window.on_window_state_change,
-                                  self)
+        self.vimiv.connect_data('window-state-event',
+                                Window.on_window_state_change,
+                                self)
         self.last_focused = ""
 
         # The configruations from vimivrc
@@ -32,8 +32,8 @@ class Window(object):
         # Connect
         self.vimiv.connect("check-resize", self.auto_resize)
 
-    def on_window_state_change(self, event):
-        self.fullscreen = bool(Gdk.WindowState.FULLSCREEN
+    def on_window_state_change(self, event, window):
+        window.fullscreen = bool(Gdk.WindowState.FULLSCREEN
                                & event.new_window_state)
 
     def toggle_fullscreen(self):

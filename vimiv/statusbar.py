@@ -26,7 +26,7 @@ class Statusbar(object):
         self.was_hidden = False
 
         # Statusbar on the bottom
-        self.bar = Gtk.HBox(False, 0)
+        self.bar = Gtk.HBox()
         # Two labels for two sides of statusbar and one in the middle for
         # additional info
         self.left_label = Gtk.Label()  # Position and image name

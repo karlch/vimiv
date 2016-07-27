@@ -7,7 +7,7 @@ from threading import Thread
 from subprocess import Popen, PIPE
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk, GLib, Pango
+from gi.repository import Gtk, Gdk, GLib
 from vimiv.fileactions import populate
 from vimiv.helpers import read_file
 
@@ -24,7 +24,7 @@ class CommandLine(object):
         general = settings["GENERAL"]
 
         # Command line
-        self.box = Gtk.VBox(False, 0)
+        self.box = Gtk.VBox()
         # self.box.override_background_color(Gtk.StateType.NORMAL, border_color)
         self.entry = Gtk.Entry()
         self.entry.connect("activate", self.handler)
@@ -32,20 +32,30 @@ class CommandLine(object):
                            self.vimiv.keyhandler.run, "COMMAND")
         self.entry.connect("changed", self.check_close)
         self.entry.connect("changed", self.reset_tab_count)
-        self.info = Gtk.Label()
-        self.info.set_alignment(0.0, 0.5)
+        self.info = Gtk.Label(xalign=0.0, yalign=0.5)
         self.box.pack_end(self.entry, True, True, 5)
         self.box.pack_start(self.info, False, False, 5)
-        # Make it nice
+        # Make it nice using CSS
+        self.box.set_name("CommandLine")
         style = self.vimiv.get_style_context()
         color = style.get_background_color(Gtk.StateType.NORMAL)
-        self.box.override_background_color(Gtk.StateType.NORMAL, color)
+        color_str = "#CommandLine { background-color: " + color.to_string() \
+                + "; }"
+        command_provider = Gtk.CssProvider()
+        command_css = color_str.encode()
+        command_provider.load_from_data(command_css)
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),
+                command_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         self.box.set_valign(Gtk.Align.END)
         self.box.set_border_width(0)
 
         # Monospaced font
-        monospace = Pango.FontDescription("monospace")
-        self.info.modify_font(monospace)
+        self.info.set_name("CompletionInfo")
+        completion_provider = Gtk.CssProvider()
+        completion_css = "#CompletionInfo { font: monospace; }".encode()
+        completion_provider.load_from_data(completion_css)
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),
+                completion_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         # Cmd history from file
         self.history = read_file(os.path.expanduser("~/.vimiv/history"))

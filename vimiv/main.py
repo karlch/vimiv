@@ -24,7 +24,7 @@ from vimiv.tags import TagHandler
 from vimiv.mark import Mark
 
 
-def main():
+def main(running_tests=False):
     """ Starting point for vimiv """
     parser = get_args()
     parse_dirs()
@@ -40,7 +40,13 @@ def main():
     paths, index = populate(args, recursive, shuffle_paths)
     # Start the actual window
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # ^C
-    Vimiv(settings, paths, index).main()
+    if running_tests:
+        vimiv = Vimiv(settings, paths, index)
+        vimiv.main(True)
+        vimiv.quit(running_tests=True)
+    else:
+        Vimiv(settings, paths, index).main()
+        Gtk.main()
 
 
 class Vimiv(Gtk.Window):
@@ -73,7 +79,7 @@ class Vimiv(Gtk.Window):
         # Box in which everything gets packed
         self.vbox = Gtk.VBox()
         # Horizontal Box with image and treeview
-        self.hbox = Gtk.HBox(False, 0)
+        self.hbox = Gtk.HBox()
         self.vbox.pack_start(self.hbox, True, True, 0)
 
         # Other classes
@@ -104,7 +110,7 @@ class Vimiv(Gtk.Window):
         # self.overlay.set_opacity(0.3)
         self.add(self.overlay)
 
-    def quit(self, force=False):
+    def quit(self, force=False, running_tests=False):
         """ Quit the main loop, printing marked files and saving history """
         for image in self.mark.marked:
             print(image)
@@ -119,9 +125,10 @@ class Vimiv(Gtk.Window):
             histfile.write(cmd)
         histfile.close()
 
-        Gtk.main_quit()
+        if not running_tests:
+            Gtk.main_quit()
 
-    def main(self):
+    def main(self, running_tests=False):
         # Move to the directory of the image
         if self.paths:
             if isinstance(self.paths, list):
@@ -131,7 +138,8 @@ class Vimiv(Gtk.Window):
                 self.paths = []
 
         # Show everything and then hide whatever needs to be hidden
-        self.show_all()
+        if not running_tests:
+            self.show_all()
         self.manipulate.hbox.hide()
         self.commandline.box.hide()
         self.commandline.info.hide()
@@ -158,5 +166,3 @@ class Vimiv(Gtk.Window):
             if self.library.expand:
                 self.library.grid.set_size_request(self.winsize[0], 10)
             self.statusbar.err_message("No valid paths, opening library viewer")
-
-        Gtk.main()

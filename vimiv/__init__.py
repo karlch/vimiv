@@ -15,4 +15,4 @@ except ImportError as import_error:
     print("Are all dependencies installed?")
     sys.exit(1)
 
-from vimiv.main import main
+import vimiv.main
