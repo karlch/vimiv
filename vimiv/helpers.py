@@ -34,16 +34,6 @@ except:
 external_commands = tuple(external_commands)
 
 
-def import_wrapper(module):
-    """ Wrapper function around the import statement with exception checking """
-    try:
-        import module
-    except ImportError:
-        print("Python module", module, "not found. Are all dependencies",
-              "installed?")
-        sys.exit(1)
-
-
 def listdir_wrapper(path, show_hidden=False):
     """ Reimplementation of os.listdir which mustn't show hidden files """
     if show_hidden:
