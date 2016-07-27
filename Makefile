@@ -48,3 +48,6 @@ uninstall:
 	@printf " files from /usr/lib/python3.x/site-packages/.\n"
 	@printf "A list of files should have been generated during make install"
 	@printf " in install_log.txt.\n"
+
+test:
+	nosetests
