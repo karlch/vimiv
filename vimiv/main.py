@@ -40,13 +40,13 @@ def main(running_tests=False):
     paths, index = populate(args, recursive, shuffle_paths)
     # Start the actual window
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # ^C
-    if running_tests:
+    if not running_tests:
+        Vimiv(settings, paths, index).main()
+        Gtk.main()
+    else:
         vimiv = Vimiv(settings, paths, index)
         vimiv.main(True)
         vimiv.quit(running_tests=True)
-    else:
-        Vimiv(settings, paths, index).main()
-        Gtk.main()
 
 
 class Vimiv(Gtk.Window):
