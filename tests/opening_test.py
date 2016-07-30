@@ -78,10 +78,11 @@ class OpeningTest(TestCase):
 
     def test_opening_recursively(self):
         """ Open all images recursively """
+        os.chdir("testimages")
         paths, index = populate([], True, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
         vimiv.main(True)
-        self.assertEqual(6, len(vimiv.paths))
+        self.assertEqual(4, len(vimiv.paths))
         os.chdir("..")
 
 
