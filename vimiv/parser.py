@@ -48,7 +48,7 @@ def get_args():
     return parser
 
 
-def parse_args(parser, settings, arguments=[]):
+def parse_args(parser, settings, arguments=None):
     """ Parse the arguments and return the modified settings """
     if arguments:
         args = parser.parse_args(arguments)

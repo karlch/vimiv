@@ -84,6 +84,7 @@ class Image(object):
         pbo_width = self.pixbuf_original.get_width()
         pbo_height = self.pixbuf_original.get_height()
 
+        # pylint:disable=no-member
         try:  # If possible scale the image
             pbf_width = int(pbo_width * self.zoom_percent)
             pbf_height = int(pbo_height * self.zoom_percent)

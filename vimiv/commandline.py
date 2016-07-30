@@ -44,8 +44,9 @@ class CommandLine(object):
         command_provider = Gtk.CssProvider()
         command_css = color_str.encode()
         command_provider.load_from_data(command_css)
-        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),
-                command_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), command_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
         self.box.set_valign(Gtk.Align.END)
         self.box.set_border_width(0)
 
@@ -54,8 +55,9 @@ class CommandLine(object):
         completion_provider = Gtk.CssProvider()
         completion_css = "#CompletionInfo { font: monospace; }".encode()
         completion_provider.load_from_data(completion_css)
-        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(),
-                completion_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), completion_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         # Cmd history from file
         self.history = read_file(os.path.expanduser("~/.vimiv/history"))
@@ -409,7 +411,7 @@ class CommandLine(object):
         if self.vimiv.library.toggled:
             path = self.search_positions[self.search_pos]
             self.vimiv.library.treeview.set_cursor(Gtk.TreePath(path),
-                                                    None, False)
+                                                   None, False)
             self.vimiv.library.treepos = path
             if len(self.search_names) == 1:
                 self.vimiv.library.file_select("alt",

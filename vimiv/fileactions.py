@@ -16,6 +16,7 @@ trashdir = os.path.join(vimivdir, "Trash")
 
 def recursive_search(directory):
     """ Search a directory recursively for images """
+    # pylint: disable=unused-variable
     for root, dirs, files in os.walk(directory):
         for fil in files:
             yield os.path.join(root, fil)
@@ -67,7 +68,7 @@ def populate(args, recursive=False, shuffle_paths=False):
         if os.path.isfile(path):
             paths.append(path)
         elif os.path.isdir(path) and recursive:
-            paths = recursive_search(path)
+            paths = list(recursive_search(path))
     # Remove unsupported files
     paths = [possible_path for possible_path in paths
              if is_image(possible_path)]
@@ -117,10 +118,7 @@ def is_image(filename):
     """ Checks whether the file is an image """
     complete_name = os.path.abspath(os.path.expanduser(filename))
     try:
-        if GdkPixbuf.Pixbuf.get_file_info(complete_name)[0]:
-            return True
-        else:
-            return False
+        return bool(GdkPixbuf.Pixbuf.get_file_info(complete_name)[0])
     except:
         return False
 

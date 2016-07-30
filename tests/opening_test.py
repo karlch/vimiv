@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
+""" Tests the opening of different filetypes with vimiv """
 
 import os
 from unittest import TestCase, main
@@ -9,15 +10,19 @@ from vimiv.parser import parse_config
 
 
 class OpeningTest(TestCase):
+    """ Opening of different filetypes Test"""
 
     def setUp(self):
         self.settings = parse_config()
 
     def test_opening_without_path(self):
+        """ Opening without an argument """
         vimiv = v_main.Vimiv(self.settings, [], 0)
+        self.assertEqual(vimiv.paths, [])
         vimiv.main(True)
 
     def test_opening_with_directory(self):
+        """ Opening with a directory """
         expected_dir = os.path.abspath("./testimages")
         paths, index = populate(["testimages"], False, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
@@ -31,6 +36,7 @@ class OpeningTest(TestCase):
         os.chdir("..")
 
     def test_opening_with_image(self):
+        """ Opening with an image """
         expected_dir = os.path.abspath("./testimages")
         paths, index = populate(["testimages/arch_001.jpg"], False, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
@@ -43,6 +49,7 @@ class OpeningTest(TestCase):
         os.chdir("..")
 
     def test_opening_with_symlink(self):
+        """ Opening with a symlink to an image """
         expected_dir = os.path.abspath("./testimages")
         paths, index = populate(["testimages/symlink_to_image"], False, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
@@ -55,6 +62,7 @@ class OpeningTest(TestCase):
         os.chdir("..")
 
     def test_opening_recursively(self):
+        """ Open all images recursively """
         paths, index = populate([], True, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
         vimiv.main(True)

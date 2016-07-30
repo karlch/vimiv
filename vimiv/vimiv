@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 """ Vimiv executable """
-import vimiv
 import sys
+import vimiv
 
 if __name__ == '__main__':
     sys.exit(vimiv.main.main())

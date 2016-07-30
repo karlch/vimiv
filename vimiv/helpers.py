@@ -3,7 +3,6 @@
 """ Wrappers around standard library functions used in vimiv """
 
 import os
-import sys
 from subprocess import Popen, PIPE
 from gi import require_version
 require_version('Gtk', '3.0')

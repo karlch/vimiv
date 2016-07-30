@@ -1,6 +1,7 @@
 # vim: ft=dosini fileencoding=utf-8:
 
 [MASTER]
+reports=n
 
 [MESSAGES CONTROL]
 enable=all
@@ -10,6 +11,8 @@ disable=no-self-use,
         locally-disabled,
         too-many-ancestors,
         too-few-public-methods,
+        too-many-branches,
+        too-many-locals,
         too-many-public-methods,
         cyclic-import,
         too-many-instance-attributes,
@@ -28,7 +31,7 @@ disable=no-self-use,
         suppressed-message,
         too-many-return-statements,
         unused-argument,
-        protected-access
+        protected-access,
 
 [BASIC]
 function-rgx=[a-z_][a-z0-9_]{2,50}$

@@ -50,4 +50,7 @@ uninstall:
 	@printf " in install_log.txt.\n"
 
 test:
-	nosetests
+	@nosetests
+
+lint:
+	@pylint vimiv/*.py vimiv/vimiv tests/*.py

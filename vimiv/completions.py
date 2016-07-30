@@ -222,8 +222,9 @@ class VimivComplete(object):
             cur_pos = len("  ".join(self.completions_reordered[0:cur_index+1]))
             # Rewrap if we are out of the displayable area
             if cur_pos > line_length:
-                self.completions_reordered = self.completions[command_position:] + \
-                                             self.completions[:command_position]
+                self.completions_reordered = \
+                        self.completions[command_position:] + \
+                        self.completions[:command_position]
                 cur_index = 0
             highlight = self.vimiv.library.markup + \
                         "<b>" + command + "</b></span>"

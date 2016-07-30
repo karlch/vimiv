@@ -1,17 +1,20 @@
 #!/usr/bin/env python
 # encoding: utf-8
+""" Parser Tests for vimiv's testsuite """
 
 import os
 from unittest import TestCase, main
 import vimiv.parser as parser
 
 class ParserTest(TestCase):
+    """ Different parsers from parser.py test """
 
     def setUp(self):
         self.parser = parser.get_args()
         self.config_settings = parser.parse_config()
 
     def test_parse_dirs(self):
+        """ Checks if all directories where created correctly """
         parser.parse_dirs()
         vimivdir = os.path.join(os.path.expanduser('~'), ".vimiv")
         trashdir = os.path.join(vimivdir, "Trash")
@@ -21,6 +24,7 @@ class ParserTest(TestCase):
             self.assertTrue(os.path.isdir(directory))
 
     def test_parse_config(self):
+        """ Check if the config files where parsed correctly """
         general = self.config_settings["GENERAL"]
         library = self.config_settings["LIBRARY"]
         amount_general_settings = len(general.keys())
@@ -33,6 +37,7 @@ class ParserTest(TestCase):
         self.assertEqual(library["file_check_amount"], 30)
 
     def test_parse_args(self):
+        """ Check if command line arguments are parsed correctly """
         # Set arguments to be different from default so they are run
         args = ["--slideshow-delay", "5", "-B", "-l", "-r", "-g", "foo"]
         settings = parser.parse_args(self.parser, self.config_settings, args)
@@ -41,6 +46,7 @@ class ParserTest(TestCase):
         self.assertEqual(general["slideshow_delay"], 5)
 
     def test_parse_keys(self):
+        """ Check if the keybindings are parsed correctly """
         keybindings = parser.parse_keys()
         image_bindings = keybindings["IMAGE"]
         self.assertEqual(image_bindings["j"], "down")

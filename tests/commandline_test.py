@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
+""" Command line tests for vimiv's test suite """
 
 import os
 import time
@@ -11,12 +12,15 @@ import vimiv.main as v_main
 from vimiv.parser import parse_config
 
 def refresh_gui(delay=0):
+    """ Refresh the Gtk window as the Gtk.main() loop is not running when
+        testing """
     time.sleep(delay)
     while Gtk.events_pending():
         Gtk.main_iteration_do(False)
 
 
 class CommandlineTest(TestCase):
+    """ Command Line Tests """
 
     def setUp(self):
         self.settings = parse_config()
@@ -24,6 +28,7 @@ class CommandlineTest(TestCase):
         self.vimiv.main(True)
 
     def test_toggling(self):
+        """ Focus and leave the commandline """
         # Focusing
         self.vimiv.commandline.focus()
         self.assertEqual(self.vimiv.commandline.entry.get_text(), ":")
@@ -32,6 +37,7 @@ class CommandlineTest(TestCase):
         self.assertFalse(self.vimiv.commandline.box.is_visible())
 
     def test_run_command(self):
+        """ Run an internal vimiv command """
         before_command = self.vimiv.image.overzoom
         self.vimiv.commandline.entry.set_text(":set overzoom!")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
@@ -39,6 +45,7 @@ class CommandlineTest(TestCase):
         self.assertNotEqual(before_command, after_command)
 
     def test_run_external(self):
+        """ Run an external command """
         self.vimiv.commandline.entry.set_text(":!touch tmp_foo")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
         time.sleep(0.1)  # Necessary so the entry is created
@@ -48,6 +55,7 @@ class CommandlineTest(TestCase):
         os.remove("tmp_foo")
 
     def test_pipe(self):
+        """ Pipe a command to vimiv """
         # Internal command
         before_command = self.vimiv.image.overzoom
         self.vimiv.commandline.entry.set_text(":!echo set overzoom! |")
@@ -71,6 +79,7 @@ class CommandlineTest(TestCase):
         os.chdir("..")
 
     def test_path(self):
+        """ Enter a path in the commandline """
         # Pass a directory
         expected_dir = os.path.abspath("./testimages")
         self.vimiv.commandline.entry.set_text(":./testimages")
@@ -85,6 +94,7 @@ class CommandlineTest(TestCase):
         os.chdir("..")
 
     def test_search(self):
+        """ Search for images, directories and navigate search results """
         self.vimiv.commandline.cmd_search()
         self.assertEqual(self.vimiv.commandline.entry.get_text(), "/")
         # Search should move into testimages

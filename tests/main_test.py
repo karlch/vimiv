@@ -9,8 +9,10 @@ import vimiv.main as v_main
 
 
 class MainTest(TestCase):
+    """ Main Test Class """
 
     def test_main_until_quit(self):
+        """ Run through vimiv main once """
         v_main.main(True)
 
 if __name__ == '__main__':
