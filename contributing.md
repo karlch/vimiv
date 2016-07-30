@@ -1,7 +1,14 @@
 ### Contributing to vimiv
-You want to contribute? Great! Here are some general recommendations.
-I try to comment the code fairly well and the code tries to follow pep8
-standards. So if you want to contribute please try to do so as well.
+You want to contribute? Great!
+
+Here are some general recommendations to make the process easier for me. If any
+of them stop you from contributing, please do so anyway and I will fix them
+myself!
+
+Your new code should not break any existing tests or, if it is an actual change,
+rewrite the test so it works with the new code. If you introduce a new feature,
+you might be asked to write tests for it. The tests can be run with make test
+and use nosetests. The code should follow the included .pylintrc.
 
 ## TODO List
 These are some topics that are on my TODO List. They are marked in the code.
