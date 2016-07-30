@@ -101,9 +101,6 @@ class Completion():
 
         return compstr, output
 
-    def complete_internal(self):
-        pass
-
     def complete_tag(self):
         """ Appends the available tag names to an internal tag command """
         tags = listdir_wrapper(os.path.expanduser("~/.vimiv/Tags"),
