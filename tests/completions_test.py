@@ -42,7 +42,7 @@ class CompletionsTest(TestCase):
 
     def test_external_with_path_completion(self):
         """ Completion of external commands """
-        self.vimiv.commandline.entry.set_text(":!ls t")
+        self.vimiv.commandline.entry.set_text(":!ls testi")
         self.vimiv.completions.complete()
         expected_completions = ["!ls testimages/"]
         self.assertEqual(self.vimiv.completions.completions,

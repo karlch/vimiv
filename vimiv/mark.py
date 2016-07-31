@@ -80,7 +80,8 @@ class Mark(object):
         if self.vimiv.library.focused:
             files = []
             for fil in self.vimiv.library.files:
-                files.append(os.path.abspath(fil))
+                if not os.path.isdir(fil):
+                    files.append(os.path.abspath(fil))
         elif self.vimiv.paths:
             files = self.vimiv.paths
         else:
