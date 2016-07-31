@@ -18,32 +18,36 @@ def save_image(im, filename):
 def rotate_file(filelist, cwise):
     """ Rotate every image in filelist cwise*90° counterclockwise """
     for image in filelist:
-        im = Image.open(image)
-        if cwise == 1:
-            im = im.transpose(Image.ROTATE_90)
-        elif cwise == 2:
-            im = im.transpose(Image.ROTATE_180)
-        elif cwise == 3:
-            im = im.transpose(Image.ROTATE_270)
-        save_image(im, image)
+        with open(image, "rb") as image_file:
+            im = Image.open(image_file)
+            if cwise == 1:
+                im = im.transpose(Image.ROTATE_90)
+            elif cwise == 2:
+                im = im.transpose(Image.ROTATE_180)
+            elif cwise == 3:
+                im = im.transpose(Image.ROTATE_270)
+            save_image(im, image)
 
 
 def flip_file(filelist, horizontal):
     """ Flips every image in filelist """
     for image in filelist:
-        im = Image.open(image)
-        if horizontal:
-            im = im.transpose(Image.FLIP_LEFT_RIGHT)
-        else:
-            im = im.transpose(Image.FLIP_TOP_BOTTOM)
-        save_image(im, image)
+        with open(image, "rb") as image_file:
+            im = Image.open(image_file)
+            if horizontal:
+                im = im.transpose(Image.FLIP_LEFT_RIGHT)
+            else:
+                im = im.transpose(Image.FLIP_TOP_BOTTOM)
+            save_image(im, image)
 
 
-def autorotate(filelist):
+def autorotate(filelist, method="auto"):
     """ This function autorotates all pictures in the current pathlist """
     rotated_images = 0
     # jhead does this better
     try:
+        if method == "PIL":
+            raise ValueError
         cmd = ["jhead", "-autorot", "-ft"] + filelist
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         out, err = p.communicate()
@@ -58,26 +62,27 @@ def autorotate(filelist):
     # If it isn't there fall back to PIL
     except:
         for path in filelist:
-            im = Image.open(path)
-            exif = im._getexif()
-            orientation_key = 274  # cf ExifTags
-            rotated = True
+            with open(path, "rb") as image_file:
+                im = Image.open(image_file)
+                exif = im._getexif()
+                orientation_key = 274  # cf ExifTags
+                rotated = True
 
-            # Only do something if orientation info is there
-            if exif and orientation_key in exif:
-                orientation = exif[orientation_key]
-                # Rotate and save the image
-                if orientation == 3:
-                    im = im.transpose(Image.ROTATE_180)
-                elif orientation == 6:
-                    im = im.transpose(Image.ROTATE_270)
-                elif orientation == 8:
-                    im = im.transpose(Image.ROTATE_90)
-                else:
-                    rotated = False
-                if rotated:
-                    save_image(im, path)
-                    rotated_images += 1
+                # Only do something if orientation info is there
+                if exif and orientation_key in exif:
+                    orientation = exif[orientation_key]
+                    # Rotate and save the image
+                    if orientation == 3:
+                        im = im.transpose(Image.ROTATE_180)
+                    elif orientation == 6:
+                        im = im.transpose(Image.ROTATE_270)
+                    elif orientation == 8:
+                        im = im.transpose(Image.ROTATE_90)
+                    else:
+                        rotated = False
+                    if rotated:
+                        save_image(im, path)
+                        rotated_images += 1
             method = "PIL"
 
     # Return the amount of rotated images and the method used
@@ -105,10 +110,11 @@ def thumbnails_create(filelist, thumbsize):
         # Only if they aren't cached already
         if outfile_base not in thumbnails:
             try:
-                im = Image.open(infile)
-                im.thumbnail(thumbsize, Image.ANTIALIAS)
-                save_image(im, outfile)
-                thumblist.append(outfile)
+                with open(infile, "rb") as image_file:
+                    im = Image.open(image_file)
+                    im.thumbnail(thumbsize, Image.ANTIALIAS)
+                    save_image(im, outfile)
+                    thumblist.append(outfile)
             except:
                 errtuple[0].append(i)
                 errtuple[1].append(os.path.basename(infile))
@@ -128,11 +134,11 @@ def manipulate_all(image, outfile, manipulations):
         except:
             return 1
     # Enhance all three other values
-    im = Image.open(image)
-    im = ImageEnhance.Brightness(im).enhance(manipulations[0])
-    im = ImageEnhance.Contrast(im).enhance(manipulations[1])
-    im = ImageEnhance.Sharpness(im).enhance(manipulations[2])
-    # Write
-    save_image(im, outfile)
+    with open(image, "rb") as image_file:
+        im = Image.open(image_file)
+        im = ImageEnhance.Brightness(im).enhance(manipulations[0])
+        im = ImageEnhance.Contrast(im).enhance(manipulations[1])
+        im = ImageEnhance.Sharpness(im).enhance(manipulations[2])
+        save_image(im, outfile)
 
     return 0
