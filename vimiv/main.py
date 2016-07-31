@@ -59,7 +59,7 @@ class Vimiv(Gtk.Window):
 
         # Own stuff
         general = settings["GENERAL"]
-        self.directory = os.path.join(os.path.expanduser("~"), ".vimiv")
+        self.directory = os.path.expanduser("~/.vimiv")
         self.paths = paths
         self.index = index
         self.set_icon_name("image-x-generic")

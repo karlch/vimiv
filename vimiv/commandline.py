@@ -12,7 +12,7 @@ from vimiv.fileactions import populate
 from vimiv.helpers import read_file
 
 # Directories
-vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
+vimivdir = os.path.expanduser("~/.vimiv")
 tagdir = os.path.join(vimivdir, "Tags")
 
 
