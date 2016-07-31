@@ -39,7 +39,7 @@ class TagHandler(object):
         if os.path.isfile(tagfile_name):
             os.remove(tagfile_name)
         else:
-            err = "Tagfile '%s' does not exist" % (tagfile_name)
+            err = "Tagfile '%s' does not exist" % (tagname)
             self.vimiv.statusbar.err_message(err)
 
     def load(self, tagname):
