@@ -82,7 +82,7 @@ class Library(object):
     def toggle(self):
         """ Toggles the library """
         if self.toggled:
-            self.remember_pos(os.path.abspath("."), self.treepos)
+            self.remember_pos(os.getcwd(), self.treepos)
             self.box.hide()
             self.vimiv.image.animation_toggled = False  # Now play Gifs
             self.toggled = not self.toggled
@@ -93,7 +93,7 @@ class Library(object):
                 self.vimiv.image.vimiv.image.scrolled_win.hide()
             else:  # Try to focus the current image in the library
                 path = os.path.dirname(self.vimiv.paths[self.vimiv.index])
-                if path == os.path.abspath("."):
+                if path == os.getcwd():
                     self.treeview.set_cursor(Gtk.TreePath([self.vimiv.index]),
                                              None, False)
                     self.treepos = self.vimiv.index
@@ -102,7 +102,7 @@ class Library(object):
             self.toggled = not self.toggled
             self.focus(True)
             # Markings and other stuff might have changed
-            self.reload(os.path.abspath("."))
+            self.reload(os.getcwd())
         # Resize image and grid if necessary
         if self.vimiv.paths:
             if self.vimiv.thumbnail.toggled:
@@ -168,7 +168,7 @@ class Library(object):
         self.datalist = list()
         self.files = self.filelist_create()
         # Remove unsupported files if one isn't in the self.vimiv.tags.directory
-        if os.path.abspath(".") != self.vimiv.tags.directory:
+        if os.getcwd() != self.vimiv.tags.directory:
             self.files = [
                 possible_file
                 for possible_file in self.files
@@ -197,9 +197,9 @@ class Library(object):
         else:
             count = count.get_indices()[0]
             fil = self.files[count]
-            self.remember_pos(os.path.abspath("."), count)
+            self.remember_pos(os.getcwd(), count)
         # Tags
-        if os.path.abspath(".") == self.vimiv.tags.directory:
+        if os.getcwd() == self.vimiv.tags.directory:
             self.vimiv.tags.load(fil)
             # Close if selected twice
             if fil == self.vimiv.tags.last:
@@ -237,10 +237,10 @@ class Library(object):
     def move_up(self, directory="..", start=False):
         """ move (up/to) directory in the library """
         try:
-            curdir = os.path.abspath(".")
+            curdir = os.getcwd()
             os.chdir(directory)
             if not start:
-                self.reload(os.path.abspath("."), curdir)
+                self.reload(os.getcwd(), curdir)
         except:
             self.vimiv.statusbar.err_message("Error: directory not accessible")
 
@@ -362,7 +362,7 @@ class Library(object):
         """ Scroll the library viewer and select if necessary """
         # Handle the specific keys
         if direction == "h":  # Behave like ranger
-            self.remember_pos(os.path.abspath("."), self.treepos)
+            self.remember_pos(os.getcwd(), self.treepos)
             self.move_up()
         elif direction == "l":
             self.file_select("a", Gtk.TreePath(self.treepos), "b", False)

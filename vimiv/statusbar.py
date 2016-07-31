@@ -73,7 +73,7 @@ class Statusbar(object):
         try:
             # Directory if library is focused
             if self.vimiv.library.focused:
-                self.left_label.set_text(os.path.abspath("."))
+                self.left_label.set_text(os.getcwd())
             # Position, name and thumbnail size in thumb mode
             elif self.vimiv.thumbnail.toggled:
                 pos = self.vimiv.thumbnail.pos

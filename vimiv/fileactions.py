@@ -53,7 +53,7 @@ def populate(args, recursive=False, shuffle_paths=False):
     paths = []
     # Default to current directory for recursive search
     if not args and recursive:
-        args = [os.path.abspath(".")]
+        args = [os.getcwd()]
     # If only one path is passed do special stuff
     single = None
     if len(args) == 1:
@@ -184,12 +184,12 @@ class FileExtras(object):
             os.rename(fil, outstring)
 
         # Reload everything
-        self.reload_changes(os.path.abspath("."), True)
+        self.reload_changes(os.getcwd(), True)
 
     def reload_changes(self, directory, reload_path=True, pipe=False,
                        pipe_input=None):
         """ Reload everything, meaning filelist in library and image """
-        if (directory == os.path.abspath(".") and directory !=
+        if (directory == os.getcwd() and directory !=
                 self.vimiv.tags.directory and self.vimiv.library.toggled):
             if (self.vimiv.library.treepos >= 0 and
                     self.vimiv.library.treepos <=

@@ -136,7 +136,7 @@ class CommandLine(object):
         cmd = re.sub(r'(?<!\\)(\*)', " ".join(filelist), cmd)
         cmd = re.sub(r'(\\)(?!\\)', '', cmd)
         # Run the command in an extra thread
-        directory = os.path.abspath(".")
+        directory = os.getcwd()
         cmd_thread = Thread(target=self.thread_for_external, args=(cmd,
                                                                    directory))
         cmd_thread.start()
