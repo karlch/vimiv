@@ -23,6 +23,7 @@ class CommandlineTest(TestCase):
     """ Command Line Tests """
 
     def setUp(self):
+        self.working_directory = os.getcwd()
         self.settings = parse_config()
         self.vimiv = v_main.Vimiv(self.settings, [], 0)
         self.vimiv.main(True)
@@ -76,7 +77,6 @@ class CommandlineTest(TestCase):
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
         refresh_gui(0.05)
         self.assertEqual(self.vimiv.paths[0], expected_image)
-        os.chdir("..")
 
     def test_path(self):
         """ Enter a path in the commandline """
@@ -91,7 +91,6 @@ class CommandlineTest(TestCase):
         self.vimiv.commandline.entry.set_text(":./arch-logo.png")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
         self.assertEqual(self.vimiv.paths[0], expected_image)
-        os.chdir("..")
 
     def test_search(self):
         """ Search for images, directories and navigate search results """
@@ -119,7 +118,8 @@ class CommandlineTest(TestCase):
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
         self.assertFalse(self.vimiv.commandline.search_names)
 
-        os.chdir("..")
+    def tearDown(self):
+        os.chdir(self.working_directory)
 
 
 if __name__ == '__main__':

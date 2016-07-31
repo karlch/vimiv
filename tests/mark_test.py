@@ -12,6 +12,7 @@ class MarkTest(TestCase):
     """ Mark Tests """
 
     def setUp(self):
+        self.working_directory = os.getcwd()
         self.settings = parse_config()
         paths, index = populate(["testimages"], False, False)
         self.vimiv = v_main.Vimiv(self.settings, paths, index)
@@ -55,7 +56,7 @@ class MarkTest(TestCase):
         self.assertEqual(expected_marked, self.vimiv.mark.marked)
 
     def tearDown(self):
-        os.chdir("..")
+        os.chdir(self.working_directory)
 
 
 if __name__ == '__main__':
