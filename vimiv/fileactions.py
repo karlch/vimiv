@@ -12,6 +12,7 @@ from vimiv.helpers import listdir_wrapper
 # Directory for trash
 vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
 trashdir = os.path.join(vimivdir, "Trash")
+thumbdir = os.path.join(vimivdir, "Thumbnails")
 
 
 def recursive_search(directory):
@@ -129,10 +130,14 @@ class FileExtras(object):
     def __init__(self, vimiv, settings):
         self.vimiv = vimiv
 
-    def clear(self, directory):
+    def clear(self, directory_name):
         """ Remove all files in directory (Trash or Thumbnails) """
-        for fil in os.listdir(trashdir):
-            fil = os.path.join(trashdir, fil)
+        if directory_name == "Trash":
+            directory = trashdir
+        else:
+            directory = thumbdir
+        for fil in os.listdir(directory):
+            fil = os.path.join(directory, fil)
             os.remove(fil)
 
     def format_files(self, string):
@@ -152,10 +157,11 @@ class FileExtras(object):
         if tofind:
             try:
                 for fil in self.vimiv.paths:
-                    im = Image.open(fil)
-                    exif = im._getexif()
-                    if not (exif and 306 in exif):
-                        raise AttributeError
+                    with open(fil) as image_file:
+                        im = Image.open(image_file)
+                        exif = im._getexif()
+                        if not (exif and 306 in exif):
+                            raise AttributeError
             except:
                 self.vimiv.statusbar.err_message("No exif data for %s available"
                                                  % (fil))
@@ -166,17 +172,18 @@ class FileExtras(object):
             num = "%03d" % (i + 1)
             # Exif stuff
             if tofind:
-                im = Image.open(fil)
-                exif = im._getexif()
-                date = exif[306]
-                time = date.split()[1].split(":")
-                date = date.split()[0].split(":")
-                outstring = string.replace("%Y", date[0])  # year
-                outstring = outstring.replace("%m", date[1])  # month
-                outstring = outstring.replace("%d", date[2])  # day
-                outstring = outstring.replace("%H", time[0])  # hour
-                outstring = outstring.replace("%M", time[1])  # minute
-                outstring = outstring.replace("%S", time[2])  # second
+                with open(fil) as image_file:
+                    im = Image.open(image_file)
+                    exif = im._getexif()
+                    date = exif[306]
+                    time = date.split()[1].split(":")
+                    date = date.split()[0].split(":")
+                    outstring = string.replace("%Y", date[0])  # year
+                    outstring = outstring.replace("%m", date[1])  # month
+                    outstring = outstring.replace("%d", date[2])  # day
+                    outstring = outstring.replace("%H", time[0])  # hour
+                    outstring = outstring.replace("%M", time[1])  # minute
+                    outstring = outstring.replace("%S", time[2])  # second
             else:
                 outstring = string
             # Ending
