@@ -8,6 +8,7 @@ from vimiv.fileactions import populate
 import vimiv.main as v_main
 from vimiv.parser import parse_config
 
+
 class MarkTest(TestCase):
     """ Mark Tests """
 

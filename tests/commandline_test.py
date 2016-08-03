@@ -11,6 +11,7 @@ from gi.repository import Gtk
 import vimiv.main as v_main
 from vimiv.parser import parse_config
 
+
 def refresh_gui(delay=0):
     """ Refresh the Gtk window as the Gtk.main() loop is not running when
         testing """
@@ -49,8 +50,9 @@ class CommandlineTest(TestCase):
         """ Run an external command """
         self.vimiv.commandline.entry.set_text(":!touch tmp_foo")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
-        time.sleep(0.1)  # Necessary so the entry is created
-                          # (->multithreading...)
+        # Necessary so the entry is created (-> multithreading...)
+        # TODO should be fixed
+        time.sleep(0.1)
         files = os.listdir()
         self.assertTrue("tmp_foo" in files)
         os.remove("tmp_foo")

@@ -34,7 +34,7 @@ class Window(object):
 
     def on_window_state_change(self, event):
         self.fullscreen = bool(Gdk.WindowState.FULLSCREEN
-                                 & event.new_window_state)
+                               & event.new_window_state)
 
     def toggle_fullscreen(self):
         """ Toggles fullscreen """

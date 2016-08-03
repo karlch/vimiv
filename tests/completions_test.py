@@ -6,6 +6,7 @@ from unittest import TestCase, main
 import vimiv.main as v_main
 from vimiv.parser import parse_config
 
+
 class CompletionsTest(TestCase):
     """ Completions Tests """
 

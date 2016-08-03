@@ -63,8 +63,8 @@ class OpeningTest(TestCase):
         """ Open an image with whitespace and symlink in directory """
         expected_dir = os.path.abspath("./testimages/directory/")
         paths, index = \
-                populate(["testimages/directory/symlink with spaces .jpg"],
-                         False, False)
+            populate(["testimages/directory/symlink with spaces .jpg"],
+                     False, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
         vimiv.main(True)
         # Check moving and image population
@@ -83,7 +83,6 @@ class OpeningTest(TestCase):
 
     def tearDown(self):
         os.chdir(self.working_directory)
-
 
 
 if __name__ == '__main__':

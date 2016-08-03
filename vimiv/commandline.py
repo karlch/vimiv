@@ -40,7 +40,7 @@ class CommandLine(object):
         style = self.vimiv.get_style_context()
         color = style.get_background_color(Gtk.StateType.NORMAL)
         color_str = "#CommandLine { background-color: " + color.to_string() \
-                + "; }"
+            + "; }"
         command_provider = Gtk.CssProvider()
         command_css = color_str.encode()
         command_provider.load_from_data(command_css)

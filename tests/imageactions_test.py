@@ -4,9 +4,10 @@
 
 import os
 import shutil
-import vimiv.imageactions as imageactions
-from PIL import Image
 from unittest import TestCase, main
+from PIL import Image
+import vimiv.imageactions as imageactions
+
 
 class ImageActionsTest(TestCase):
     """ Imageactions Tests """
@@ -38,7 +39,7 @@ class ImageActionsTest(TestCase):
         """ Creation of thumbnail files """
         imageactions.thumbnails_create(self.files, (128, 128))
         thumbnail = os.path.expanduser(
-                "~/.vimiv/Thumbnails/image_to_edit.thumbnail.png")
+            "~/.vimiv/Thumbnails/image_to_edit.thumbnail.png")
         with Image.open(thumbnail) as im:
             thumbnail_size = max(im.size[0], im.size[1])
             self.assertEqual(thumbnail_size, 128)
@@ -63,7 +64,6 @@ class ImageActionsTest(TestCase):
         with Image.open(self.filename) as im:
             orientation = im.size[0] < im.size[1]
             self.assertFalse(orientation)
-
 
     def tearDown(self):
         os.chdir(self.working_directory)

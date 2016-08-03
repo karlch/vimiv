@@ -7,6 +7,7 @@ import shutil
 from unittest import TestCase, main
 import vimiv.helpers as helpers
 
+
 class HelpersTest(TestCase):
     """ Helpers Tests """
 

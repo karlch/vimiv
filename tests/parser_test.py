@@ -6,6 +6,7 @@ import os
 from unittest import TestCase, main
 import vimiv.parser as parser
 
+
 class ParserTest(TestCase):
     """ Different parsers from parser.py test """
 

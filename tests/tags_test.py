@@ -8,6 +8,7 @@ from vimiv.helpers import read_file
 import vimiv.main as v_main
 from vimiv.parser import parse_config
 
+
 class TagsTest(TestCase):
     """ Tag Tests """
 
@@ -68,7 +69,6 @@ class TagsTest(TestCase):
 
     def tearDown(self):
         os.chdir(self.working_directory)
-
 
 
 if __name__ == '__main__':

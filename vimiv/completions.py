@@ -214,17 +214,18 @@ class VimivComplete(object):
             self.tab_presses = tab_presses
             self.vimiv.commandline.entry.set_position(-1)
             # Get maximum and current pos to always show current completion
-            line_length = self.vimiv.commandline.info.get_max_width_chars()*2
+            line_length = self.vimiv.commandline.info.get_max_width_chars() * 2
             cur_index = self.completions_reordered.index(command)
-            cur_pos = len("  ".join(self.completions_reordered[0:cur_index+1]))
+            cur_pos = len("  ".join(
+                self.completions_reordered[0:cur_index + 1]))
             # Rewrap if we are out of the displayable area
             if cur_pos > line_length:
                 self.completions_reordered = \
-                        self.completions[command_position:] + \
-                        self.completions[:command_position]
+                    self.completions[command_position:] + \
+                    self.completions[:command_position]
                 cur_index = 0
             highlight = self.vimiv.library.markup + \
-                        "<b>" + command + "</b></span>"
+                "<b>" + command + "</b></span>"
             completions = list(self.completions_reordered)  # Pythonic list copy
             completions[cur_index] = highlight
             compstr = "  ".join(completions)

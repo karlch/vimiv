@@ -4,10 +4,11 @@
 
 import os
 import shutil
-import vimiv.fileactions as fileactions
 from unittest import TestCase, main
+import vimiv.fileactions as fileactions
 import vimiv.main as v_main
 from vimiv.parser import parse_config
+
 
 class FileActionsTest(TestCase):
     """ Fileactions Tests """
@@ -114,7 +115,7 @@ class FileActionsTest(TestCase):
         vimiv.fileextras.format_files("formatted_%y_")
         err_message = vimiv.statusbar.left_label.get_text()
         expected_message = "No exif data for %s available" % \
-                (os.path.abspath("formatted_001.jpg"))
+            (os.path.abspath("formatted_001.jpg"))
         self.assertEqual(expected_message, err_message)
         # Should not work without a path
         vimiv.paths = []
