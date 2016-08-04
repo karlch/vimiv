@@ -1,6 +1,8 @@
-### vimiv, an image viewer with vim-like keybindings
+## vimiv, an image viewer with vim-like keybindings
 
-## Version 0.6
+### Version 0.6.1 (unreleased)
+
+[Changelog](https://github.com/karlch/vimiv/blob/master/changelog.md)
 
 ## Features
 * vim-like keybindings
