@@ -180,8 +180,7 @@ class Thumbnail(object):
     def move(self, direction):
         """ Select thumbnails correctly and scroll """
         # Get last element
-        last = self.iconview.get_visible_range()[1]
-        last = int(last.to_string())
+        last = len(self.vimiv.paths) - len(self.errorpos) - 1
         # Check for a user prefixed step
         if self.vimiv.keyhandler.num_str:
             step = int(self.vimiv.keyhandler.num_str)
