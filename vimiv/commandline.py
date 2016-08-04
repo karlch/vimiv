@@ -387,7 +387,7 @@ class CommandLine(object):
                     self.search_positions.append(i)
 
         if self.vimiv.library.focused:
-            self.vimiv.library.reload(".", search=True)
+            self.vimiv.library.reload(os.getcwd(), search=True)
 
         # Move to first result or throw an error
         if self.search_names:

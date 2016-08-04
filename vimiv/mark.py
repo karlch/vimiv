@@ -100,8 +100,9 @@ class Mark(object):
         """ Reload all information which contains marks """
         # Update lib
         if self.vimiv.library.toggled:
-            self.vimiv.library.remember_pos(".", self.vimiv.library.treepos)
-            self.vimiv.library.reload(".")
+            self.vimiv.library.remember_pos(os.getcwd(),
+                                            self.vimiv.library.treepos)
+            self.vimiv.library.reload(os.getcwd())
         if self.vimiv.thumbnail.toggled:
             for i, image in enumerate(self.vimiv.paths):
                 if reload_all or image in current:

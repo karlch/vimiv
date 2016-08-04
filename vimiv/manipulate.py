@@ -94,7 +94,10 @@ class Manipulate(object):
 
         # Reload stuff if needed
         if self.vimiv.library.toggled:
-            self.vimiv.library.reload(".")
+            if self.vimiv.library.treepos:
+                self.vimiv.library.remember_pos(os.getcwd(),
+                                                self.vimiv.library.treepos - 1)
+            self.vimiv.library.reload(os.getcwd())
         if self.vimiv.image.scrolled_win.is_focus():
             del self.vimiv.paths[self.vimiv.index]
             if self.vimiv.paths:
