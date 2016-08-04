@@ -289,20 +289,31 @@ class Library(object):
         self.vimiv.keyhandler.num_clear()
         return True
 
-    def resize(self, val=None, inc=True):
+    def resize(self, inc=True, require_val=False, val=None):
         """ Resize the library and update the image if necessary """
-        if isinstance(val, int):
-            # The default 0 passed by arguments
+        if require_val:  # Set to value
             if not val:
-                val = 300
-            self.width = self.default_width
-        elif val:  # A non int was given as library width
-            self.vimiv.statusbar.err_message("Library width must be an integer")
-            return
-        elif inc:
-            self.width += 20
-        else:
-            self.width -= 20
+                val = self.default_width
+            try:
+                val = int(val)
+            except:
+                message = "Library width must be an integer"
+                self.vimiv.statusbar.err_message(message)
+                return
+            self.width = val
+        else:  # Grow/shrink by value
+            if not val:
+                val = 20
+            try:
+                val = int(val)
+            except:
+                message = "Library width must be an integer"
+                self.vimiv.statusbar.err_message(message)
+                return
+            if inc:
+                self.width += val
+            else:
+                self.width -= val
         # Set some reasonable limits to the library size
         if self.width > self.vimiv.winsize[0] - 200:
             self.width = self.vimiv.winsize[0] - 200

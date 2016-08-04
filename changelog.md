@@ -6,6 +6,7 @@ The most important changes between the versions are listed here.
 * Stop mark\_between from marking directories
 * Fix clear\_thumbs
 * Fix leaving commandline on double tab
+* Fix set library\_width
 
 #### v0.6
 * Major rebase of code rewriting vimiv as python module
