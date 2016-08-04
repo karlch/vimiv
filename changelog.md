@@ -1,7 +1,11 @@
 ## Changelog
-The most important changes between the versions are listed here. Note that
-versions before 0.5 were not released properly as git tag and are therefore not
-listed under releases in github.
+The most important changes between the versions are listed here.
+
+#### v0.6.1 (unreleased)
+* Bugfix release after implementing a testsuite
+* Stop mark\_between from marking directories
+* Fix clear\_thumbs
+* Fix leaving commandline on double tab
 
 #### v0.6
 * Major rebase of code rewriting vimiv as python module
@@ -13,6 +17,15 @@ listed under releases in github.
 * Much better tab completion
 
 #### v0.5
+* Pipe to vimiv
+* Builting Tag support
+* Multithreading of external commands
+* New configfiles vimivrc and keys.conf instead of vimivrc.py
+* Search results navigatable with N and P
+* Search can be case insensitive
+* Implement search highlighting
+
+#### v0.4.1
 * Let external shell handle external arguments, allows for pipes, ...
 * Colon and slash displayed in command line for commands and searching
 * Command history now with arrow keys and supports substring search
@@ -20,18 +33,12 @@ listed under releases in github.
 * Follow symbolic links to their directory
 * Escape sequences as expected for % and *
 
-#### v0.4.1
-* Added a command line solving
-* Added various internal commands for the command line
-* Tab-completion
-* Solved a minor bug: when manipulating images and returning back to the value 0 in any of the sliders the image wouldn't be updated before
-* Arrow keys now support prefixing by numbers
-
 #### v0.4
-* Added a command line solving
+* Added a command line
 * Added various internal commands for the command line
 * Tab-completion
-* Solved a minor bug: when manipulating images and returning back to the value 0 in any of the sliders the image wouldn't be updated before
+* Solved a minor bug: when manipulating images and returning back to the value 0
+  in any of the sliders the image wouldn't be updated before
 * Arrow keys now support prefixing by numbers
 
 #### v0.3
@@ -44,7 +51,8 @@ listed under releases in github.
 * Fullscreen now works for both the main window and the library popup
 * Images and directories are distinguished in the library
 * An extra keyhandler for the library
-* Different handling of showing directory size, highly increases library performance
+* Different handling of showing directory size, highly increases library
+  performance
 * Remember last position in library
 * Add the cmd\_handler
 * If a folder is given as path, open it in the library
