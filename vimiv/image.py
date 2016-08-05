@@ -111,7 +111,7 @@ class Image(object):
         if update_info:
             self.vimiv.statusbar.update_info()
 
-    def get_size(self):
+    def get_available_size(self):
         """ Returns the size of the image depending on what other widgets
         are visible and if fullscreen or not """
         if self.vimiv.window.fullscreen:
@@ -164,7 +164,7 @@ class Image(object):
                 return
             self.vimiv.keyhandler.num_str = ""
         try:
-            self.imsize = self.get_size()
+            self.imsize = self.get_available_size()
             self.zoom_percent = (percent if percent
                                  else self.get_zoom_percent(z_width, z_height))
             # Catch some unreasonable zooms
@@ -243,7 +243,7 @@ class Image(object):
                     path)
             if self.pixbuf_original.is_static_image():
                 self.pixbuf_original = self.pixbuf_original.get_static_image()
-                self.imsize = self.get_size()
+                self.imsize = self.get_available_size()
                 self.zoom_percent = self.get_zoom_percent()
             else:
                 self.zoom_percent = 1

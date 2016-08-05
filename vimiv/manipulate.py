@@ -19,8 +19,6 @@ class Manipulate(object):
 
     def __init__(self, vimiv, settings):
         self.vimiv = vimiv
-        # general = settings["GENERAL"]
-        # library = settings["LIBRARY"]
 
         # Settings
         self.toggled = False
@@ -120,6 +118,7 @@ class Manipulate(object):
         # Add all marked images
         else:
             images = self.vimiv.mark.marked
+            # Abuse err_message to simply display information about what is done
             if len(images) == 1:
                 err = "%s %d marked image" % (message, len(images))
             else:
@@ -265,7 +264,7 @@ class Manipulate(object):
         self.vimiv.image.pixbuf_original = \
             self.vimiv.image.pixbuf_original.get_static_image()
         if not self.vimiv.window.fullscreen:
-            self.vimiv.image.imsize = self.vimiv.image.get_size()
+            self.vimiv.image.imsize = self.vimiv.image.get_available_size()
         self.vimiv.image.zoom_percent = self.vimiv.image.get_zoom_percent()
         self.vimiv.image.update()
 
@@ -337,7 +336,7 @@ class Manipulate(object):
                 self.vimiv.image.pixbuf_original.get_static_image()
             self.vimiv.paths[self.vimiv.index] = path
             if not self.vimiv.window.fullscreen:
-                self.vimiv.image.imsize = self.vimiv.image.get_size()
+                self.vimiv.image.imsize = self.vimiv.image.get_available_size()
             self.vimiv.image.zoom_percent = self.vimiv.image.get_zoom_percent()
             self.vimiv.image.update()
         # Done
