@@ -39,6 +39,12 @@ class HelpersTest(TestCase):
         created_file_content = helpers.read_file("tmp_testdir/baz")
         self.assertEqual(created_file_content, ["vimiv", "is", "great"])
 
+    def test_error_message(self):
+        """ Error message popup """
+        # Not much can happen here, if all attributes are set correctly it will
+        # also run
+        helpers.error_message("Test error", True)
+
     def tearDown(self):
         shutil.rmtree("tmp_testdir")
 

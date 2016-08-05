@@ -5,6 +5,7 @@ import argparse
 import configparser
 import os
 import sys
+from vimiv.helpers import error_message
 
 
 def get_args():
@@ -213,11 +214,14 @@ def parse_keys():
         elif os.path.isfile("/etc/vimiv/keys.conf"):
             keys.read("/etc/vimiv/keys.conf")
         else:
-            print("Keyfile not found. Exiting.")
+            message = "Keyfile not found. Exiting."
+            print(message)
+            error_message(message)
             sys.exit(1)
     except configparser.DuplicateOptionError as e:
-        print(e)
-        print("Duplicate keybinding. Exiting.")
+        message = e.message + ".\n Duplicate keybinding. Exiting."
+        print(message)
+        error_message(message)
         sys.exit(1)
 
     # Get the keybinding dictionaries checking for errors
@@ -228,10 +232,11 @@ def parse_keys():
         keys_manipulate = keys["MANIPULATE"]
         keys_command = keys["COMMAND"]
     except KeyError as e:
-        print("Missing section", e, "in keys.conf.",
-              "Refer to vimivrc(5) to fix your config.")
+        message = "Missing section " + str(e) + " in keys.conf.\n" \
+                  + "Refer to vimivrc(5) to fix your config."
+        print(message)
+        error_message(message)
         sys.exit(1)
-
 
     # Update the dictionaries of every window with the keybindings that apply
     # for more than one window
