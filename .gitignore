@@ -6,3 +6,4 @@ TODO
 tests/htmlcov
 *__pycache__*
 *.coverage
+coverage.xml

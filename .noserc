@@ -4,4 +4,6 @@ with-coverage=1
 cover-erase=1
 cover-html=1
 cover-html-dir=htmlcov
+cover-xml=1
+cover-xml-file=../coverage.xml
 where=tests
