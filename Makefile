@@ -23,17 +23,12 @@ help:
 
 install:
 	python3 setup.py install --root=$(DESTDIR)/ --record=install_log.txt
-	mkdir -p $(DESTDIR)/etc/vimiv
-	cp config/vimivrc $(DESTDIR)/etc/vimiv/
-	cp config/keys.conf $(DESTDIR)/etc/vimiv/
-	mkdir -p $(DESTDIR)/usr/share/applications
-	cp vimiv.desktop $(DESTDIR)/usr/share/applications/
-	mkdir -p $(DESTDIR)$(MANPREFIX)/man1
-	cp man/vimiv.1 $(DESTDIR)$(MANPREFIX)/man1/
-	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/vimiv.1
-	mkdir -p $(DESTDIR)$(MANPREFIX)/man5
-	cp man/vimivrc.5 $(DESTDIR)$(MANPREFIX)/man5/
-	chmod 644 $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5
+	install -Dm644 config/vimivrc $(DESTDIR)/etc/vimiv/vimivrc
+	install -Dm644 config/keys.conf $(DESTDIR)/etc/vimiv/keys.conf
+	install -Dm644 vimiv.desktop $(DESTDIR)/usr/share/applications/vimiv.desktop
+	install -Dm644 man/vimiv.1 $(DESTDIR)$(MANPREFIX)/man1/vimiv.1
+	install -Dm644 man/vimivrc.5 $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5
+	icons/install_icons.sh
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/vimiv
@@ -43,6 +38,7 @@ uninstall:
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/vimiv.1.gz
 	rm -f $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5
 	rm -f $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5.gz
+	icons/remove_icons.sh
 	@printf "python-setuptools does not provide an uninstall option.\n"
 	@printf "To completely remove vimiv you will have to remove all related"
 	@printf " files from /usr/lib/python3.x/site-packages/.\n"

@@ -62,7 +62,7 @@ class Vimiv(Gtk.Window):
         self.directory = os.path.expanduser("~/.vimiv")
         self.paths = paths
         self.index = index
-        self.set_icon_name("image-x-generic")
+        self.set_icon_name("vimiv")
 
         # Sceen and window size
         screen = Gdk.Screen()

@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="401.60367"
+   height="188.23361"
+   viewBox="0 0 401.60368 188.23361"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="vimiv_banner.svg"
+   style="enable-background:new"
+   inkscape:export-filename="/home/christian/Dokumente/git/vimiv/icons/vimiv_banner_400.png"
+   inkscape:export-xdpi="52.749626"
+   inkscape:export-ydpi="52.749626">
+  <defs
+     id="defs4">
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter3409">
+      <feBlend
+         inkscape:collect="always"
+         mode="multiply"
+         in2="BackgroundImage"
+         id="feBlend3411" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7071068"
+     inkscape:cx="158.73855"
+     inkscape:cy="21.536751"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="954"
+     inkscape:window-x="0"
+     inkscape:window-y="51"
+     inkscape:window-maximized="0"
+     units="px"
+     fit-margin-top="2"
+     fit-margin-left="2"
+     fit-margin-right="2"
+     fit-margin-bottom="2">
+    <inkscape:grid
+       type="xygrid"
+       id="grid3412"
+       originx="0.030439803"
+       originy="-97.604025" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="left leg"
+     style="display:inline"
+     transform="translate(-67.905149,-279.00479)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:98.03028107px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="217.93121"
+       y="404.14499"
+       id="text3471"
+       sodipodi:linespacing="125%"
+       transform="scale(1.0247942,0.97580568)"
+       inkscape:export-xdpi="117.53871"
+       inkscape:export-ydpi="117.53871"><tspan
+         sodipodi:role="line"
+         id="tspan3473"
+         x="217.93121"
+         y="404.14499"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:98.0274353px;line-height:125%;font-family:Overpass;-inkscape-font-specification:'Overpass, Ultra-Light';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#333333"
+           id="tspan3477">vim</tspan><tspan
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:98.0274353px;line-height:125%;font-family:Overpass;-inkscape-font-specification:'Overpass, Bold';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#333333"
+           id="tspan3475">iv</tspan></tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="right leg"
+     style="display:inline;filter:url(#filter3409)"
+     transform="translate(-67.905149,-279.00479)" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="description"
+     style="display:inline;opacity:1"
+     transform="translate(-67.905149,-279.00479)">
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot3490"
+       style="font-style:normal;font-weight:normal;font-size:125px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:0;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"><flowRegion
+         id="flowRegion3492"><rect
+           id="rect3494"
+           width="616.59711"
+           height="149.90663"
+           x="72.124893"
+           y="544.65955" /></flowRegion><flowPara
+         id="flowPara3496"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:Overpass;-inkscape-font-specification:'Overpass, Normal';text-align:start;writing-mode:lr-tb;text-anchor:start" /></flowRoot>    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:78.93347168px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#333333;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="70.131058"
+       y="447.90637"
+       id="text3498"
+       sodipodi:linespacing="125%"
+       inkscape:export-xdpi="117.53871"
+       inkscape:export-ydpi="117.53871"
+       transform="scale(0.97286456,1.0278923)"><tspan
+         sodipodi:role="line"
+         id="tspan3500"
+         x="70.131058"
+         y="447.90637"
+         style="font-style:normal;font-variant:normal;font-weight:200;font-stretch:normal;font-size:22.10137177px;line-height:125%;font-family:Overpass;-inkscape-font-specification:'Overpass, Ultra-Light';text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#333333">an image viewer with vim-like keybindings</tspan></text>
+    <ellipse
+       style="display:inline;opacity:1;fill:#003399;stroke:#6699ff;stroke-width:10.12822342;stroke-miterlimit:4;stroke-dasharray:none;enable-background:new"
+       id="path3543"
+       cx="145.06894"
+       cy="355.65967"
+       rx="69.546082"
+       ry="69.590767"
+       inkscape:export-xdpi="117.53871"
+       inkscape:export-ydpi="117.53871" />
+    <path
+       style="opacity:1;fill:#6699ff;fill-rule:evenodd;stroke:#6699ff;stroke-width:0.16858108px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;enable-background:new"
+       d="m 118.06233,320.35335 -18.39446,0 35.03707,90.38414 20.14631,0 z"
+       id="path3366-5"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-xdpi="117.53871"
+       inkscape:export-ydpi="117.53871" />
+    <path
+       style="display:inline;opacity:0.98999999;fill:#cc0000;fill-rule:evenodd;stroke:#cc0000;stroke-width:0.16858108px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;enable-background:new"
+       d="m 171.56491,320.35284 18.39445,0 -35.03706,90.38413 -20.14631,0 z"
+       id="path3366-3-3"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-xdpi="117.53871"
+       inkscape:export-ydpi="117.53871" />
+  </g>
+</svg>

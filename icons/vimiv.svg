@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="635.55695"
+   height="635.93512"
+   viewBox="0 0 635.55696 635.93513"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="vimiv.svg"
+   style="enable-background:new"
+   inkscape:export-filename="/home/christian/Dokumente/git/vimiv/icons/vimiv_512x512.png"
+   inkscape:export-xdpi="72.96254"
+   inkscape:export-ydpi="72.96254"
+   enable-background="new">
+  <defs
+     id="defs4" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.5"
+     inkscape:cx="57.4402"
+     inkscape:cy="255.26336"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer3"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="974"
+     inkscape:window-x="0"
+     inkscape:window-y="31"
+     inkscape:window-maximized="0"
+     showguides="true"
+     inkscape:snap-object-midpoints="false"
+     inkscape:snap-center="false"
+     inkscape:snap-page="false"
+     showborder="true"
+     units="px"
+     fit-margin-top="2"
+     fit-margin-left="2"
+     fit-margin-right="2"
+     fit-margin-bottom="2"
+     inkscape:guide-bbox="true">
+    <sodipodi:guide
+       position="-49.158746,-234.72502"
+       orientation="0,744.09449"
+       id="guide3671" />
+    <sodipodi:guide
+       position="694.93575,-234.72502"
+       orientation="-1052.3622,0"
+       id="guide3673" />
+    <sodipodi:guide
+       position="-49.158746,817.63719"
+       orientation="0,-744.09449"
+       id="guide3675" />
+    <sodipodi:guide
+       position="-49.158746,817.63719"
+       orientation="1052.3622,0"
+       id="guide3677" />
+    <inkscape:grid
+       type="xygrid"
+       id="grid3679"
+       originx="-49.158746"
+       originy="-234.72502" />
+    <sodipodi:guide
+       position="1022,316.00001"
+       orientation="0,1"
+       id="guide4400" />
+    <sodipodi:guide
+       position="316.00001,702.00001"
+       orientation="1,0"
+       id="guide4402" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="circle"
+     transform="translate(20.604555,33.949862)"
+     style="display:inline">
+    <ellipse
+       style="opacity:1;fill:#003399;stroke:#6699ff;stroke-width:42.86645889;stroke-miterlimit:4;stroke-dasharray:none"
+       id="path3543"
+       cx="297.17392"
+       cy="284.0177"
+       rx="294.34525"
+       ry="294.53433" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="left leg"
+     transform="translate(-49.158744,-181.70207)">
+    <path
+       style="opacity:1;fill:#6699ff;fill-rule:evenodd;stroke:#6699ff;stroke-width:0.71349865px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 252.63511,350.23979 -77.85228,0 148.29005,382.53966 85.26678,0 z"
+       id="path3366"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-xdpi="81.052948"
+       inkscape:export-ydpi="81.052948" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="right leg"
+     style="display:inline;"
+     transform="translate(-49.158744,-181.70207)">
+    <path
+       style="opacity:0.98999999;fill:#cc0000;fill-rule:evenodd;stroke:#cc0000;stroke-width:0.71349865px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 479.07814,350.23765 77.85228,0 -148.29005,382.53966 -85.26677,0 z"
+       id="path3366-3"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-xdpi="81.052948"
+       inkscape:export-ydpi="81.052948" />
+  </g>
+</svg>
