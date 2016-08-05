@@ -207,12 +207,17 @@ def parse_keys():
     """ Checks for a keyfile and parses it """
     # Check which keyfile should be used
     keys = configparser.ConfigParser()
-    if os.path.isfile(os.path.expanduser("~/.vimiv/keys.conf")):
-        keys.read(os.path.expanduser("~/.vimiv/keys.conf"))
-    elif os.path.isfile("/etc/vimiv/keys.conf"):
-        keys.read("/etc/vimiv/keys.conf")
-    else:
-        print("Keyfile not found. Exiting.")
+    try:
+        if os.path.isfile(os.path.expanduser("~/.vimiv/keys.conf")):
+            keys.read(os.path.expanduser("~/.vimiv/keys.conf"))
+        elif os.path.isfile("/etc/vimiv/keys.conf"):
+            keys.read("/etc/vimiv/keys.conf")
+        else:
+            print("Keyfile not found. Exiting.")
+            sys.exit(1)
+    except configparser.DuplicateOptionError as e:
+        print(e)
+        print("Duplicate keybinding. Exiting.")
         sys.exit(1)
 
     # Get the keybinding dictionaries checking for errors
@@ -226,6 +231,7 @@ def parse_keys():
         print("Missing section", e, "in keys.conf.",
               "Refer to vimivrc(5) to fix your config.")
         sys.exit(1)
+
 
     # Update the dictionaries of every window with the keybindings that apply
     # for more than one window
