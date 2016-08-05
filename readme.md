@@ -1,4 +1,4 @@
-![vimiv banner](https://raw.githubusercontent.com/karlch/vimiv/master/icons/vimiv_banner.svg)
+![vimiv banner](https://raw.githubusercontent.com/karlch/vimiv/master/icons/vimiv_banner_400.png)
 
 [![License badge](https://img.shields.io/aur/license/vimiv.svg)](https://raw.githubusercontent.com/karlch/vimiv/master/LICENSE)
 [![codecov](https://codecov.io/gh/karlch/vimiv/branch/master/graph/badge.svg)](https://codecov.io/gh/karlch/vimiv)
