@@ -1,8 +1,14 @@
-## vimiv, an image viewer with vim-like keybindings
+![vimiv banner](https://raw.githubusercontent.com/karlch/vimiv/master/icons/vimiv_banner.svg)
 
-### Version 0.6.1 (unreleased)
+[![License badge](https://img.shields.io/aur/license/vimiv.svg)](https://raw.githubusercontent.com/karlch/vimiv/master/LICENSE)
+[![codecov](https://codecov.io/gh/karlch/vimiv/branch/master/graph/badge.svg)](https://codecov.io/gh/karlch/vimiv)
+[![Version badge](https://img.shields.io/aur/version/vimiv.svg)](https://aur.archlinux.org/packages/vimiv/)
 
-[Changelog](https://github.com/karlch/vimiv/blob/master/changelog.md)
+#### Version 0.6.1 (unreleased)
+
+[Releases](https://github.com/karlch/vimiv/releases "releases")
+|
+[Changelog](https://github.com/karlch/vimiv/blob/master/changelog.md "changelog")
 
 ## Features
 * vim-like keybindings
@@ -20,13 +26,13 @@
 
 ## Screenshots
 
-**Open image and library:**
+#### Open image and library
 
-![Image](https://raw.githubusercontent.com/karlch/vimiv/gh-pages/vimiv-lib.png "Open image and library")
+![image + library](https://raw.githubusercontent.com/karlch/vimiv/gh-pages/vimiv-lib.png)
 
-**Thumbnail mode:**
+#### Thumbnail mode
 
-![Image](https://raw.githubusercontent.com/karlch/vimiv/gh-pages/vimiv-thumb.png "Thumbnail mode")
+![thumbnail mode](https://raw.githubusercontent.com/karlch/vimiv/gh-pages/vimiv-thumb.png)
 
 ## Configuration
 Vimiv comes with two configuration files. The vimivrc for general settings and
@@ -58,6 +64,3 @@ built.
 
 Bert Muennich, author of sxiv https://github.com/muennich/sxiv which inspired
 many of the features of vimiv.
-
-## License
-In accordance with Pim vimiv is released under the MIT license.

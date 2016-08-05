@@ -9,6 +9,7 @@ The most important changes between the versions are listed here.
 * Fix set library\_width
 * grow\_/shrink\_lib allow an argument
 * Implemented error message pop-up for fatal errors at startup
+* Add icon for vimiv
 
 #### v0.6
 * Major rebase of code rewriting vimiv as python module
