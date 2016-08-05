@@ -12,12 +12,13 @@ from vimiv.parser import parse_config
 class MarkTest(TestCase):
     """ Mark Tests """
 
-    def setUp(self):
-        self.working_directory = os.getcwd()
-        self.settings = parse_config()
+    @classmethod
+    def setUpClass(cls):
+        cls.working_directory = os.getcwd()
+        cls.settings = parse_config()
         paths, index = populate(["testimages"], False, False)
-        self.vimiv = v_main.Vimiv(self.settings, paths, index)
-        self.vimiv.main(True)
+        cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
+        cls.vimiv.main(True)
 
     def test_mark(self):
         """ Marking images """
@@ -44,7 +45,6 @@ class MarkTest(TestCase):
         expected_marked = ["arch_001.jpg", "arch-logo.png", "symlink_to_image"]
         expected_marked = [os.path.abspath(image) for image in expected_marked]
         self.assertEqual(expected_marked, self.vimiv.mark.marked)
-        self.vimiv.mark.toggle_mark()
 
     def test_mark_between(self):
         """ Mark between """
@@ -55,9 +55,14 @@ class MarkTest(TestCase):
         expected_marked = ["arch_001.jpg", "arch-logo.png", "symlink_to_image"]
         expected_marked = [os.path.abspath(image) for image in expected_marked]
         self.assertEqual(expected_marked, self.vimiv.mark.marked)
+        self.vimiv.library.move_pos(False)
 
     def tearDown(self):
-        os.chdir(self.working_directory)
+        self.vimiv.mark.marked = []
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cls.working_directory)
 
 
 if __name__ == '__main__':

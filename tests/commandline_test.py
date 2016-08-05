@@ -23,11 +23,14 @@ def refresh_gui(delay=0):
 class CommandlineTest(TestCase):
     """ Command Line Tests """
 
+    @classmethod
+    def setUpClass(cls):
+        cls.settings = parse_config()
+        cls.vimiv = v_main.Vimiv(cls.settings, [], 0)
+        cls.vimiv.main(True)
+
     def setUp(self):
         self.working_directory = os.getcwd()
-        self.settings = parse_config()
-        self.vimiv = v_main.Vimiv(self.settings, [], 0)
-        self.vimiv.main(True)
 
     def test_toggling(self):
         """ Focus and leave the commandline """

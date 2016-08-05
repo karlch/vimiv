@@ -14,12 +14,13 @@ from vimiv.parser import parse_config
 class LibraryTest(TestCase):
     """ Test library """
 
-    def setUp(self):
-        self.working_directory = os.getcwd()
-        self.settings = parse_config()
-        self.vimiv = v_main.Vimiv(self.settings, "testimages", 0)
-        self.vimiv.main(True)
-        self.lib = self.vimiv.library
+    @classmethod
+    def setUpClass(cls):
+        cls.working_directory = os.getcwd()
+        cls.settings = parse_config()
+        cls.vimiv = v_main.Vimiv(cls.settings, "testimages", 0)
+        cls.vimiv.main(True)
+        cls.lib = cls.vimiv.library
 
     def test_toggle(self):
         """ Toggling of the library"""
@@ -53,6 +54,9 @@ class LibraryTest(TestCase):
         self.assertFalse(self.lib.focused)
         self.assertFalse(self.lib.toggled)
         self.assertTrue(self.vimiv.image.scrolled_win.is_focus())
+        # Reopen and back to beginning
+        self.lib.toggle()
+        self.lib.treepos = 0
 
     def test_move_pos(self):
         """ Move position in library """
@@ -60,18 +64,18 @@ class LibraryTest(TestCase):
         self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
         self.lib.move_pos()
         self.assertEqual(self.lib.files[self.lib.treepos], "symlink_to_image")
-        # g
-        self.lib.move_pos(False)
-        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
         # 3g
         self.vimiv.keyhandler.num_str = "3"
         self.lib.move_pos()
         self.assertEqual(self.lib.files[self.lib.treepos], "directory")
         self.assertFalse(self.vimiv.keyhandler.num_str)
+        # g
+        self.lib.move_pos(False)
+        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
         # Throw an error
         self.vimiv.keyhandler.num_str = "300"
         self.lib.move_pos()
-        self.assertEqual(self.lib.files[self.lib.treepos], "directory")
+        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
         expected_message = "Warning: Unsupported index"
         received_message = self.vimiv.statusbar.left_label.get_text()
         self.assertEqual(expected_message, received_message)
@@ -126,9 +130,14 @@ class LibraryTest(TestCase):
         self.assertEqual(expected_path, os.getcwd())
         # Remember pos
         self.assertEqual(self.lib.files[self.lib.treepos], "directory")
+        # Back to beginning
+        self.lib.scroll("k")
+        self.lib.scroll("k")
+        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
 
-    def tearDown(self):
-        os.chdir(self.working_directory)
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cls.working_directory)
 
 
 if __name__ == '__main__':

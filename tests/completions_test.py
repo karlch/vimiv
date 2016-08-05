@@ -10,10 +10,11 @@ from vimiv.parser import parse_config
 class CompletionsTest(TestCase):
     """ Completions Tests """
 
-    def setUp(self):
-        self.settings = parse_config()
-        self.vimiv = v_main.Vimiv(self.settings, [], 0)
-        self.vimiv.main(True)
+    @classmethod
+    def setUpClass(cls):
+        cls.settings = parse_config()
+        cls.vimiv = v_main.Vimiv(cls.settings, [], 0)
+        cls.vimiv.main(True)
 
     def test_reset(self):
         """ Reset the internal completion values """

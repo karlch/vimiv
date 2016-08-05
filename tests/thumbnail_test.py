@@ -15,13 +15,20 @@ from vimiv.parser import parse_config
 class ThumbnailTest(TestCase):
     """ Test thumbnail """
 
-    def setUp(self):
-        self.working_directory = os.getcwd()
-        self.settings = parse_config()
+    @classmethod
+    def setUpClass(cls):
+        cls.working_directory = os.getcwd()
+        cls.settings = parse_config()
         paths, index = populate(["testimages/arch-logo.png"])
-        self.vimiv = v_main.Vimiv(self.settings, paths, index)
-        self.vimiv.main(True)
-        self.thumb = self.vimiv.thumbnail
+        cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
+        cls.vimiv.main(True)
+        cls.thumb = cls.vimiv.thumbnail
+
+    def setUp(self):
+        if self.thumb.toggled:
+            self.thumb.toggle()
+        self.thumb.pos = 0
+        self.vimiv.index = 0
 
     def test_toggle(self):
         """ Toggling thumbnail mode """
@@ -64,6 +71,8 @@ class ThumbnailTest(TestCase):
     def test_move(self):
         """ Move in thumbnail mode """
         self.thumb.toggle()
+        print(self.vimiv.paths)
+        print(self.thumb.pos)
         for move_combo in [("l", "arch_001.jpg"), ("h", "arch-logo.png"),
                            ("j", "symlink_to_image"), ("k", "arch-logo.png")]:
             self.thumb.move(move_combo[0])
@@ -71,8 +80,9 @@ class ThumbnailTest(TestCase):
             received_file = self.vimiv.paths[self.thumb.pos]
             self.assertEqual(expected_file, received_file)
 
-    def tearDown(self):
-        os.chdir(self.working_directory)
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cls.working_directory)
 
 
 if __name__ == '__main__':

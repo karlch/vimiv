@@ -12,11 +12,12 @@ from vimiv.parser import parse_config
 class TagsTest(TestCase):
     """ Tag Tests """
 
-    def setUp(self):
-        self.working_directory = os.getcwd()
-        self.settings = parse_config()
-        self.vimiv = v_main.Vimiv(self.settings, [], 0)
-        self.vimiv.main(True)
+    @classmethod
+    def setUpClass(cls):
+        cls.working_directory = os.getcwd()
+        cls.settings = parse_config()
+        cls.vimiv = v_main.Vimiv(cls.settings, [], 0)
+        cls.vimiv.main(True)
 
     def test_tag_create_remove(self):
         """ Create and remove a tag """
