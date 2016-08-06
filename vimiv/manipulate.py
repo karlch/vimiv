@@ -110,7 +110,7 @@ class Manipulate(object):
         images = []
         # Add the image shown
         if not self.vimiv.mark.marked and not self.vimiv.thumbnail.toggled:
-            if self.vimiv.library.focused:
+            if self.vimiv.library.treeview.is_focus():
                 images.append(os.path.abspath(
                     self.vimiv.library.files[self.vimiv.library.treepos]))
             else:
@@ -211,7 +211,7 @@ class Manipulate(object):
             self.vimiv.image.scrolled_win.grab_focus()
             self.vimiv.statusbar.update_info()
         elif self.vimiv.paths and not(self.vimiv.thumbnail.toggled
-                                      or self.vimiv.library.focused):
+                                      or self.vimiv.library.treeview.is_focus()):
             try:
                 self.vimiv.image.pixbuf_original.is_static_image()
                 self.vimiv.statusbar.err_message(
@@ -225,7 +225,7 @@ class Manipulate(object):
             if self.vimiv.thumbnail.toggled:
                 self.vimiv.statusbar.err_message(
                     "Manipulate not supported in thumbnail mode")
-            elif self.vimiv.library.focused:
+            elif self.vimiv.library.treeview.is_focus():
                 self.vimiv.statusbar.err_message(
                     "Manipulate not supported in library")
             else:

@@ -16,7 +16,7 @@ class Mark(object):
     def mark(self):
         """ Marks the current image """
         # Check which image
-        if self.vimiv.library.focused:
+        if self.vimiv.library.treeview.is_focus():
             current = os.path.abspath(self.vimiv.library.files[
                 self.vimiv.library.treepos])
         elif self.vimiv.thumbnail.toggled:
@@ -54,7 +54,7 @@ class Mark(object):
     def mark_all(self):
         """ Marks all images """
         # Get the correct filelist
-        if self.vimiv.library.focused:
+        if self.vimiv.library.treeview.is_focus():
             files = []
             for fil in self.vimiv.library.files:
                 files.append(os.path.abspath(fil))
@@ -77,7 +77,7 @@ class Mark(object):
         start = self.marked[-2]
         end = self.marked[-1]
         # Get the correct filelist
-        if self.vimiv.library.focused:
+        if self.vimiv.library.treeview.is_focus():
             files = []
             for fil in self.vimiv.library.files:
                 if not os.path.isdir(fil):

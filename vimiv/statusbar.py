@@ -72,7 +72,7 @@ class Statusbar(object):
         # Left side
         try:
             # Directory if library is focused
-            if self.vimiv.library.focused:
+            if self.vimiv.library.treeview.is_focus():
                 self.left_label.set_text(os.getcwd())
             # Position, name and thumbnail size in thumb mode
             elif self.vimiv.thumbnail.toggled:
@@ -97,7 +97,7 @@ class Statusbar(object):
         except:
             self.left_label.set_text("No open images")
         # Center
-        if not (self.vimiv.thumbnail.toggled or self.vimiv.library.focused) \
+        if not (self.vimiv.thumbnail.toggled or self.vimiv.library.treeview.is_focus()) \
                 and self.vimiv.paths:
             mark = "[*]" if self.vimiv.paths[self.vimiv.index] \
                 in self.vimiv.mark.marked else ""
@@ -125,7 +125,7 @@ class Statusbar(object):
 
     def get_mode(self):
         """ Returns which widget is currently focused """
-        if self.vimiv.library.focused:
+        if self.vimiv.library.treeview.is_focus():
             return "<b>-- LIBRARY --</b>"
         elif self.vimiv.manipulate.toggled:
             return "<b>-- MANIPULATE --</b>"

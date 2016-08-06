@@ -32,7 +32,7 @@ class OpeningTest(TestCase):
         expected_files = ["arch_001.jpg", "arch-logo.png", "directory",
                           "symlink_to_image"]
         self.assertEqual(vimiv.library.files, expected_files)
-        self.assertTrue(vimiv.library.focused)
+        self.assertTrue(vimiv.library.treeview.is_focus())
         self.assertTrue(vimiv.library.toggled)
 
     def test_opening_with_image(self):

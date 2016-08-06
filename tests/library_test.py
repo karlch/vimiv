@@ -51,7 +51,7 @@ class LibraryTest(TestCase):
         self.lib.treeview.row_activated(path, column)
         self.assertEqual(self.vimiv.paths, expected_images)
         # Library closed, image has focus
-        self.assertFalse(self.lib.focused)
+        self.assertFalse(self.lib.treeview.is_focus())
         self.assertFalse(self.lib.toggled)
         self.assertTrue(self.vimiv.image.scrolled_win.is_focus())
         # Reopen and back to beginning

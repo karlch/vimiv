@@ -317,7 +317,7 @@ class CommandLine(object):
         # Show/hide the relevant stuff
         self.box.show()
         # Remember what widget was focused before
-        if self.vimiv.library.focused:
+        if self.vimiv.library.treeview.is_focus():
             self.vimiv.window.last_focused = "lib"
         elif self.vimiv.manipulate.toggled:
             self.vimiv.window.last_focused = "man"
@@ -367,7 +367,7 @@ class CommandLine(object):
 
     def search(self, searchstr):
         """ Run a search on the appropriate filelist """
-        if self.vimiv.library.focused:
+        if self.vimiv.library.treeview.is_focus():
             paths = self.vimiv.library.files
         else:
             paths = self.vimiv.paths
@@ -386,7 +386,7 @@ class CommandLine(object):
                     self.search_names.append(fil)
                     self.search_positions.append(i)
 
-        if self.vimiv.library.focused:
+        if self.vimiv.library.treeview.is_focus():
             self.vimiv.library.reload(os.getcwd(), search=True)
 
         # Move to first result or throw an error

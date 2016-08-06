@@ -144,7 +144,7 @@ class FileExtras(object):
         """ Format the image names in the filelist according to a formatstring
             nicely numbering them """
         # Catch problems
-        if self.vimiv.library.focused:
+        if self.vimiv.library.treeview.is_focus():
             message = "Format only works on opened image files"
             self.vimiv.statusbar.err_message(message)
             return

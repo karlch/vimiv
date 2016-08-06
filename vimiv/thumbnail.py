@@ -71,7 +71,7 @@ class Thumbnail(object):
             # Scroll to thumb
             self.timer_id = GLib.timeout_add(1, self.scroll_to_thumb)
             # Let the library keep focus
-            if self.vimiv.library.focused:
+            if self.vimiv.library.treeview.is_focus():
                 self.vimiv.library.treeview.grab_focus()
             # Manipulate bar is useless in thumbnail mode
             if self.vimiv.manipulate.toggled:

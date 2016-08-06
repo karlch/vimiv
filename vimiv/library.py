@@ -21,7 +21,6 @@ class Library(object):
         library = settings["LIBRARY"]
 
         # Settings
-        self.focused = False
         self.dir_pos = {}  # Remembers positions in the library browser
         self.toggled = library["show_library"]
         self.default_width = library["library_width"]
@@ -118,10 +117,8 @@ class Library(object):
             if not self.toggled:
                 self.toggle()
             self.treeview.grab_focus()
-            self.focused = True
         else:
             self.vimiv.image.vimiv.image.scrolled_win.grab_focus()
-            self.focused = False
         # Update info for the current mode
         self.vimiv.statusbar.update_info()
 
