@@ -11,6 +11,8 @@ The most important changes between the versions are listed here.
 * Implemented error message pop-up for fatal errors at startup
 * Add icon for vimiv
 * Improve scrolling in library and thumbnail mode
+* Library border now set with Gtk.Separator, border\_color is no longer in
+  config
 
 #### v0.6
 * Major rebase of code rewriting vimiv as python module
