@@ -34,11 +34,11 @@ class Manipulate(object):
         self.manipulations = [1, 1, 1, False]
 
         # Sliders
-        self.scale_bri = Gtk.HScale()
+        self.scale_bri = Gtk.Scale()
         self.scale_bri.connect("value-changed", self.value_slider, "bri")
-        self.scale_con = Gtk.HScale()
+        self.scale_con = Gtk.Scale()
         self.scale_con.connect("value-changed", self.value_slider, "con")
-        self.scale_sha = Gtk.HScale()
+        self.scale_sha = Gtk.Scale()
         self.scale_sha.connect("value-changed", self.value_slider, "sha")
 
         # Set some properties
