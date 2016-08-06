@@ -76,11 +76,8 @@ class Vimiv(Gtk.Window):
             self.resize(self.winsize[0], self.winsize[1])
 
         # Generate Window structure
-        # Box in which everything gets packed
-        self.vbox = Gtk.VBox()
-        # Horizontal Box with image and treeview
-        self.hbox = Gtk.HBox()
-        self.vbox.pack_start(self.hbox, True, True, 0)
+        # Grid in which everything gets packed
+        self.main_grid = Gtk.Grid()
 
         # Other classes
         self.keyhandler = KeyHandler(self, settings)
@@ -99,15 +96,15 @@ class Vimiv(Gtk.Window):
         Commands(self)
 
         # Pack library, statusbar and manipulate
-        self.hbox.pack_start(self.library.box, False, False, 0)
-        self.vbox.pack_end(self.statusbar.bar, False, False, 0)
-        self.vbox.pack_end(self.manipulate.hbox, False, False, 0)
+        self.main_grid.attach(self.library.grid, 0, 0, 1, 1)
+        self.main_grid.attach(self.image.scrolled_win, 1, 0, 1, 1)
+        self.main_grid.attach(self.manipulate.scrolled_win, 0, 1, 2, 1)
+        self.main_grid.attach(self.statusbar.bar, 0, 2, 2, 1)
 
-        # Overlay contains vbox mainly and adds commandline as floating
+        # Overlay contains grid mainly and adds commandline as floating
         self.overlay = Gtk.Overlay()
-        self.overlay.add(self.vbox)
-        self.overlay.add_overlay(self.commandline.box)
-        # self.overlay.set_opacity(0.3)
+        self.overlay.add(self.main_grid)
+        self.overlay.add_overlay(self.commandline.grid)
         self.add(self.overlay)
 
     def quit(self, force=False, running_tests=False):
@@ -140,18 +137,17 @@ class Vimiv(Gtk.Window):
         # Show everything and then hide whatever needs to be hidden
         if not running_tests:
             self.show_all()
-        self.manipulate.hbox.hide()
-        self.commandline.box.hide()
-        self.commandline.info.hide()
+        self.manipulate.scrolled_win.hide()
+        self.commandline.grid.hide()
 
         # Show the image if an imagelist exists
         if self.paths:
             self.image.move_index(True, False, 0)
             # Show library at the beginning?
             if self.library.toggled:
-                self.library.box.show()
+                self.library.grid.show()
             else:
-                self.library.box.hide()
+                self.library.grid.hide()
             self.image.scrolled_win.grab_focus()
             # Start in slideshow mode?
             if self.slideshow.at_start:
@@ -164,5 +160,6 @@ class Vimiv(Gtk.Window):
             self.statusbar.toggle()
             self.library.focus(True)
             if self.library.expand:
-                self.library.grid.set_size_request(self.winsize[0], 10)
+                self.library.scrollable_treeview.set_size_request(
+                    self.winsize[0], 10)
             self.statusbar.err_message("No valid paths, opening library viewer")

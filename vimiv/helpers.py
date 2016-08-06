@@ -68,18 +68,20 @@ def read_file(filename):
 
 def error_message(message, running_tests=False):
     """ Shows a GTK Error Pop Up with the message """
-    popup = Gtk.Dialog("vimiv - Error", Gtk.Window())
+    popup = Gtk.Dialog(title="vimiv - Error", transient_for=Gtk.Window())
     popup.add_button("Close", Gtk.ResponseType.CLOSE)
     message_label = Gtk.Label()
     message_label.set_text(message)
+    message_label.set_hexpand(True)
     box = popup.get_child()
     box.set_border_width(12)
-    hbox = Gtk.HBox()
-    box.pack_start(hbox, False, False, 12)
-    hbox.pack_end(message_label, True, True, 12)
+    grid = Gtk.Grid()
+    grid.set_column_spacing(12)
+    box.pack_start(grid, False, False, 12)
     icon_size = Gtk.IconSize(5)
     error_icon = Gtk.Image.new_from_icon_name("dialog-error", icon_size)
-    hbox.pack_start(error_icon, False, False, 0)
+    grid.attach(error_icon, 0, 0, 1, 1)
+    grid.attach(message_label, 1, 0, 1, 1)
     popup.show_all()
     if not running_tests:
         popup.run()

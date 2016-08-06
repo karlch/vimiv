@@ -31,7 +31,7 @@ class ParserTest(TestCase):
         amount_general_settings = len(general.keys())
         amount_library_settings = len(library.keys())
         self.assertEqual(amount_general_settings, 14)
-        self.assertEqual(amount_library_settings, 9)
+        self.assertEqual(amount_library_settings, 8)
         self.assertFalse(general["start_fullscreen"])
         self.assertEqual(general["slideshow_delay"], 2)
         self.assertTrue(general["display_bar"])

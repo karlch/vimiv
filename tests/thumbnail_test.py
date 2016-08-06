@@ -71,8 +71,6 @@ class ThumbnailTest(TestCase):
     def test_move(self):
         """ Move in thumbnail mode """
         self.thumb.toggle()
-        print(self.vimiv.paths)
-        print(self.thumb.pos)
         for move_combo in [("l", "arch_001.jpg"), ("h", "arch-logo.png"),
                            ("j", "symlink_to_image"), ("k", "arch-logo.png")]:
             self.thumb.move_direction(move_combo[0])

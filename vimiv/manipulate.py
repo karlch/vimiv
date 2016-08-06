@@ -24,11 +24,14 @@ class Manipulate(object):
         self.toggled = False
         self.manipulations = [1, 1, 1, False]
 
-        # A vbox in which everything gets packed
-        self.hbox = Gtk.HBox(spacing=5)
-        self.hbox.connect("key_press_event",
-                          self.vimiv.keyhandler.run,
-                          "MANIPULATE")
+        # A scrollable window so all tools are always accessible
+        self.scrolled_win = Gtk.ScrolledWindow()
+        # A grid in which everything gets packed
+        grid = Gtk.Grid()
+        grid.set_column_spacing(6)
+        grid.set_border_width(6)
+        grid.connect("key_press_event", self.vimiv.keyhandler.run, "MANIPULATE")
+        self.scrolled_win.add_with_viewport(grid)
 
         # A list to save the changes being done
         self.manipulations = [1, 1, 1, False]
@@ -56,6 +59,10 @@ class Manipulate(object):
         sha_label = Gtk.Label()
         sha_label.set_markup("\n<b>Sha</b>")
 
+        # Dummy grid as separator
+        separator = Gtk.Grid()
+        separator.set_hexpand(True)
+
         # Buttons
         button_yes = Gtk.Button(label="Accept")
         button_yes.connect("clicked", self.button_clicked, True)
@@ -67,11 +74,11 @@ class Manipulate(object):
         button_opt.connect("clicked", self.button_opt_clicked)
         button_opt.set_size_request(80, 20)
 
-        # Pack everything into the box
+        # Pack everything into the grid
         for item in [bri_label, self.scale_bri, con_label, self.scale_con,
-                     sha_label, self.scale_sha, button_opt, button_yes,
-                     button_no]:
-            self.hbox.add(item)
+                     sha_label, self.scale_sha, separator, button_opt,
+                     button_yes, button_no]:
+            grid.add(item)
 
     def delete(self):
         """ Delete all marked images or the current one """
@@ -209,7 +216,7 @@ class Manipulate(object):
     def toggle(self):
         if self.toggled:
             self.toggled = False
-            self.hbox.hide()
+            self.scrolled_win.hide()
             self.vimiv.image.scrolled_win.grab_focus()
             self.vimiv.statusbar.update_info()
         elif self.vimiv.paths and not(self.vimiv.thumbnail.toggled or
@@ -220,7 +227,7 @@ class Manipulate(object):
                     "Manipulating Gifs is not supported")
             except:
                 self.toggled = True
-                self.hbox.show()
+                self.scrolled_win.show()
                 self.scale_bri.grab_focus()
                 self.vimiv.statusbar.update_info()
         else:
@@ -239,15 +246,16 @@ class Manipulate(object):
             orig, out = real, real
         # A thumbnail for higher responsiveness
         elif "-EDIT" not in self.vimiv.paths[self.vimiv.index]:
-            im = Image.open(self.vimiv.paths[self.vimiv.index])
-            out = "-EDIT.".join(
-                self.vimiv.paths[self.vimiv.index].rsplit(".", 1))
-            orig = out.replace("EDIT", "EDIT-ORIG")
-            im.thumbnail(self.vimiv.image.imsize, Image.ANTIALIAS)
-            imageactions.save_image(im, out)
-            self.vimiv.paths[self.vimiv.index] = out
-            # Save the original to work with
-            imageactions.save_image(im, orig)
+            with open(self.vimiv.paths[self.vimiv.index], "rb") as image_file:
+                im = Image.open(image_file)
+                out = "-EDIT.".join(
+                    self.vimiv.paths[self.vimiv.index].rsplit(".", 1))
+                orig = out.replace("EDIT", "EDIT-ORIG")
+                im.thumbnail(self.vimiv.image.imsize, Image.ANTIALIAS)
+                imageactions.save_image(im, out)
+                self.vimiv.paths[self.vimiv.index] = out
+                # Save the original to work with
+                imageactions.save_image(im, orig)
         else:
             out = self.vimiv.paths[self.vimiv.index]
             orig = out.replace("EDIT", "EDIT-ORIG")

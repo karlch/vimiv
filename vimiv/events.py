@@ -3,8 +3,8 @@
 """ Handles events for vimiv, e.g. fullscreen, resize, keypress """
 
 from gi import require_version
-require_version('Gdk', '3.0')
-from gi.repository import Gdk, GLib
+require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk, GLib
 from vimiv.helpers import scrolltypes
 from vimiv.parser import parse_keys
 
@@ -16,9 +16,14 @@ class Window(object):
     def __init__(self, vimiv, settings):
         self.vimiv = vimiv
         self.fullscreen = False
-        self.vimiv.connect_object('window-state-event',
-                                  Window.on_window_state_change,
-                                  self)
+        if Gtk.get_minor_version() > 10:
+            self.vimiv.connect_data('window-state-event',
+                                    Window.on_window_state_change,
+                                    self)
+        else:
+            self.vimiv.connect_object('window-state-event',
+                                      Window.on_window_state_change,
+                                      self)
         self.last_focused = ""
 
         # The configruations from vimivrc
@@ -32,9 +37,14 @@ class Window(object):
         # Connect
         self.vimiv.connect("check-resize", self.auto_resize)
 
-    def on_window_state_change(self, event):
-        self.fullscreen = bool(Gdk.WindowState.FULLSCREEN
-                               & event.new_window_state)
+    def on_window_state_change(self, event, window=None):
+        """ Correct handling of fullscreen/unfullscreen """
+        if window:
+            window.fullscreen = bool(Gdk.WindowState.FULLSCREEN
+                                     & event.new_window_state)
+        else:
+            self.fullscreen = bool(Gdk.WindowState.FULLSCREEN
+                                   & event.new_window_state)
 
     def toggle_fullscreen(self):
         """ Toggles fullscreen """
@@ -59,8 +69,8 @@ class Window(object):
                 if not self.vimiv.image.user_zoomed:
                     self.vimiv.image.zoom_to(0)
             elif not self.vimiv.paths and self.vimiv.library.expand:
-                self.vimiv.library.grid.set_size_request(self.vimiv.winsize[0],
-                                                         10)
+                self.vimiv.library.scrollable_treeview.set_size_request(
+                    self.vimiv.winsize[0], 10)
             self.vimiv.commandline.info.set_max_width_chars(
                 self.vimiv.winsize[0] / 16)
 

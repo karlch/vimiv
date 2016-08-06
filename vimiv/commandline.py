@@ -24,19 +24,22 @@ class CommandLine(object):
         general = settings["GENERAL"]
 
         # Command line
-        self.box = Gtk.VBox()
-        # self.box.override_background_color(Gtk.StateType.NORMAL, border_color)
+        self.grid = Gtk.Grid()
         self.entry = Gtk.Entry()
         self.entry.connect("activate", self.handler)
         self.entry.connect("key_press_event",
                            self.vimiv.keyhandler.run, "COMMAND")
         self.entry.connect("changed", self.check_close)
         self.entry.connect("changed", self.reset_tab_count)
-        self.info = Gtk.Label(xalign=0.0, yalign=0.5)
-        self.box.pack_end(self.entry, True, True, 5)
-        self.box.pack_start(self.info, False, False, 5)
+        self.entry.set_hexpand(True)
+        self.info = Gtk.Label()
+        self.info.set_hexpand(True)
+        self.info.set_valign(Gtk.Align.CENTER)
+        self.info.set_halign(Gtk.Align.START)
+        self.grid.attach(self.info, 0, 0, 1, 1)
+        self.grid.attach(self.entry, 0, 1, 1, 1)
         # Make it nice using CSS
-        self.box.set_name("CommandLine")
+        self.grid.set_name("CommandLine")
         style = self.vimiv.get_style_context()
         color = style.get_background_color(Gtk.StateType.NORMAL)
         color_str = "#CommandLine { background-color: " + color.to_string() \
@@ -47,8 +50,10 @@ class CommandLine(object):
         Gtk.StyleContext.add_provider_for_screen(
             Gdk.Screen.get_default(), command_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        self.box.set_valign(Gtk.Align.END)
-        self.box.set_border_width(0)
+        # Alignment and spacing
+        self.grid.set_valign(Gtk.Align.END)
+        self.info.set_margin_top(6)
+        self.info.set_margin_bottom(6)
 
         # Monospaced font
         self.info.set_name("CompletionInfo")
@@ -242,9 +247,8 @@ class CommandLine(object):
                             self.vimiv.library.treepos = i
                             break
                     # Show the image
-                    self.vimiv.library.grid.set_size_request(
-                        self.vimiv.library.width -
-                        self.vimiv.library.border_width, 10)
+                    self.vimiv.library.treeview.set_size_request(
+                        self.vimiv.library.width, 10)
                     self.vimiv.image.scrolled_win.show()
                 else:
                     self.vimiv.library.move_up(abspath, True)
@@ -315,7 +319,7 @@ class CommandLine(object):
         # Remove old error messages
         self.vimiv.statusbar.update_info()
         # Show/hide the relevant stuff
-        self.box.show()
+        self.grid.show()
         # Remember what widget was focused before
         if self.vimiv.library.treeview.is_focus():
             self.vimiv.window.last_focused = "lib"
@@ -330,7 +334,7 @@ class CommandLine(object):
 
     def leave(self):
         """ Close the command line """
-        self.box.hide()
+        self.grid.hide()
         # Remove all completions shown and the text currently inserted
         self.info.set_text("")
         self.entry.set_text("")

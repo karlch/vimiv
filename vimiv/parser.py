@@ -133,7 +133,6 @@ def set_defaults():
                "library_width": 300,
                "expand_lib": True,
                "border_width": 0,
-               "border_color": "#000000",
                "markup": '<span foreground="#00FF00">',
                "show_hidden": False,
                "desktop_start_dir": os.path.expanduser("~"),
@@ -163,11 +162,6 @@ def overwrite_section(key, config, settings):
                              "file_check_amount"]:
                 # Must be an integer
                 file_set = int(section[setting])
-            elif setting == "border_color":
-                border_color = section[setting]
-                if len(border_color) != 7 or border_color[0] != "#":
-                    raise ValueError
-                file_set = border_color
             elif setting == "border_width":
                 file_set = int(section[setting])
             elif setting == "desktop_start_dir":

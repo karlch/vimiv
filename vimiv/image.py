@@ -21,21 +21,20 @@ class Image(object):
         # Generate window structure
         # Scrollable window for the image
         self.scrolled_win = Gtk.ScrolledWindow()
-        self.vimiv.hbox.pack_end(self.scrolled_win, True, True, 0)
+        self.scrolled_win.set_hexpand(True)
+        self.scrolled_win.set_vexpand(True)
 
         # Viewport
         self.viewport = Gtk.Viewport()
-        self.viewport.set_shadow_type(Gtk.ShadowType.NONE)
-        self.scrolled_win.add(self.viewport)
         self.image = Gtk.Image()
+        self.scrolled_win.add(self.viewport)
         self.viewport.add(self.image)
-        self.scrolled_win.connect("key_press_event",
-                                  self.vimiv.keyhandler.run,
+        self.scrolled_win.connect("key_press_event", self.vimiv.keyhandler.run,
                                   "IMAGE")
 
         # Settings
         self.animation_toggled = False
-        self.user_zoomed = False  # checks if the user manually zoomed the
+        self.user_zoomed = False  # checks if the user manually zoomed the image
         self.trashdir = os.path.join(self.vimiv.directory, "Trash")
         self.overzoom = general["overzoom"]
         self.rescale_svg = general["rescale_svg"]
@@ -121,7 +120,9 @@ class Image(object):
         if self.vimiv.library.toggled:
             size = (size[0] - self.vimiv.library.width, size[1])
         if not self.vimiv.statusbar.hidden:
-            size = (size[0], size[1] - self.vimiv.statusbar.size - 24)
+            size = (size[0], size[1]
+                    - self.vimiv.statusbar.bar.get_allocated_height()
+                    - 2 * self.vimiv.statusbar.bar.get_border_width())
         return size
 
     def zoom_delta(self, delta):

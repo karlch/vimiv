@@ -39,7 +39,7 @@ class CommandlineTest(TestCase):
         self.assertEqual(self.vimiv.commandline.entry.get_text(), ":")
         # Leaving by deleting the colon
         self.vimiv.commandline.entry.set_text("")
-        self.assertFalse(self.vimiv.commandline.box.is_visible())
+        self.assertFalse(self.vimiv.commandline.grid.is_visible())
 
     def test_run_command(self):
         """ Run an internal vimiv command """

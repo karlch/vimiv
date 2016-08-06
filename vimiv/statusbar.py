@@ -26,7 +26,7 @@ class Statusbar(object):
         self.was_hidden = False
 
         # Statusbar on the bottom
-        self.bar = Gtk.HBox()
+        self.bar = Gtk.Grid()
         # Two labels for two sides of statusbar and one in the middle for
         # additional info
         self.left_label = Gtk.Label()  # Position and image name
@@ -35,13 +35,13 @@ class Statusbar(object):
         self.right_label.set_justify(Gtk.Justification.RIGHT)
         self.center_label = Gtk.Label()  # Zoom, marked, slideshow, ...
         self.center_label.set_justify(Gtk.Justification.CENTER)
-        self.bar.pack_start(self.left_label, False, False, 0)
-        self.bar.pack_start(self.center_label, True, True, 0)
-        self.bar.pack_end(self.right_label, False, False, 0)
+        self.center_label.set_hexpand(True)
+        # Add them all
+        self.bar.add(self.left_label)
+        self.bar.add(self.center_label)
+        self.bar.add(self.right_label)
         self.bar.set_border_width(10)
-
-        # Size for resizing image
-        self.size = self.bar.get_allocated_height()
+        self.bar.set_valign(Gtk.Align.END)
 
     def err_message(self, mes):
         """ Pushes an error message to the statusbar """

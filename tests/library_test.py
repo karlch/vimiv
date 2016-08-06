@@ -84,18 +84,23 @@ class LibraryTest(TestCase):
         """ Resize library """
         # Set to 200
         self.lib.resize(None, True, 200)
-        self.assertEqual(200, self.lib.grid.get_size_request()[0])
+        self.assertEqual(200,
+                         self.lib.scrollable_treeview.get_size_request()[0])
         # Grow
         self.lib.resize(True)
-        self.assertEqual(220, self.lib.grid.get_size_request()[0])
+        self.assertEqual(220,
+                         self.lib.scrollable_treeview.get_size_request()[0])
         self.lib.resize(True, False, 30)
-        self.assertEqual(250, self.lib.grid.get_size_request()[0])
+        self.assertEqual(250,
+                         self.lib.scrollable_treeview.get_size_request()[0])
         # Shrink
         self.lib.resize(False, False, 50)
-        self.assertEqual(200, self.lib.grid.get_size_request()[0])
+        self.assertEqual(200,
+                         self.lib.scrollable_treeview.get_size_request()[0])
         # Too small
         self.lib.resize(False, False, 500)
-        self.assertEqual(100, self.lib.grid.get_size_request()[0])
+        self.assertEqual(100,
+                         self.lib.scrollable_treeview.get_size_request()[0])
         # Throw errors
         self.lib.resize(False, False, "hi")
         expected_message = "Library width must be an integer"

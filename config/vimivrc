@@ -20,7 +20,6 @@ show_library: no
 library_width: 300
 expand_lib: yes
 border_width: 0
-border_color: #000000
 markup: <span foreground="#875FFF">
 show_hidden: no
 desktop_start_dir: ~
