@@ -304,17 +304,7 @@ class Image(object):
         dif = pos - current - 1
         if self.vimiv.thumbnail.toggled:
             pos -= 1
-            self.vimiv.thumbnail.pos = pos
-            path = Gtk.TreePath.new_from_string(str(pos))
-            self.vimiv.thumbnail.iconview.select_path(path)
-            curthing = self.vimiv.thumbnail.iconview.get_cells()[0]
-            self.vimiv.thumbnail.iconview.set_cursor(path, curthing, False)
-            if forward:
-                self.scrolled_win.emit('scroll-child',
-                                       Gtk.ScrollType.END, False)
-            else:
-                self.scrolled_win.emit('scroll-child',
-                                       Gtk.ScrollType.START, False)
+            self.vimiv.thumbnail.move_to_pos(pos)
         else:
             self.move_index(True, False, dif)
             self.user_zoomed = False

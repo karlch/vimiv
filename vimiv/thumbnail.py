@@ -7,7 +7,6 @@ from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib
 from vimiv.imageactions import thumbnails_create
-from vimiv.helpers import scrolltypes
 
 
 class Thumbnail(object):
@@ -61,15 +60,15 @@ class Thumbnail(object):
     def toggle(self):
         """ Toggles thumbnail mode """
         if self.toggled:
-            self.vimiv.image.viewport.remove(self.iconview)
-            self.vimiv.image.viewport.add(self.vimiv.image.image)
+            self.vimiv.image.scrolled_win.remove(self.iconview)
+            self.vimiv.image.scrolled_win.add(self.vimiv.image.viewport)
             self.vimiv.image.update()
             self.vimiv.image.scrolled_win.grab_focus()
             self.toggled = False
         elif self.vimiv.paths:
             self.show()
             # Scroll to thumb
-            self.timer_id = GLib.timeout_add(1, self.scroll_to_thumb)
+            self.timer_id = GLib.timeout_add(1, self.move_to_pos, self.pos)
             # Let the library keep focus
             if self.vimiv.library.treeview.is_focus():
                 self.vimiv.library.treeview.grab_focus()
@@ -118,8 +117,8 @@ class Thumbnail(object):
         self.calculate_columns()
 
         # Draw the icon view instead of the image
-        self.vimiv.image.viewport.remove(self.vimiv.image.image)
-        self.vimiv.image.viewport.add(self.iconview)
+        self.vimiv.image.scrolled_win.remove(self.vimiv.image.viewport)
+        self.vimiv.image.scrolled_win.add(self.iconview)
 
         # Show the window
         self.iconview.show()
@@ -127,14 +126,11 @@ class Thumbnail(object):
 
         # Focus the current immage
         self.iconview.grab_focus()
-        self.pos = (self.vimiv.index) % len(self.vimiv.paths)
+        pos = (self.vimiv.index) % len(self.vimiv.paths)
         for i in self.errorpos:
-            if self.pos > i:
-                self.pos -= 1
-        curpath = Gtk.TreePath.new_from_string(str(self.pos))
-        self.iconview.select_path(curpath)
-        curthing = self.iconview.get_cells()[0]
-        self.iconview.set_cursor(curpath, curthing, False)
+            if pos > i:
+                pos -= 1
+        self.move_to_pos(pos)
 
         # Remove the files again if the thumbnails should not be cached
         if not self.cache:
@@ -168,17 +164,10 @@ class Thumbnail(object):
             message = "Reload of manipulated thumbnails failed"
             self.vimiv.statusbar.err_message(message)
 
-    def scroll_to_thumb(self):
-        """ Function which scrolls to the currently selected thumbnail """
-        # TODO
-        scrollamount = int(self.pos / self.columns) * self.size[1]
-        Gtk.Adjustment.set_step_increment(
-            self.vimiv.image.viewport.get_vadjustment(), scrollamount)
-        self.vimiv.image.scrolled_win.emit('scroll-child',
-                                           Gtk.ScrollType.STEP_FORWARD, False)
-
-    def move(self, direction):
-        """ Select thumbnails correctly and scroll """
+    def move_direction(self, direction):
+        """ Find out correct position to move to when scrolling with hjkl and
+            call move_to_pos with the position """
+        pos = self.pos
         # Get last element
         last = len(self.vimiv.paths) - len(self.errorpos) - 1
         # Check for a user prefixed step
@@ -188,48 +177,30 @@ class Thumbnail(object):
             step = 1
         # Check for the specified thumbnail and handle exceptons
         if direction == "h":
-            self.pos -= step
+            pos -= step
         elif direction == "k":
-            self.pos -= self.columns * step
+            pos -= self.columns * step
         elif direction == "l":
-            self.pos += step
+            pos += step
+        elif direction == "j":
+            pos += self.columns * step
+        # Allow numbers to be passed directly
         else:
-            self.pos += self.columns * step
+            pos = direction
         # Do not scroll to self.vimiv.paths that don't exist
-        if self.pos < 0:
-            self.pos = 0
-        elif self.pos > last:
-            self.pos = last
+        if pos < 0:
+            pos = 0
+        elif pos > last:
+            pos = last
         # Move
-        path = Gtk.TreePath.new_from_string(str(self.pos))
-        self.iconview.select_path(path)
-        curthing = self.iconview.get_cells()[0]
-        self.iconview.set_cursor(path, curthing, False)
-        # Actual scrolling TODO
-        self.scroll(direction, step, self.pos)
+        self.move_to_pos(pos)
+
+    def move_to_pos(self, pos):
+        """ Focus the thumbnail at pos and center it in iconview """
+        self.pos = pos
+        self.iconview.select_path(Gtk.TreePath(self.pos))
+        current_thumb = self.iconview.get_cells()[0]
+        self.iconview.set_cursor(Gtk.TreePath(self.pos), current_thumb, False)
+        self.iconview.scroll_to_path(Gtk.TreePath(self.pos), True, 0.5, 0.5)
         # Clear the user prefixed step
         self.vimiv.keyhandler.num_clear()
-
-    def scroll(self, direction, step, target):
-        """ Handles the actual scrolling """
-        # TODO
-        if step == 0:
-            step += 1
-        # Vertical
-        if direction == "k" or direction == "j":
-            Gtk.Adjustment.set_step_increment(
-                self.vimiv.image.viewport.get_vadjustment(),
-                (self.size[1] + 30) * step)
-            self.vimiv.image.scrolled_win.emit('scroll-child',
-                                               scrolltypes[direction][0], False)
-        # Horizontal (tricky because one might reach a new column)
-        else:
-            start = target - step
-            startcol = int(start / self.columns)
-            endcol = int(target / self.columns)
-            toscroll = endcol - startcol
-            Gtk.Adjustment.set_step_increment(
-                self.vimiv.image.viewport.get_vadjustment(),
-                (self.size[1] + 30) * toscroll)
-            self.vimiv.image.scrolled_win.emit('scroll-child',
-                                               scrolltypes[direction][0], False)

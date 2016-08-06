@@ -127,7 +127,7 @@ class KeyHandler(object):
     def scroll(self, direction):
         """ Scroll the correct object """
         if self.vimiv.thumbnail.toggled:
-            self.vimiv.thumbnail.move(direction)
+            self.vimiv.thumbnail.move_direction(direction)
         else:
             self.vimiv.image.scrolled_win.emit('scroll-child',
                                                scrolltypes[direction][0],

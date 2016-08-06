@@ -75,7 +75,7 @@ class ThumbnailTest(TestCase):
         print(self.thumb.pos)
         for move_combo in [("l", "arch_001.jpg"), ("h", "arch-logo.png"),
                            ("j", "symlink_to_image"), ("k", "arch-logo.png")]:
-            self.thumb.move(move_combo[0])
+            self.thumb.move_direction(move_combo[0])
             expected_file = os.path.abspath(move_combo[1])
             received_file = self.vimiv.paths[self.thumb.pos]
             self.assertEqual(expected_file, received_file)
