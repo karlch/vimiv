@@ -89,11 +89,19 @@ class Library(object):
         else:
             self.box.show()
             if not self.vimiv.paths:
+                # Hide the non existing image and expand if necessary
                 self.vimiv.image.vimiv.image.scrolled_win.hide()
+                if self.expand:
+                    self.grid.set_size_request(self.vimiv.winsize[0], 10)
             else:  # Try to focus the current image in the library
-                path = os.path.dirname(self.vimiv.paths[self.vimiv.index])
-                if path == os.getcwd():
-                    self.remember_pos(os.getcwd(), self.vimiv.index)
+                image = self.vimiv.paths[self.vimiv.index]
+                image_path = os.path.dirname(image)
+                image_name = os.path.basename(image)
+                if image_path == os.getcwd():
+                    for i, fil in enumerate(self.files):
+                        if fil == image_name:
+                            self.remember_pos(os.getcwd(), i)
+                            break
             # Do not play Gifs with the lib
             self.vimiv.image.animation_toggled = True
             self.toggled = not self.toggled
@@ -261,6 +269,9 @@ class Library(object):
 
     def move_pos(self, forward=True, defined_pos=None):
         """ Move to pos in lib """
+        if not self.files:
+            self.vimiv.statusbar.err_message("Directory is empty")
+            return
         max_pos = len(self.files) - 1
         # Direct call from scroll
         if isinstance(defined_pos, int):

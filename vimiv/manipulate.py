@@ -101,6 +101,8 @@ class Manipulate(object):
             if self.vimiv.paths:
                 self.vimiv.image.move_index()
             else:
+                # No more images in this directory -> focus parent in library
+                self.vimiv.library.move_up()
                 self.vimiv.library.focus(True)
                 self.vimiv.statusbar.err_message("No more images")
 
