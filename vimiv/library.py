@@ -277,7 +277,7 @@ class Library(object):
             new_pos = 0
         self.treeview.set_cursor(Gtk.TreePath(new_pos), None, False)
         self.treeview.scroll_to_cell(Gtk.TreePath(new_pos), None, True,
-                                        0.5, 0)
+                                     0.5, 0)
         self.treepos = new_pos
         # Clear the prefix
         self.vimiv.keyhandler.num_clear()

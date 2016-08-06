@@ -210,8 +210,8 @@ class Manipulate(object):
             self.hbox.hide()
             self.vimiv.image.scrolled_win.grab_focus()
             self.vimiv.statusbar.update_info()
-        elif self.vimiv.paths and not(self.vimiv.thumbnail.toggled
-                                      or self.vimiv.library.treeview.is_focus()):
+        elif self.vimiv.paths and not(self.vimiv.thumbnail.toggled or
+                                      self.vimiv.library.treeview.is_focus()):
             try:
                 self.vimiv.image.pixbuf_original.is_static_image()
                 self.vimiv.statusbar.err_message(

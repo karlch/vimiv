@@ -97,8 +97,8 @@ class Statusbar(object):
         except:
             self.left_label.set_text("No open images")
         # Center
-        if not (self.vimiv.thumbnail.toggled or self.vimiv.library.treeview.is_focus()) \
-                and self.vimiv.paths:
+        if not (self.vimiv.thumbnail.toggled or
+                self.vimiv.library.treeview.is_focus()) and self.vimiv.paths:
             mark = "[*]" if self.vimiv.paths[self.vimiv.index] \
                 in self.vimiv.mark.marked else ""
         else:
