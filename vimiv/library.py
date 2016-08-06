@@ -93,9 +93,7 @@ class Library(object):
             else:  # Try to focus the current image in the library
                 path = os.path.dirname(self.vimiv.paths[self.vimiv.index])
                 if path == os.getcwd():
-                    self.treeview.set_cursor(Gtk.TreePath([self.vimiv.index]),
-                                             None, False)
-                    self.treepos = self.vimiv.index
+                    self.remember_pos(os.getcwd(), self.vimiv.index)
             # Do not play Gifs with the lib
             self.vimiv.image.animation_toggled = True
             self.toggled = not self.toggled
@@ -251,38 +249,37 @@ class Library(object):
         self.focus(True)
         # Check if there is a saved position
         if directory in self.dir_pos.keys():
-            self.treeview.set_cursor(Gtk.TreePath(self.dir_pos[directory]),
-                                     None, False)
-            self.treepos = self.dir_pos[directory]
+            self.move_pos(True, self.dir_pos[directory])
         # Check if the last directory is in the current one
         else:
-            curdir = os.path.basename(curdir)
+            last_dir = os.path.basename(curdir)
             for i, fil in enumerate(self.files):
-                if curdir == fil:
-                    self.treeview.set_cursor(Gtk.TreePath([i]), None, False)
-                    self.treepos = i
+                if last_dir == fil:
+                    self.move_pos(True, i)
                     break
         self.box.show_all()
 
-    def move_pos(self, forward=True):
+    def move_pos(self, forward=True, defined_pos=None):
         """ Move to pos in lib """
         max_pos = len(self.files) - 1
-        if self.vimiv.keyhandler.num_str:
-            pos = int(self.vimiv.keyhandler.num_str) - 1
-            if pos < 0 or pos > max_pos:
+        # Direct call from scroll
+        if isinstance(defined_pos, int):
+            new_pos = defined_pos
+        # Call from g/G via keybinding
+        elif self.vimiv.keyhandler.num_str:
+            new_pos = int(self.vimiv.keyhandler.num_str) - 1
+            if new_pos < 0 or new_pos > max_pos:
                 self.vimiv.statusbar.err_message("Warning: Unsupported index")
                 return False
         elif forward:
-            pos = max_pos
+            new_pos = max_pos
         else:
-            pos = 0
-        try:
-            self.treepos = pos
-            self.treeview.set_cursor(Gtk.TreePath(self.treepos), None, False)
-        except:
-            self.vimiv.statusbar.err_message("Warning: Unsupported index")
-            return False
-
+            new_pos = 0
+        self.treeview.set_cursor(Gtk.TreePath(new_pos), None, False)
+        self.treeview.scroll_to_cell(Gtk.TreePath(new_pos), None, True,
+                                        0.5, 0)
+        self.treepos = new_pos
+        # Clear the prefix
         self.vimiv.keyhandler.num_clear()
         return True
 
@@ -381,11 +378,12 @@ class Library(object):
             else:
                 step = 1
             if direction == "j":
-                self.treepos = (self.treepos + step) % len(self.filelist)
+                new_pos = self.treepos + step
+                if new_pos >= len(self.filelist):
+                    new_pos = len(self.filelist) - 1
             else:
-                self.treepos = (self.treepos - step) % len(self.filelist)
-
-            self.treeview.set_cursor(Gtk.TreePath(self.treepos), None, False)
-            # Clear the user prefixed step
-            self.vimiv.keyhandler.num_clear()
+                new_pos = self.treepos - step
+                if new_pos < 0:
+                    new_pos = 0
+            self.move_pos(True, new_pos)
         return True  # Deactivates default bindings (here for Arrows)
