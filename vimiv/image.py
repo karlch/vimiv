@@ -42,6 +42,7 @@ class Image(object):
         self.zoom_percent = 1
         self.imsize = [0, 0]
         self.pixbuf_original = GdkPixbuf.PixbufAnimation
+        self.timer_id = 0
 
     def check_for_edit(self, force):
         """ Checks if an image was edited before moving """
@@ -84,7 +85,7 @@ class Image(object):
         pbo_height = self.pixbuf_original.get_height()
 
         # pylint:disable=no-member
-        try:  # If possible scale the image
+        try:  # Try to scale the image
             pbf_width = int(pbo_width * self.zoom_percent)
             pbf_height = int(pbo_height * self.zoom_percent)
             # Rescaling of svg
@@ -97,18 +98,36 @@ class Image(object):
                 pixbuf_final = self.pixbuf_original.scale_simple(
                     pbf_width, pbf_height, GdkPixbuf.InterpType.BILINEAR)
             self.image.set_from_pixbuf(pixbuf_final)
-        except:  # If not it must me an animation
-            # TODO actual pause and play of Gifs
+        except:  # If that does not work it must be an animation
             self.zoom_percent = 1
             if update_gif:
                 if not self.animation_toggled:
-                    self.image.set_from_animation(self.pixbuf_original)
+                    delay = self.pixbuf_iter.get_delay_time()
+                    self.timer_id = GLib.timeout_add(delay, self.play_gif)
+                    self.play_gif()
                 else:
-                    pixbuf_final = self.pixbuf_original.get_static_image()
-                    self.image.set_from_pixbuf(pixbuf_final)
+                    self.pause_gif()
         # Update the statusbar if required
         if update_info:
             self.vimiv.statusbar.update_info()
+
+    def play_gif(self):
+        """ Run the animation of a gif """
+        image = self.pixbuf_iter.get_pixbuf()
+        self.image.set_from_pixbuf(image)
+        if self.pixbuf_iter.advance():
+            GLib.source_remove(self.timer_id)
+            delay = self.pixbuf_iter.get_delay_time()
+            self.timer_id = GLib.timeout_add(delay, self.play_gif)
+
+    def pause_gif(self):
+        """ Pause a gif or show initial image """
+        if self.timer_id:
+            GLib.source_remove(self.timer_id)
+            self.timer_id = 0
+        else:
+            image = self.pixbuf_iter.get_pixbuf()
+            self.image.set_from_pixbuf(image)
 
     def get_available_size(self):
         """ Returns the size of the image depending on what other widgets
@@ -247,6 +266,7 @@ class Image(object):
                 self.imsize = self.get_available_size()
                 self.zoom_percent = self.get_zoom_percent()
             else:
+                self.pixbuf_iter = self.pixbuf_original.get_iter()
                 self.zoom_percent = 1
             # If one simply reloads the file the info shouldn't be updated
             if delta:
