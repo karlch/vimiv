@@ -13,6 +13,7 @@ The most important changes between the versions are listed here.
 * Improve scrolling in library and thumbnail mode
 * Library border now set with Gtk.Separator, border\_color is no longer in
   config
+* Proper pause and play of animated Gifs
 
 #### v0.6
 * Major rebase of code rewriting vimiv as python module
