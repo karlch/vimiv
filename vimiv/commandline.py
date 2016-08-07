@@ -75,6 +75,9 @@ class CommandLine(object):
         self.search_names = []
         self.search_case = general["search_case_sensitive"]
 
+        # List of threads
+        self.running_threads = []
+
     def handler(self, entry):
         """ Handles input from the entry, namely if it is a path to be focused
         or a (external) command to be run """
@@ -144,6 +147,7 @@ class CommandLine(object):
         directory = os.getcwd()
         cmd_thread = Thread(target=self.thread_for_external, args=(cmd,
                                                                    directory))
+        self.running_threads.append(cmd_thread)
         cmd_thread.start()
         # Undo the escaping
         fil = fil.replace("\\\\\\\\ ", " ")
@@ -177,6 +181,7 @@ class CommandLine(object):
             e = str(e)
             cmd = e.split()[-1]
             self.vimiv.statusbar.err_message("Command %s not found" % (cmd))
+        self.running_threads.pop()
 
     def pipe(self, pipe_input):
         """ Run output of external command in a pipe

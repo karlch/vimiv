@@ -80,6 +80,8 @@ class Manipulate(object):
                      button_yes, button_no]:
             grid.add(item)
 
+        self.running_threads = []
+
     def delete(self):
         """ Delete all marked images or the current one """
         # Get all images
@@ -158,6 +160,7 @@ class Manipulate(object):
             # Rotate all files in external thread
             rotate_thread = Thread(target=self.thread_for_rotate, args=(images,
                                                                         cwise))
+            self.running_threads.append(rotate_thread)
             rotate_thread.start()
         except:
             self.vimiv.statusbar.err_message(
@@ -166,6 +169,9 @@ class Manipulate(object):
     def thread_for_rotate(self, images, cwise):
         """ Rotate all image files in an extra thread """
         try:
+            # Finish older manipulate threads first
+            while len(self.running_threads) > 1:
+                self.running_threads[0].join()
             imageactions.rotate_file(images, cwise)
             if self.vimiv.thumbnail.toggled:
                 for image in images:
@@ -173,6 +179,7 @@ class Manipulate(object):
                         image, self.vimiv.paths.index(image))
         except:
             self.vimiv.statusbar.err_message("Error: Rotation of file failed")
+        self.running_threads.pop(0)
 
     def flip(self, direction):
         try:
@@ -187,6 +194,7 @@ class Manipulate(object):
             # Flip all vimiv.library.files in an extra thread
             flip_thread = Thread(target=self.thread_for_flip, args=(images,
                                                                     direction))
+            self.running_threads.append(flip_thread)
             flip_thread.start()
         except:
             self.vimiv.statusbar.err_message(
@@ -195,6 +203,9 @@ class Manipulate(object):
     def thread_for_flip(self, images, horizontal):
         """ Flip all image vimiv.library.files in an extra thread """
         try:
+            # Finish older manipulate threads first
+            while len(self.running_threads) > 1:
+                self.running_threads[0].join()
             imageactions.flip_file(images, horizontal)
             if self.vimiv.thumbnail.toggled:
                 for image in images:
@@ -202,6 +213,7 @@ class Manipulate(object):
                         image, self.vimiv.paths.index(image))
         except:
             self.vimiv.statusbar.err_message("Error: Flipping of file failed")
+        self.running_threads.pop(0)
 
     def rotate_auto(self):
         """ This function autorotates all pictures in the current pathlist """

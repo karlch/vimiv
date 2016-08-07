@@ -53,9 +53,7 @@ class CommandlineTest(TestCase):
         """ Run an external command """
         self.vimiv.commandline.entry.set_text(":!touch tmp_foo")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
-        # Necessary so the entry is created (-> multithreading...)
-        # TODO should be fixed
-        time.sleep(0.1)
+        self.vimiv.commandline.running_threads[0].join()
         files = os.listdir()
         self.assertTrue("tmp_foo" in files)
         os.remove("tmp_foo")
@@ -66,21 +64,24 @@ class CommandlineTest(TestCase):
         before_command = self.vimiv.image.overzoom
         self.vimiv.commandline.entry.set_text(":!echo set overzoom! |")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
-        refresh_gui(0.05)
+        self.vimiv.commandline.running_threads[0].join()
+        refresh_gui(0.001)
         after_command = self.vimiv.image.overzoom
         self.assertNotEqual(before_command, after_command)
         # Directory
         expected_dir = os.path.abspath("./testimages")
         self.vimiv.commandline.entry.set_text(":!ls -d testimages |")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
-        refresh_gui(0.05)
+        self.vimiv.commandline.running_threads[0].join()
+        refresh_gui(0.001)
         dir_after = os.getcwd()
         self.assertEqual(expected_dir, dir_after)
         # Image
         expected_image = os.path.abspath("arch-logo.png")
         self.vimiv.commandline.entry.set_text(":!echo arch-logo.png |")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
-        refresh_gui(0.05)
+        self.vimiv.commandline.running_threads[0].join()
+        refresh_gui()
         self.assertEqual(self.vimiv.paths[0], expected_image)
 
     def test_path(self):
@@ -125,6 +126,7 @@ class CommandlineTest(TestCase):
 
     def tearDown(self):
         os.chdir(self.working_directory)
+        self.vimiv.library.reload(os.getcwd())
 
 
 if __name__ == '__main__':
