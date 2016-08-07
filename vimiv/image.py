@@ -42,6 +42,7 @@ class Image(object):
         self.zoom_percent = 1
         self.imsize = [0, 0]
         self.pixbuf_original = GdkPixbuf.PixbufAnimation
+        self.pixbuf_iter = GdkPixbuf.PixbufAnimationIter
         self.timer_id = 0
 
     def check_for_edit(self, force):
