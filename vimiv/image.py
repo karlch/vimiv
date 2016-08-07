@@ -89,9 +89,9 @@ class Image(object):
             pbf_width = int(pbo_width * self.zoom_percent)
             pbf_height = int(pbo_height * self.zoom_percent)
             # Rescaling of svg
-            ending = os.path.basename(
-                self.vimiv.paths[self.vimiv.index]).split(".")[-1]
-            if ending == "svg" and self.rescale_svg:
+            name = self.vimiv.paths[self.vimiv.index]
+            info = GdkPixbuf.Pixbuf.get_file_info(name)[0]
+            if "svg" in info.get_extensions():
                 pixbuf_final = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                     self.vimiv.paths[self.vimiv.index], -1, pbf_height, True)
             else:
