@@ -233,6 +233,10 @@ class Manipulate(object):
             self.vimiv.statusbar.update_info()
         elif self.vimiv.paths and not(self.vimiv.thumbnail.toggled or
                                       self.vimiv.library.treeview.is_focus()):
+            if os.path.islink(self.vimiv.paths[self.vimiv.index]):
+                self.vimiv.statusbar.err_message(
+                    "Manipulating symbolik links is not supported")
+                return
             try:
                 self.vimiv.image.pixbuf_original.is_static_image()
                 self.vimiv.statusbar.err_message(

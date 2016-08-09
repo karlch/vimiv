@@ -17,6 +17,8 @@ def save_image(im, filename):
 
 def rotate_file(filelist, cwise):
     """ Rotate every image in filelist cwise*90° counterclockwise """
+    # Always work on realpath, not on symlink
+    filelist = [os.path.realpath(image) for image in filelist]
     for image in filelist:
         with open(image, "rb") as image_file:
             im = Image.open(image_file)
@@ -31,6 +33,8 @@ def rotate_file(filelist, cwise):
 
 def flip_file(filelist, horizontal):
     """ Flips every image in filelist """
+    # Always work on realpath, not on symlink
+    filelist = [os.path.realpath(image) for image in filelist]
     for image in filelist:
         with open(image, "rb") as image_file:
             im = Image.open(image_file)
