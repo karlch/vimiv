@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/karlch/vimiv/branch/master/graph/badge.svg)](https://codecov.io/gh/karlch/vimiv)
 [![Version badge](https://img.shields.io/aur/version/vimiv.svg)](https://aur.archlinux.org/packages/vimiv/)
 
-#### Version 0.6.1 (unreleased)
+#### Version 0.6.1
 
 [Releases](https://github.com/karlch/vimiv/releases "releases")
 |

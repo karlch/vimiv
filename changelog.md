@@ -1,7 +1,7 @@
 ## Changelog
 The most important changes between the versions are listed here.
 
-#### v0.6.1 (unreleased)
+#### v0.6.1
 * Bugfix release after implementing a testsuite
 * Stop mark\_between from marking directories
 * Fix clear\_thumbs
