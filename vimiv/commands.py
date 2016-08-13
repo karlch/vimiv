@@ -70,7 +70,9 @@ class Commands(object):
             "thumbnail": [self.vimiv.thumbnail.toggle],
             "zoom_in": [self.vimiv.image.zoom_delta, +.25],
             "zoom_out": [self.vimiv.image.zoom_delta, -.25],
-            "zoom_to": [self.vimiv.image.zoom_to]}
+            "zoom_to": [self.vimiv.image.zoom_to],
+            "zoom_thumb_in": [self.vimiv.thumbnail.zoom, True],
+            "zoom_thumb_out": [self.vimiv.thumbnail.zoom, False]}
 
         self.vimiv.functions = {
             "bri_focus": [self.vimiv.manipulate.focus_slider, "bri"],

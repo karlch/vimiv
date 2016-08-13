@@ -3,6 +3,7 @@
 """ Actions which act on the actual image file """
 import os
 from subprocess import Popen, PIPE
+from threading import Thread
 from PIL import Image, ImageEnhance
 
 
@@ -93,39 +94,58 @@ def autorotate(filelist, method="auto"):
     return rotated_images, method
 
 
-def thumbnails_create(filelist, thumbsize):
-    """ Creates thumbnails for all images in filelist if they don't exist """
-    # Create thumbnail directory if necessary
-    thumbdir = os.path.expanduser("~/.vimiv/Thumbnails")
-    if not os.path.isdir(thumbdir):
-        os.mkdir(thumbdir)
-    # Get all thumbnails that were already created
-    thumbnails = os.listdir(thumbdir)
-    thumblist = []  # List of all files with thumbnails
-    errtuple = ([], [])    # Tuple containing all files for which thumbnail
-    # creation failed and their position
+class Thumbnails:
+    """ Thumbnail creation class """
 
-    # Loop over all files
-    for i, infile in enumerate(filelist):
-        # Correct name
-        outfile_ext = infile.split(".")[0] + ".thumbnail" + ".png"
-        outfile_base = os.path.basename(outfile_ext)
-        outfile = os.path.join(thumbdir, outfile_base)
-        # Only if they aren't cached already
-        if outfile_base not in thumbnails:
-            try:
-                with open(infile, "rb") as image_file:
-                    im = Image.open(image_file)
-                    im.thumbnail(thumbsize, Image.ANTIALIAS)
-                    save_image(im, outfile)
-                    thumblist.append(outfile)
-            except:
-                errtuple[0].append(i)
-                errtuple[1].append(os.path.basename(infile))
-        else:
-            thumblist.append(outfile)
+    def __init__(self, filelist, thumbsize):
+        self.filelist = filelist
+        self.thumbsize = thumbsize
+        self.directory = os.path.expanduser("~/.vimiv/Thumbnails")
+        if not os.path.isdir(self.directory):
+            os.mkdir(self.directory)
+        self.thumbnails = os.listdir(self.directory)
+        self.thumblist = []  # List of all files with thumbnails
+        # Tuple containing all files for which thumbnail creation failed and
+        # their position
+        self.errtuple = ([], [])
+        self.threads = []
 
-    return thumblist, errtuple
+    def thumbnails_create(self):
+        """ Creates thumbnails for all images in filelist if they don't exist """
+        # Loop over all files
+        for i, infile in enumerate(self.filelist):
+            # Correct name
+            thumb_ext = ".thumbnail_%dx%d" % (self.thumbsize[0],
+                                              self.thumbsize[1])
+            outfile_ext = infile.split(".")[0] + thumb_ext + ".png"
+            outfile_base = os.path.basename(outfile_ext)
+            outfile = os.path.join(self.directory, outfile_base)
+            # Only if they aren't cached already
+            if outfile_base not in self.thumbnails:
+                thread_for_thumbnail = Thread(target=self.thread_for_thumbnails,
+                                              args=(infile, outfile, i))
+                self.threads.append(thread_for_thumbnail)
+                thread_for_thumbnail.start()
+            else:
+                self.thumblist.append(outfile)
+
+        while self.threads:
+            self.threads[0].join()
+        errtuple = (sorted(self.errtuple[0]), sorted(self.errtuple[1]))
+        return sorted(self.thumblist), errtuple
+
+    def thread_for_thumbnails(self, infile, outfile, position):
+        """ Creates one thumbnail in an extra thread """
+        try:
+            with open(infile, "rb") as image_file:
+                im = Image.open(image_file)
+                im.thumbnail(self.thumbsize, Image.ANTIALIAS)
+                save_image(im, outfile)
+                self.thumblist.append(outfile)
+        except:
+            self.errtuple[0].append(position)
+            self.errtuple[1].append(outfile)
+        self.threads.pop(0)
 
 
 def manipulate_all(image, outfile, manipulations):

@@ -1,6 +1,9 @@
 ## Changelog
 The most important changes between the versions are listed here.
 
+#### v0.7 (unreleased)
+* Add zooming of thumbnails
+
 #### v0.6.1
 * Bugfix release after implementing a testsuite
 * Stop mark\_between from marking directories

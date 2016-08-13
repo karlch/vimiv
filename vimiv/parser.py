@@ -123,6 +123,7 @@ def set_defaults():
                "shuffle": False,
                "display_bar": True,
                "thumbsize": (128, 128),
+               "thumb_maxsize": (256, 256),
                "geometry": (800, 600),
                "search_case_sensitive": True,
                "recursive": False,
@@ -151,13 +152,14 @@ def overwrite_section(key, config, settings):
             if setting == "geometry":
                 file_set = (int(section[setting].split("x")[0]),
                             int(section[setting].split("x")[1]))
-            elif setting == "thumbsize":
+            elif setting in ["thumbsize", "thumb_maxsize"]:
                 file_set = section[setting].lstrip("(").rstrip(")")
                 file_set = file_set.split(",")
                 file_set[0] = int(file_set[0])
                 file_set[1] = int(file_set[1])
                 if len(file_set) != 2:
                     raise ValueError
+                file_set = tuple(file_set)
             elif setting in ["library_width", "slideshow_delay",
                              "file_check_amount"]:
                 # Must be an integer

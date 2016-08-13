@@ -6,7 +6,7 @@ import os
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib
-from vimiv.imageactions import thumbnails_create
+from vimiv.imageactions import Thumbnails
 
 
 class Thumbnail(object):
@@ -21,12 +21,37 @@ class Thumbnail(object):
         # Settings
         self.toggled = False
         self.size = general["thumbsize"]
+        self.max_size = general["thumb_maxsize"]
+        self.possible_sizes = [(64, 64), (128, 128), (256, 256), (512, 512)]
+        self.current_size = 0
         self.cache = general["cache_thumbnails"]
         self.directory = os.path.join(self.vimiv.directory, "Thumbnails")
         self.timer_id = GLib.Timeout
         self.errorpos = 0
         self.pos = 0
         self.elements = []
+
+        # Prepare thumbnail sizes for zooming of thumbnails
+        # Maximum
+        if self.max_size[0] >= self.possible_sizes[-1][0]:
+            self.sizes = self.possible_sizes
+        else:
+            for i, size in enumerate(self.possible_sizes):
+                if size[0] > self.max_size[0]:
+                    self.sizes = self.possible_sizes[0:i]
+                    break
+        # Current position
+        if self.size in self.sizes:
+            self.current_size = self.sizes.index(self.size)
+        elif self.size[0] > self.sizes[-1][0]:
+            self.current_size = len(self.sizes)
+            self.sizes.append(self.size)
+        else:
+            for i, size in enumerate(self.sizes):
+                if size[0] > self.size[0]:
+                    self.sizes.insert(i, self.size)
+                    self.current_size = i
+                    break
 
         # Creates the Gtk elements necessary for thumbnail mode, fills them
         # and focuses the iconview
@@ -92,12 +117,13 @@ class Thumbnail(object):
         self.columns = int(width / (self.size[0] + 30))
         self.iconview.set_columns(self.columns)
 
-    def show(self):
+    def show(self, toggled=False):
         """ Shows thumbnail mode when called from toggle """
         # Clean liststore
         self.liststore.clear()
         # Create thumbnails
-        self.elements, errtuple = thumbnails_create(self.vimiv.paths, self.size)
+        thumbnails = Thumbnails(self.vimiv.paths, self.sizes[-1])
+        self.elements, errtuple = thumbnails.thumbnails_create()
         self.errorpos = errtuple[0]
         if self.errorpos:
             failed_files = ", ".join(errtuple[1])
@@ -106,7 +132,11 @@ class Thumbnail(object):
 
         # Add all thumbnails to the liststore
         for i, thumb in enumerate(self.elements):
-            pixbuf = GdkPixbuf.Pixbuf.new_from_file(thumb)
+            pixbuf_max = GdkPixbuf.Pixbuf.new_from_file(thumb)
+            width = pixbuf_max.get_width() * (float(self.size[0]) / self.max_size[0])
+            height = pixbuf_max.get_height() * (float(self.size[1]) / self.max_size[1])
+            pixbuf = pixbuf_max.scale_simple(width, height,
+                                             GdkPixbuf.InterpType.BILINEAR)
             name = os.path.basename(thumb)
             name = name.split(".")[0]
             if self.vimiv.paths[i] in self.vimiv.mark.marked:
@@ -117,8 +147,9 @@ class Thumbnail(object):
         self.calculate_columns()
 
         # Draw the icon view instead of the image
-        self.vimiv.image.scrolled_win.remove(self.vimiv.image.viewport)
-        self.vimiv.image.scrolled_win.add(self.iconview)
+        if not toggled:
+            self.vimiv.image.scrolled_win.remove(self.vimiv.image.viewport)
+            self.vimiv.image.scrolled_win.add(self.iconview)
 
         # Show the window
         self.iconview.show()
@@ -204,3 +235,17 @@ class Thumbnail(object):
         self.iconview.scroll_to_path(Gtk.TreePath(self.pos), True, 0.5, 0.5)
         # Clear the user prefixed step
         self.vimiv.keyhandler.num_clear()
+
+    def zoom(self, inc=True):
+        """ Zoom thumbnails """
+        # What zoom and limits
+        if inc and self.current_size < len(self.sizes) - 1:
+            self.current_size += 1
+        elif not inc and self.current_size > 0:
+            self.current_size -= 1
+        else:
+            return
+        self.size = self.sizes[self.current_size]
+        if self.toggled:
+            self.show(True)
+

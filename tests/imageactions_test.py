@@ -37,9 +37,10 @@ class ImageActionsTest(TestCase):
 
     def test_thumbnails_create(self):
         """ Creation of thumbnail files """
-        imageactions.thumbnails_create(self.files, (128, 128))
+        thumbnails = imageactions.Thumbnails(self.files, (128, 128))
+        thumbnails.thumbnails_create()
         thumbnail = os.path.expanduser(
-            "~/.vimiv/Thumbnails/image_to_edit.thumbnail.png")
+            "~/.vimiv/Thumbnails/image_to_edit.thumbnail_128x128.png")
         with Image.open(thumbnail) as im:
             thumbnail_size = max(im.size[0], im.size[1])
             self.assertEqual(thumbnail_size, 128)
