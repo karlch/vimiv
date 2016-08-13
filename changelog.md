@@ -26,10 +26,10 @@ The most important changes between the versions are listed here.
 
 #### v0.5
 * Pipe to vimiv
-* Builting Tag support
+* Built-in Tag support
 * Multithreading of external commands
 * New configfiles vimivrc and keys.conf instead of vimivrc.py
-* Search results navigatable with N and P
+* Search results navigable with N and P
 * Search can be case insensitive
 * Implement search highlighting
 
@@ -56,7 +56,7 @@ The most important changes between the versions are listed here.
 * Improve manipulation of images
 
 #### v0.2
-* Fullscreen now works for both the main window and the library popup
+* Fullscreen now works for both the main window and the library pop-up
 * Images and directories are distinguished in the library
 * An extra keyhandler for the library
 * Different handling of showing directory size, highly increases library
