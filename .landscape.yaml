@@ -1,0 +1,4 @@
+python-targets:
+    - 3
+max-line-length: 80
+ignore-patterns: *__init__*
