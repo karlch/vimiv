@@ -16,6 +16,7 @@ class ManipulateTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.working_directory = os.getcwd()
+        os.chdir("vimiv")
         cls.settings = parse_config()
         shutil.copytree("testimages", "testimages_man")
         paths, index = populate(["testimages_man/arch_001.jpg"])
@@ -100,7 +101,7 @@ class ManipulateTest(TestCase):
     @classmethod
     def tearDownClass(cls):
         os.chdir(cls.working_directory)
-        shutil.rmtree("testimages_man")
+        shutil.rmtree("vimiv/testimages_man")
 
 
 if __name__ == "__main__":

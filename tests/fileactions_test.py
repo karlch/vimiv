@@ -15,6 +15,7 @@ class FileActionsTest(TestCase):
 
     def setUp(self):
         self.working_directory = os.getcwd()
+        os.chdir("vimiv")
 
     def test_move_to_trash(self):
         """ Move file to trash """

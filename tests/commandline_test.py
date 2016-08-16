@@ -69,8 +69,8 @@ class CommandlineTest(TestCase):
         after_command = self.vimiv.image.overzoom
         self.assertNotEqual(before_command, after_command)
         # Directory
-        expected_dir = os.path.abspath("./testimages")
-        self.vimiv.commandline.entry.set_text(":!ls -d testimages |")
+        expected_dir = os.path.abspath("./vimiv/testimages/")
+        self.vimiv.commandline.entry.set_text(":!echo vimiv/testimages |")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
         self.vimiv.commandline.running_threads[0].join()
         refresh_gui(0.001)
@@ -87,8 +87,8 @@ class CommandlineTest(TestCase):
     def test_path(self):
         """ Enter a path in the commandline """
         # Pass a directory
-        expected_dir = os.path.abspath("./testimages")
-        self.vimiv.commandline.entry.set_text(":./testimages")
+        expected_dir = os.path.abspath("./vimiv/testimages")
+        self.vimiv.commandline.entry.set_text(":./vimiv/testimages")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
         dir_after = os.getcwd()
         self.assertEqual(expected_dir, dir_after)
@@ -103,6 +103,11 @@ class CommandlineTest(TestCase):
         self.vimiv.commandline.cmd_search()
         self.assertEqual(self.vimiv.commandline.entry.get_text(), "/")
         # Search should move into testimages
+        expected_dir = os.path.abspath("./vimiv")
+        self.vimiv.commandline.entry.set_text("/vimi")
+        self.vimiv.commandline.handler(self.vimiv.commandline.entry)
+        dir_after = os.getcwd()
+        self.assertEqual(expected_dir, dir_after)
         expected_dir = os.path.abspath("./testimages")
         self.vimiv.commandline.entry.set_text("/test")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)

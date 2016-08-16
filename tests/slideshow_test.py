@@ -26,6 +26,7 @@ class SlideshowTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.working_directory = os.getcwd()
+        os.chdir("vimiv")
         cls.settings = parse_config()
         paths, index = populate(["testimages/arch_001.jpg"])
         cls.vimiv = v_main.Vimiv(cls.settings, paths, index)

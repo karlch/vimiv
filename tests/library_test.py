@@ -17,6 +17,7 @@ class LibraryTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.working_directory = os.getcwd()
+        os.chdir("vimiv")
         cls.settings = parse_config()
         cls.vimiv = v_main.Vimiv(cls.settings, "testimages", 0)
         cls.vimiv.main(True)

@@ -15,6 +15,7 @@ class TagsTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.working_directory = os.getcwd()
+        os.chdir("vimiv")
         cls.settings = parse_config()
         cls.vimiv = v_main.Vimiv(cls.settings, [], 0)
         cls.vimiv.main(True)
@@ -32,11 +33,9 @@ class TagsTest(TestCase):
 
     def test_tag_append(self):
         """ Append to a tag """
-        taglist = ["./testimages/arch-logo.png"]
-        taglist = [os.path.abspath(image) for image in taglist]
+        taglist = [os.path.abspath("./testimages/arch-logo.png")]
         self.vimiv.tags.write(taglist, "arch_test_tag")
-        taglist2 = ["./testimages/arch_001.jpg"]
-        taglist2 = [os.path.abspath(image) for image in taglist2]
+        taglist2 = [os.path.abspath("./testimages/arch_001.jpg")]
         self.vimiv.tags.write(taglist2, "arch_test_tag")
         complete_taglist = taglist + taglist2
         created_file = os.path.expanduser("~/.vimiv/Tags/arch_test_tag")
@@ -70,6 +69,11 @@ class TagsTest(TestCase):
 
     def tearDown(self):
         os.chdir(self.working_directory)
+        os.chdir("vimiv")
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cls.working_directory)
 
 
 if __name__ == '__main__':

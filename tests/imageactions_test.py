@@ -14,7 +14,7 @@ class ImageActionsTest(TestCase):
 
     def setUp(self):
         self.working_directory = os.getcwd()
-        os.chdir("testimages/")
+        os.chdir("vimiv/testimages/")
         shutil.copyfile("arch_001.jpg", "image_to_edit.jpg")
         self.filename = os.path.abspath("image_to_edit.jpg")
         self.files = [self.filename]

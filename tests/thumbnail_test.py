@@ -30,6 +30,7 @@ class ThumbnailTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.working_directory = os.getcwd()
+        os.chdir("vimiv")
         cls.settings = parse_config()
         paths, index = populate(["testimages/arch-logo.png"])
         cls.vimiv = v_main.Vimiv(cls.settings, paths, index)

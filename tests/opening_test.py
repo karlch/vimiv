@@ -14,6 +14,7 @@ class OpeningTest(TestCase):
 
     def setUp(self):
         self.working_directory = os.getcwd()
+        os.chdir("vimiv")
         self.settings = parse_config()
 
     def test_opening_without_path(self):
