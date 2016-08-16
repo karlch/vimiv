@@ -125,10 +125,6 @@ class Thumbnail(object):
         thumbnails = Thumbnails(self.vimiv.paths, self.sizes[-1])
         self.elements, errtuple = thumbnails.thumbnails_create()
         self.errorpos = errtuple[0]
-        if self.errorpos:
-            failed_files = ", ".join(errtuple[1])
-            self.vimiv.statusbar.err_message(
-                "Thumbnail creation for %s failed" % (failed_files))
 
         # Add all thumbnails to the liststore
         for i, thumb in enumerate(self.elements):
@@ -167,6 +163,12 @@ class Thumbnail(object):
         if not self.cache:
             for thumb in self.elements:
                 os.remove(thumb)
+
+        # Show error message if necessary TODO
+        if self.errorpos:
+            failed_files = ", ".join([os.path.basename(image) for image in errtuple[1]])
+            self.vimiv.statusbar.err_message(
+                "Thumbnail creation for %s failed" % (failed_files))
 
     def reload(self, thumb, index, reload_image=True):
         """ Reloads the thumbnail of manipulated images """

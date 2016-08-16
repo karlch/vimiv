@@ -105,6 +105,7 @@ class Thumbnails:
             os.mkdir(self.directory)
         self.thumbnails = os.listdir(self.directory)
         self.thumblist = []  # List of all files with thumbnails
+        self.thumbdict = {}  # Asserts thumbnails to their original file
         # Tuple containing all files for which thumbnail creation failed and
         # their position
         self.errtuple = ([], [])
@@ -128,11 +129,17 @@ class Thumbnails:
                 thread_for_thumbnail.start()
             else:
                 self.thumblist.append(outfile)
+                self.thumbdict[outfile] = infile
 
         while self.threads:
             self.threads[0].join()
-        errtuple = (sorted(self.errtuple[0]), sorted(self.errtuple[1]))
-        return sorted(self.thumblist), errtuple
+        print("created all")
+        self.errtuple[0].sort()
+        self.errtuple[1].sort(key=lambda x: self.filelist.index(x))
+        self.thumblist.sort(
+            key=lambda x: self.filelist.index(self.thumbdict[x]))
+        print("done sorting")
+        return self.thumblist, self.errtuple
 
     def thread_for_thumbnails(self, infile, outfile, position):
         """ Creates one thumbnail in an extra thread """
@@ -142,9 +149,10 @@ class Thumbnails:
                 im.thumbnail(self.thumbsize, Image.ANTIALIAS)
                 save_image(im, outfile)
                 self.thumblist.append(outfile)
+                self.thumbdict[outfile] = infile
         except:
             self.errtuple[0].append(position)
-            self.errtuple[1].append(outfile)
+            self.errtuple[1].append(infile)
         self.threads.pop(0)
 
 
