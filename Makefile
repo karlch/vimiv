@@ -46,6 +46,7 @@ uninstall:
 	@printf " in install_log.txt.\n"
 
 test:
+	tests/create_testimages.sh
 	@nosetests
 
 lint:
