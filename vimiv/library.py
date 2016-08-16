@@ -37,7 +37,8 @@ class Library(object):
         self.treepos = 0
         self.datalist = []
         self.filesize = {}
-        self.filelist = []
+        # Filelist in a liststore model
+        self.file_liststore = Gtk.ListStore(int, str, str, str)
 
         # Grid with treeview and border
         self.grid = Gtk.Grid()
@@ -144,17 +145,17 @@ class Library(object):
 
     def filestore(self, datalist):
         """ Returns the file_filter for the tree view """
-        # Filelist in a liststore model
-        self.filelist = Gtk.ListStore(int, str, str, str)
+        # Reset
+        self.file_liststore = Gtk.ListStore(int, str, str, str)
         # Numerate each filename
         count = 0
         for data in datalist:
             count += 1
             data.insert(0, count)
             # The data into the filelist
-            self.filelist.append(data)
+            self.file_liststore.append(data)
 
-        current_file_filter = self.filelist.filter_new()
+        current_file_filter = self.file_liststore.filter_new()
         return current_file_filter
 
     def datalist_create(self):
@@ -380,8 +381,8 @@ class Library(object):
                 step = 1
             if direction == "j":
                 new_pos = self.treepos + step
-                if new_pos >= len(self.filelist):
-                    new_pos = len(self.filelist) - 1
+                if new_pos >= len(self.file_liststore):
+                    new_pos = len(self.file_liststore) - 1
             else:
                 new_pos = self.treepos - step
                 if new_pos < 0:
