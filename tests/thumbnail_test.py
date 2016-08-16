@@ -12,6 +12,17 @@ from vimiv.fileactions import populate
 from vimiv.parser import parse_config
 
 
+def create_tuples(max_val, insert=None):
+    tuples = []
+    value = 64
+    while value <= max_val:
+        tuples.append((value, value))
+        value *= 2
+    if insert:
+        tuples.append((insert, insert))
+    return sorted(tuples)
+
+
 class ThumbnailTest(TestCase):
     """ Test thumbnail """
 
@@ -23,6 +34,9 @@ class ThumbnailTest(TestCase):
         cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
         cls.vimiv.main(True)
         cls.thumb = cls.vimiv.thumbnail
+        cls.thumb.size = (128, 128)
+        cls.thumb.max_size = (256, 256)
+        cls.thumb.sizes = [(64, 64), (128, 128), (256, 256)]
 
     def setUp(self):
         if self.thumb.toggled:
@@ -77,6 +91,52 @@ class ThumbnailTest(TestCase):
             expected_file = os.path.abspath(move_combo[1])
             received_file = self.vimiv.paths[self.thumb.pos]
             self.assertEqual(expected_file, received_file)
+
+    def test_zoom(self):
+        """ Zoom in thumbnail mode """
+        self.thumb.toggle()
+        self.assertEqual(self.thumb.size, (128, 128))
+        self.thumb.zoom(True)
+        self.assertEqual(self.thumb.size, (256, 256))
+        pixbuf = self.thumb.liststore[0][0]
+        width = pixbuf.get_width()
+        height = pixbuf.get_height()
+        scale = max(width, height)
+        self.assertEqual(scale, 256)
+        self.thumb.zoom(True)
+        self.assertEqual(self.thumb.size, (256, 256))
+        # This is the max size, one more zoom shouldn't change anything
+        self.thumb.zoom(False)
+        self.assertEqual(self.thumb.size, (128, 128))
+
+    def test_thumb_sizes(self):
+        """ Parsing of sizes for thumbnails """
+        # Large max size
+        self.thumb.max_size = (1000, 1000)
+        self.thumb.set_sizes()
+        expected_sizes = create_tuples(512)
+        self.assertEqual(self.thumb.sizes, expected_sizes)
+        # Small max size
+        self.thumb.max_size = (128, 128)
+        self.thumb.set_sizes()
+        expected_sizes = create_tuples(128)
+        self.assertEqual(self.thumb.sizes, expected_sizes)
+        # Medium max size and insert a value
+        self.thumb.max_size = (256, 256)
+        self.thumb.size = (200, 200)
+        self.thumb.set_sizes()
+        expected_sizes = create_tuples(256, 200)
+        self.assertEqual(self.thumb.sizes, expected_sizes)
+        # To large size
+        self.thumb.size = (1000, 1000)
+        self.thumb.set_sizes()
+        expected_sizes = create_tuples(256)
+        self.assertEqual(self.thumb.sizes, expected_sizes)
+        self.assertEqual(self.thumb.size, (256, 256))
+        # Reset
+        self.thumb.size = (128, 128)
+        self.thumb.max_size = (256, 256)
+        self.thumb.set_sizes()
 
     @classmethod
     def tearDownClass(cls):

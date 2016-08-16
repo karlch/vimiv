@@ -33,26 +33,7 @@ class Thumbnail(object):
         self.pixbuf_max = []
 
         # Prepare thumbnail sizes for zooming of thumbnails
-        # Maximum
-        if self.max_size[0] >= self.possible_sizes[-1][0]:
-            self.sizes = self.possible_sizes
-        else:
-            for i, size in enumerate(self.possible_sizes):
-                if size[0] > self.max_size[0]:
-                    self.sizes = self.possible_sizes[0:i]
-                    break
-        # Current position
-        if self.size in self.sizes:
-            self.current_size = self.sizes.index(self.size)
-        elif self.size[0] > self.sizes[-1][0]:
-            self.current_size = len(self.sizes)
-            self.sizes.append(self.size)
-        else:
-            for i, size in enumerate(self.sizes):
-                if size[0] > self.size[0]:
-                    self.sizes.insert(i, self.size)
-                    self.current_size = i
-                    break
+        self.set_sizes()
 
         # Creates the Gtk elements necessary for thumbnail mode, fills them
         # and focuses the iconview
@@ -265,3 +246,26 @@ class Thumbnail(object):
         pixbuf = pixbuf_max.scale_simple(width, height,
                                             GdkPixbuf.InterpType.BILINEAR)
         return pixbuf
+
+    def set_sizes(self):
+        """ Sets maximum size, current size and possible sizes for thumbs """
+        # Maximum
+        if self.max_size[0] >= self.possible_sizes[-1][0]:
+            self.sizes = self.possible_sizes
+        else:
+            for i, size in enumerate(self.possible_sizes):
+                if size[0] > self.max_size[0]:
+                    self.sizes = self.possible_sizes[0:i]
+                    break
+        # Current position
+        if self.size in self.sizes:
+            self.current_size = self.sizes.index(self.size)
+        elif self.size[0] > self.sizes[-1][0]:
+            self.current_size = len(self.sizes) - 1
+            self.size = self.sizes[-1]
+        else:
+            for i, size in enumerate(self.sizes):
+                if size[0] > self.size[0]:
+                    self.sizes.insert(i, self.size)
+                    self.current_size = i
+                    break
