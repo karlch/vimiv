@@ -1,4 +1,5 @@
+max-line-length: 80
 python-targets:
     - 3
-max-line-length: 80
-ignore-patterns: *__init__*
+ignore-paths:
+    - vimiv/__init__.py
