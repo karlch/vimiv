@@ -133,12 +133,10 @@ class Thumbnails:
 
         while self.threads:
             self.threads[0].join()
-        print("created all")
         self.errtuple[0].sort()
         self.errtuple[1].sort(key=lambda x: self.filelist.index(x))
         self.thumblist.sort(
             key=lambda x: self.filelist.index(self.thumbdict[x]))
-        print("done sorting")
         return self.thumblist, self.errtuple
 
     def thread_for_thumbnails(self, infile, outfile, position):

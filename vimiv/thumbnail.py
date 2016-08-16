@@ -30,6 +30,7 @@ class Thumbnail(object):
         self.errorpos = 0
         self.pos = 0
         self.elements = []
+        self.pixbuf_max = []
 
         # Prepare thumbnail sizes for zooming of thumbnails
         # Maximum
@@ -92,8 +93,6 @@ class Thumbnail(object):
             self.toggled = False
         elif self.vimiv.paths:
             self.show()
-            # Scroll to thumb
-            self.timer_id = GLib.timeout_add(1, self.move_to_pos, self.pos)
             # Let the library keep focus
             if self.vimiv.library.treeview.is_focus():
                 self.vimiv.library.treeview.grab_focus()
@@ -121,18 +120,24 @@ class Thumbnail(object):
         """ Shows thumbnail mode when called from toggle """
         # Clean liststore
         self.liststore.clear()
+        self.pixbuf_max = []
         # Create thumbnails
         thumbnails = Thumbnails(self.vimiv.paths, self.sizes[-1])
         self.elements, errtuple = thumbnails.thumbnails_create()
         self.errorpos = errtuple[0]
+        # Draw the icon view instead of the image
+        if not toggled:
+            self.vimiv.image.scrolled_win.remove(self.vimiv.image.viewport)
+            self.vimiv.image.scrolled_win.add(self.iconview)
+        # Show the window
+        self.iconview.show()
+        self.toggled = True
 
         # Add all thumbnails to the liststore
         for i, thumb in enumerate(self.elements):
             pixbuf_max = GdkPixbuf.Pixbuf.new_from_file(thumb)
-            width = pixbuf_max.get_width() * (float(self.size[0]) / self.max_size[0])
-            height = pixbuf_max.get_height() * (float(self.size[1]) / self.max_size[1])
-            pixbuf = pixbuf_max.scale_simple(width, height,
-                                             GdkPixbuf.InterpType.BILINEAR)
+            self.pixbuf_max.append(pixbuf_max)
+            pixbuf = self.scale_thumb(pixbuf_max)
             name = os.path.basename(thumb)
             name = name.split(".")[0]
             if self.vimiv.paths[i] in self.vimiv.mark.marked:
@@ -141,15 +146,6 @@ class Thumbnail(object):
 
         # Set columns
         self.calculate_columns()
-
-        # Draw the icon view instead of the image
-        if not toggled:
-            self.vimiv.image.scrolled_win.remove(self.vimiv.image.viewport)
-            self.vimiv.image.scrolled_win.add(self.iconview)
-
-        # Show the window
-        self.iconview.show()
-        self.toggled = True
 
         # Focus the current immage
         self.iconview.grab_focus()
@@ -164,9 +160,10 @@ class Thumbnail(object):
             for thumb in self.elements:
                 os.remove(thumb)
 
-        # Show error message if necessary TODO
+        # Show error message if necessary
         if self.errorpos:
-            failed_files = ", ".join([os.path.basename(image) for image in errtuple[1]])
+            failed_files = ", ".join(
+                [os.path.basename(image) for image in errtuple[1]])
             self.vimiv.statusbar.err_message(
                 "Thumbnail creation for %s failed" % (failed_files))
 
@@ -179,7 +176,8 @@ class Thumbnail(object):
         self.liststore.remove(liststore_iter)
         try:
             if reload_image:
-                new_thumb = thumbnails_create([thumb], self.size)[0]
+                thumbnails = Thumbnails([thumb], self.sizes[-1])
+                new_thumb = thumbnails.thumbnails_create()[0]
                 self.elements[index] = new_thumb[0]
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.elements[index])
 
@@ -248,6 +246,22 @@ class Thumbnail(object):
         else:
             return
         self.size = self.sizes[self.current_size]
+        # Rescale all images in liststore
         if self.toggled:
-            self.show(True)
+            for i, row in enumerate(self.liststore):
+                pixbuf_max = self.pixbuf_max[i]
+                pixbuf = self.scale_thumb(pixbuf_max)
+                self.liststore[i][0] = pixbuf
 
+        # Set columns and refocus current image
+        self.calculate_columns()
+        self.move_to_pos(self.pos)
+
+    def scale_thumb(self, pixbuf_max):
+        """ Scale the image to self.size from pixbuf_max
+            returns the scaled pixbuf """
+        width = pixbuf_max.get_width() * (float(self.size[0]) / self.max_size[0])
+        height = pixbuf_max.get_height() * (float(self.size[1]) / self.max_size[1])
+        pixbuf = pixbuf_max.scale_simple(width, height,
+                                            GdkPixbuf.InterpType.BILINEAR)
+        return pixbuf
