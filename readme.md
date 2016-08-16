@@ -1,7 +1,8 @@
 ![vimiv banner](https://raw.githubusercontent.com/karlch/vimiv/master/icons/vimiv_banner_400.png)
 
 [![License badge](https://img.shields.io/aur/license/vimiv.svg)](https://raw.githubusercontent.com/karlch/vimiv/master/LICENSE)
-[![codecov](https://codecov.io/gh/karlch/vimiv/branch/master/graph/badge.svg)](https://codecov.io/gh/karlch/vimiv)
+[![Coverage](https://codecov.io/gh/karlch/vimiv/branch/master/graph/badge.svg)](https://codecov.io/gh/karlch/vimiv)
+[![Code Health](https://landscape.io/github/karlch/vimiv/master/landscape.svg?style=flat)](https://landscape.io/github/karlch/vimiv/master)
 [![Version badge](https://img.shields.io/aur/version/vimiv.svg)](https://aur.archlinux.org/packages/vimiv/)
 
 #### Version 0.7 (unreleased)
