@@ -229,10 +229,11 @@ class Thumbnail(object):
         self.size = self.sizes[self.current_size]
         # Rescale all images in liststore
         if self.toggled:
-            for i, row in enumerate(self.liststore):
+            for i in range(len(self.liststore)):
                 pixbuf_max = self.pixbuf_max[i]
                 pixbuf = self.scale_thumb(pixbuf_max)
-                self.liststore[i][0] = pixbuf
+                liststore_list = list(self.liststore)
+                liststore_list[i][0] = pixbuf
 
         # Set columns and refocus current image
         self.calculate_columns()
@@ -241,10 +242,12 @@ class Thumbnail(object):
     def scale_thumb(self, pixbuf_max):
         """ Scale the image to self.size from pixbuf_max
             returns the scaled pixbuf """
-        width = pixbuf_max.get_width() * (float(self.size[0]) / self.max_size[0])
-        height = pixbuf_max.get_height() * (float(self.size[1]) / self.max_size[1])
+        width = \
+            pixbuf_max.get_width() * (float(self.size[0]) / self.max_size[0])
+        height = \
+            pixbuf_max.get_height() * (float(self.size[1]) / self.max_size[1])
         pixbuf = pixbuf_max.scale_simple(width, height,
-                                            GdkPixbuf.InterpType.BILINEAR)
+                                         GdkPixbuf.InterpType.BILINEAR)
         return pixbuf
 
     def set_sizes(self):

@@ -13,6 +13,7 @@ from vimiv.parser import parse_config
 
 
 def create_tuples(max_val, insert=None):
+    """ Creates tuples for thumbnail sizes as powers of two starting from 64 """
     tuples = []
     value = 64
     while value <= max_val:
@@ -98,7 +99,7 @@ class ThumbnailTest(TestCase):
         self.assertEqual(self.thumb.size, (128, 128))
         self.thumb.zoom(True)
         self.assertEqual(self.thumb.size, (256, 256))
-        pixbuf = self.thumb.liststore[0][0]
+        pixbuf = list(self.thumb.liststore)[0][0]
         width = pixbuf.get_width()
         height = pixbuf.get_height()
         scale = max(width, height)

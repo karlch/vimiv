@@ -112,7 +112,8 @@ class Thumbnails:
         self.threads = []
 
     def thumbnails_create(self):
-        """ Creates thumbnails for all images in filelist if they don't exist """
+        """ Creates thumbnails for all images in self.filelist if they don't
+            exist """
         # Loop over all files
         for i, infile in enumerate(self.filelist):
             # Correct name
@@ -134,7 +135,7 @@ class Thumbnails:
         while self.threads:
             self.threads[0].join()
         self.errtuple[0].sort()
-        self.errtuple[1].sort(key=lambda x: self.filelist.index(x))
+        self.errtuple[1].sort(key=self.filelist.index)
         self.thumblist.sort(
             key=lambda x: self.filelist.index(self.thumbdict[x]))
         return self.thumblist, self.errtuple
