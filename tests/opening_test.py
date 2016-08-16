@@ -30,8 +30,9 @@ class OpeningTest(TestCase):
         vimiv = v_main.Vimiv(self.settings, paths, index)
         vimiv.main(True)
         self.assertEqual(expected_dir, os.getcwd())
-        expected_files = ["arch_001.jpg", "arch-logo.png", "directory",
-                          "symlink_to_image"]
+        expected_files = ["animation", "arch_001.jpg", "arch-logo.png",
+                          "directory", "symlink_to_image", "vimiv.bmp",
+                          "vimiv.svg", "vimiv.tiff"]
         self.assertEqual(vimiv.library.files, expected_files)
         self.assertTrue(vimiv.library.treeview.is_focus())
         self.assertTrue(vimiv.library.toggled)
@@ -44,7 +45,8 @@ class OpeningTest(TestCase):
         vimiv.main(True)
         # Check moving and image population
         self.assertEqual(expected_dir, os.getcwd())
-        expected_images = ["arch_001.jpg", "symlink_to_image", "arch-logo.png"]
+        expected_images = ["arch_001.jpg", "symlink_to_image", "vimiv.bmp",
+                           "vimiv.svg", "vimiv.tiff", "arch-logo.png"]
         expected_images = [os.path.abspath(image) for image in expected_images]
         self.assertEqual(expected_images, vimiv.paths)
 
@@ -56,7 +58,8 @@ class OpeningTest(TestCase):
         vimiv.main(True)
         # Check moving and image population
         self.assertEqual(expected_dir, os.getcwd())
-        expected_images = ["symlink_to_image", "arch-logo.png", "arch_001.jpg"]
+        expected_images = ["symlink_to_image", "vimiv.bmp", "vimiv.svg",
+                           "vimiv.tiff", "arch-logo.png", "arch_001.jpg"]
         expected_images = [os.path.abspath(image) for image in expected_images]
         self.assertEqual(expected_images, vimiv.paths)
 
@@ -80,7 +83,7 @@ class OpeningTest(TestCase):
         paths, index = populate([], True, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
         vimiv.main(True)
-        self.assertEqual(4, len(vimiv.paths))
+        self.assertEqual(8, len(vimiv.paths))
 
     def tearDown(self):
         os.chdir(self.working_directory)

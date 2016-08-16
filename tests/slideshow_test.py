@@ -74,10 +74,9 @@ class SlideshowTest(TestCase):
         refresh_gui()
         self.assertEqual(self.vimiv.slideshow.delay, 0.001)
         refresh_gui(0.001)
-        self.assertEqual(self.vimiv.index, 1)
-        refresh_gui()
-        self.assertEqual(self.vimiv.index, 2)
-        refresh_gui()
+        for i in range(1, 6):
+            self.assertEqual(self.vimiv.index, i)
+            refresh_gui()
         self.assertEqual(self.vimiv.index, 0)
 
     def tearDown(self):

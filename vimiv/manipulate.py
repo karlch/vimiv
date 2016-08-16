@@ -108,7 +108,7 @@ class Manipulate(object):
         if self.vimiv.image.scrolled_win.is_focus():
             del self.vimiv.paths[self.vimiv.index]
             if self.vimiv.paths:
-                self.vimiv.image.move_index()
+                self.vimiv.image.move_index(delta=0)
             else:
                 # No more images in this directory -> focus parent in library
                 self.vimiv.library.move_up()
@@ -146,7 +146,7 @@ class Manipulate(object):
 
         return images
 
-    def rotate(self, cwise):
+    def rotate(self, cwise, rotate_file=True):
         try:
             cwise = int(cwise)
             images = self.get_manipulated_images("Rotated")
@@ -154,14 +154,14 @@ class Manipulate(object):
             # Rotate the image shown
             if self.vimiv.paths[self.vimiv.index] in images:
                 self.vimiv.image.pixbuf_original = \
-                    self.vimiv.image.pixbuf_original.rotate_simple(
-                        (90 * cwise))
+                    self.vimiv.image.pixbuf_original.rotate_simple((90 * cwise))
                 self.vimiv.image.update(False)
-            # Rotate all files in external thread
-            rotate_thread = Thread(target=self.thread_for_rotate, args=(images,
-                                                                        cwise))
-            self.running_threads.append(rotate_thread)
-            rotate_thread.start()
+            if rotate_file:
+                # Rotate all files in external thread
+                rotate_thread = Thread(target=self.thread_for_rotate,
+                                       args=(images, cwise))
+                self.running_threads.append(rotate_thread)
+                rotate_thread.start()
         except:
             self.vimiv.statusbar.err_message(
                 "Warning: Object cannot be rotated")
@@ -181,21 +181,21 @@ class Manipulate(object):
             self.vimiv.statusbar.err_message("Error: Rotation of file failed")
         self.running_threads.pop(0)
 
-    def flip(self, direction):
+    def flip(self, direction, flip_file=True):
         try:
             direction = int(direction)
             images = self.get_manipulated_images("Flipped")
             # Flip the image shown
             if self.vimiv.paths[self.vimiv.index] in images:
                 self.vimiv.image.pixbuf_original = \
-                    self.vimiv.image.pixbuf_original.flip(
-                        direction)
+                    self.vimiv.image.pixbuf_original.flip(direction)
                 self.vimiv.image.update(False)
-            # Flip all vimiv.library.files in an extra thread
-            flip_thread = Thread(target=self.thread_for_flip, args=(images,
-                                                                    direction))
-            self.running_threads.append(flip_thread)
-            flip_thread.start()
+            if flip_file:
+                # Flip all files in an extra thread
+                flip_thread = Thread(target=self.thread_for_flip,
+                                     args=(images, direction))
+                self.running_threads.append(flip_thread)
+                flip_thread.start()
         except:
             self.vimiv.statusbar.err_message(
                 "Warning: Object cannot be flipped")
@@ -354,10 +354,8 @@ class Manipulate(object):
             os.remove(out)
             os.remove(orig)
             # Show the original image
-            self.vimiv.image.image.clear()
             self.vimiv.image.pixbuf_original = \
-                GdkPixbuf.PixbufAnimation.new_from_file(
-                    path)
+                GdkPixbuf.PixbufAnimation.new_from_file(path)
             self.vimiv.image.pixbuf_original = \
                 self.vimiv.image.pixbuf_original.get_static_image()
             self.vimiv.paths[self.vimiv.index] = path

@@ -19,7 +19,7 @@ class ManipulateTest(TestCase):
         os.chdir("vimiv")
         cls.settings = parse_config()
         shutil.copytree("testimages", "testimages_man")
-        paths, index = populate(["testimages_man/arch_001.jpg"])
+        paths, index = populate(["testimages_man/arch-logo.png"])
         cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
         cls.vimiv.main(True)
         cls.manipulate = cls.vimiv.manipulate
@@ -36,18 +36,22 @@ class ManipulateTest(TestCase):
         self.vimiv.mark.marked = marked
         received_images = self.manipulate.get_manipulated_images("test")
         self.assertEqual(marked, received_images)
+        # Reset mark
+        self.vimiv.mark.marked = []
 
     def test_delete(self):
         """ Delete images """
-        self.assertTrue(os.path.exists("arch_001.jpg"))
+        self.assertTrue(os.path.exists("arch-logo.png"))
         self.manipulate.delete()
-        self.assertFalse(os.path.exists("arch_001.jpg"))
-        self.assertNotEqual(self.vimiv.paths[0],
-                            os.path.abspath("arch_001.jpg"))
+        self.assertFalse(os.path.exists("arch-logo.png"))
+        self.assertEqual(self.vimiv.paths[self.vimiv.index],
+                         os.path.abspath("arch_001.jpg"))
 
     def test_rotate(self):
         """ Rotate image """
-        self.manipulate.rotate(1)
+        pixbuf = self.vimiv.image.image.get_pixbuf()
+        is_portrait = pixbuf.get_width() < pixbuf.get_height()
+        self.manipulate.rotate(1, False)
         pixbuf = self.vimiv.image.image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertTrue(is_portrait)
@@ -55,7 +59,7 @@ class ManipulateTest(TestCase):
     def test_flip(self):
         """ Flip image """
         # simply run through the function, TODO find a way to test a flip
-        self.manipulate.flip(1)
+        self.manipulate.flip(1, False)
 
     def test_toggle(self):
         """ Toggle manipulate """
@@ -71,6 +75,12 @@ class ManipulateTest(TestCase):
         """ Test manipulate image """
         self.manipulate.toggle()
         self.manipulate.manipulate_image()
+        # temporary thumbnails are created correctly
+        files = os.listdir(".")
+        self.assertTrue("arch_001-EDIT.jpg" in files)
+        self.assertTrue("arch_001-EDIT-ORIG.jpg" in files)
+        self.assertTrue(
+            "arch_001-EDIT.jpg" in self.vimiv.paths[self.vimiv.index])
         self.manipulate.button_clicked(None, False)
         self.manipulate.toggle()
         self.manipulate.manipulations = [20, 20, 20, False]
@@ -101,7 +111,8 @@ class ManipulateTest(TestCase):
     @classmethod
     def tearDownClass(cls):
         os.chdir(cls.working_directory)
-        shutil.rmtree("vimiv/testimages_man")
+        if os.path.isdir("./vimiv/testimages_man"):
+            shutil.rmtree("vimiv/testimages_man")
 
 
 if __name__ == "__main__":

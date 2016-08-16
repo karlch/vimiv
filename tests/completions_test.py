@@ -52,7 +52,7 @@ class CompletionsTest(TestCase):
 
     def test_path_completion(self):
         """ Completion of paths """
-        self.vimiv.commandline.entry.set_text(":./vimiv/testimages/a")
+        self.vimiv.commandline.entry.set_text(":./vimiv/testimages/ar")
         self.vimiv.completions.complete()
         expected_completions = ["arch-logo.png", "arch_001.jpg"]
         self.assertEqual(self.vimiv.completions.completions,

@@ -81,7 +81,8 @@ class FileActionsTest(TestCase):
         files = [fil for fil in os.listdir() if "formatted_" in fil]
         files = sorted(files)
         expected_files = ["formatted_001.jpg", "formatted_002",
-                          "formatted_003.png"]
+                          "formatted_003.bmp", "formatted_004.svg",
+                          "formatted_005.tiff", "formatted_006.png"]
         self.assertEqual(files, expected_files)
         os.chdir("..")
         shutil.rmtree("testimages_to_format")
@@ -110,7 +111,8 @@ class FileActionsTest(TestCase):
         files = [fil for fil in os.listdir() if "formatted_" in fil]
         files = sorted(files)
         expected_files = ["formatted_001.jpg", "formatted_002",
-                          "formatted_003.png"]
+                          "formatted_003.bmp", "formatted_004.svg",
+                          "formatted_005.tiff", "formatted_006.png"]
         self.assertEqual(files, expected_files)
         # These files have no exif info
         vimiv.fileextras.format_files("formatted_%y_")

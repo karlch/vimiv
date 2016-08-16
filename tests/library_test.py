@@ -38,7 +38,8 @@ class LibraryTest(TestCase):
         self.lib.move_up()
         # Image by name
         self.lib.file_select(None, "arch-logo.png", None, False)
-        expected_images = ["arch_001.jpg", "arch-logo.png", "symlink_to_image"]
+        expected_images = ["arch_001.jpg", "arch-logo.png", "symlink_to_image",
+                           "vimiv.bmp", "vimiv.svg", "vimiv.tiff"]
         expected_images = [os.path.abspath(image) for image in expected_images]
         self.assertEqual(self.vimiv.paths, expected_images)
         open_image = self.vimiv.paths[self.vimiv.index]
@@ -47,7 +48,7 @@ class LibraryTest(TestCase):
         # Library still focused
         self.assertTrue(self.lib.treeview.is_focus())
         # Image by position
-        path = Gtk.TreePath([0])
+        path = Gtk.TreePath([1])
         column = self.lib.treeview.get_column(1)
         self.lib.treeview.row_activated(path, column)
         self.assertEqual(self.vimiv.paths, expected_images)
@@ -62,21 +63,21 @@ class LibraryTest(TestCase):
     def test_move_pos(self):
         """ Move position in library """
         # G
-        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
+        self.assertEqual(self.lib.files[self.lib.treepos], "animation")
         self.lib.move_pos()
-        self.assertEqual(self.lib.files[self.lib.treepos], "symlink_to_image")
+        self.assertEqual(self.lib.files[self.lib.treepos], "vimiv.tiff")
         # 3g
         self.vimiv.keyhandler.num_str = "3"
         self.lib.move_pos()
-        self.assertEqual(self.lib.files[self.lib.treepos], "directory")
+        self.assertEqual(self.lib.files[self.lib.treepos], "arch-logo.png")
         self.assertFalse(self.vimiv.keyhandler.num_str)
         # g
         self.lib.move_pos(False)
-        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
+        self.assertEqual(self.lib.files[self.lib.treepos], "animation")
         # Throw an error
         self.vimiv.keyhandler.num_str = "300"
         self.lib.move_pos()
-        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
+        self.assertEqual(self.lib.files[self.lib.treepos], "animation")
         expected_message = "Warning: Unsupported index"
         received_message = self.vimiv.statusbar.left_label.get_text()
         self.assertEqual(expected_message, received_message)
@@ -114,14 +115,14 @@ class LibraryTest(TestCase):
     def test_scroll(self):
         """ Scroll library """
         # j
-        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
+        self.assertEqual(self.lib.files[self.lib.treepos], "animation")
         self.lib.scroll("j")
-        self.assertEqual(self.lib.files[self.lib.treepos], "arch-logo.png")
+        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
         # k
         self.lib.scroll("k")
-        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
-        # 2j
-        self.vimiv.keyhandler.num_str = "2"
+        self.assertEqual(self.lib.files[self.lib.treepos], "animation")
+        # 3j
+        self.vimiv.keyhandler.num_str = "3"
         self.lib.scroll("j")
         self.assertEqual(self.lib.files[self.lib.treepos], "directory")
         self.assertFalse(self.vimiv.keyhandler.num_str)
@@ -137,9 +138,9 @@ class LibraryTest(TestCase):
         # Remember pos
         self.assertEqual(self.lib.files[self.lib.treepos], "directory")
         # Back to beginning
+        self.vimiv.keyhandler.num_str = "3"
         self.lib.scroll("k")
-        self.lib.scroll("k")
-        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
+        self.assertEqual(self.lib.files[self.lib.treepos], "animation")
 
     @classmethod
     def tearDownClass(cls):
