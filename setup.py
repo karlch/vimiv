@@ -7,7 +7,7 @@ setup(
     version = "0.6.1",
     packages = ['vimiv'],
     scripts = ['vimiv/vimiv'],
-    install_requires = ['pillow', 'pygobject'],
+    install_requires = ['pillow', 'PyGObject'],
     description = "An image viewer with vim-like keybindings",
     license = "MIT",
     url = "https://github.com/karlch/vimiv",
