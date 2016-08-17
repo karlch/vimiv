@@ -52,6 +52,21 @@ class CommandlineTest(TestCase):
         after_command = self.vimiv.image.overzoom
         self.assertNotEqual(before_command, after_command)
 
+    def test_run_alias(self):
+        """Run an alias."""
+        self.vimiv.aliases = {"test_alias": "set overzoom!"}
+        before_command = self.vimiv.image.overzoom
+        self.vimiv.commandline.entry.set_text(":test_alias")
+        self.vimiv.commandline.handler(self.vimiv.commandline.entry)
+        after_command = self.vimiv.image.overzoom
+        self.assertNotEqual(before_command, after_command)
+        # Alias that does not exist
+        self.vimiv.aliases = {"test_alias": "useless_command"}
+        self.vimiv.commandline.entry.set_text(":test_alias")
+        self.vimiv.commandline.handler(self.vimiv.commandline.entry)
+        error_message = self.vimiv.statusbar.left_label.get_text()
+        self.assertEqual(error_message, "No such command: useless_command")
+
     def test_run_external(self):
         """Run an external command."""
         self.vimiv.commandline.entry.set_text(":!touch tmp_foo")
