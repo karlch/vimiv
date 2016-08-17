@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Tests manipulate.py for vimiv's test suite """
+"""Test manipulate.py for vimiv's test suite."""
 
 import os
 import shutil
@@ -11,7 +11,7 @@ from vimiv.parser import parse_config
 
 
 class ManipulateTest(TestCase):
-    """ Manipulate Tests """
+    """Manipulate Tests."""
 
     @classmethod
     def setUpClass(cls):
@@ -25,7 +25,7 @@ class ManipulateTest(TestCase):
         cls.manipulate = cls.vimiv.manipulate
 
     def test_get_manipulated_images(self):
-        """ Get images to manipulate """
+        """Get images to manipulate."""
         # Nothing marked -> current image
         expected_images = [self.vimiv.paths[self.vimiv.index]]
         received_images = self.manipulate.get_manipulated_images("test")
@@ -40,7 +40,7 @@ class ManipulateTest(TestCase):
         self.vimiv.mark.marked = []
 
     def test_delete(self):
-        """ Delete images """
+        """Delete images."""
         self.assertTrue(os.path.exists("arch-logo.png"))
         self.manipulate.delete()
         self.assertFalse(os.path.exists("arch-logo.png"))
@@ -48,7 +48,7 @@ class ManipulateTest(TestCase):
                          os.path.abspath("arch_001.jpg"))
 
     def test_rotate(self):
-        """ Rotate image """
+        """Rotate image."""
         pixbuf = self.vimiv.image.image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.manipulate.rotate(1, False)
@@ -57,12 +57,12 @@ class ManipulateTest(TestCase):
         self.assertTrue(is_portrait)
 
     def test_flip(self):
-        """ Flip image """
+        """Flip image."""
         # simply run through the function, TODO find a way to test a flip
         self.manipulate.flip(1, False)
 
     def test_toggle(self):
-        """ Toggle manipulate """
+        """Toggle manipulate."""
         self.manipulate.toggle()
         self.assertTrue(self.manipulate.toggled)
         self.assertTrue(self.manipulate.scale_bri.is_focus())
@@ -72,7 +72,7 @@ class ManipulateTest(TestCase):
         self.assertTrue(self.vimiv.image.scrolled_win.is_focus())
 
     def test_manipulate_image(self):
-        """ Test manipulate image """
+        """Test manipulate image."""
         self.manipulate.toggle()
         self.manipulate.manipulate_image()
         # temporary thumbnails are created correctly
@@ -87,7 +87,7 @@ class ManipulateTest(TestCase):
         self.manipulate.button_clicked(None, True)
 
     def test_manipulate_sliders(self):
-        """ Focusing and changing values of sliders """
+        """Focusing and changing values of sliders."""
         self.manipulate.toggle()
         self.manipulate.focus_slider("bri")
         self.manipulate.change_slider(True, False)
@@ -102,7 +102,7 @@ class ManipulateTest(TestCase):
         self.manipulate.button_clicked(None, False)
 
     def test_cmd_edit(self):
-        """ Test manipulating from command line commands """
+        """Test manipulating from command line commands."""
         self.manipulate.cmd_edit("sha", 20)
         self.assertEqual(self.manipulate.scale_sha.get_value(), 20)
         self.assertTrue(self.manipulate.scale_sha.is_focus())

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Tag tests for vimiv's test suite """
+"""Tag tests for vimiv's test suite."""
 
 import os
 from unittest import TestCase, main
@@ -10,7 +10,7 @@ from vimiv.parser import parse_config
 
 
 class TagsTest(TestCase):
-    """ Tag Tests """
+    """Tag Tests."""
 
     @classmethod
     def setUpClass(cls):
@@ -21,7 +21,7 @@ class TagsTest(TestCase):
         cls.vimiv.main(True)
 
     def test_tag_create_remove(self):
-        """ Create and remove a tag """
+        """Create and remove a tag."""
         taglist = ["./testimages/arch-logo.png", "./testimages/arch_001.jpg"]
         taglist = [os.path.abspath(image) for image in taglist]
         self.vimiv.tags.write(taglist, "arch_test_tag")
@@ -32,7 +32,7 @@ class TagsTest(TestCase):
         self.assertFalse(os.path.isfile(created_file))
 
     def test_tag_append(self):
-        """ Append to a tag """
+        """Append to a tag."""
         taglist = [os.path.abspath("./testimages/arch-logo.png")]
         self.vimiv.tags.write(taglist, "arch_test_tag")
         taglist2 = [os.path.abspath("./testimages/arch_001.jpg")]
@@ -44,7 +44,7 @@ class TagsTest(TestCase):
         self.vimiv.tags.remove("arch_test_tag")
 
     def test_tag_load(self):
-        """ Load a tag """
+        """Load a tag."""
         taglist = ["./testimages/arch-logo.png", "./testimages/arch_001.jpg"]
         taglist = [os.path.abspath(image) for image in taglist]
         self.vimiv.tags.write(taglist, "arch_test_tag")
@@ -53,7 +53,7 @@ class TagsTest(TestCase):
         self.vimiv.tags.remove("arch_test_tag")
 
     def test_tag_errors(self):
-        """ Error messages with tags """
+        """Error messages with tags."""
         unavailable_file = os.path.expanduser("~/.vimiv/Tags/foo_is_real")
         if os.path.exists(unavailable_file):
             os.remove(unavailable_file)

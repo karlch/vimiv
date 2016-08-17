@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Mark tests for vimiv's test suite """
+"""Mark tests for vimiv's test suite."""
 
 import os
 from unittest import TestCase, main
@@ -10,7 +10,7 @@ from vimiv.parser import parse_config
 
 
 class MarkTest(TestCase):
-    """ Mark Tests """
+    """Mark Tests."""
 
     @classmethod
     def setUpClass(cls):
@@ -24,7 +24,7 @@ class MarkTest(TestCase):
         cls.vimiv.library.scroll("j")
 
     def test_mark(self):
-        """ Marking images """
+        """Mark images."""
         # Mark
         self.vimiv.mark.mark()
         expected_marked = [os.path.abspath("arch_001.jpg")]
@@ -34,7 +34,7 @@ class MarkTest(TestCase):
         self.assertEqual([], self.vimiv.mark.marked)
 
     def test_toggle_mark(self):
-        """ Toggle marks """
+        """Toggle marks."""
         self.vimiv.mark.mark()
         self.vimiv.mark.toggle_mark()
         self.assertEqual([], self.vimiv.mark.marked)
@@ -43,7 +43,7 @@ class MarkTest(TestCase):
         self.assertEqual(expected_marked, self.vimiv.mark.marked)
 
     def test_mark_all(self):
-        """ Mark all """
+        """Mark all."""
         self.vimiv.mark.mark_all()
         expected_marked = ["arch_001.jpg", "arch-logo.png", "symlink_to_image",
                            "vimiv.bmp", "vimiv.svg", "vimiv.tiff"]
@@ -51,7 +51,7 @@ class MarkTest(TestCase):
         self.assertEqual(expected_marked, self.vimiv.mark.marked)
 
     def test_mark_between(self):
-        """ Mark between """
+        """Mark between."""
         self.vimiv.mark.mark()
         self.vimiv.keyhandler.num_str = "3"
         self.vimiv.library.scroll("j")

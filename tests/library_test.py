@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Test library.py for vimiv's test suite """
+"""Test library.py for vimiv's test suite."""
 
 import os
 from unittest import TestCase, main
@@ -12,7 +12,7 @@ from vimiv.parser import parse_config
 
 
 class LibraryTest(TestCase):
-    """ Test library """
+    """Test Library."""
 
     @classmethod
     def setUpClass(cls):
@@ -24,14 +24,14 @@ class LibraryTest(TestCase):
         cls.lib = cls.vimiv.library
 
     def test_toggle(self):
-        """ Toggling of the library"""
+        """Toggle the library."""
         self.lib.toggle()
         self.assertFalse(self.lib.treeview.is_focus())
         self.lib.toggle()
         self.assertTrue(self.lib.treeview.is_focus())
 
     def test_file_select(self):
-        """ Select file in library """
+        """Select file in library."""
         # Directory by name
         self.lib.file_select(None, "directory", None, False)
         self.assertEqual(self.lib.files, ["symlink with spaces .jpg"])
@@ -61,7 +61,7 @@ class LibraryTest(TestCase):
         self.lib.treepos = 0
 
     def test_move_pos(self):
-        """ Move position in library """
+        """Move position in library."""
         # G
         self.assertEqual(self.lib.files[self.lib.treepos], "animation")
         self.lib.move_pos()
@@ -83,7 +83,7 @@ class LibraryTest(TestCase):
         self.assertEqual(expected_message, received_message)
 
     def test_resize(self):
-        """ Resize library """
+        """Resize library."""
         # Set to 200
         self.lib.resize(None, True, 200)
         self.assertEqual(200,
@@ -113,7 +113,7 @@ class LibraryTest(TestCase):
         self.assertEqual(expected_message, received_message)
 
     def test_scroll(self):
-        """ Scroll library """
+        """Scroll library."""
         # j
         self.assertEqual(self.lib.files[self.lib.treepos], "animation")
         self.lib.scroll("j")

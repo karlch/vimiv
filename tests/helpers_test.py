@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Tests helpers.py for vimiv's test suite """
+"""Test helpers.py for vimiv's test suite."""
 
 import os
 import shutil
@@ -9,7 +9,7 @@ import vimiv.helpers as helpers
 
 
 class HelpersTest(TestCase):
-    """ Helpers Tests """
+    """Helpers Tests."""
 
     def setUp(self):
         os.mkdir("tmp_testdir")
@@ -17,13 +17,13 @@ class HelpersTest(TestCase):
         open("tmp_testdir/.foo", "a").close()
 
     def test_external_commands(self):
-        """ Check if list of external commands was generated """
+        """Check if list of external commands was generated."""
         external_commands = " ".join(list(helpers.external_commands))
         self.assertIn(" !ls ", external_commands)
         self.assertIn(" !pwd ", external_commands)
 
     def test_listdir_wrapper(self):
-        """ Check the listdir_wrapper (hidden/no_hidden) """
+        """Check the listdir_wrapper (hidden/no_hidden)."""
         no_hidden_files = helpers.listdir_wrapper("tmp_testdir", False)
         hidden_files = helpers.listdir_wrapper("tmp_testdir", True)
         self.assertEqual(len(no_hidden_files), 1)
@@ -31,7 +31,7 @@ class HelpersTest(TestCase):
         self.assertEqual(hidden_files, sorted(hidden_files))
 
     def test_read_file(self):
-        """ Check if a file is read correctly into a list of its lines """
+        """Check if a file is read correctly into a list of its lines."""
         helpers.read_file("tmp_testdir/bar")
         self.assertTrue(os.path.exists("tmp_testdir/bar"))
         with open("tmp_testdir/baz", "w") as created_file:
@@ -40,7 +40,7 @@ class HelpersTest(TestCase):
         self.assertEqual(created_file_content, ["vimiv", "is", "great"])
 
     def test_error_message(self):
-        """ Error message popup """
+        """Error message popup."""
         # Not much can happen here, if all attributes are set correctly it will
         # also run
         helpers.error_message("Test error", True)

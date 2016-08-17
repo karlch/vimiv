@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Test slideshow.py for vimiv's test suite """
+"""Test slideshow.py for vimiv's test suite."""
 
 import os
 import time
@@ -14,14 +14,18 @@ from vimiv.fileactions import populate
 
 
 def refresh_gui(delay=0):
-    """ Refresh the Gtk window as the Gtk.main() loop is not running when
-        testing """
+    """Refresh the gui as the Gtk.main() loop is not running when testing.
+
+    Args:
+        delay: Time to wait before refreshing.
+    """
     time.sleep(delay)
-    Gtk.main_iteration_do(False)
+    while Gtk.events_pending():
+        Gtk.main_iteration_do(False)
 
 
 class SlideshowTest(TestCase):
-    """ Slideshow Tests """
+    """Slideshow Tests."""
 
     @classmethod
     def setUpClass(cls):
@@ -34,7 +38,7 @@ class SlideshowTest(TestCase):
         cls.vimiv.main(True)
 
     def test_toggle(self):
-        """ Toggle slideshow """
+        """Toggle slideshow."""
         self.assertFalse(self.slideshow.running)
         self.slideshow.toggle()
         self.assertTrue(self.slideshow.running)
@@ -52,7 +56,7 @@ class SlideshowTest(TestCase):
         self.vimiv.paths = paths_before
 
     def test_set_delay(self):
-        """ Set slideshow delay """
+        """Set slideshow delay."""
         self.assertEqual(self.slideshow.delay, 2.0)
         self.slideshow.set_delay(3.0)
         self.assertEqual(self.slideshow.delay, 3.0)
@@ -66,7 +70,7 @@ class SlideshowTest(TestCase):
         self.assertEqual(self.slideshow.delay, 2.0)
 
     def test_running(self):
-        """ Check if slideshow runs correctly """
+        """Check if slideshow runs correctly."""
         self.assertEqual(self.vimiv.index, 0)
         self.slideshow.toggle()
         # Set delay when running

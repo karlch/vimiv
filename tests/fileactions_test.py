@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Test fileactions.py for vimiv's test suite """
+"""Test fileactions.py for vimiv's test suite."""
 
 import os
 import shutil
@@ -11,14 +11,14 @@ from vimiv.parser import parse_config
 
 
 class FileActionsTest(TestCase):
-    """ Fileactions Tests """
+    """Fileactions Tests."""
 
     def setUp(self):
         self.working_directory = os.getcwd()
         os.chdir("vimiv")
 
     def test_move_to_trash(self):
-        """ Move file to trash """
+        """Move file to trash."""
         os.chdir("testimages/")
         shutil.copyfile("arch_001.jpg", "image_to_edit.jpg")
         filename = os.path.abspath("image_to_edit.jpg")
@@ -40,13 +40,13 @@ class FileActionsTest(TestCase):
         os.remove(trashed_file1)
 
     def test_is_image(self):
-        """ Check whether file is an image """
+        """Check whether file is an image."""
         os.chdir("testimages/")
         self.assertTrue(fileactions.is_image("arch_001.jpg"))
         self.assertFalse(fileactions.is_image("not_an_image.jpg"))
 
     def test_clear(self):
-        """ Clear Trash/Thumbnails """
+        """Clear Trash/Thumbnails."""
         settings = parse_config()
         vimiv = v_main.Vimiv(settings, [], 0)
         vimiv.main(True)
@@ -70,7 +70,7 @@ class FileActionsTest(TestCase):
         shutil.move("Trash_bak", trashdir)
 
     def test_format_files(self):
-        """ Format files according to a formatstring """
+        """Format files according to a formatstring."""
         shutil.copytree("testimages/", "testimages_to_format/")
         os.chdir("testimages_to_format")
         settings = parse_config()
@@ -100,7 +100,7 @@ class FileActionsTest(TestCase):
         self.assertEqual(expected_message, err_message)
 
     def test_format_files_with_exif(self):
-        """ Format files according to a formatstring with EXIF data """
+        """Format files according to a formatstring with EXIF data."""
         shutil.copytree("testimages/", "testimages_to_format/")
         os.chdir("testimages_to_format")
         settings = parse_config()

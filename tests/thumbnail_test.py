@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Test thumbnail.py for vimiv's test suite """
+"""Test thumbnail.py for vimiv's test suite."""
 
 import os
 from unittest import TestCase, main
@@ -13,7 +13,7 @@ from vimiv.parser import parse_config
 
 
 def create_tuples(max_val, insert=None):
-    """ Creates tuples for thumbnail sizes as powers of two starting from 64 """
+    """Create tuples for thumbnail sizes as powers of two starting from 64."""
     tuples = []
     value = 64
     while value <= max_val:
@@ -25,7 +25,7 @@ def create_tuples(max_val, insert=None):
 
 
 class ThumbnailTest(TestCase):
-    """ Test thumbnail """
+    """Test thumbnail."""
 
     @classmethod
     def setUpClass(cls):
@@ -47,7 +47,7 @@ class ThumbnailTest(TestCase):
         self.vimiv.index = 0
 
     def test_toggle(self):
-        """ Toggling thumbnail mode """
+        """Toggle thumbnail mode."""
         self.assertFalse(self.thumb.toggled)
         self.assertFalse(self.thumb.iconview.is_focus())
         self.thumb.toggle()
@@ -55,7 +55,7 @@ class ThumbnailTest(TestCase):
         self.assertTrue(self.thumb.iconview.is_focus())
 
     def test_iconview_clicked(self):
-        """ Select thumbnail """
+        """Select thumbnail."""
         self.thumb.toggle()
         path = Gtk.TreePath([1])
         self.thumb.iconview_clicked(None, path)
@@ -66,14 +66,14 @@ class ThumbnailTest(TestCase):
         self.assertEqual(expected_image, received_image)
 
     def test_calculate_columns(self):
-        """ Calculate thumbnail columns """
+        """Calculate thumbnail columns."""
         self.thumb.toggle()
         expected_columns = int(800 / (self.thumb.size[0] + 30))
         received_columns = self.thumb.iconview.get_columns()
         self.assertEqual(expected_columns, received_columns)
 
     def test_reload(self):
-        """ Reload and name thumbnails """
+        """Reload and name thumbnails."""
         self.thumb.toggle()
         liststore_iter = self.thumb.liststore.get_iter(0)
         name = self.thumb.liststore.get_value(liststore_iter, 1)
@@ -85,7 +85,7 @@ class ThumbnailTest(TestCase):
         self.assertEqual(name, "arch-logo [*]")
 
     def test_move(self):
-        """ Move in thumbnail mode """
+        """Move in thumbnail mode."""
         self.thumb.toggle()
         for move_combo in [("l", "arch_001.jpg"), ("h", "arch-logo.png"),
                            ("j", "symlink_to_image"), ("k", "arch-logo.png")]:
@@ -95,7 +95,7 @@ class ThumbnailTest(TestCase):
             self.assertEqual(expected_file, received_file)
 
     def test_zoom(self):
-        """ Zoom in thumbnail mode """
+        """Zoom in thumbnail mode."""
         self.thumb.toggle()
         self.assertEqual(self.thumb.size, (128, 128))
         self.thumb.zoom(True)
@@ -112,7 +112,7 @@ class ThumbnailTest(TestCase):
         self.assertEqual(self.thumb.size, (128, 128))
 
     def test_thumb_sizes(self):
-        """ Parsing of sizes for thumbnails """
+        """Parse sizes for thumbnails."""
         # Large max size
         self.thumb.max_size = (1000, 1000)
         self.thumb.set_sizes()

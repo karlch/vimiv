@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Completion tests for vimiv's test suite """
+"""Completion tests for vimiv's test suite."""
 
 from unittest import TestCase, main
 import vimiv.main as v_main
@@ -8,7 +8,7 @@ from vimiv.parser import parse_config
 
 
 class CompletionsTest(TestCase):
-    """ Completions Tests """
+    """Completions Tests."""
 
     @classmethod
     def setUpClass(cls):
@@ -17,7 +17,7 @@ class CompletionsTest(TestCase):
         cls.vimiv.main(True)
 
     def test_reset(self):
-        """ Reset the internal completion values """
+        """Reset the internal completion values."""
         self.vimiv.commandline.entry.set_text(":a")
         self.vimiv.completions.complete()
         self.vimiv.completions.reset()
@@ -27,7 +27,7 @@ class CompletionsTest(TestCase):
         self.assertEqual(self.vimiv.completions.compstr, "")
 
     def test_internal_completion(self):
-        """ Completion of internal commands """
+        """Completion of internal commands."""
         self.vimiv.commandline.entry.set_text(":a")
         self.vimiv.completions.complete()
         expected_completions = ["accept_changes", "autorotate"]
@@ -35,7 +35,7 @@ class CompletionsTest(TestCase):
                          expected_completions)
 
     def test_external_completion(self):
-        """ Completion of external commands """
+        """Completion of external commands."""
         self.vimiv.commandline.entry.set_text(":!vimi")
         self.vimiv.completions.complete()
         expected_completions = ["!vimiv"]
@@ -43,7 +43,7 @@ class CompletionsTest(TestCase):
                          expected_completions)
 
     def test_external_with_path_completion(self):
-        """ Completion of external commands """
+        """Completion of external commands."""
         self.vimiv.commandline.entry.set_text(":!ls vimi")
         self.vimiv.completions.complete()
         expected_completions = ["!ls vimiv/"]
@@ -51,7 +51,7 @@ class CompletionsTest(TestCase):
                          expected_completions)
 
     def test_path_completion(self):
-        """ Completion of paths """
+        """Completion of paths."""
         self.vimiv.commandline.entry.set_text(":./vimiv/testimages/ar")
         self.vimiv.completions.complete()
         expected_completions = ["arch-logo.png", "arch_001.jpg"]
@@ -59,7 +59,7 @@ class CompletionsTest(TestCase):
                          expected_completions)
 
     def test_tabbing(self):
-        """ Tabbing through completions """
+        """Tabbing through completions."""
         # Complete to last matching character
         self.vimiv.commandline.entry.set_text(":cl")
         self.vimiv.completions.complete()

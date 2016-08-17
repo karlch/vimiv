@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Test imageactions.py for vimiv's test suite """
+"""Test imageactions.py for vimiv's test suite."""
 
 import os
 import shutil
@@ -10,7 +10,7 @@ import vimiv.imageactions as imageactions
 
 
 class ImageActionsTest(TestCase):
-    """ Imageactions Tests """
+    """Imageactions Tests."""
 
     def setUp(self):
         self.working_directory = os.getcwd()
@@ -20,7 +20,7 @@ class ImageActionsTest(TestCase):
         self.files = [self.filename]
 
     def test_rotate(self):
-        """ Rotate image file """
+        """Rotate image file."""
         with Image.open(self.filename) as im:
             orientation_before = im.size[0] < im.size[1]
         imageactions.rotate_file(self.files, 1)
@@ -29,14 +29,14 @@ class ImageActionsTest(TestCase):
         self.assertNotEqual(orientation_before, orientation_after)
 
     def test_flip(self):
-        """ Flipping of files """
+        """Flipping of files."""
         # Currently only runs through
         # TODO find a way to check if the image was flipped
         imageactions.flip_file(self.files, False)
         imageactions.flip_file(self.files, True)
 
     def test_thumbnails_create(self):
-        """ Creation of thumbnail files """
+        """Creation of thumbnail files."""
         thumbnails = imageactions.Thumbnails(self.files, (128, 128))
         thumbnails.thumbnails_create()
         thumbnail = os.path.expanduser(
@@ -47,7 +47,7 @@ class ImageActionsTest(TestCase):
         os.remove(thumbnail)
 
     def test_manipulate(self):
-        """ Manipulation of files """
+        """Manipulation of files."""
         # Currently only runs through
         # TODO find a way to check if the image was manipulated correctly
         imageactions.manipulate_all(self.filename, self.filename,
@@ -56,7 +56,7 @@ class ImageActionsTest(TestCase):
                                     [0, 0, 0, True])
 
     def test_autorotate(self):
-        """ Autorotate files """
+        """Autorotate files."""
         imageactions.autorotate(self.files)
         with Image.open(self.filename) as im:
             orientation = im.size[0] < im.size[1]
