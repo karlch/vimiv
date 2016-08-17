@@ -30,7 +30,7 @@ class OpeningTest(TestCase):
         vimiv = v_main.Vimiv(self.settings, paths, index)
         vimiv.main(True)
         self.assertEqual(expected_dir, os.getcwd())
-        expected_files = ["animation", "arch_001.jpg", "arch-logo.png",
+        expected_files = ["animation", "arch-logo.png", "arch_001.jpg",
                           "directory", "symlink_to_image", "vimiv.bmp",
                           "vimiv.svg", "vimiv.tiff"]
         self.assertEqual(vimiv.library.files, expected_files)

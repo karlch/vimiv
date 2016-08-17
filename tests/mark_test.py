@@ -27,7 +27,7 @@ class MarkTest(TestCase):
         """Mark images."""
         # Mark
         self.vimiv.mark.mark()
-        expected_marked = [os.path.abspath("arch_001.jpg")]
+        expected_marked = [os.path.abspath("arch-logo.png")]
         self.assertEqual(expected_marked, self.vimiv.mark.marked)
         # Remove mark
         self.vimiv.mark.mark()
@@ -39,13 +39,13 @@ class MarkTest(TestCase):
         self.vimiv.mark.toggle_mark()
         self.assertEqual([], self.vimiv.mark.marked)
         self.vimiv.mark.toggle_mark()
-        expected_marked = [os.path.abspath("arch_001.jpg")]
+        expected_marked = [os.path.abspath("arch-logo.png")]
         self.assertEqual(expected_marked, self.vimiv.mark.marked)
 
     def test_mark_all(self):
         """Mark all."""
         self.vimiv.mark.mark_all()
-        expected_marked = ["arch_001.jpg", "arch-logo.png", "symlink_to_image",
+        expected_marked = ["arch-logo.png", "arch_001.jpg", "symlink_to_image",
                            "vimiv.bmp", "vimiv.svg", "vimiv.tiff"]
         expected_marked = [os.path.abspath(image) for image in expected_marked]
         self.assertEqual(expected_marked, self.vimiv.mark.marked)
@@ -57,7 +57,7 @@ class MarkTest(TestCase):
         self.vimiv.library.scroll("j")
         self.vimiv.mark.mark()
         self.vimiv.mark.mark_between()
-        expected_marked = ["arch_001.jpg", "arch-logo.png", "symlink_to_image"]
+        expected_marked = ["arch-logo.png", "arch_001.jpg", "symlink_to_image"]
         expected_marked = [os.path.abspath(image) for image in expected_marked]
         self.assertEqual(expected_marked, self.vimiv.mark.marked)
 

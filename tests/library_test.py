@@ -42,7 +42,7 @@ class LibraryTest(TestCase):
         # Image by position closing library
         path = Gtk.TreePath([self.lib.files.index("arch_001.jpg")])
         self.lib.file_select(None, path, None, True)
-        expected_images = ["arch_001.jpg", "arch-logo.png", "symlink_to_image",
+        expected_images = ["arch-logo.png", "arch_001.jpg", "symlink_to_image",
                            "vimiv.bmp", "vimiv.svg", "vimiv.tiff"]
         expected_images = [os.path.abspath(image) for image in expected_images]
         self.assertEqual(self.vimiv.paths, expected_images)
@@ -66,7 +66,7 @@ class LibraryTest(TestCase):
         # 3g
         self.vimiv.keyhandler.num_str = "3"
         self.lib.move_pos()
-        self.assertEqual(self.lib.files[self.lib.treepos], "arch-logo.png")
+        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
         self.assertFalse(self.vimiv.keyhandler.num_str)
         # g
         self.lib.move_pos(False)
@@ -114,7 +114,7 @@ class LibraryTest(TestCase):
         # j
         self.assertEqual(self.lib.files[self.lib.treepos], "animation")
         self.lib.scroll("j")
-        self.assertEqual(self.lib.files[self.lib.treepos], "arch_001.jpg")
+        self.assertEqual(self.lib.files[self.lib.treepos], "arch-logo.png")
         # k
         self.lib.scroll("k")
         self.assertEqual(self.lib.files[self.lib.treepos], "animation")
