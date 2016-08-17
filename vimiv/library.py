@@ -3,12 +3,11 @@
 """Library part of self.vimiv."""
 
 import os
-from subprocess import Popen, PIPE
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 from vimiv.fileactions import is_image, populate
-from vimiv.helpers import listdir_wrapper
+from vimiv.helpers import listdir_wrapper, sizeof_fmt
 
 
 class Library(object):
@@ -410,47 +409,32 @@ class Library(object):
     def filelist_create(self, directory="."):
         """Create a filelist from all files in directory.
 
-        Filter out filetypes not usable with vimiv and remember the size of all
-        files in the self.filesize dictionary.
-
-        Args:
+                Args:
             directory: Directory of which the filelist is created.
         """
         # Get data from ls -lh and parse it correctly
-        if self.show_hidden:
-            p = Popen(['ls', '-lAhL', directory], stdin=PIPE, stdout=PIPE,
-                      stderr=PIPE)
-        else:
-            p = Popen(['ls', '-lhL', directory], stdin=PIPE, stdout=PIPE,
-                      stderr=PIPE)
-        data = p.communicate()[0]
-        data = data.decode(encoding='UTF-8').split("\n")[1:-1]
-        files = []
+        files = listdir_wrapper(directory, self.show_hidden)
         self.filesize = {}
-        for fil in data:
-            fil = fil.split()
-            # Catch stupid filenames with whitespaces
-            filename = " ".join(fil[8:])
-            files.append(filename)
+        for fil in files:
             # Number of images in directory as filesize
-            if os.path.isdir(filename):
+            if os.path.isdir(fil):
                 try:
-                    subfiles = listdir_wrapper(filename, self.show_hidden)
+                    subfiles = listdir_wrapper(fil, self.show_hidden)
                     # Necessary to keep acceptable speed in library
                     many = False
                     if len(subfiles) > self.file_check_amount:
                         many = True
                     subfiles = [subfile
                                 for subfile in subfiles[:self.file_check_amount]
-                                if is_image(os.path.join(filename, subfile))]
+                                if is_image(os.path.join(fil, subfile))]
                     amount = str(len(subfiles))
                     if subfiles and many:
                         amount += "+"
-                    self.filesize[filename] = amount
+                    self.filesize[fil] = amount
                 except:
-                    self.filesize[filename] = "N/A"
+                    self.filesize[fil] = "N/A"
             else:
-                self.filesize[filename] = fil[4]
+                self.filesize[fil] = sizeof_fmt(os.path.getsize(fil))
 
         return files
 
