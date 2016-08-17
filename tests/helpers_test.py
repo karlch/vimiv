@@ -39,6 +39,16 @@ class HelpersTest(TestCase):
         created_file_content = helpers.read_file("tmp_testdir/baz")
         self.assertEqual(created_file_content, ["vimiv", "is", "great"])
 
+    def test_sizeof_fmt(self):
+        """Format filesize in human-readable format."""
+        readable_size = helpers.sizeof_fmt(100)
+        self.assertEqual(readable_size, "100B")
+        readable_size = helpers.sizeof_fmt(10240)
+        self.assertEqual(readable_size, "10.0K")
+        huge_size = 1024**8 * 12
+        readable_size = helpers.sizeof_fmt(huge_size)
+        self.assertEqual(readable_size, "12.0Y")
+
     def test_error_message(self):
         """Error message popup."""
         # Not much can happen here, if all attributes are set correctly it will
