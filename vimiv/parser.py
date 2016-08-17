@@ -226,6 +226,7 @@ def add_aliases(config, settings):
 
     return settings
 
+
 def parse_config():
     """Check each configfile for settings and apply them.
 
