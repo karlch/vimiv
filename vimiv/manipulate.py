@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Manipulate part for vimiv """
+"""Manipulate part for vimiv."""
 
 import os
 from threading import Thread
@@ -13,11 +13,31 @@ from vimiv.fileactions import move_to_trash
 
 
 class Manipulate(object):
-    """ Manipulate class for vimiv
-        includes the manipulation toolbar, all the actions that apply to it and
-        all the other image manipulations like rotate, flip, ... """
+    """Manipulate class for vimiv.
+
+    Includes the manipulation toolbar, all the actions that apply to it and all
+    the other image manipulations like rotate, flip, and so on.
+
+    Attributes:
+        vimiv: The main vimiv class to interact with.
+        toggled: If True the manipulation bar is visible.
+        manipulations. List of possible manipulations. Includes brightness,
+            contrast, sharpness and optimize.
+        scrolled_win: Gtk.ScrolledWindow for the widgets so they are accessible
+            regardless of window size.
+        scale_bri: Gtk.Scale for brightness.
+        scale_con: Gtk.Scale for contrast.
+        scale_sha: Gtk.Scale for sharpness.
+        running_threads: List of running threads.
+    """
 
     def __init__(self, vimiv, settings):
+        """Create the necessary objects and settings.
+
+        Args:
+            vimiv: The main vimiv class to interact with.
+            settings: Settings from configfiles to use.
+        """
         self.vimiv = vimiv
 
         # Settings
@@ -83,7 +103,7 @@ class Manipulate(object):
         self.running_threads = []
 
     def delete(self):
-        """ Delete all marked images or the current one """
+        """Delete all marked images or the current one."""
         # Get all images
         images = self.get_manipulated_images("Deleted")
         self.vimiv.mark.marked = []
@@ -116,8 +136,13 @@ class Manipulate(object):
                 self.vimiv.statusbar.err_message("No more images")
 
     def get_manipulated_images(self, message):
-        """ Returns the images which should be manipulated - either the
-            currently focused one or all marked images """
+        """Return the images which should be manipulated.
+
+        Either the currently focused image or all marked images.
+
+        Args:
+            message: Message to display when acting on marked images.
+        """
         images = []
         # Add the image shown
         if not self.vimiv.mark.marked and not self.vimiv.thumbnail.toggled:
@@ -147,6 +172,12 @@ class Manipulate(object):
         return images
 
     def rotate(self, cwise, rotate_file=True):
+        """Rotate the displayed image and call thread to rotate files.
+
+        Args:
+            cwise: Rotate image 90 * cwise degrees.
+            rotate_file: If True call thread to rotate files.
+        """
         try:
             cwise = int(cwise)
             images = self.get_manipulated_images("Rotated")
@@ -167,7 +198,12 @@ class Manipulate(object):
                 "Warning: Object cannot be rotated")
 
     def thread_for_rotate(self, images, cwise):
-        """ Rotate all image files in an extra thread """
+        """Rotate all image files in an extra thread.
+
+        Args:
+            images: List of images to rotate.
+            cwise: Rotate image 90 * cwise degrees.
+        """
         try:
             # Finish older manipulate threads first
             while len(self.running_threads) > 1:
@@ -181,19 +217,25 @@ class Manipulate(object):
             self.vimiv.statusbar.err_message("Error: Rotation of file failed")
         self.running_threads.pop(0)
 
-    def flip(self, direction, flip_file=True):
+    def flip(self, horizontal, flip_file=True):
+        """Flip the displayed image and call thread to flip files.
+
+        Args:
+            horizontal: If 1 flip horizontally. Else vertically.
+            rotate_file: If True call thread to rotate files.
+        """
         try:
-            direction = int(direction)
+            horizontal = int(horizontal)
             images = self.get_manipulated_images("Flipped")
             # Flip the image shown
             if self.vimiv.paths[self.vimiv.index] in images:
                 self.vimiv.image.pixbuf_original = \
-                    self.vimiv.image.pixbuf_original.flip(direction)
+                    self.vimiv.image.pixbuf_original.flip(horizontal)
                 self.vimiv.image.update(False)
             if flip_file:
                 # Flip all files in an extra thread
                 flip_thread = Thread(target=self.thread_for_flip,
-                                     args=(images, direction))
+                                     args=(images, horizontal))
                 self.running_threads.append(flip_thread)
                 flip_thread.start()
         except:
@@ -201,7 +243,12 @@ class Manipulate(object):
                 "Warning: Object cannot be flipped")
 
     def thread_for_flip(self, images, horizontal):
-        """ Flip all image vimiv.library.files in an extra thread """
+        """Flip all image files in an extra thread.
+
+        Args:
+            images: List of images to rotate.
+            horizontal: If 1 flip horizontally. Else vertically.
+        """
         try:
             # Finish older manipulate threads first
             while len(self.running_threads) > 1:
@@ -216,7 +263,7 @@ class Manipulate(object):
         self.running_threads.pop(0)
 
     def rotate_auto(self):
-        """ This function autorotates all pictures in the current pathlist """
+        """Autorotate all pictures in the current pathlist."""
         amount, method = imageactions.autorotate(self.vimiv.paths)
         if amount:
             self.vimiv.image.move_index(True, False, 0)
@@ -226,6 +273,7 @@ class Manipulate(object):
         self.vimiv.statusbar.err_message(message)
 
     def toggle(self):
+        """Toggle the manipulation bar."""
         if self.toggled:
             self.toggled = False
             self.scrolled_win.hide()
@@ -257,7 +305,15 @@ class Manipulate(object):
                 self.vimiv.statusbar.err_message("No image open to edit")
 
     def manipulate_image(self, real=""):
-        """ Apply the actual changes defined by the following actions """
+        """Apply manipulations to image.
+
+        Manipulations are the three sliders for brightness, contrast and
+        sharpness and optimize from ImageMagick. They are applied to a thumbnail
+        by default and can act on the real image.
+
+        Args:
+            real: If set, apply manipulations to the real image.
+        """
         if real:  # To the actual image?
             orig, out = real, real
         # A thumbnail for higher responsiveness
@@ -295,7 +351,12 @@ class Manipulate(object):
         self.vimiv.image.update()
 
     def value_slider(self, slider, name):
-        """ Function for the brightness/contrast sliders """
+        """Set value of self.manipulations according to slider value.
+
+        Args:
+            slider: Gtk.Scale on which to operate.
+            name: Name of slider to operate on.
+        """
         val = slider.get_value()
         val = (val + 127) / 127
         # Change brightness, contrast or sharpness
@@ -308,17 +369,26 @@ class Manipulate(object):
         # Run the manipulation function
         self.manipulate_image()
 
-    def focus_slider(self, man):
-        """ Focuses one of the three sliders """
-        if man == "bri":
+    def focus_slider(self, name):
+        """Set focus on one of the three sliders.
+
+        Args:
+            name: Name of slider to focus.
+        """
+        if name == "bri":
             self.scale_bri.grab_focus()
-        elif man == "con":
+        elif name == "con":
             self.scale_con.grab_focus()
         else:
             self.scale_sha.grab_focus()
 
     def change_slider(self, dec, large):
-        """ Changes the value of the currently focused slider """
+        """Change the value of the currently focused slider.
+
+        Args:
+            dec: If True decrease the value.
+            large: If True use large step (10) instead of small one (1)
+        """
         for scale in [self.scale_bri, self.scale_con, self.scale_sha]:
             if scale.is_focus():
                 val = scale.get_value()
@@ -335,8 +405,13 @@ class Manipulate(object):
                     val += step
                 scale.set_value(val)
 
-    def button_clicked(self, widget, accept=False):
-        """ Finishes manipulate mode """
+    def button_clicked(self, button, accept=False):
+        """Finish manipulate mode.
+
+        Args:
+            button: Gtk.Button that was clicked.
+            accept: If True apply changes to image file. Else discard them.
+        """
         # Reload the real images if changes were made
         if "EDIT" in self.vimiv.paths[self.vimiv.index]:
             # manipulated thumbnail
@@ -367,25 +442,34 @@ class Manipulate(object):
         self.toggle()
         self.vimiv.statusbar.update_info()
 
-    def button_opt_clicked(self, widget):
-        """ Sets optimize to True and runs the manipulation """
+    def button_opt_clicked(self, button):
+        """Set optimize to True and run the manipulation.
+
+        Args:
+            button: Gtk.Button that was clicked.
+        """
         self.manipulations[3] = True
         self.manipulate_image()
 
-    def cmd_edit(self, man, num="0"):
-        """ Run the specified edit command """
+    def cmd_edit(self, manipulation, num="0"):
+        """Run the specified manipulation.
+
+        Args:
+            manipulation: Name of manipulation to run.
+            num: Value for setting the slider.
+        """
         if not self.toggled:
             if not self.vimiv.paths:
                 self.vimiv.statusbar.err_message("No image to manipulate")
                 return
             else:
                 self.toggle()
-        if man == "opt":
+        if manipulation == "opt":
             self.button_opt_clicked("button_widget")
         else:
-            self.focus_slider(man)
+            self.focus_slider(manipulation)
             self.vimiv.keyhandler.num_str = num
-            execstr = "self.scale_" + man + \
+            execstr = "self.scale_" + manipulation + \
                 ".set_value(int(self.vimiv.keyhandler.num_str))"
             exec(execstr)
         self.vimiv.keyhandler.num_str = ""

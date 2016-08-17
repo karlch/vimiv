@@ -1,13 +1,18 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Contains all commands and functions for vimiv """
+"""Contains all commands and functions for vimiv."""
 from vimiv.tags import TagHandler
 
 
 class Commands(object):
-    """ Creates the commands for vimiv """
+    """Create the commands for vimiv."""
 
     def __init__(self, vimiv):
+        """Generate commands and functions.
+
+        Args:
+            vimiv: The main vimiv class to interact with.
+        """
         self.vimiv = vimiv
         self.vimiv.tag_handler = TagHandler(vimiv)
 

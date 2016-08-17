@@ -1,14 +1,30 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Slideshow for vimiv """
+"""Slideshow for vimiv."""
 
 from gi.repository import GLib
 
 
 class Slideshow(object):
-    """ Handles everything related to slideshow for vimiv """
+    """Handle everything related to slideshow for vimiv.
+
+    Attributes:
+        vimiv: The main vimiv class to interact with.
+        at_start: If True start the slideshow after startup.
+        delay: Slideshow delay between images.
+        timer_id: ID of the currently running GLib.Timeout.
+        start_index: Index of the image when slideshow was started. Saved to
+            display a message when slideshow is back at the beginning.
+        running: If True the slideshow is running.
+    """
 
     def __init__(self, vimiv, settings):
+        """Create the necessary objects and settings.
+
+        Args:
+            vimiv: The main vimiv class to interact with.
+            settings: Settings from configfiles to use.
+        """
         self.vimiv = vimiv
         general = settings["GENERAL"]
 
@@ -19,7 +35,7 @@ class Slideshow(object):
         self.running = False
 
     def toggle(self):
-        """ Toggles the slideshow or updates the delay """
+        """Toggle the slideshow or update the delay."""
         if not self.vimiv.paths:
             message = "No valid paths, starting slideshow failed"
             self.vimiv.statusbar.err_message(message)
@@ -45,7 +61,13 @@ class Slideshow(object):
         self.vimiv.statusbar.update_info()
 
     def set_delay(self, val, key=""):
-        """ Sets slideshow delay to val or inc/dec depending on key """
+        """Set slideshow delay.
+
+        Args:
+            val: Value to which the delay is set.
+            key: One of "+" or "-" indicating if the delay should be increased
+                or decreased.
+        """
         if key == "-":
             if self.delay >= 0.8:
                 self.delay -= 0.2

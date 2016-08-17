@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Contains the commandline class for vimiv """
+"""Contains the commandline class for vimiv."""
 import re
 import os
 from threading import Thread
@@ -17,9 +17,29 @@ tagdir = os.path.join(vimivdir, "Tags")
 
 
 class CommandLine(object):
-    """ Commandline of vimiv """
+    """Commandline of vimiv.
+
+    Attributes:
+        vimiv: The main vimiv class to interact with.
+        grid: Gtdk.Grid which packs the other objects.
+        entry: Gtk.Entry as commandline entry.
+        info: Gtk.Label to show completion information.
+        history: List of commandline history to save.
+        pos: Position in history completion.
+        sub_history: Parts of the history that match entered text.
+        search_pos: Position when navigating through search results.
+        search_positions: Search results as positions.
+        search_case: If True, search case sensitively.
+        running_threads: List of all running threads.
+    """
 
     def __init__(self, vimiv, settings):
+        """Create the necessary objects and settings.
+
+        Args:
+            vimiv: The main vimiv class to interact with.
+            settings: Settings from configfiles to use.
+        """
         self.vimiv = vimiv
         general = settings["GENERAL"]
 
@@ -72,15 +92,20 @@ class CommandLine(object):
         self.sub_history = []
         self.search_pos = 0
         self.search_positions = []
-        self.search_names = []
         self.search_case = general["search_case_sensitive"]
 
         # List of threads
         self.running_threads = []
 
     def handler(self, entry):
-        """ Handles input from the entry, namely if it is a path to be focused
-        or a (external) command to be run """
+        """Handle input from the entry.
+
+        Check for type of command (internal, external or path) and run the
+        correct function.
+
+        Args:
+            entry: The Gtk.Entry from which the command comes.
+        """
         # Only close completions if the tabbing is open
         if self.vimiv.completions.cycling:
             self.vimiv.completions.reset()
@@ -120,7 +145,11 @@ class CommandLine(object):
         self.pos = 0
 
     def run_external_command(self, cmd):
-        """ Run the entered command in the terminal """
+        """Run the entered command in the terminal.
+
+        Args:
+            cmd: The command to run.
+        """
         # Check on which file(s) % and * should operate
         if self.vimiv.window.last_focused == "lib" and self.vimiv.library.files:
             filelist = self.vimiv.library.files
@@ -155,7 +184,12 @@ class CommandLine(object):
             filelist[i] = f.replace("\\\\\\\\ ", " ")
 
     def thread_for_external(self, cmd, directory):
-        """ Starting a new thread for external commands """
+        """Start a new thread for external commands.
+
+        Args:
+            cmd: The command to run.
+            directory: Directory which is affected by command.
+        """
         try:
             # Possibility to "pipe to vimiv"
             if cmd[-1] == "|":
@@ -184,8 +218,13 @@ class CommandLine(object):
         self.running_threads.pop()
 
     def pipe(self, pipe_input):
-        """ Run output of external command in a pipe
-            This checks for directories, files and vimiv commands """
+        """Run output of external command in a pipe.
+
+        This checks for directories, files and vimiv commands.
+
+        Args:
+            pipe_input: Command that comes from pipe.
+        """
         # Leave if no pipe_input came
         if not pipe_input:
             self.vimiv.statusbar.err_message("No pipe_input from pipe")
@@ -222,7 +261,11 @@ class CommandLine(object):
                 self.run_command(cmd)
 
     def run_path(self, path):
-        """ Run a path command, namely populate files or focus directory """
+        """Run a path command, namely populate files or focus directory.
+
+        Args:
+            path: The path to run on.
+        """
         # Expand home
         if path[0] == "~":
             path = os.path.expanduser("~") + path[1:]
@@ -261,7 +304,11 @@ class CommandLine(object):
             self.vimiv.statusbar.err_message("Warning: Not a valid path")
 
     def run_command(self, cmd):
-        """ Run the correct internal cmd """
+        """Run the correct internal command.
+
+        Args:
+            cmd: Internal command to run.
+        """
         parts = cmd.split()
         if "set" in cmd:
             arg = parts[2:]
@@ -295,7 +342,13 @@ class CommandLine(object):
             self.vimiv.statusbar.err_message("No such command: %s" % (cmd))
 
     def history_search(self, down):
-        """ Update the cmd_handler text with history """
+        """Search through history with substring match.
+
+        Updates the text of self.entry with the matching history search.
+
+        Args:
+            down: If True, search downwards. Else search updwards.
+        """
         # Shortly disconnect the change signal
         self.entry.disconnect_by_func(self.check_close)
         # Only parts of the history that match the entered text
@@ -318,7 +371,7 @@ class CommandLine(object):
         self.entry.connect("changed", self.check_close)
 
     def focus(self):
-        """ Open and focus the command line """
+        """Open and focus the command line."""
         # Colon for text
         self.entry.set_text(":")
         # Remove old error messages
@@ -338,7 +391,7 @@ class CommandLine(object):
         self.entry.set_position(-1)
 
     def leave(self):
-        """ Close the command line """
+        """Close the command line."""
         self.grid.hide()
         # Remove all completions shown and the text currently inserted
         self.info.set_text("")
@@ -354,7 +407,11 @@ class CommandLine(object):
             self.vimiv.image.scrolled_win.grab_focus()
 
     def check_close(self, entry):
-        """ Close the entry if the colon/slash is deleted """
+        """Close the entry if the colon/slash is deleted.
+
+        Args:
+            entry: The Gtk.Entry to check.
+        """
         self.sub_history = []
         self.pos = 0
         text = entry.get_text()
@@ -362,50 +419,59 @@ class CommandLine(object):
             self.leave()
 
     def reset_tab_count(self, entry):
-        """ Reset the amount of tab presses if anything else than a tab is
-            pressed """
+        """Reset the amount of tab presses if new text is entered.
+
+        Args:
+            entry: The Gtk.Entry to check.
+        """
         self.vimiv.completions.tab_presses = 0
         self.vimiv.completions.cycling = False
         self.info.hide()
 
     def cmd_search(self):
-        """ Prepend search to the cmd_line and open it """
+        """Prepend search character '/' to the cmd_line and open it."""
         self.focus()
         self.entry.set_text("/")
         self.entry.set_position(-1)
 
     def search(self, searchstr):
-        """ Run a search on the appropriate filelist """
+        """Run a search on the appropriate filelist.
+
+        Args:
+            searchstr: The search string to parse.
+        """
         if self.vimiv.library.treeview.is_focus():
             paths = self.vimiv.library.files
         else:
             paths = self.vimiv.paths
-        self.search_names = []
         self.search_positions = []
         self.search_pos = 0
 
         if self.search_case:
             for i, fil in enumerate(paths):
                 if searchstr in fil:
-                    self.search_names.append(fil)
                     self.search_positions.append(i)
         else:
             for i, fil in enumerate(paths):
                 if searchstr.lower() in fil.lower():
-                    self.search_names.append(fil)
                     self.search_positions.append(i)
 
         if self.vimiv.library.treeview.is_focus():
             self.vimiv.library.reload(os.getcwd(), search=True)
 
         # Move to first result or throw an error
-        if self.search_names:
+        if self.search_positions:
             self.search_move()
         else:
             self.vimiv.statusbar.err_message("No matching file")
 
     def search_move(self, index=0, forward=True):
-        """ Move to the next/previous search """
+        """Move to the next or previous search.
+
+        Args:
+            index: How much to move.
+            forward: If true, move forwards. Else move backwards.
+        """
         # Correct handling of index
         if self.vimiv.keyhandler.num_str:
             index = int(self.vimiv.keyhandler.num_str)
@@ -414,7 +480,7 @@ class CommandLine(object):
             self.search_pos += index
         else:
             self.search_pos -= index
-        self.search_pos = self.search_pos % len(self.search_names)
+        self.search_pos = self.search_pos % len(self.search_positions)
 
         # Select file depending on library
         if self.vimiv.library.toggled:
@@ -422,11 +488,10 @@ class CommandLine(object):
             self.vimiv.library.treeview.set_cursor(Gtk.TreePath(path),
                                                    None, False)
             self.vimiv.library.treepos = path
-            if len(self.search_names) == 1:
-                self.vimiv.library.file_select("alt",
-                                               self.search_names
-                                               [self.search_pos],
-                                               "b",
+            if len(self.search_positions) == 1:
+                self.vimiv.library.file_select(self.vimiv.library.treeview,
+                                               Gtk.TreePath(path),
+                                               None,
                                                False)
         else:
             self.vimiv.keyhandler.num_str = str(
@@ -434,8 +499,6 @@ class CommandLine(object):
             self.vimiv.image.move_pos()
 
     def reset_search(self):
-        """ Simply resets all search parameters to null """
-        self.search_names = []
+        """Reset all search parameters to null."""
         self.search_positions = []
         self.search_pos = 0
-        return

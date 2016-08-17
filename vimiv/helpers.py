@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-""" Wrappers around standard library functions used in vimiv """
+"""Wrappers around standard library functions used in vimiv."""
 
 import os
 from subprocess import Popen, PIPE
@@ -34,7 +34,13 @@ external_commands = tuple(external_commands)
 
 
 def listdir_wrapper(path, show_hidden=False):
-    """ Reimplementation of os.listdir which mustn't show hidden files """
+    """Reimplementation of os.listdir which mustn't show hidden files.
+
+    Args:
+        path: Path of the directory in which os.listdir is called.
+        show_hidden: If true, show hidden files. Else do not.
+    Return: Sorted list of files in path.
+    """
     if show_hidden:
         files = os.listdir(os.path.expanduser(path))
     else:
@@ -44,7 +50,11 @@ def listdir_wrapper(path, show_hidden=False):
 
 
 def listdir_nohidden(path):
-    """ The nohidden part of listdir_wrapper """
+    """The nohidden part of listdir_wrapper.
+
+    Args:
+        path: Path of the directory in which os.listdir is called.
+    """
     files = os.listdir(os.path.expanduser(path))
     for fil in files:
         if not fil.startswith("."):
@@ -52,8 +62,12 @@ def listdir_nohidden(path):
 
 
 def read_file(filename):
-    """ Reads the contents of a file into a list and returns it. If the file
-    doesn't exist it will be created and an empty list returned. """
+    """Read the content of a file into a list or create file.
+
+    Args:
+        filename: The name of the file to be read.
+    Return: Content of filename in a list.
+    """
     content = []
     try:
         fil = open(filename, "r")
@@ -67,7 +81,12 @@ def read_file(filename):
 
 
 def error_message(message, running_tests=False):
-    """ Shows a GTK Error Pop Up with the message """
+    """Show a GTK Error Pop Up with message.
+
+    Args:
+        message: The message to display.
+        running_tests: True if running from testsuite. Do not show window then.
+    """
     popup = Gtk.Dialog(title="vimiv - Error", transient_for=Gtk.Window())
     popup.add_button("Close", Gtk.ResponseType.CLOSE)
     message_label = Gtk.Label()

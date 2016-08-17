@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-""" Return a list of images for vimiv """
+"""Different actions applying directly to files."""
 
 import os
 import shutil
@@ -16,7 +16,12 @@ thumbdir = os.path.join(vimivdir, "Thumbnails")
 
 
 def recursive_search(directory):
-    """ Search a directory recursively for images """
+    """Search a directory recursively for images.
+
+    Args:
+        directory: Directory to search for images.
+    Return: List of images in directory.
+    """
     # pylint: disable=unused-variable
     for root, dirs, files in os.walk(directory):
         for fil in files:
@@ -24,7 +29,12 @@ def recursive_search(directory):
 
 
 def populate_single(arg, recursive):
-    """ Populate a complete filelist if only one path is given """
+    """Populate a complete filelist if only one path is given.
+
+    Args:
+        arg: Single path given.
+        recursive: If True search path recursively for images.
+    """
     if os.path.isfile(arg):
         # Use parent directory
         directory = os.path.dirname(os.path.abspath(arg))
@@ -50,7 +60,14 @@ def populate_single(arg, recursive):
 
 
 def populate(args, recursive=False, shuffle_paths=False):
-    """ Populate a list of files out of a given path """
+    """Populate a list of files out given paths.
+
+    Args:
+        args: Paths given.
+        recursive: If True search path recursively for images.
+        shuffle_paths: If True shuffle found paths randomly.
+    Return: Found paths, position of first given path.
+    """
     paths = []
     # Default to current directory for recursive search
     if not args and recursive:
@@ -88,8 +105,13 @@ def populate(args, recursive=False, shuffle_paths=False):
 
 
 def move_to_trash(filelist):
-    """ Moves every file in filelist to the Trash. If it is a directory, an
-    error is thrown."""
+    """Move every file in filelist to the Trash.
+
+    If it is a directory, an error is thrown.
+
+    Args:
+        filelist: The list of files to operate on.
+    """
     # Create the directory if it isn't there yet
     deldir = os.path.expanduser("~/.vimiv/Trash")
     if not os.path.isdir(deldir):
@@ -116,7 +138,11 @@ def move_to_trash(filelist):
 
 
 def is_image(filename):
-    """ Checks whether the file is an image """
+    """Check whether a file is an image.
+
+    Args:
+        filename: Name of file to check.
+    """
     complete_name = os.path.abspath(os.path.expanduser(filename))
     try:
         return bool(GdkPixbuf.Pixbuf.get_file_info(complete_name)[0])
@@ -125,13 +151,22 @@ def is_image(filename):
 
 
 class FileExtras(object):
-    """ Extra fileactions for vimiv """
+    """Extra fileactions for vimiv."""
 
-    def __init__(self, vimiv, settings):
+    def __init__(self, vimiv):
+        """Receive and set vimiv class.
+
+        Args:
+            vimiv: The main vimiv class to interact with.
+        """
         self.vimiv = vimiv
 
     def clear(self, directory_name):
-        """ Remove all files in directory (Trash or Thumbnails) """
+        """Remove all files in directory (Trash or Thumbnails).
+
+        Args:
+            directory_name: Directory to clear.
+        """
         if directory_name == "Trash":
             directory = trashdir
         else:
@@ -141,8 +176,14 @@ class FileExtras(object):
             os.remove(fil)
 
     def format_files(self, string):
-        """ Format the image names in the filelist according to a formatstring
-            nicely numbering them """
+        """Format image names in filelist according to a formatstring.
+
+        Numbers files in form of formatstring_000.extension. Replaces exif
+        information accordingly.
+
+        Args:
+            string: Formatstring to use.
+        """
         # Catch problems
         if self.vimiv.library.treeview.is_focus():
             message = "Format only works on opened image files"
@@ -195,7 +236,17 @@ class FileExtras(object):
 
     def reload_changes(self, directory, reload_path=True, pipe=False,
                        pipe_input=None):
-        """ Reload everything, meaning filelist in library and image """
+        """Reload everything that could have changed.
+
+        Reload filelist in library and image and update names accordingly.
+
+        Args:
+            directory: Directory which was affected.
+            reload_path: If True reload information that contains the current
+                path.
+            pipe: If True, input came from a pipe. Therefore run pipe.
+            pipe_input: Command that comes from pipe.
+        """
         if (directory == os.getcwd() and directory !=
                 self.vimiv.tags.directory and self.vimiv.library.toggled):
             if (self.vimiv.library.treepos >= 0 and

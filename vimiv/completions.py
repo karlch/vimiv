@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-""" The command line completion for vimiv """
+"""The commandline completion for vimiv."""
 
 import os
 import re
@@ -10,24 +10,26 @@ from vimiv.fileactions import is_image
 
 
 class Completion():
+    """Class for the commandline completion.
 
-    """ Class for the command line completion
-        Different functions for the different completion types """
+    Contains different functions for the different completion types.
+
+    Attributes:
+        command: Entered text in commandline.
+        completions: Available completions.
+        repeat: Prepended repeat number for command.
+        show_hidden: If true, show hidden files. Else do not.
+    """
 
     def __init__(self, command, commandlist, repeat="", show_hidden=False):
-        """ Requieres the entered command and a list of the possible
-            completions; an integer which says how often the entered command
-            shall be executed is optional and defaults to 0 (not used);
-            boolean to show hidden files or not """
-        self.command = command  # entered text
+        """Set default values for attributes."""
+        self.command = command
         self.completions = commandlist  # internal commands (default completion)
         self.repeat = repeat  # numstr for repetition
         self.show_hidden = show_hidden
 
     def complete(self):
-        """ Finds out which type of completion should be done and executes the
-            correct function """
-        # Tab presses are remembered so one can tab through all the completions
+        """Find out type of completion and execute the correct function."""
         comp_type = "internal"
         # Generate list of possible completions depending on the type of
         # completion
@@ -67,8 +69,13 @@ class Completion():
         return output, compstr, completions
 
     def best_match(self, completions, comp_type):
-        """ Finds the best matching completion and returns the formatted
-            completions and the best match"""
+        """Find the best matching completion.
+
+        Args:
+            completions: List of possible completions.
+            comp_type: Completion type (internal, external, path, tag).
+        Return: Formatted completions, best match.
+        """
         # Output, start with : and the prepended numbers
         output = ":" + self.repeat
         # Find last equal character
@@ -102,7 +109,7 @@ class Completion():
         return compstr, output
 
     def complete_tag(self):
-        """ Appends the available tag names to an internal tag command """
+        """Append the available tag names to an internal tag command."""
         tags = listdir_wrapper(os.path.expanduser("~/.vimiv/Tags"),
                                self.show_hidden)
         completions = []
@@ -111,7 +118,7 @@ class Completion():
         return completions
 
     def complete_external(self):
-        """ Completion of external commands """
+        """Complete external commands."""
         arguments = self.command.split()
         # Check if path completion would be useful
         # Assumed the case if we have more than one argument and the last one is
@@ -132,9 +139,13 @@ class Completion():
             return external_commands
 
     def complete_path(self, path, external_command=False):
-        """ Returns a nicely formated filelist inside path
-            If not running within an external command it will sort out
-            unsupported filetypes """
+        """Complete paths.
+
+        Args:
+            path: (Partial) name of the path to run completion on.
+            external_command: If True, path comes from an external command.
+        Return: List containing formatted matching paths.
+        """
         # Directory of the path, default to .
         directory = os.path.dirname(path) if os.path.dirname(path) else path
         if not os.path.exists(os.path.expanduser(directory)):
@@ -156,9 +167,23 @@ class Completion():
 
 
 class VimivComplete(object):
-    """ Inherits from vimiv to communicate with the widget """
+    """Interface between Completion and vimiv for commandline completion.
+
+    Attributes:
+        vimiv: The main vimiv class to interact with.
+        tab_presses: Times tab has been pressed without any other text being
+            entered.
+        cycling: If True, cycle through possible completions.
+        completions: Available completions.
+        completions_reordered: Completions ordered according to current tab
+            position.
+        output: Best match to be set in the commandline entry.
+        compstr: Formatted string with all possible completions to show in
+            commandline info.
+    """
 
     def __init__(self, vimiv):
+        """Set default values for attributes."""
         self.vimiv = vimiv
         self.tab_presses = 0
         self.cycling = False
@@ -168,7 +193,7 @@ class VimivComplete(object):
         self.compstr = ""
 
     def complete(self, inverse=False):
-        """ Simple autocompletion for the command line """
+        """Run completion for the commandline."""
         # Remember old completion
         previous_output = self.output
         if not self.cycling:
@@ -236,7 +261,7 @@ class VimivComplete(object):
         return True  # Deactivates default bindings (here for Tab)
 
     def reset(self):
-        """ Simply empty completions """
+        """Empty completions and all corresponding values."""
         self.tab_presses = 0
         self.cycling = False
         self.completions = []
@@ -244,7 +269,14 @@ class VimivComplete(object):
         self.vimiv.commandline.info.set_markup(self.compstr)
 
     def not_common(self, output, completion):
-        """ Returns everything but the common match at the end of output """
+        """Receive prepended text from output.
+
+        Args:
+            output: Test from commandline entry.
+            completion: Proposed completion string.
+        Return: String with everything but the common match between output and
+            completion.
+        """
         for i in range(len(completion)):
             end = len(completion) - i
             possible_ending = completion[:end]

@@ -1,20 +1,26 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Handles marking of images for vimiv """
+"""Handle marking of images for vimiv."""
 
 import os
 
 
 class Mark(object):
-    """ Handles marking of images """
+    """Handle marking of images.
+
+    Attributes:
+        vimiv: The main vimiv class to interact with.
+        marked: List of currently marked images.
+        marked_bak: List of last marked images to be able to toggle mark status.
+    """
 
     def __init__(self, vimiv, settings):
         self.vimiv = vimiv
         self.marked = []
-        self.marked_bak = []  # saves marked images after marked toggle
+        self.marked_bak = []
 
     def mark(self):
-        """ Marks the current image """
+        """Mark the current image."""
         # Check which image
         if self.vimiv.library.treeview.is_focus():
             current = os.path.abspath(self.vimiv.library.files[
@@ -41,8 +47,11 @@ class Mark(object):
                 "Marking directories is not supported")
 
     def toggle_mark(self):
-        """ Toggles mark status: if images are marked all marks are removed,
-            otherwise the last marked images are re-marked """
+        """Toggle mark status.
+
+        If images are marked all marks are removed, otherwise the last marked
+        images are re-marked.
+        """
         if self.marked:
             self.marked_bak = self.marked
             self.marked = []
@@ -52,7 +61,7 @@ class Mark(object):
         self.mark_reload(False, to_reload)
 
     def mark_all(self):
-        """ Marks all images """
+        """Mark all images."""
         # Get the correct filelist
         if self.vimiv.library.treeview.is_focus():
             files = []
@@ -69,7 +78,7 @@ class Mark(object):
         self.mark_reload()
 
     def mark_between(self):
-        """ Marks all images between the two last selections """
+        """Mark all images between the two last marks."""
         # Check if there are enough marks
         if len(self.marked) < 2:
             self.vimiv.statusbar.err_message("Not enough marks")
@@ -97,7 +106,7 @@ class Mark(object):
         self.mark_reload()
 
     def mark_reload(self, reload_all=True, current=None):
-        """ Reload all information which contains marks """
+        """Reload all information which contains marks."""
         # Update lib
         if self.vimiv.library.toggled:
             self.vimiv.library.remember_pos(os.getcwd(),

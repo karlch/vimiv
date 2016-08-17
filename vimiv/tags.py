@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Deals with the handling of tags for vimiv """
+"""Deal with the handling of tags for vimiv."""
 import os
 from gi import require_version
 require_version('Gtk', '3.0')
@@ -10,21 +10,43 @@ from vimiv.fileactions import populate
 
 
 class TagHandler(object):
-    """ Handles tags """
+    """Handle tags.
+
+    Attributes:
+        vimiv: The main vimiv class to interact with.
+        directory: Directory in which tags are stored.
+        last: Last tag that was loaded.
+    """
 
     def __init__(self, vimiv):
+        """Create the necessary objects.
+
+        Args:
+            vimiv: The main vimiv class to interact with.
+        """
         self.vimiv = vimiv
         self.directory = os.path.join(self.vimiv.directory, "Tags")
         self.last = ""
 
     def read(self, tagname):
-        """ Returns a list of all images in tagname """
+        """Read a tag and return the images in it.
+
+        Args:
+            tagname: Name of tag to operate on.
+
+        Return: List of images in the tag called tagname.
+        """
         tagfile_name = os.path.join(self.directory, tagname)
         tagged_images = read_file(tagfile_name)
         return tagged_images
 
     def write(self, imagelist, tagname):
-        """ Adds the images in imagelist to the tag named tagname """
+        """Add a list of images to a tag.
+
+        Args:
+            imagelist: List of images to write to the tag.
+            tagname: Name of tag to operate on.
+        """
         tagfile_name = os.path.join(self.directory, tagname)
         tagged_images = self.read(tagname)
 
@@ -34,7 +56,11 @@ class TagHandler(object):
                     tagfile.write(image + "\n")
 
     def remove(self, tagname):
-        """ Remove tagname showing an error if the tag doesn't exist """
+        """Remove a tag showing an error if the tag doesn't exist.
+
+        Args:
+            tagname: Name of tag to operate on.
+        """
         tagfile_name = os.path.join(self.directory, tagname)
         if os.path.isfile(tagfile_name):
             os.remove(tagfile_name)
@@ -43,7 +69,11 @@ class TagHandler(object):
             self.vimiv.statusbar.err_message(err)
 
     def load(self, tagname):
-        """ Load all images in tag 'name' as current filelist """
+        """Load all images in a tag as current filelist.
+
+        Args:
+            tagname: Name of tag to operate on.
+        """
         os.chdir(self.directory)
         # Read file and get all tagged images as list
         tagged_images = self.read(tagname)

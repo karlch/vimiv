@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Statusbar for vimiv """
+"""Statusbar for vimiv."""
 
 import os
 from gi import require_version
@@ -9,7 +9,23 @@ from gi.repository import GLib, Gtk
 
 
 class Statusbar(object):
-    """ Creates the statusbar and handles all events for it """
+    """Create the statusbar and handle all events for it.
+
+    Attributes:
+        vimiv: The main vimiv class to interact with.
+        hidden: If True the statusbar is not visible.
+        errors: List of errors.
+        search_names: List of names of the search results.
+        search_positions: List of positions of the search results.
+        timer_id: ID of the currently running GLib.Timeout.
+        size: Height of the statusbar.
+        lock: If True do not update any information.
+        was_hidden: If True the statusbar was hidden before an error message.
+        bar: Gtk.Grid containing all widgets.
+        left_label: Gtk.Label containing position, name and zoom.
+        right_label: Gtk.Label containing mode and prefixed numbers.
+        center_label: Gtk.Label containing mark status and slideshow info.
+    """
 
     def __init__(self, vimiv, settings):
         self.vimiv = vimiv
@@ -17,7 +33,7 @@ class Statusbar(object):
 
         # Default values
         self.hidden = general["display_bar"]
-        self.error = []  # Errors for statusbar
+        self.errors = []
         self.search_names = []
         self.search_positions = []
         self.timer_id = GLib.Timeout
@@ -29,11 +45,11 @@ class Statusbar(object):
         self.bar = Gtk.Grid()
         # Two labels for two sides of statusbar and one in the middle for
         # additional info
-        self.left_label = Gtk.Label()  # Position and image name
+        self.left_label = Gtk.Label()
         self.left_label.set_justify(Gtk.Justification.LEFT)
-        self.right_label = Gtk.Label()  # Mode and prefixed numbers
+        self.right_label = Gtk.Label()
         self.right_label.set_justify(Gtk.Justification.RIGHT)
-        self.center_label = Gtk.Label()  # Zoom, marked, slideshow, ...
+        self.center_label = Gtk.Label()
         self.center_label.set_justify(Gtk.Justification.CENTER)
         self.center_label.set_hexpand(True)
         # Add them all
@@ -43,25 +59,29 @@ class Statusbar(object):
         self.bar.set_border_width(10)
         self.bar.set_valign(Gtk.Align.END)
 
-    def err_message(self, mes):
-        """ Pushes an error message to the statusbar """
-        self.error.append(1)
-        mes = "<b>" + mes + "</b>"
+    def err_message(self, message):
+        """Push an error message to the statusbar.
+
+        Args:
+            message: Message to push.
+        """
+        self.errors.append(1)
+        message = "<b>" + message + "</b>"
         self.timer_id = GLib.timeout_add_seconds(5, self.error_false)
         # Show if is was hidden
         if self.hidden:
             self.toggle()
             self.was_hidden = True
-        self.left_label.set_markup(mes)
+        self.left_label.set_markup(message)
 
     def error_false(self):
-        """ Strip one error and update the statusbar if no more errors remain"""
-        self.error = self.error[0:-1]
-        if not self.error:
+        """Strip one error and update the statusbar if no more errors remain."""
+        self.errors = self.errors[0:-1]
+        if not self.errors:
             self.update_info()
 
     def update_info(self):
-        """ Update the statusbar and the window title """
+        """Update the statusbar and the window title."""
         # Return if it is locked
         if self.lock:
             return
@@ -124,7 +144,7 @@ class Statusbar(object):
         self.size = self.vimiv.statusbar.bar.get_allocated_height()
 
     def get_mode(self):
-        """ Returns which widget is currently focused """
+        """Return which widget is currently focused."""
         if self.vimiv.library.treeview.is_focus():
             return "<b>-- LIBRARY --</b>"
         elif self.vimiv.manipulate.toggled:
@@ -135,7 +155,7 @@ class Statusbar(object):
             return "<b>-- IMAGE --</b>"
 
     def toggle(self):
-        """ Toggles statusbar resizing image if necessary """
+        """Toggle statusbar and resize image if necessary."""
         if not self.hidden and not self.vimiv.commandline.entry.is_visible():
             self.bar.hide()
         else:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Thumbnail part of vimiv """
+"""Thumbnail part of vimiv."""
 
 import os
 from gi import require_version
@@ -10,11 +10,37 @@ from vimiv.imageactions import Thumbnails
 
 
 class Thumbnail(object):
-    """ Thumbnail class for vimiv
-        includes the iconview with the thumnbails and all actions that apply to
-        it """
+    """Thumbnail class for vimiv.
+
+    Includes the iconview with the thumnbails and all actions that apply to it.
+
+    Attributes:
+        vimiv: The main vimiv class to interact with.
+        toggled: If True the library is visible.
+        size: Tuple containing the size of thumbnails.
+        max_size: Tuple containing the maximum size of thumbnails.
+        possible_sizes: List of tuples containing the possible thumbnail sizes.
+        current_size: Position in the possible_sizes list.
+        cache: If True, cache thumbnails.
+        directory: Directory in which thumbnails are stored.
+        timer_id: ID of the currently running GLib.Timeout.
+        errorpos: List containing the positions of images where thumbnail
+            creation failed.
+        pos: Current position in the Gtk.IconView.
+        elements: List containing names of current thumbnail-files.
+        pixbuf_max: List containing current thumbnail-pixbufs at maximum size.
+        listsotre: Gtk.ListStore containing thumbnail pixbufs and names.
+        iconview: Gtk.IconView to display thumbnails.
+        columns: Amount of columns that fit into the window.
+    """
 
     def __init__(self, vimiv, settings):
+        """Create the necessary objects and settings.
+
+        Args:
+            vimiv: The main vimiv class to interact with.
+            settings: Settings from configfiles to use.
+        """
         self.vimiv = vimiv
         general = settings["GENERAL"]
 
@@ -27,7 +53,7 @@ class Thumbnail(object):
         self.cache = general["cache_thumbnails"]
         self.directory = os.path.join(self.vimiv.directory, "Thumbnails")
         self.timer_id = GLib.Timeout
-        self.errorpos = 0
+        self.errorpos = []
         self.pos = 0
         self.elements = []
         self.pixbuf_max = []
@@ -52,11 +78,15 @@ class Thumbnail(object):
         self.iconview.set_border_width(1)
         self.iconview.set_markup_column(1)
 
-    def iconview_clicked(self, w, count):
-        """ Selects image when thumbnail was selected """
-        # Move to the current position if the iconview is clicked
+    def iconview_clicked(self, iconview, path):
+        """Select and show image when thumbnail was activated.
+
+        Args:
+            iconview: Gtk.IconView that emitted the signal.
+            path: Gtk.TreePath of the activated thumbnail.
+        """
         self.toggle()
-        count = count.get_indices()[0] + 1
+        count = path.get_indices()[0] + 1
         self.vimiv.keyhandler.vimiv.keyhandler.num_clear()
         for i in self.errorpos:
             if count > i:
@@ -65,7 +95,7 @@ class Thumbnail(object):
         self.vimiv.image.move_pos()
 
     def toggle(self):
-        """ Toggles thumbnail mode """
+        """Toggle thumbnail mode."""
         if self.toggled:
             self.vimiv.image.scrolled_win.remove(self.iconview)
             self.vimiv.image.scrolled_win.add(self.vimiv.image.viewport)
@@ -87,8 +117,7 @@ class Thumbnail(object):
             self.vimiv.statusbar.update_info()
 
     def calculate_columns(self):
-        """ Calculates how many columns fit into the current window and sets
-            them for the iconview """
+        """Calculate how many columns fit into the current window."""
         window_width = self.vimiv.winsize[0]
         if self.vimiv.library.toggled:
             width = window_width - self.vimiv.library.width
@@ -98,7 +127,11 @@ class Thumbnail(object):
         self.iconview.set_columns(self.columns)
 
     def show(self, toggled=False):
-        """ Shows thumbnail mode when called from toggle """
+        """Show thumbnails when called from toggle.
+
+        Args:
+            toggled: If True thumbnail mode is already toggled.
+        """
         # Clean liststore
         self.liststore.clear()
         self.pixbuf_max = []
@@ -149,7 +182,14 @@ class Thumbnail(object):
                 "Thumbnail creation for %s failed" % (failed_files))
 
     def reload(self, thumb, index, reload_image=True):
-        """ Reloads the thumbnail of manipulated images """
+        """Reload the thumbnails of manipulated images.
+
+        Args:
+            thumb: Thumbnail to reload.
+            index: Position of the thumbnail to be reloaded.
+            reload_image: If True reload the image of the thumbnail. Else only
+                the name (useful for marking).
+        """
         for i in self.errorpos:
             if index > i:
                 index -= 1
@@ -177,8 +217,11 @@ class Thumbnail(object):
             self.vimiv.statusbar.err_message(message)
 
     def move_direction(self, direction):
-        """ Find out correct position to move to when scrolling with hjkl and
-            call move_to_pos with the position """
+        """Scroll with "hjkl".
+
+        Args:
+            direction: Direction to scroll in. One of "hjkl".
+        """
         pos = self.pos
         # Get last element
         last = len(self.vimiv.paths) - len(self.errorpos) - 1
@@ -208,7 +251,11 @@ class Thumbnail(object):
         self.move_to_pos(pos)
 
     def move_to_pos(self, pos):
-        """ Focus the thumbnail at pos and center it in iconview """
+        """Set focus on position in iconview and center it.
+
+        Args:
+            pos: The position to focus.
+        """
         self.pos = pos
         self.iconview.select_path(Gtk.TreePath(self.pos))
         current_thumb = self.iconview.get_cells()[0]
@@ -218,7 +265,11 @@ class Thumbnail(object):
         self.vimiv.keyhandler.num_clear()
 
     def zoom(self, inc=True):
-        """ Zoom thumbnails """
+        """Zoom thumbnails.
+
+        Args:
+            inc: If True increase thumbnail size.
+        """
         # What zoom and limits
         if inc and self.current_size < len(self.sizes) - 1:
             self.current_size += 1
@@ -240,8 +291,13 @@ class Thumbnail(object):
         self.move_to_pos(self.pos)
 
     def scale_thumb(self, pixbuf_max):
-        """ Scale the image to self.size from pixbuf_max
-            returns the scaled pixbuf """
+        """Scale the thumbnail image to self.size.
+
+        Args:
+            pixbuf_max: Pixbuf at maximum thumbnail size to scale.
+
+        Return: The scaled pixbuf.
+        """
         width = \
             pixbuf_max.get_width() * (float(self.size[0]) / self.max_size[0])
         height = \
@@ -251,7 +307,7 @@ class Thumbnail(object):
         return pixbuf
 
     def set_sizes(self):
-        """ Sets maximum size, current size and possible sizes for thumbs """
+        """Set maximum size, current size and possible sizes for thumbnails."""
         # Maximum
         if self.max_size[0] >= self.possible_sizes[-1][0]:
             self.sizes = self.possible_sizes

@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-""" Main function for the vimiv image browser
-Parses the necessary stuff and starts the Gtk instance """
+"""Main function for the vimiv image browser.
+
+Parses the necessary stuff and starts the Gtk instance.
+"""
 
 import os
 import signal
@@ -25,7 +27,11 @@ from vimiv.mark import Mark
 
 
 def main(running_tests=False):
-    """ Starting point for vimiv """
+    """Starting point for vimiv.
+
+    Args:
+        running_tests: True if running from testsuite. Do not show window then.
+    """
     parser = get_args()
     parse_dirs()
     settings = parse_config()
@@ -50,10 +56,39 @@ def main(running_tests=False):
 
 
 class Vimiv(Gtk.Window):
-    """" Actual vimiv class as a Gtk Window """
+    """"Actual vimiv class inheriting from Gtk.Window.
+
+    Attributes:
+        directory: Directory where configfiles and data is stored.
+        paths: Paths for images.
+        index: Position in paths.
+        screensize: Available screensize.
+        winsize: Size of the Gtk.Window.
+        main_grid: Grid in which everything gets packed.
+        keyhandler: Class to handle key-press events.
+        commandline: Class for the commandline.
+        tags: Class handling tags.
+        mark: Class handling marks.
+        fileextras: Class handling extra file actions.
+        statusbar: Class for the statusbar.
+        completions: Class handling completions.
+        slideshow: Class handling slideshow.
+        window: Class handling window events.
+        image: Class for the image.
+        library: Class for the library.
+        thumbnail: Class for thumbnail mode.
+        manipulate: Class handling manipulations.
+        overlay: Gtk.Overlay with main_grid and floating commandline.
+    """
 
     def __init__(self, settings, paths, index):
+        """Create the necessary objects and settings.
 
+        Args:
+            settings: Settings from configfiles to use.
+            paths: Paths received from the parser.
+            index: Current position in paths.
+        """
         Gtk.Window.__init__(self)
         self.connect('destroy', Gtk.main_quit)
 
@@ -84,7 +119,7 @@ class Vimiv(Gtk.Window):
         self.commandline = CommandLine(self, settings)
         self.tags = TagHandler(self)
         self.mark = Mark(self, settings)
-        self.fileextras = FileExtras(self, settings)
+        self.fileextras = FileExtras(self)
         self.statusbar = Statusbar(self, settings)
         self.completions = VimivComplete(self)
         self.slideshow = Slideshow(self, settings)
@@ -108,7 +143,13 @@ class Vimiv(Gtk.Window):
         self.add(self.overlay)
 
     def quit(self, force=False, running_tests=False):
-        """ Quit the main loop, printing marked files and saving history """
+        """Quit the main loop, printi marked files and save history.
+
+        Args:
+            force: If True quit even if an image was edited.
+            running_tests: True if running from testsuite. Do not quit loop then
+                as it wasn't started in the first place.
+        """
         for image in self.mark.marked:
             print(image)
         # Check if image has been edited
@@ -126,6 +167,12 @@ class Vimiv(Gtk.Window):
             Gtk.main_quit()
 
     def main(self, running_tests=False):
+        """Starting point for the vimiv class.
+
+        Args:
+            running_tests: True if running from testsuite. Do not show anything
+                then.
+        """
         # Move to the directory of the image
         if self.paths:
             if isinstance(self.paths, list):

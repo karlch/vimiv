@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-""" Actions which act on the actual image file """
+"""Actions which act on the actual image file."""
 import os
 from subprocess import Popen, PIPE
 from threading import Thread
@@ -8,7 +8,12 @@ from PIL import Image, ImageEnhance
 
 
 def save_image(im, filename):
-    """ Saves the PIL image name with all the keys that exist """
+    """Save the image with all the exif keys that exist.
+
+    Args:
+        im: PIL image to act on.
+        filename: Name of the image to save.
+    """
     argstr = "filename"
     for key in im.info.keys():
         argstr += ", " + key + "=" + str(im.info[key])
@@ -17,7 +22,12 @@ def save_image(im, filename):
 
 
 def rotate_file(filelist, cwise):
-    """ Rotate every image in filelist cwise*90° counterclockwise """
+    """Rotate every image in filelist cwise*90° counterclockwise.
+
+    Args:
+        filelist: List of files to operate on.
+        cwise: Rotation amount. Rotation is cwise*90° counterclockwise.
+    """
     # Always work on realpath, not on symlink
     filelist = [os.path.realpath(image) for image in filelist]
     for image in filelist:
@@ -33,7 +43,12 @@ def rotate_file(filelist, cwise):
 
 
 def flip_file(filelist, horizontal):
-    """ Flips every image in filelist """
+    """Flip every image in the correct direction.
+
+    Args:
+        filelist: List of files to operate on.
+        horizontal: If True, flip horizontally. Else flip vertically.
+    """
     # Always work on realpath, not on symlink
     filelist = [os.path.realpath(image) for image in filelist]
     for image in filelist:
@@ -47,7 +62,12 @@ def flip_file(filelist, horizontal):
 
 
 def autorotate(filelist, method="auto"):
-    """ This function autorotates all pictures in the current pathlist """
+    """Autorotate all pictures in filelist according to exif information.
+
+    Args:
+        filelist: List of files to operate on.
+        method: Method to use. Auto tries jhead and falls back to PIL.
+    """
     rotated_images = 0
     # jhead does this better
     try:
@@ -95,9 +115,26 @@ def autorotate(filelist, method="auto"):
 
 
 class Thumbnails:
-    """ Thumbnail creation class """
+    """Thumbnail creation class.
+
+    Attributes:
+        filelist: List of files to operate on.
+        thumbsize: Size of thumbnails that are created.
+        directory: Directory to save thumbnails in.
+        thumbnails: Cached thumbnails that have been created already.
+        thumblist: List of required thumbnails.
+        thumbdict: Dictionary with required thumbnails and original filename.
+        errutple: Tuple containing failed thumbnails and their position.
+        threads: Threads that are running for thumbnail creation.
+    """
 
     def __init__(self, filelist, thumbsize):
+        """Create default settings.
+
+        Args:
+            filelist: List of files to operate on.
+            thumbsize: Size of thumbnails that are created.
+        """
         self.filelist = filelist
         self.thumbsize = thumbsize
         self.directory = os.path.expanduser("~/.vimiv/Thumbnails")
@@ -112,8 +149,7 @@ class Thumbnails:
         self.threads = []
 
     def thumbnails_create(self):
-        """ Creates thumbnails for all images in self.filelist if they don't
-            exist """
+        """Create thumbnails for all images in filelist if they do not exist."""
         # Loop over all files
         for i, infile in enumerate(self.filelist):
             # Correct name
@@ -141,7 +177,7 @@ class Thumbnails:
         return self.thumblist, self.errtuple
 
     def thread_for_thumbnails(self, infile, outfile, position):
-        """ Creates one thumbnail in an extra thread """
+        """Create thumbnail in an extra thread."""
         try:
             with open(infile, "rb") as image_file:
                 im = Image.open(image_file)
@@ -156,8 +192,17 @@ class Thumbnails:
 
 
 def manipulate_all(image, outfile, manipulations):
-    """ Apply all the manipulations to image saving to outfile. These include
-    optimize, brightness, contrast and sharpness. """
+    """Apply all the manipulations to image.
+
+    Manipulations include brightness, contrast and sharpness.
+
+    Args:
+        image: Name of the image to manipulate.
+        outfile: File to save the manipulated image to.
+        Manipulations: Values of manipulations to apply.
+
+    Return: 1 for errors, 0 else.
+    """
     if manipulations[3]:  # Optimize
         try:
             Popen(["mogrify", "-contrast", "-auto-gamma", "-auto-level",

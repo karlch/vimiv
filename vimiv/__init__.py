@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-""" vimiv init: tests some imports and imports main """
+"""vimiv init: tests some imports and imports main."""
 
 import sys
 

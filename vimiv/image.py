@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Image part of vimiv """
+"""Image part of vimiv."""
 
 import os
 from random import shuffle
@@ -10,11 +10,32 @@ from gi.repository import Gtk, GdkPixbuf, GLib
 
 
 class Image(object):
-    """ Image class for vimiv
-        includes the scrollable window with the image and all actions that apply
-        to it """
+    """Image class for vimiv.
+
+    Includes the scrollable window with the image and all actions that apply
+    to it.
+
+    Attributes:
+        vimiv: The main vimiv class to interact with.
+        scrolled_win: Gtk.ScrollableWindow for the image.
+        viewport: Gtk.Viewport to be able to scroll the image.
+        image: Gtk.Image containing the actual image Pixbuf.
+        animation_toggled: If True play animations.
+        user_zoomed: If True do not rezoom automatically.
+        trashdir: Directory for all the deleted files.
+        overzoom: If True, increase image size up to window size even if images
+            are smaller than window.
+        rescale_svg: If True rescale vector graphics when zooming.
+        shuffle: If True randomly shuffle paths.
+        zoom_percent: Percentage to zoom to compared to the original size.
+        imsize: Size of the displayed image as a tuple.
+        pixbuf_original: Original image.
+        pixbuf_iter: Iter of displayes animation.
+        timer_id: Id of current animation timer.
+    """
 
     def __init__(self, vimiv, settings):
+        """Set default values for attributes."""
         self.vimiv = vimiv
         general = settings["GENERAL"]
 
@@ -46,7 +67,12 @@ class Image(object):
         self.timer_id = 0
 
     def check_for_edit(self, force):
-        """ Checks if an image was edited before moving """
+        """Check if an image was edited before moving.
+
+        Args:
+            force: If True move and ignore any editing.
+        Return: 0 if no edits were done or force, 1 else.
+        """
         if self.vimiv.paths:
             if "EDIT" in self.vimiv.paths[self.vimiv.index]:
                 if force:
@@ -58,7 +84,13 @@ class Image(object):
                     return 1
 
     def get_zoom_percent(self, z_width=False, z_height=False):
-        """ returns the current zoom factor """
+        """Get the current zoom factor.
+
+        Args:
+            z_width: If True zoom to width.
+            z_height: If True zoom to height.
+        Return: Zoom percentage.
+        """
         # Size of the file
         pbo_width = self.pixbuf_original.get_width()
         pbo_height = self.pixbuf_original.get_height()
@@ -79,7 +111,12 @@ class Image(object):
             return self.imsize[0] / pbo_width
 
     def update(self, update_info=True, update_gif=True):
-        """ Show the final image """
+        """Show the final image.
+
+        Args:
+            update_info: If True update the statusbar with new information.
+            update_gif: If True update animation status.
+        """
         if not self.vimiv.paths:
             return
         pbo_width = self.pixbuf_original.get_width()
@@ -113,7 +150,7 @@ class Image(object):
             self.vimiv.statusbar.update_info()
 
     def play_gif(self):
-        """ Run the animation of a gif """
+        """Run the animation of a gif."""
         image = self.pixbuf_iter.get_pixbuf()
         self.image.set_from_pixbuf(image)
         if self.pixbuf_iter.advance():
@@ -122,7 +159,7 @@ class Image(object):
             self.timer_id = GLib.timeout_add(delay, self.play_gif)
 
     def pause_gif(self):
-        """ Pause a gif or show initial image """
+        """Pause a gif or show initial image."""
         if self.timer_id:
             GLib.source_remove(self.timer_id)
             self.timer_id = 0
@@ -131,8 +168,13 @@ class Image(object):
             self.image.set_from_pixbuf(image)
 
     def get_available_size(self):
-        """ Returns the size of the image depending on what other widgets
-        are visible and if fullscreen or not """
+        """Receive size not occupied by other Widgets.
+
+        Substracts other widgets (manipulte, statusbar, library) from window
+        size and returns the available size.
+
+        Return: Tuple of available size.
+        """
         if self.vimiv.window.fullscreen:
             size = self.vimiv.screensize
         else:
@@ -146,7 +188,11 @@ class Image(object):
         return size
 
     def zoom_delta(self, delta):
-        """ Zooms the image by delta percent """
+        """Zoom the image by delta percent.
+
+        Args:
+            delta: Percentage to change zoom by.
+        """
         if self.vimiv.thumbnail.toggled:
             return
         try:
@@ -164,7 +210,13 @@ class Image(object):
             self.vimiv.statusbar.err_message(message)
 
     def zoom_to(self, percent, z_width=False, z_height=False):
-        """ Zooms to a given percentage """
+        """Zoom to a given percentage.
+
+        Args:
+            percent: Percentage to zoom to.
+            z_width: If True zoom to width.
+            z_height: If True zoom to height.
+        """
         if self.vimiv.thumbnail.toggled:
             return
         before = self.zoom_percent
@@ -200,7 +252,7 @@ class Image(object):
                 "Warning: Object cannot be zoomed (further)")
 
     def center_window(self):
-        """ Centers the image in the current window """
+        """Center the image in the current window."""
         # Don't do anything if no images are open
         if not self.vimiv.paths or self.vimiv.thumbnail.toggled:
             return
@@ -233,8 +285,15 @@ class Image(object):
             Gtk.Adjustment.set_step_increment(self.viewport.get_hadjustment(),
                                               100)
 
-    def move_index(self, forward=True, key=False, delta=1, force=False):
-        """ Move by delta in the path """
+    def move_index(self, forward=True, key=None, delta=1, force=False):
+        """Move by delta in paths.
+
+        Args:
+            forward: If True move forwards. Else move backwards.
+            key: If available, move by key.
+            delta: Positions to move by.
+            force: If True, move regardless of editing image.
+        """
         # Check if an image is opened
         if not self.vimiv.paths or self.vimiv.thumbnail.toggled:
             return
@@ -293,7 +352,12 @@ class Image(object):
         return True  # for the slideshow
 
     def move_pos(self, forward=True, force=False):
-        """ Move to pos in path """
+        """Move to specific position in paths.
+
+        Args:
+            forward: If True move forwards. Else move backwards.
+            force: If True, move regardless of editing image.
+        """
         # Check if image has been edited (might be gone by now -> try)
         try:
             if self.check_for_edit(force):
@@ -335,13 +399,15 @@ class Image(object):
         return True
 
     def toggle_rescale_svg(self):
+        """Toggle rescale state of vector images."""
         self.rescale_svg = not self.rescale_svg
 
     def toggle_overzoom(self):
+        """Toggle overzoom of images."""
         self.overzoom = not self.overzoom
 
     def toggle_animation(self):
-        """ Toggles animation status of Gifs """
+        """Toggle animation status of Gifs."""
         if self.vimiv.paths and not self.vimiv.thumbnail.toggled:
             self.animation_toggled = not self.animation_toggled
             self.update()

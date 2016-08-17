@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-""" All parsers for vimiv """
+"""All parsers for vimiv."""
 import argparse
 import configparser
 import os
@@ -9,7 +9,10 @@ from vimiv.helpers import error_message
 
 
 def get_args():
-    """ Create the argparse parser and return it """
+    """Create the argparse parser and return it.
+
+    Return: argparse.ArgumentParser with the possible arguments.
+    """
     usage = '%(prog)s [options] [paths ...]'
     parser = argparse.ArgumentParser(usage=usage)
 
@@ -50,7 +53,15 @@ def get_args():
 
 
 def parse_args(parser, settings, arguments=None):
-    """ Parse the arguments and return the modified settings """
+    """Parse the arguments and return the modified settings.
+
+    Args:
+        parser: argparse.ArgumentParser with the possible arguments.
+        settings: Dictionary containing all settings.
+        arguments: Extra arguments to add to the parser.
+
+    Return: Modified settings after parsing the arguments.
+    """
     if arguments:
         args = parser.parse_args(arguments)
     else:
@@ -106,7 +117,13 @@ def parse_args(parser, settings, arguments=None):
 
 
 def check_configs(filelist):
-    """ Returns the existing configfiles in a list """
+    """Return the existing configfiles in a list.
+
+    Args:
+        filelist: List of possible configfiles.
+
+    Return: List of existing configfiles.
+    """
     configfiles = []
     for fil in filelist:
         if os.path.isfile(fil):
@@ -116,7 +133,10 @@ def check_configs(filelist):
 
 
 def set_defaults():
-    """ Returns the default settings for vimiv """
+    """Return the default settings for vimiv.
+
+    Return: Dictionary of default settings.
+    """
     general = {"fullscreen": False,
                "slideshow": False,
                "slideshow_delay": 2,
@@ -143,8 +163,15 @@ def set_defaults():
 
 
 def overwrite_section(key, config, settings):
-    """ Overwrites a section in settings with the available settings in a
-    configfile """
+    """Overwrite a section in settings with the settings in a configfile.
+
+    Args:
+        key: One of "GENERAL" or "LIBRARY" indicating the main section.
+        config: configparser.ConfigParser of the configfile.
+        settings: Dictionary of settings to operate on.
+
+    Return: Dictionary of modified settings.
+    """
     section = config[key]
     for setting in section.keys():
         # Parse the setting so it gets the correct value
@@ -184,7 +211,10 @@ def overwrite_section(key, config, settings):
 
 
 def parse_config():
-    """ Checks each configfile for settings and returns them accordingly """
+    """Check each configfile for settings and apply them.
+
+    Return: Dictionary of modified settings.
+    """
     settings = set_defaults()
     configfiles = check_configs(["/etc/vimiv/vimivrc",
                                  os.path.expanduser("~/.vimiv/vimivrc")])
@@ -201,7 +231,10 @@ def parse_config():
 
 
 def parse_keys():
-    """ Checks for a keyfile and parses it """
+    """Check for a keyfile and parse it.
+
+    Return: Dictionary of keybindings.
+    """
     # Check which keyfile should be used
     keys = configparser.ConfigParser()
     try:
@@ -254,7 +287,7 @@ def parse_keys():
 
 
 def parse_dirs():
-    """ Checks for and creates all directories in ~/.vimiv """
+    """Check for and create all required directories in ~/.vimiv."""
     vimivdir = os.path.expanduser("~/.vimiv")
     tagdir = os.path.join(vimivdir, "Tags")
     thumbdir = os.path.join(vimivdir, "Thumbnails")

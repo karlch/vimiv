@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Handles events for vimiv, e.g. fullscreen, resize, keypress """
+"""Handle events for vimiv, e.g. fullscreen, resize, keypress."""
 
 from gi import require_version
 require_version('Gtk', '3.0')
@@ -10,10 +10,15 @@ from vimiv.parser import parse_keys
 
 
 class Window(object):
-    """ Window class for vimiv
-        handles fullscreen and resize """
+    """Window class for vimiv which handles fullscreen and resize."""
 
     def __init__(self, vimiv, settings):
+        """Create the necessary objects and settings.
+
+        Args:
+            vimiv: The main vimiv class to interact with.
+            settings: Settings from configfiles to use.
+        """
         self.vimiv = vimiv
         self.fullscreen = False
         if Gtk.get_minor_version() > 10:
@@ -38,7 +43,12 @@ class Window(object):
         self.vimiv.connect("check-resize", self.auto_resize)
 
     def on_window_state_change(self, event, window=None):
-        """ Correct handling of fullscreen/unfullscreen """
+        """Handle fullscreen/unfullscreen correctly.
+
+        Args:
+            event: Gtk event that called the function.
+            window: Gtk.Window to operate on.
+        """
         if window:
             window.fullscreen = bool(Gdk.WindowState.FULLSCREEN
                                      & event.new_window_state)
@@ -47,7 +57,7 @@ class Window(object):
                                    & event.new_window_state)
 
     def toggle_fullscreen(self):
-        """ Toggles fullscreen """
+        """Toggle fullscreen."""
         if self.fullscreen:
             self.vimiv.unfullscreen()
         else:
@@ -60,7 +70,7 @@ class Window(object):
                 self.vimiv.zoom_to(0)
 
     def auto_resize(self, w):
-        """ Automatically resize image when window is resized """
+        """Automatically resize image when window is resized."""
         if self.vimiv.get_size() != self.vimiv.winsize:
             self.vimiv.winsize = self.vimiv.get_size()
             if self.vimiv.paths:
@@ -76,9 +86,21 @@ class Window(object):
 
 
 class KeyHandler(object):
-    """ Handles key press for vimiv invoking the correct commands """
+    """Handle key press for vimiv invoking the correct commands.
+
+    Attributes:
+        vimiv: The main vimiv class to interact with.
+        num_str: String containing repetition number for commands.
+        keys: Keybindings from configfiles.
+    """
 
     def __init__(self, vimiv, settings):
+        """Create the necessary objects and settings.
+
+        Args:
+            vimiv: The main vimiv class to interact with.
+            settings: Settings from configfiles to use.
+        """
         # Add events to vimiv
         self.vimiv = vimiv
         self.vimiv.add_events(Gdk.EventMask.KEY_PRESS_MASK |
@@ -88,7 +110,13 @@ class KeyHandler(object):
         self.keys = parse_keys()
 
     def run(self, widget, event, window):
-        """ Runs the correct function per keypress """
+        """Run the correct function per keypress.
+
+        Args:
+            widget: Focused Gtk Object.
+            event: KeyPressEvent that called the function.
+            window: Gtk.Window to operate on.
+        """
         keyval = event.keyval
         keyname = Gdk.keyval_name(keyval)
         shiftkeys = ["space", "Return", "Tab", "Escape", "BackSpace",
@@ -135,7 +163,11 @@ class KeyHandler(object):
                 return False
 
     def scroll(self, direction):
-        """ Scroll the correct object """
+        """Scroll the correct object.
+
+        Args:
+            direction: Scroll direction to emit.
+        """
         if self.vimiv.thumbnail.toggled:
             self.vimiv.thumbnail.move_direction(direction)
         else:
@@ -145,13 +177,13 @@ class KeyHandler(object):
         return True  # Deactivates default bindings (here for Arrows)
 
     def num_append(self, num):
-        """ Adds a new char to the num_str """
+        """Add a new char to num_str."""
         self.num_str += num
         # RISKY
         GLib.timeout_add_seconds(1, self.num_clear)
         self.vimiv.statusbar.update_info()
 
     def num_clear(self):
-        """ Clears the num_str """
+        """Clear num_str."""
         self.num_str = ""
         self.vimiv.statusbar.update_info()

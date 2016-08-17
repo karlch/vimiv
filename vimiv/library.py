@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-""" Library part of self.vimiv """
+"""Library part of self.vimiv."""
 
 import os
 from subprocess import Popen, PIPE
@@ -12,11 +12,42 @@ from vimiv.helpers import listdir_wrapper
 
 
 class Library(object):
-    """ Library class for self.vimiv
-        includes the treeview with the library and all actions that apply to
-        it """
+    """Library of vimiv.
+
+    Includes the treeview with the library and all actions that apply to it
+
+    Attributes:
+        vimiv: The main vimiv class to interact with.
+        dir_pos: Dictionary that stores position in directories.
+        toggled: If True the library is visible.
+        default_width: Setting for the default width of the library.
+        expand: If True expand the library to window width if no images are
+            shown.
+        width: Width of the actual library without border width.
+        markup: Markup string used to highlight search results.
+        show_hidden: If True show hidden files.
+        file_check_amount: Amount of files checked in a directory to display
+            amount of images in it.
+        desktop_start_dir: Directory to start in if launched from desktop.
+        files: Files in the library.
+        treepos: Current position in the Gtk.TreeView.
+        datalist: List containing information on files (formatted name, size,
+            mark indicator).
+        filesize: Dictionary storing the size of files.
+        file_liststore: Gtk.ListStore for the file information to be displayed.
+        grid: Gtk.Grid containing the TreeView and the border.
+        scrollable_treeview: Gtk.ScrolledWindow in which the TreeView gets
+            packed.
+        treeview: Gtk.TreeView object with file_liststore as model.
+    """
 
     def __init__(self, vimiv, settings):
+        """Create the necessary objects and settings.
+
+        Args:
+            vimiv: The main vimiv class to interact with.
+            settings: Settings from configfiles to use.
+        """
         self.vimiv = vimiv
         library = settings["LIBRARY"]
 
@@ -70,7 +101,7 @@ class Library(object):
             self.scrollable_treeview.set_size_request(self.vimiv.winsize[0], 10)
 
     def toggle(self):
-        """ Toggles the library """
+        """Toggle the library."""
         if self.toggled:
             self.remember_pos(os.getcwd(), self.treepos)
             self.grid.hide()
@@ -109,9 +140,13 @@ class Library(object):
         #  Change the toggle state of animation
         self.vimiv.image.update()
 
-    def focus(self, library=True):
-        """ Focused library object """
-        if library:
+    def focus(self, focus_library=True):
+        """Set or remove focus from the library.
+
+        Args:
+            focus_library: If True focus the library. Else unfocus it.
+        """
+        if focus_library:
             if not self.toggled:
                 self.toggle()
             self.treeview.grab_focus()
@@ -121,16 +156,20 @@ class Library(object):
         self.vimiv.statusbar.update_info()
 
     def update_treeview(self, search=False):
-        """ Renews the information in the treeview """
-        # The search parameter is necessary to highlight searches after a search
-        # and to delete search items if a new directory is entered
+        """Renew the information in the treeview.
+
+        Args:
+            search: If True a search was performed. Necessary to highlight
+            search results and delete search items if a new directory is
+            entered.
+        """
         if not search:
             self.vimiv.commandline.reset_search()
         # Remove old columns
         for column in self.treeview.get_columns():
             self.treeview.remove_column(column)
         # Tree View
-        current_file_filter = self.filestore(self.datalist_create())
+        current_file_filter = self.file_filter_create(self.datalist_create())
         self.treeview.set_model(current_file_filter)
         # Needed for the movement keys
         self.treepos = 0
@@ -143,8 +182,14 @@ class Library(object):
                 column.set_max_width(20)
             self.treeview.append_column(column)
 
-    def filestore(self, datalist):
-        """ Returns the file_filter for the tree view """
+    def file_filter_create(self, datalist):
+        """Create the file_filter for the treeview.
+
+        Args:
+            datalist:
+
+        Return: Gtk.ListStore.filter_new to use as treeview model.
+        """
         # Reset
         self.file_liststore = Gtk.ListStore(int, str, str, str)
         # Numerate each filename
@@ -159,17 +204,20 @@ class Library(object):
         return current_file_filter
 
     def datalist_create(self):
-        """ Returns the list of data for the file_filter model """
-        self.datalist = list()
+        """Create the list of data for the file_filter model.
+
+        Return: The created datalist.
+        """
+        self.datalist = []
         self.files = self.filelist_create()
-        # Remove unsupported files if one isn't in the self.vimiv.tags.directory
+        # Remove unsupported files if one isn't in the tags directory
         if os.getcwd() != self.vimiv.tags.directory:
             self.files = [
                 possible_file
                 for possible_file in self.files
                 if is_image(possible_file) or os.path.isdir(possible_file)]
-        # Add all the supported files
-        for fil in self.files:
+        # Add all supported files
+        for i, fil in enumerate(self.files):
             markup_string = fil
             size = self.filesize[fil]
             is_marked = ""
@@ -179,20 +227,24 @@ class Library(object):
                 is_marked = "[*]"
             if os.path.isdir(fil):
                 markup_string = "<b>" + markup_string + "</b>"
-            if fil in self.vimiv.commandline.search_names:
+            if i in self.vimiv.commandline.search_positions:
                 markup_string = self.markup + markup_string + '</span>'
             self.datalist.append([markup_string, size, is_marked])
 
         return self.datalist
 
-    def file_select(self, alternative, count, b, close):
-        """ Focus image or open dir for activated file in library """
-        if isinstance(count, str):
-            fil = count
-        else:
-            count = count.get_indices()[0]
-            fil = self.files[count]
-            self.remember_pos(os.getcwd(), count)
+    def file_select(self, treeview, path, column, close):
+        """Show image or open directory for activated file in library.
+
+        Args:
+            treeview: The Gtk.TreeView which emitted the signal.
+            path: Gtk.TreePath that was activated.
+            column: Column that was activated.
+            close: If True close the library when finished.
+        """
+        count = path.get_indices()[0]
+        fil = self.files[count]
+        self.remember_pos(os.getcwd(), count)
         # Tags
         if os.getcwd() == self.vimiv.tags.directory:
             self.vimiv.tags.load(fil)
@@ -229,7 +281,13 @@ class Library(object):
                 self.vimiv.image.update()
 
     def move_up(self, directory="..", start=False):
-        """ move (up/to) directory in the library """
+        """Move up a directory or to a specific one in the library.
+
+        Args:
+            directory: Directory to move to. Defaults to parent.
+            start: If True the function was called on startup and should not
+                reload the library as it does not exist yet.
+        """
         try:
             curdir = os.getcwd()
             os.chdir(directory)
@@ -238,12 +296,23 @@ class Library(object):
         except:
             self.vimiv.statusbar.err_message("Error: directory not accessible")
 
-    def remember_pos(self, directory, count):
-        """ Write the current position in dir to the dir_pos dictionary """
-        self.dir_pos[directory] = count
+    def remember_pos(self, directory, position):
+        """Write the current position in directory to the dir_pos dictionary.
 
-    def reload(self, directory, curdir="", search=False):
-        """ Reloads the treeview """
+        Args:
+            directory: Directory of which to remember the position.
+            position: Current position in library.
+        """
+        self.dir_pos[directory] = position
+
+    def reload(self, directory, last_directory="", search=False):
+        """Reload the treeview.
+
+        Args:
+            directory: Directory of the library.
+            last_directory: Directory that was last opened in the library.
+            search: If True the reload request comes from a search
+        """
         self.update_treeview(search)
         self.focus(True)
         # Check if there is a saved position
@@ -251,28 +320,35 @@ class Library(object):
             self.move_pos(True, self.dir_pos[directory])
         # Check if the last directory is in the current one
         else:
-            last_dir = os.path.basename(curdir)
             for i, fil in enumerate(self.files):
-                if last_dir == fil:
+                if os.path.basename(last_directory) == fil:
                     self.move_pos(True, i)
                     break
         self.grid.show_all()
 
     def move_pos(self, forward=True, defined_pos=None):
-        """ Move to pos in lib """
+        """Move to a specific position in the library.
+
+        Defaults to moving to the last file. Can be used for the first file or
+        any defined position.
+
+        Args:
+            forward: If True move forwards.
+            defined_pos: If not empty defines the position to move to.
+        """
         if not self.files:
-            self.vimiv.statusbar.err_message("Directory is empty")
+            self.vimiv.statusbar.err_message("Warning: Directory is empty")
             return
         max_pos = len(self.files) - 1
         # Direct call from scroll
         if isinstance(defined_pos, int):
             new_pos = defined_pos
-        # Call from g/G via keybinding
+        # Call from g/G via key-binding
         elif self.vimiv.keyhandler.num_str:
             new_pos = int(self.vimiv.keyhandler.num_str) - 1
             if new_pos < 0 or new_pos > max_pos:
                 self.vimiv.statusbar.err_message("Warning: Unsupported index")
-                return False
+                return
         elif forward:
             new_pos = max_pos
         else:
@@ -283,10 +359,15 @@ class Library(object):
         self.treepos = new_pos
         # Clear the prefix
         self.vimiv.keyhandler.num_clear()
-        return True
 
     def resize(self, inc=True, require_val=False, val=None):
-        """ Resize the library and update the image if necessary """
+        """Resize the library and update the image if necessary.
+
+        Args:
+            inc: If True increase the library size.
+            require_val: If True require a specific value val for the size.
+            val: Specific value for the new size.
+        """
         if require_val:  # Set to value
             if not val:
                 val = self.default_width
@@ -321,12 +402,19 @@ class Library(object):
             self.vimiv.image.zoom_to(0)
 
     def toggle_hidden(self):
-        """ Toggles showing of hidden files """
+        """Toggle showing of hidden files."""
         self.show_hidden = not self.show_hidden
         self.reload('.')
 
     def filelist_create(self, directory="."):
-        """ Create a filelist from all files in directory """
+        """Create a filelist from all files in directory.
+
+        Filter out filetypes not usable with vimiv and remember the size of all
+        files in the self.filesize dictionary.
+
+        Args:
+            directory: Directory of which the filelist is created.
+        """
         # Get data from ls -lh and parse it correctly
         if self.show_hidden:
             p = Popen(['ls', '-lAhL', directory], stdin=PIPE, stdout=PIPE,
@@ -366,13 +454,20 @@ class Library(object):
         return files
 
     def scroll(self, direction):
-        """ Scroll the library viewer and select if necessary """
+        """Scroll the library viewer and call file_select if necessary.
+
+        Args:
+            direction: One of 'hjkl' defining the scroll direction.
+
+        Return: True to deactivate default key-bindings for arrow keys.
+        """
         # Handle the specific keys
         if direction == "h":  # Behave like ranger
             self.remember_pos(os.getcwd(), self.treepos)
             self.move_up()
         elif direction == "l":
-            self.file_select("a", Gtk.TreePath(self.treepos), "b", False)
+            self.file_select(self.treeview, Gtk.TreePath(self.treepos), None,
+                             False)
         else:
             # Scroll the tree checking for a user step
             if self.vimiv.keyhandler.num_str:
