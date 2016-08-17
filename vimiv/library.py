@@ -409,7 +409,7 @@ class Library(object):
     def filelist_create(self, directory="."):
         """Create a filelist from all files in directory.
 
-                Args:
+        Args:
             directory: Directory of which the filelist is created.
         """
         # Get data from ls -lh and parse it correctly

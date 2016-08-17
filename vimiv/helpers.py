@@ -81,8 +81,14 @@ def read_file(filename):
 
 
 def sizeof_fmt(num):
-    """Print size of a byte number in human-readable format."""
-    for unit in ['B','K','M','G','T','P','E','Z']:
+    """Print size of a byte number in human-readable format.
+
+    Args:
+        num: Filesize in bytes.
+
+    Return: Filesize in human-readable format.
+    """
+    for unit in ['B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
         if abs(num) < 1024.0:
             if abs(num) < 100:
                 return "%3.1f%s" % (num, unit)
