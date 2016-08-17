@@ -26,4 +26,6 @@ show_hidden: no
 desktop_start_dir: ~
 file_check_amount: 30
 
+[ALIASES] ######################################################################
+
 # vim:ft=config

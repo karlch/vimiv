@@ -7,13 +7,15 @@ from vimiv.tags import TagHandler
 class Commands(object):
     """Create the commands for vimiv."""
 
-    def __init__(self, vimiv):
+    def __init__(self, vimiv, settings):
         """Generate commands and functions.
 
         Args:
             vimiv: The main vimiv class to interact with.
+            settings: Settings from configfiles to use.
         """
         self.vimiv = vimiv
+        self.settings = settings
         self.vimiv.tag_handler = TagHandler(vimiv)
 
         # Dictionary with command names and the corresponding functions
@@ -78,6 +80,8 @@ class Commands(object):
             "zoom_to": [self.vimiv.image.zoom_to],
             "zoom_thumb_in": [self.vimiv.thumbnail.zoom, True],
             "zoom_thumb_out": [self.vimiv.thumbnail.zoom, False]}
+
+        self.vimiv.aliases = self.settings["ALIASES"]
 
         self.vimiv.functions = {
             "bri_focus": [self.vimiv.manipulate.focus_slider, "bri"],

@@ -158,7 +158,8 @@ def set_defaults():
                "show_hidden": False,
                "desktop_start_dir": os.path.expanduser("~"),
                "file_check_amount": 30}
-    settings = {"GENERAL": general, "LIBRARY": library}
+    aliases = {}
+    settings = {"GENERAL": general, "LIBRARY": library, "ALIASES": aliases}
     return settings
 
 
@@ -206,9 +207,24 @@ def overwrite_section(key, config, settings):
             settings[key][setting] = file_set
         except ValueError:
             continue
-
     return settings
 
+
+def add_aliases(config, settings):
+    """Add aliases from the configfile to the ALIASES section of settings.
+
+    Args:
+        key: One of "GENERAL" or "LIBRARY" indicating the main section.
+        config: configparser.ConfigParser of the configfile.
+        settings: Dictionary of settings to operate on.
+
+    Return: Dictionary of modified settings.
+    """
+    alias_section = config["ALIASES"]
+    for alias in alias_section.keys():
+        settings["ALIASES"][alias] = alias_section[alias]
+
+    return settings
 
 def parse_config():
     """Check each configfile for settings and apply them.
@@ -226,6 +242,7 @@ def parse_config():
         keys = [key for key in config.keys() if key in ["GENERAL", "LIBRARY"]]
         for key in keys:
             settings = overwrite_section(key, config, settings)
+        settings = add_aliases(config, settings)
 
     return settings
 

@@ -13,7 +13,7 @@ the file to configure all the keybindings. If the files exist in
 configure the files in ~/.vimiv to ones liking.
 
 .SH VIMIVRC
-The vimivrc file is split into two sections with various settings. What each
+The vimivrc file is split into three sections with various settings. What each
 setting means is explained below:
 
 .TP
@@ -86,6 +86,15 @@ The directory in which vimiv should start if invoked via the desktop file.
 The amount of files vimiv should check in a directory for whether they are
 images or not. This affects the size column of directories in the library. A
 higher number will increase precision at the cost of speed.
+
+.SH ALIASES
+It is possible to configure aliases for the commandline in the ALIASES section
+of the vimivrc. An alias is defined as following:
+
+"alias":        "commandname"
+
+where "commandname" must be a command that can be run from the commandline. See
+COMMANDS below.
 
 .SH KEYS.CONF
 The keys.conf file is split into sections with each section standing for a

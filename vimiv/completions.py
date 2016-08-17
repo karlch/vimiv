@@ -209,8 +209,10 @@ class VimivComplete(object):
                 except:
                     break
             # Generate completion class and get completions
-            commandlist = sorted(list(self.vimiv.commands.keys()))
-            completion = Completion(command, commandlist)
+            commandlist = list(self.vimiv.commands.keys())
+            aliaslist = list(self.vimiv.aliases.keys())
+            complete_commandlist = sorted(commandlist + aliaslist)
+            completion = Completion(command, complete_commandlist)
             self.output, self.compstr, self.completions = completion.complete()
             self.completions_reordered = self.completions
 

@@ -100,8 +100,8 @@ class CommandLine(object):
     def handler(self, entry):
         """Handle input from the entry.
 
-        Check for type of command (internal, external or path) and run the
-        correct function.
+        Check for type of command (internal, external, path or alias) and run
+        the correct function.
 
         Args:
             entry: The Gtk.Entry from which the command comes.
@@ -113,6 +113,9 @@ class CommandLine(object):
             return
         # cmd from input
         command = entry.get_text()
+        # Check for alias and update command
+        if command[1:] in self.vimiv.aliases.keys():
+            command = ":" + self.vimiv.aliases[command[1:]]
         # And close the cmd line
         self.leave()
         if command[0] == "/":  # Search

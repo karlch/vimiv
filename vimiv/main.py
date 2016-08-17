@@ -128,7 +128,7 @@ class Vimiv(Gtk.Window):
         self.library = Library(self, settings)
         self.thumbnail = Thumbnail(self, settings)
         self.manipulate = Manipulate(self, settings)
-        Commands(self)
+        Commands(self, settings)
 
         # Pack library, statusbar and manipulate
         self.main_grid.attach(self.library.grid, 0, 0, 1, 1)
