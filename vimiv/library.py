@@ -346,6 +346,7 @@ class Library(object):
         # Call from g/G via key-binding
         elif self.vimiv.keyhandler.num_str:
             new_pos = int(self.vimiv.keyhandler.num_str) - 1
+            self.vimiv.keyhandler.num_clear()
             if new_pos < 0 or new_pos > max_pos:
                 self.vimiv.statusbar.err_message("Warning: Unsupported index")
                 return

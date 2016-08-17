@@ -32,26 +32,23 @@ class LibraryTest(TestCase):
 
     def test_file_select(self):
         """Select file in library."""
-        # Directory by name
-        self.lib.file_select(None, "directory", None, False)
+        # Directory by position
+        path = Gtk.TreePath([self.lib.files.index("directory")])
+        self.lib.file_select(None, path, None, False)
         self.assertEqual(self.lib.files, ["symlink with spaces .jpg"])
         self.lib.move_up()
-        # Image by name
-        self.lib.file_select(None, "arch-logo.png", None, False)
+        # Library still focused
+        self.assertTrue(self.lib.treeview.is_focus())
+        # Image by position closing library
+        path = Gtk.TreePath([self.lib.files.index("arch_001.jpg")])
+        self.lib.file_select(None, path, None, True)
         expected_images = ["arch_001.jpg", "arch-logo.png", "symlink_to_image",
                            "vimiv.bmp", "vimiv.svg", "vimiv.tiff"]
         expected_images = [os.path.abspath(image) for image in expected_images]
         self.assertEqual(self.vimiv.paths, expected_images)
         open_image = self.vimiv.paths[self.vimiv.index]
-        expected_image = os.path.abspath("arch-logo.png")
+        expected_image = os.path.abspath("arch_001.jpg")
         self.assertEqual(expected_image, open_image)
-        # Library still focused
-        self.assertTrue(self.lib.treeview.is_focus())
-        # Image by position
-        path = Gtk.TreePath([1])
-        column = self.lib.treeview.get_column(1)
-        self.lib.treeview.row_activated(path, column)
-        self.assertEqual(self.vimiv.paths, expected_images)
         # Library closed, image has focus
         self.assertFalse(self.lib.treeview.is_focus())
         self.assertFalse(self.lib.toggled)

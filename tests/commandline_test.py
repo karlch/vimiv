@@ -120,8 +120,8 @@ class CommandlineTest(TestCase):
         self.vimiv.commandline.search_case = False
         self.vimiv.commandline.entry.set_text("/Ar")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
-        expected_search_results = ["arch_001.jpg", "arch-logo.png"]
-        search_results = self.vimiv.commandline.search_names
+        expected_search_results = [1, 2]
+        search_results = self.vimiv.commandline.search_positions
         self.assertEqual(search_results, expected_search_results)
         # Moving forward to next result should work
         self.assertEqual(self.vimiv.library.treepos, 1)
@@ -131,7 +131,7 @@ class CommandlineTest(TestCase):
         self.vimiv.commandline.search_case = True
         self.vimiv.commandline.entry.set_text("/Ar")
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
-        self.assertFalse(self.vimiv.commandline.search_names)
+        self.assertFalse(self.vimiv.commandline.search_positions)
 
     def tearDown(self):
         os.chdir(self.working_directory)

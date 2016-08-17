@@ -20,8 +20,7 @@ def refresh_gui(delay=0):
         delay: Time to wait before refreshing.
     """
     time.sleep(delay)
-    while Gtk.events_pending():
-        Gtk.main_iteration_do(False)
+    Gtk.main_iteration_do(False)
 
 
 class SlideshowTest(TestCase):
