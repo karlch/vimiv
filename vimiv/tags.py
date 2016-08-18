@@ -93,7 +93,6 @@ class TagHandler(object):
                 tag_pos = self.vimiv.library.files.index(tagname)
                 self.vimiv.library.treeview.set_cursor(Gtk.TreePath(tag_pos),
                                                        None, False)
-                self.vimiv.library.treepos = tag_pos
         else:
             message = "Tagfile '%s' has no valid images" % (tagname)
             self.vimiv.statusbar.err_message(message)

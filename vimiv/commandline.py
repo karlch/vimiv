@@ -156,7 +156,7 @@ class CommandLine(object):
         # Check on which file(s) % and * should operate
         if self.vimiv.window.last_focused == "lib" and self.vimiv.library.files:
             filelist = self.vimiv.library.files
-            fil = self.vimiv.library.files[self.vimiv.library.treepos]
+            fil = self.vimiv.library.get_treepos(True)
         elif self.vimiv.paths:
             filelist = self.vimiv.paths
             fil = self.vimiv.paths[self.vimiv.index]
@@ -295,7 +295,6 @@ class CommandLine(object):
                         if fil in path:
                             self.vimiv.library.treeview.set_cursor(
                                 Gtk.TreePath(i), None, False)
-                            self.vimiv.library.treepos = i
                             break
                     # Show the image
                     self.vimiv.library.treeview.set_size_request(
@@ -490,7 +489,6 @@ class CommandLine(object):
             path = self.search_positions[self.search_pos]
             self.vimiv.library.treeview.set_cursor(Gtk.TreePath(path),
                                                    None, False)
-            self.vimiv.library.treepos = path
             if len(self.search_positions) == 1:
                 self.vimiv.library.file_select(self.vimiv.library.treeview,
                                                Gtk.TreePath(path),

@@ -29,7 +29,6 @@ class Library(object):
             amount of images in it.
         desktop_start_dir: Directory to start in if launched from desktop.
         files: Files in the library.
-        treepos: Current position in the Gtk.TreeView.
         datalist: List containing information on files (formatted name, size,
             mark indicator).
         filesize: Dictionary storing the size of files.
@@ -64,7 +63,6 @@ class Library(object):
 
         # Defaults
         self.files = []
-        self.treepos = 0
         self.datalist = []
         self.filesize = {}
         # Filelist in a liststore model
@@ -102,7 +100,7 @@ class Library(object):
     def toggle(self):
         """Toggle the library."""
         if self.toggled:
-            self.remember_pos(os.getcwd(), self.treepos)
+            self.remember_pos(os.getcwd(), self.get_treepos())
             self.grid.hide()
             self.vimiv.image.animation_toggled = False  # Now play Gifs
             self.toggled = not self.toggled
@@ -170,8 +168,6 @@ class Library(object):
         # Tree View
         current_file_filter = self.file_filter_create(self.datalist_create())
         self.treeview.set_model(current_file_filter)
-        # Needed for the movement keys
-        self.treepos = 0
         # Add the columns
         for i, name in enumerate(["Num", "Name", "Size", "M"]):
             renderer = Gtk.CellRendererText()
@@ -356,7 +352,6 @@ class Library(object):
         self.treeview.set_cursor(Gtk.TreePath(new_pos), None, False)
         self.treeview.scroll_to_cell(Gtk.TreePath(new_pos), None, True,
                                      0.5, 0)
-        self.treepos = new_pos
         # Clear the prefix
         self.vimiv.keyhandler.num_clear()
 
@@ -438,6 +433,26 @@ class Library(object):
 
         return files
 
+    def get_treepos(self, get_filename=False):
+        """Get the current position in the TreeView.
+
+        get_filename: If True return filename instead of position.
+
+        Return: Current position as Int or filename.
+        """
+        path = self.treeview.get_cursor()[0]
+        if path:
+            position = path.get_indices()[0]
+            if get_filename:
+                return self.files[position]
+            else:
+                return position
+        else:
+            if get_filename:
+                return ""
+            else:
+                return 0
+
     def scroll(self, direction):
         """Scroll the library viewer and call file_select if necessary.
 
@@ -448,11 +463,11 @@ class Library(object):
         """
         # Handle the specific keys
         if direction == "h":  # Behave like ranger
-            self.remember_pos(os.getcwd(), self.treepos)
+            self.remember_pos(os.getcwd(), self.get_treepos())
             self.move_up()
         elif direction == "l":
-            self.file_select(self.treeview, Gtk.TreePath(self.treepos), None,
-                             False)
+            self.file_select(self.treeview, self.treeview.get_cursor()[0],
+                             None, False)
         else:
             # Scroll the tree checking for a user step
             if self.vimiv.keyhandler.num_str:
@@ -460,11 +475,11 @@ class Library(object):
             else:
                 step = 1
             if direction == "j":
-                new_pos = self.treepos + step
+                new_pos = self.get_treepos() + step
                 if new_pos >= len(self.file_liststore):
                     new_pos = len(self.file_liststore) - 1
             else:
-                new_pos = self.treepos - step
+                new_pos = self.get_treepos() - step
                 if new_pos < 0:
                     new_pos = 0
             self.move_pos(True, new_pos)

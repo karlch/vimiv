@@ -24,7 +24,7 @@ class Mark(object):
         # Check which image
         if self.vimiv.library.treeview.is_focus():
             current = os.path.abspath(self.vimiv.library.files[
-                self.vimiv.library.treepos])
+                self.vimiv.library.get_treepos()])
         elif self.vimiv.thumbnail.toggled:
             index = self.vimiv.thumbnail.pos
             pathindex = index
@@ -110,7 +110,7 @@ class Mark(object):
         # Update lib
         if self.vimiv.library.toggled:
             self.vimiv.library.remember_pos(os.getcwd(),
-                                            self.vimiv.library.treepos)
+                                            self.vimiv.library.get_treepos())
             self.vimiv.library.reload(os.getcwd())
         if self.vimiv.thumbnail.toggled:
             for i, image in enumerate(self.vimiv.paths):
