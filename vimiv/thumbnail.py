@@ -54,7 +54,6 @@ class Thumbnail(object):
         self.directory = os.path.join(self.vimiv.directory, "Thumbnails")
         self.timer_id = GLib.Timeout
         self.errorpos = []
-        self.pos = 0
         self.elements = []
         self.pixbuf_max = []
 
@@ -190,6 +189,8 @@ class Thumbnail(object):
             reload_image: If True reload the image of the thumbnail. Else only
                 the name (useful for marking).
         """
+        # Remember position
+        old_path = self.iconview.get_cursor()[1]
         for i in self.errorpos:
             if index > i:
                 index -= 1
@@ -208,10 +209,9 @@ class Thumbnail(object):
             if thumb in self.vimiv.mark.marked:
                 name = name + " [*]"
             self.liststore.insert(index, [pixbuf, name])
-            path = Gtk.TreePath.new_from_string(str(self.pos))
-            self.iconview.select_path(path)
-            curthing = self.iconview.get_cells()[0]
-            self.iconview.set_cursor(path, curthing, False)
+            self.iconview.select_path(old_path)
+            cell_renderer = self.iconview.get_cells()[0]
+            self.iconview.set_cursor(old_path, cell_renderer, False)
         except:
             message = "Reload of manipulated thumbnails failed"
             self.vimiv.statusbar.err_message(message)
@@ -222,7 +222,7 @@ class Thumbnail(object):
         Args:
             direction: Direction to scroll in. One of "hjkl".
         """
-        pos = self.pos
+        new_pos = self.vimiv.get_pos()
         # Get last element
         last = len(self.vimiv.paths) - len(self.errorpos) - 1
         # Check for a user prefixed step
@@ -232,23 +232,23 @@ class Thumbnail(object):
             step = 1
         # Check for the specified thumbnail and handle exceptons
         if direction == "h":
-            pos -= step
+            new_pos -= step
         elif direction == "k":
-            pos -= self.columns * step
+            new_pos -= self.columns * step
         elif direction == "l":
-            pos += step
+            new_pos += step
         elif direction == "j":
-            pos += self.columns * step
+            new_pos += self.columns * step
         # Allow numbers to be passed directly
         else:
-            pos = direction
+            new_pos = direction
         # Do not scroll to self.vimiv.paths that don't exist
-        if pos < 0:
-            pos = 0
-        elif pos > last:
-            pos = last
+        if new_pos < 0:
+            new_pos = 0
+        elif new_pos > last:
+            new_pos = last
         # Move
-        self.move_to_pos(pos)
+        self.move_to_pos(new_pos)
 
     def move_to_pos(self, pos):
         """Set focus on position in iconview and center it.
@@ -256,11 +256,10 @@ class Thumbnail(object):
         Args:
             pos: The position to focus.
         """
-        self.pos = pos
-        self.iconview.select_path(Gtk.TreePath(self.pos))
-        current_thumb = self.iconview.get_cells()[0]
-        self.iconview.set_cursor(Gtk.TreePath(self.pos), current_thumb, False)
-        self.iconview.scroll_to_path(Gtk.TreePath(self.pos), True, 0.5, 0.5)
+        self.iconview.select_path(Gtk.TreePath(pos))
+        cell_renderer = self.iconview.get_cells()[0]
+        self.iconview.set_cursor(Gtk.TreePath(pos), cell_renderer, False)
+        self.iconview.scroll_to_path(Gtk.TreePath(pos), True, 0.5, 0.5)
         # Clear the user prefixed step
         self.vimiv.keyhandler.num_clear()
 
@@ -288,7 +287,7 @@ class Thumbnail(object):
 
         # Set columns and refocus current image
         self.calculate_columns()
-        self.move_to_pos(self.pos)
+        self.move_to_pos(self.vimiv.get_pos())
 
     def scale_thumb(self, pixbuf_max):
         """Scale the thumbnail image to self.size.

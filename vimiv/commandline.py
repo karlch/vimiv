@@ -156,7 +156,7 @@ class CommandLine(object):
         # Check on which file(s) % and * should operate
         if self.vimiv.window.last_focused == "lib" and self.vimiv.library.files:
             filelist = self.vimiv.library.files
-            fil = self.vimiv.library.get_treepos(True)
+            fil = self.vimiv.get_pos(True)
         elif self.vimiv.paths:
             filelist = self.vimiv.paths
             fil = self.vimiv.paths[self.vimiv.index]

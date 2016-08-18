@@ -121,9 +121,9 @@ class Manipulate(object):
 
         # Reload stuff if needed
         if self.vimiv.library.toggled:
-            if self.vimiv.library.get_treepos():
-                self.vimiv.library.remember_pos(
-                    os.getcwd(), self.vimiv.library.get_treepos() - 1)
+            if self.vimiv.get_pos():
+                self.vimiv.library.remember_pos(os.getcwd(),
+                                                self.vimiv.get_pos() - 1)
             self.vimiv.library.reload(os.getcwd())
         if self.vimiv.image.scrolled_win.is_focus():
             del self.vimiv.paths[self.vimiv.index]
@@ -148,7 +148,7 @@ class Manipulate(object):
         if not self.vimiv.mark.marked and not self.vimiv.thumbnail.toggled:
             if self.vimiv.library.treeview.is_focus():
                 images.append(
-                    os.path.abspath(self.vimiv.library.get_treepos(True)))
+                    os.path.abspath(self.vimiv.get_pos(True)))
             else:
                 images.append(self.vimiv.paths[self.vimiv.index])
         # Add all marked images

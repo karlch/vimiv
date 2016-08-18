@@ -366,7 +366,7 @@ class Image(object):
             return
         max_pos = len(self.vimiv.paths)
         if self.vimiv.thumbnail.toggled:
-            current = self.vimiv.thumbnail.pos % len(self.vimiv.paths)
+            current = self.vimiv.get_pos()
             max_pos = max_pos - len(self.vimiv.thumbnail.errorpos)
         else:
             current = (self.vimiv.index) % len(self.vimiv.paths)

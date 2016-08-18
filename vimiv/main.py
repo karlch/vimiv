@@ -166,6 +166,31 @@ class Vimiv(Gtk.Window):
         if not running_tests:
             Gtk.main_quit()
 
+    def get_pos(self, get_filename=False):
+        """Get the current position in the focused widget.
+
+        get_filename: If True return filename instead of position.
+
+        Return: Current position as Int or filename.
+        """
+        if self.library.treeview.is_focus():
+            path = self.library.treeview.get_cursor()[0]
+            filelist = self.library.files
+        elif self.thumbnail.iconview.is_focus():
+            path = self.thumbnail.iconview.get_cursor()[1]
+            filelist = self.paths
+        try:
+            position = path.get_indices()[0]
+            if get_filename:
+                return filelist[position]
+            else:
+                return position
+        except:
+            if get_filename:
+                return ""
+            else:
+                return 0
+
     def main(self, running_tests=False):
         """Starting point for the vimiv class.
 

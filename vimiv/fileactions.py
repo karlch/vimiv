@@ -249,11 +249,9 @@ class FileExtras(object):
         """
         if (directory == os.getcwd() and directory !=
                 self.vimiv.tags.directory and self.vimiv.library.toggled):
-            if (self.vimiv.library.get_treepos() >= 0 and
-                    self.vimiv.library.get_treepos() <=
+            if (self.vimiv.get_pos() >= 0 and self.vimiv.get_pos() <=
                     len(self.vimiv.library.files)):
-                self.vimiv.library.remember_pos(
-                    directory, self.vimiv.library.get_treepos())
+                self.vimiv.library.remember_pos(directory, self.vimiv.get_pos())
             self.vimiv.library.reload(directory)
         if self.vimiv.paths and reload_path:
             pathdir = os.path.dirname(self.vimiv.paths[self.vimiv.index])

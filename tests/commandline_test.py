@@ -139,9 +139,9 @@ class CommandlineTest(TestCase):
         search_results = self.vimiv.commandline.search_positions
         self.assertEqual(search_results, expected_search_results)
         # Moving forward to next result should work
-        self.assertEqual(self.vimiv.library.get_treepos(), 1)
+        self.assertEqual(self.vimiv.get_pos(), 1)
         self.vimiv.commandline.search_move(1)
-        self.assertEqual(self.vimiv.library.get_treepos(), 2)
+        self.assertEqual(self.vimiv.get_pos(), 2)
         # Searching case sensitively should have no results here
         self.vimiv.commandline.search_case = True
         self.vimiv.commandline.entry.set_text("/Ar")

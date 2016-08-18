@@ -23,16 +23,14 @@ class Mark(object):
         """Mark the current image."""
         # Check which image
         if self.vimiv.library.treeview.is_focus():
-            current = os.path.abspath(self.vimiv.library.files[
-                self.vimiv.library.get_treepos()])
+            current = os.path.abspath(self.vimiv.get_pos(True))
         elif self.vimiv.thumbnail.toggled:
-            index = self.vimiv.thumbnail.pos
-            pathindex = index
+            index = self.vimiv.get_pos()
             # Remove errors and reload the thumb_name
             for i in self.vimiv.thumbnail.errorpos:
-                if pathindex >= i:
-                    pathindex += 1
-            current = self.vimiv.paths[pathindex]
+                if index >= i:
+                    index += 1
+            current = self.vimiv.paths[index]
         else:
             current = self.vimiv.paths[self.vimiv.index]
         # Toggle the mark
@@ -109,8 +107,7 @@ class Mark(object):
         """Reload all information which contains marks."""
         # Update lib
         if self.vimiv.library.toggled:
-            self.vimiv.library.remember_pos(os.getcwd(),
-                                            self.vimiv.library.get_treepos())
+            self.vimiv.library.remember_pos(os.getcwd(), self.vimiv.get_pos())
             self.vimiv.library.reload(os.getcwd())
         if self.vimiv.thumbnail.toggled:
             for i, image in enumerate(self.vimiv.paths):

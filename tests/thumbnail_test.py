@@ -43,7 +43,6 @@ class ThumbnailTest(TestCase):
     def setUp(self):
         if self.thumb.toggled:
             self.thumb.toggle()
-        self.thumb.pos = 0
         self.vimiv.index = 0
 
     def test_toggle(self):
@@ -91,7 +90,7 @@ class ThumbnailTest(TestCase):
                            ("j", "symlink_to_image"), ("k", "arch-logo.png")]:
             self.thumb.move_direction(move_combo[0])
             expected_file = os.path.abspath(move_combo[1])
-            received_file = self.vimiv.paths[self.thumb.pos]
+            received_file = self.vimiv.paths[self.vimiv.get_pos()]
             self.assertEqual(expected_file, received_file)
 
     def test_zoom(self):

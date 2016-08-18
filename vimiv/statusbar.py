@@ -96,13 +96,13 @@ class Statusbar(object):
                 self.left_label.set_text(os.getcwd())
             # Position, name and thumbnail size in thumb mode
             elif self.vimiv.thumbnail.toggled:
-                pos = self.vimiv.thumbnail.pos
+                pos = self.vimiv.get_pos()
                 for i in self.vimiv.thumbnail.errorpos:
                     if pos >= i:
                         pos += 1
                 name = os.path.basename(self.vimiv.paths[pos])
                 message = "{0}/{1}  {2}  {3}". \
-                    format(self.vimiv.thumbnail.pos + 1,
+                    format(pos + 1,
                            len(self.vimiv.paths) -
                            len(self.vimiv.thumbnail.errorpos),
                            name, self.vimiv.thumbnail.size)

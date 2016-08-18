@@ -100,7 +100,7 @@ class Library(object):
     def toggle(self):
         """Toggle the library."""
         if self.toggled:
-            self.remember_pos(os.getcwd(), self.get_treepos())
+            self.remember_pos(os.getcwd(), self.vimiv.get_pos())
             self.grid.hide()
             self.vimiv.image.animation_toggled = False  # Now play Gifs
             self.toggled = not self.toggled
@@ -433,26 +433,6 @@ class Library(object):
 
         return files
 
-    def get_treepos(self, get_filename=False):
-        """Get the current position in the TreeView.
-
-        get_filename: If True return filename instead of position.
-
-        Return: Current position as Int or filename.
-        """
-        path = self.treeview.get_cursor()[0]
-        if path:
-            position = path.get_indices()[0]
-            if get_filename:
-                return self.files[position]
-            else:
-                return position
-        else:
-            if get_filename:
-                return ""
-            else:
-                return 0
-
     def scroll(self, direction):
         """Scroll the library viewer and call file_select if necessary.
 
@@ -463,7 +443,7 @@ class Library(object):
         """
         # Handle the specific keys
         if direction == "h":  # Behave like ranger
-            self.remember_pos(os.getcwd(), self.get_treepos())
+            self.remember_pos(os.getcwd(), self.vimiv.get_pos())
             self.move_up()
         elif direction == "l":
             self.file_select(self.treeview, self.treeview.get_cursor()[0],
@@ -475,11 +455,11 @@ class Library(object):
             else:
                 step = 1
             if direction == "j":
-                new_pos = self.get_treepos() + step
+                new_pos = self.vimiv.get_pos() + step
                 if new_pos >= len(self.file_liststore):
                     new_pos = len(self.file_liststore) - 1
             else:
-                new_pos = self.get_treepos() - step
+                new_pos = self.vimiv.get_pos() - step
                 if new_pos < 0:
                     new_pos = 0
             self.move_pos(True, new_pos)
