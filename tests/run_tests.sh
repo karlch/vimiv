@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Simple script to fetch the images used in vimiv's testsuite
+# Runs tests for vimiv in Xvfb
 
+# Receive current testimages
 (
 cd tests 1>/dev/null 2>&1 || exit 1
 if [[ -d  "vimiv/testimages" ]]; then
@@ -15,3 +16,12 @@ else
     git clone --branch=testimages https://github.com/karlch/vimiv
 fi
 )
+
+# Start Xvfb if necessary
+if [[ ! -f /tmp/.X1-lock ]]; then
+    Xvfb -screen 1 800x600x24 :1 &
+    sleep 2
+    herbstluftwm &
+    sleep 1
+fi
+DISPLAY=":1" nosetests

@@ -19,7 +19,7 @@ class MarkTest(TestCase):
         cls.settings = parse_config()
         paths, index = populate(["testimages"], False, False)
         cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
-        cls.vimiv.main(True)
+        cls.vimiv.main()
         # Move away from directory
         cls.vimiv.library.scroll("j")
 

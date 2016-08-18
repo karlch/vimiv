@@ -18,7 +18,7 @@ class TagsTest(TestCase):
         os.chdir("vimiv")
         cls.settings = parse_config()
         cls.vimiv = v_main.Vimiv(cls.settings, [], 0)
-        cls.vimiv.main(True)
+        cls.vimiv.main()
 
     def test_tag_create_remove(self):
         """Create and remove a tag."""

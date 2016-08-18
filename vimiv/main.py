@@ -26,12 +26,8 @@ from vimiv.tags import TagHandler
 from vimiv.mark import Mark
 
 
-def main(running_tests=False):
-    """Starting point for vimiv.
-
-    Args:
-        running_tests: True if running from testsuite. Do not show window then.
-    """
+def main():
+    """Starting point for vimiv."""
     parser = get_args()
     parse_dirs()
     settings = parse_config()
@@ -46,13 +42,8 @@ def main(running_tests=False):
     paths, index = populate(args, recursive, shuffle_paths)
     # Start the actual window
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # ^C
-    if not running_tests:
-        Vimiv(settings, paths, index).main()
-        Gtk.main()
-    else:
-        vimiv = Vimiv(settings, paths, index)
-        vimiv.main(True)
-        vimiv.quit(running_tests=True)
+    Vimiv(settings, paths, index).main()
+    Gtk.main()
 
 
 class Vimiv(Gtk.Window):
@@ -142,13 +133,11 @@ class Vimiv(Gtk.Window):
         self.overlay.add_overlay(self.commandline.grid)
         self.add(self.overlay)
 
-    def quit(self, force=False, running_tests=False):
+    def quit(self, force=False):
         """Quit the main loop, printi marked files and save history.
 
         Args:
             force: If True quit even if an image was edited.
-            running_tests: True if running from testsuite. Do not quit loop then
-                as it wasn't started in the first place.
         """
         for image in self.mark.marked:
             print(image)
@@ -163,8 +152,7 @@ class Vimiv(Gtk.Window):
             histfile.write(cmd)
         histfile.close()
 
-        if not running_tests:
-            Gtk.main_quit()
+        Gtk.main_quit()
 
     def get_pos(self, get_filename=False):
         """Get the current position in the focused widget.
@@ -191,13 +179,8 @@ class Vimiv(Gtk.Window):
             else:
                 return 0
 
-    def main(self, running_tests=False):
-        """Starting point for the vimiv class.
-
-        Args:
-            running_tests: True if running from testsuite. Do not show anything
-                then.
-        """
+    def main(self):
+        """Starting point for the vimiv class."""
         # Move to the directory of the image
         if self.paths:
             if isinstance(self.paths, list):
@@ -207,8 +190,7 @@ class Vimiv(Gtk.Window):
                 self.paths = []
 
         # Show everything and then hide whatever needs to be hidden
-        if not running_tests:
-            self.show_all()
+        self.show_all()
         self.manipulate.scrolled_win.hide()
         self.commandline.grid.hide()
 

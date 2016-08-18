@@ -21,14 +21,14 @@ class OpeningTest(TestCase):
         """Opening without an argument."""
         vimiv = v_main.Vimiv(self.settings, [], 0)
         self.assertEqual(vimiv.paths, [])
-        vimiv.main(True)
+        vimiv.main()
 
     def test_opening_with_directory(self):
         """Opening with a directory."""
         expected_dir = os.path.abspath("./testimages")
         paths, index = populate(["testimages"], False, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
-        vimiv.main(True)
+        vimiv.main()
         self.assertEqual(expected_dir, os.getcwd())
         expected_files = ["animation", "arch-logo.png", "arch_001.jpg",
                           "directory", "symlink_to_image", "vimiv.bmp",
@@ -42,7 +42,7 @@ class OpeningTest(TestCase):
         expected_dir = os.path.abspath("./testimages")
         paths, index = populate(["testimages/arch_001.jpg"], False, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
-        vimiv.main(True)
+        vimiv.main()
         # Check moving and image population
         self.assertEqual(expected_dir, os.getcwd())
         expected_images = ["arch_001.jpg", "symlink_to_image", "vimiv.bmp",
@@ -55,7 +55,7 @@ class OpeningTest(TestCase):
         expected_dir = os.path.abspath("./testimages")
         paths, index = populate(["testimages/symlink_to_image"], False, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
-        vimiv.main(True)
+        vimiv.main()
         # Check moving and image population
         self.assertEqual(expected_dir, os.getcwd())
         expected_images = ["symlink_to_image", "vimiv.bmp", "vimiv.svg",
@@ -70,7 +70,7 @@ class OpeningTest(TestCase):
             populate(["testimages/directory/symlink with spaces .jpg"],
                      False, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
-        vimiv.main(True)
+        vimiv.main()
         # Check moving and image population
         self.assertEqual(expected_dir, os.getcwd())
         expected_images = ["symlink with spaces .jpg"]
@@ -82,7 +82,7 @@ class OpeningTest(TestCase):
         os.chdir("testimages")
         paths, index = populate([], True, False)
         vimiv = v_main.Vimiv(self.settings, paths, index)
-        vimiv.main(True)
+        vimiv.main()
         self.assertEqual(8, len(vimiv.paths))
 
     def tearDown(self):

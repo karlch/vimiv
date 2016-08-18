@@ -46,8 +46,7 @@ uninstall:
 	@printf " in install_log.txt.\n"
 
 test:
-	@tests/create_testimages.sh
-	@nosetests
+	@tests/run_tests.sh
 
 lint:
 	pylint vimiv/*.py vimiv/vimiv tests/*.py

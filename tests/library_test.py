@@ -20,7 +20,7 @@ class LibraryTest(TestCase):
         os.chdir("vimiv")
         cls.settings = parse_config()
         cls.vimiv = v_main.Vimiv(cls.settings, "testimages", 0)
-        cls.vimiv.main(True)
+        cls.vimiv.main()
         cls.lib = cls.vimiv.library
 
     def test_toggle(self):

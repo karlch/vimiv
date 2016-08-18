@@ -14,7 +14,7 @@ class CompletionsTest(TestCase):
     def setUpClass(cls):
         cls.settings = parse_config()
         cls.vimiv = v_main.Vimiv(cls.settings, [], 0)
-        cls.vimiv.main(True)
+        cls.vimiv.main()
 
     def test_reset(self):
         """Reset the internal completion values."""

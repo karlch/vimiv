@@ -49,7 +49,7 @@ class FileActionsTest(TestCase):
         """Clear Trash/Thumbnails."""
         settings = parse_config()
         vimiv = v_main.Vimiv(settings, [], 0)
-        vimiv.main(True)
+        vimiv.main()
         thumbdir = os.path.expanduser("~/.vimiv/Thumbnails")
         trashdir = os.path.expanduser("~/.vimiv/Trash")
         if not os.path.isdir("Thumbnail_bak"):
@@ -76,7 +76,7 @@ class FileActionsTest(TestCase):
         settings = parse_config()
         paths, index = fileactions.populate(["arch_001.jpg"])
         vimiv = v_main.Vimiv(settings, paths, index)
-        vimiv.main(True)
+        vimiv.main()
         vimiv.fileextras.format_files("formatted_")
         files = [fil for fil in os.listdir() if "formatted_" in fil]
         files = sorted(files)
@@ -106,7 +106,7 @@ class FileActionsTest(TestCase):
         settings = parse_config()
         paths, index = fileactions.populate(["arch_001.jpg"])
         vimiv = v_main.Vimiv(settings, paths, index)
-        vimiv.main(True)
+        vimiv.main()
         vimiv.fileextras.format_files("formatted_")
         files = [fil for fil in os.listdir() if "formatted_" in fil]
         files = sorted(files)

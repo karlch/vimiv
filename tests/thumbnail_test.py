@@ -34,7 +34,7 @@ class ThumbnailTest(TestCase):
         cls.settings = parse_config()
         paths, index = populate(["testimages/arch-logo.png"])
         cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
-        cls.vimiv.main(True)
+        cls.vimiv.main()
         cls.thumb = cls.vimiv.thumbnail
         cls.thumb.size = (128, 128)
         cls.thumb.max_size = (256, 256)

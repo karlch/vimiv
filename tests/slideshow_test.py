@@ -3,7 +3,6 @@
 """Test slideshow.py for vimiv's test suite."""
 
 import os
-import time
 from unittest import TestCase, main
 from gi import require_version
 require_version('Gtk', '3.0')
@@ -13,14 +12,15 @@ from vimiv.parser import parse_config
 from vimiv.fileactions import populate
 
 
-def refresh_gui(delay=0):
+def refresh_gui(vimiv=None):
     """Refresh the gui as the Gtk.main() loop is not running when testing.
 
     Args:
         delay: Time to wait before refreshing.
     """
-    time.sleep(delay)
-    Gtk.main_iteration_do(False)
+    current_pos = vimiv.index
+    while current_pos == vimiv.index:
+        Gtk.main_iteration_do(False)
 
 
 class SlideshowTest(TestCase):
@@ -34,7 +34,7 @@ class SlideshowTest(TestCase):
         paths, index = populate(["testimages/arch_001.jpg"])
         cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
         cls.slideshow = cls.vimiv.slideshow
-        cls.vimiv.main(True)
+        cls.vimiv.main()
 
     def test_toggle(self):
         """Toggle slideshow."""
@@ -74,12 +74,11 @@ class SlideshowTest(TestCase):
         self.slideshow.toggle()
         # Set delay when running
         self.slideshow.set_delay(0.001)
-        refresh_gui()
         self.assertEqual(self.vimiv.slideshow.delay, 0.001)
-        refresh_gui(0.001)
         for i in range(1, 6):
+            refresh_gui(self.vimiv)
             self.assertEqual(self.vimiv.index, i)
-            refresh_gui()
+        refresh_gui(self.vimiv)
         self.assertEqual(self.vimiv.index, 0)
 
     def tearDown(self):

@@ -21,7 +21,7 @@ class ManipulateTest(TestCase):
         shutil.copytree("testimages", "testimages_man")
         paths, index = populate(["testimages_man/arch-logo.png"])
         cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
-        cls.vimiv.main(True)
+        cls.vimiv.main()
         cls.manipulate = cls.vimiv.manipulate
 
     def test_get_manipulated_images(self):
