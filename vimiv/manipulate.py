@@ -120,7 +120,7 @@ class Manipulate(object):
         move_to_trash(images)
 
         # Reload stuff if needed
-        if self.vimiv.library.toggled:
+        if self.vimiv.library.grid.is_visible():
             if self.vimiv.get_pos():
                 self.vimiv.library.remember_pos(os.getcwd(),
                                                 self.vimiv.get_pos() - 1)

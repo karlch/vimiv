@@ -18,7 +18,7 @@ class Library(object):
     Attributes:
         vimiv: The main vimiv class to interact with.
         dir_pos: Dictionary that stores position in directories.
-        toggled: If True the library is visible.
+        show_at_start: If True show library at startup.
         default_width: Setting for the default width of the library.
         expand: If True expand the library to window width if no images are
             shown.
@@ -51,7 +51,7 @@ class Library(object):
 
         # Settings
         self.dir_pos = {}  # Remembers positions in the library browser
-        self.toggled = library["show_library"]
+        self.show_at_start = library["show_library"]
         self.default_width = library["library_width"]
         self.expand = library["expand_lib"]
         border_width = library["border_width"]
@@ -99,11 +99,10 @@ class Library(object):
 
     def toggle(self):
         """Toggle the library."""
-        if self.toggled:
+        if self.grid.is_visible():
             self.remember_pos(os.getcwd(), self.vimiv.get_pos())
             self.grid.hide()
             self.vimiv.image.animation_toggled = False  # Now play Gifs
-            self.toggled = not self.toggled
             self.focus(False)
         else:
             self.grid.show()
@@ -124,7 +123,6 @@ class Library(object):
                             break
             # Do not play Gifs with the lib
             self.vimiv.image.animation_toggled = True
-            self.toggled = not self.toggled
             self.focus(True)
             # Markings and other stuff might have changed
             self.reload(os.getcwd())
@@ -144,9 +142,9 @@ class Library(object):
             focus_library: If True focus the library. Else unfocus it.
         """
         if focus_library:
-            if not self.toggled:
-                self.toggle()
             self.treeview.grab_focus()
+            if not self.grid.is_visible():
+                self.toggle()
         else:
             self.vimiv.image.vimiv.image.scrolled_win.grab_focus()
         # Update info for the current mode
@@ -319,7 +317,6 @@ class Library(object):
                 if os.path.basename(last_directory) == fil:
                     self.move_pos(True, i)
                     break
-        self.grid.show_all()
 
     def move_pos(self, forward=True, defined_pos=None):
         """Move to a specific position in the library.

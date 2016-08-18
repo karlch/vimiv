@@ -84,7 +84,7 @@ class TagHandler(object):
             self.vimiv.image.scrolled_win.show()
             self.vimiv.image.move_index(False, False, 0)
             # Focus in library if it is open
-            if self.vimiv.library.toggled:
+            if self.vimiv.library.grid.is_visible():
                 self.vimiv.library.scrollable_treeview.set_size_request(
                     self.vimiv.library.width, 10)
                 # Find out tag position

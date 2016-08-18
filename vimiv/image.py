@@ -179,7 +179,7 @@ class Image(object):
             size = self.vimiv.screensize
         else:
             size = self.vimiv.get_size()
-        if self.vimiv.library.toggled:
+        if self.vimiv.library.grid.is_visible():
             size = (size[0] - self.vimiv.library.width, size[1])
         if not self.vimiv.statusbar.hidden:
             size = (size[0], size[1]

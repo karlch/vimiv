@@ -106,7 +106,7 @@ class Mark(object):
     def mark_reload(self, reload_all=True, current=None):
         """Reload all information which contains marks."""
         # Update lib
-        if self.vimiv.library.toggled:
+        if self.vimiv.library.grid.is_visible():
             self.vimiv.library.remember_pos(os.getcwd(), self.vimiv.get_pos())
             self.vimiv.library.reload(os.getcwd())
         if self.vimiv.thumbnail.toggled:

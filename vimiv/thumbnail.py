@@ -118,7 +118,7 @@ class Thumbnail(object):
     def calculate_columns(self):
         """Calculate how many columns fit into the current window."""
         window_width = self.vimiv.winsize[0]
-        if self.vimiv.library.toggled:
+        if self.vimiv.library.grid.is_visible():
             width = window_width - self.vimiv.library.width
         else:
             width = window_width

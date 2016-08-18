@@ -198,9 +198,7 @@ class Vimiv(Gtk.Window):
         if self.paths:
             self.image.move_index(True, False, 0)
             # Show library at the beginning?
-            if self.library.toggled:
-                self.library.grid.show()
-            else:
+            if not self.library.show_at_start:
                 self.library.grid.hide()
             self.image.scrolled_win.grab_focus()
             # Start in slideshow mode?
@@ -212,7 +210,7 @@ class Vimiv(Gtk.Window):
             # Slideshow without paths makes no sense
             self.slideshow.running = False
             self.statusbar.toggle()
-            self.library.focus(True)
+            self.library.reload(os.getcwd())
             if self.library.expand:
                 self.library.scrollable_treeview.set_size_request(
                     self.winsize[0], 10)

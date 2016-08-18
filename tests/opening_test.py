@@ -35,7 +35,7 @@ class OpeningTest(TestCase):
                           "vimiv.svg", "vimiv.tiff"]
         self.assertEqual(vimiv.library.files, expected_files)
         self.assertTrue(vimiv.library.treeview.is_focus())
-        self.assertTrue(vimiv.library.toggled)
+        self.assertTrue(vimiv.library.grid.is_visible())
 
     def test_opening_with_image(self):
         """Open with an image."""

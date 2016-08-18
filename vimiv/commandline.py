@@ -253,7 +253,7 @@ class CommandLine(object):
                 self.vimiv.image.scrolled_win.show()
                 self.vimiv.image.move_index(False, False, 0)
                 # Close library if necessary
-                if self.vimiv.library.toggled:
+                if self.vimiv.library.grid.is_visible():
                     self.vimiv.library.toggle()
             elif old_pos:  # Nothing found, go back
                 self.vimiv.paths, self.vimiv.index = populate(old_pos)
@@ -485,7 +485,7 @@ class CommandLine(object):
         self.search_pos = self.search_pos % len(self.search_positions)
 
         # Select file depending on library
-        if self.vimiv.library.toggled:
+        if self.vimiv.library.grid.is_visible():
             path = self.search_positions[self.search_pos]
             self.vimiv.library.treeview.set_cursor(Gtk.TreePath(path),
                                                    None, False)

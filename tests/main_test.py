@@ -15,7 +15,7 @@ class MainTest(TestCase):
 
     def test_main_until_quit(self):
         """Run through vimiv main once."""
-        v_main.main(True)
+        v_main.main()
 
 if __name__ == '__main__':
     main()

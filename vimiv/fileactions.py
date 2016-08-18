@@ -247,8 +247,8 @@ class FileExtras(object):
             pipe: If True, input came from a pipe. Therefore run pipe.
             pipe_input: Command that comes from pipe.
         """
-        if (directory == os.getcwd() and directory !=
-                self.vimiv.tags.directory and self.vimiv.library.toggled):
+        if (directory == os.getcwd() and directory != self.vimiv.tags.directory
+                and self.vimiv.library.grid.is_visible()):
             if (self.vimiv.get_pos() >= 0 and self.vimiv.get_pos() <=
                     len(self.vimiv.library.files)):
                 self.vimiv.library.remember_pos(directory, self.vimiv.get_pos())
