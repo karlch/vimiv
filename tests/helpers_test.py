@@ -53,7 +53,7 @@ class HelpersTest(TestCase):
         """Error message popup."""
         # Not much can happen here, if all attributes are set correctly it will
         # also run
-        helpers.error_message("Test error")
+        helpers.error_message("Test error", True)
 
     def tearDown(self):
         shutil.rmtree("tmp_testdir")

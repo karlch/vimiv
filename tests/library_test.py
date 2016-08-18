@@ -51,7 +51,7 @@ class LibraryTest(TestCase):
         self.assertEqual(expected_image, open_image)
         # Library closed, image has focus
         self.assertFalse(self.lib.treeview.is_focus())
-        self.assertFalse(self.lib.toggled)
+        self.assertFalse(self.lib.grid.is_focus())
         self.assertTrue(self.vimiv.image.scrolled_win.is_focus())
         # Reopen and back to beginning
         self.lib.toggle()

@@ -26,8 +26,12 @@ from vimiv.tags import TagHandler
 from vimiv.mark import Mark
 
 
-def main():
-    """Starting point for vimiv."""
+def main(running_tests=False):
+    """Starting point for vimiv.
+
+    Args:
+        running_tests: If True running from testsuite. Do not run Gtk.main.
+    """
     parser = get_args()
     parse_dirs()
     settings = parse_config()
@@ -43,7 +47,8 @@ def main():
     # Start the actual window
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # ^C
     Vimiv(settings, paths, index).main()
-    Gtk.main()
+    if not running_tests:
+        Gtk.main()
 
 
 class Vimiv(Gtk.Window):

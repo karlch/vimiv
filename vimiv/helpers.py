@@ -98,11 +98,12 @@ def sizeof_fmt(num):
     return "%.1f%s" % (num, 'Y')
 
 
-def error_message(message):
+def error_message(message, running_tests=False):
     """Show a GTK Error Pop Up with message.
 
     Args:
         message: The message to display.
+        running_tests: If True running from testsuite. Do not show popup.
     """
     popup = Gtk.Dialog(title="vimiv - Error", transient_for=Gtk.Window())
     popup.add_button("Close", Gtk.ResponseType.CLOSE)
@@ -119,5 +120,6 @@ def error_message(message):
     grid.attach(error_icon, 0, 0, 1, 1)
     grid.attach(message_label, 1, 0, 1, 1)
     popup.show_all()
-    popup.run()
-    popup.destroy()
+    if not running_tests:
+        popup.run()
+        popup.destroy()
