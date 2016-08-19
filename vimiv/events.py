@@ -64,13 +64,16 @@ class Window(object):
             self.vimiv.fullscreen()
         # Adjust the image if necessary
         if self.vimiv.paths:
-            if self.vimiv.user_zoomed:
-                self.vimiv.update_image()
+            if self.vimiv.image.user_zoomed:
+                self.vimiv.image.update_image()
             else:
-                self.vimiv.zoom_to(0)
+                self.vimiv.image.zoom_to(0)
 
-    def auto_resize(self, w):
-        """Automatically resize image when window is resized."""
+    def auto_resize(self, window):
+        """Automatically resize widgets when window is resized.
+
+        Args: window: The window which emitted the resize event.
+        """
         if self.vimiv.get_size() != self.vimiv.winsize:
             self.vimiv.winsize = self.vimiv.get_size()
             if self.vimiv.paths:
