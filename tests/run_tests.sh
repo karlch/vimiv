@@ -21,7 +21,12 @@ fi
 if [[ ! -f /tmp/.X1-lock ]]; then
     Xvfb -screen 1 800x600x24 :1 &
     sleep 2
-    herbstluftwm &
+    DISPLAY=":1" herbstluftwm &
     sleep 1
+    DISPLAY=":1" nosetests
+    pkill herbstluftwm
+    pkill Xvfb
+else
+    printf "Close the running Xserver running on DISPLAY :1 to start Xvfb.\n"
+    exit 1
 fi
-DISPLAY=":1" nosetests
