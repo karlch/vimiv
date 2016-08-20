@@ -35,7 +35,7 @@ class EventTest(TestCase):
         cls.vimiv.main()
 
     def test_fullscreen(self):
-        """Toggle fullscreen"""
+        """Toggle fullscreen."""
         # Start without fullscreen
         self.assertFalse(self.vimiv.window.fullscreen)
         # Fullscreen
@@ -49,6 +49,7 @@ class EventTest(TestCase):
         self.vimiv.fullscreen()
 
     def test_key_press(self):
+        """Press key."""
         self.vimiv.library.file_select(None, Gtk.TreePath(1), None, True)
         image_before = self.vimiv.paths[self.vimiv.index]
         os.system("xdotool key n")
@@ -60,8 +61,8 @@ class EventTest(TestCase):
         self.assertTrue(self.vimiv.library.treeview.is_focus())
 
     @classmethod
-    def tearDownClass(self):
-        os.chdir(self.working_directory)
+    def tearDownClass(cls):
+        os.chdir(cls.working_directory)
 
 
 if __name__ == '__main__':
