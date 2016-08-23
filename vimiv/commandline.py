@@ -383,7 +383,7 @@ class CommandLine(object):
         # Remember what widget was focused before
         if self.vimiv.library.treeview.is_focus():
             self.vimiv.window.last_focused = "lib"
-        elif self.vimiv.manipulate.toggled:
+        elif self.vimiv.manipulate.scrolled_win.is_visible():
             self.vimiv.window.last_focused = "man"
         elif self.vimiv.thumbnail.toggled:
             self.vimiv.window.last_focused = "thu"

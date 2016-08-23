@@ -64,10 +64,10 @@ class ManipulateTest(TestCase):
     def test_toggle(self):
         """Toggle manipulate."""
         self.manipulate.toggle()
-        self.assertTrue(self.manipulate.toggled)
+        self.assertTrue(self.manipulate.scrolled_win.is_visible())
         self.assertTrue(self.manipulate.scale_bri.is_focus())
         self.manipulate.toggle()
-        self.assertFalse(self.manipulate.toggled)
+        self.assertFalse(self.manipulate.scrolled_win.is_visible())
         self.assertFalse(self.manipulate.scale_bri.is_focus())
         self.assertTrue(self.vimiv.image.scrolled_win.is_focus())
 

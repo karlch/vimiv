@@ -107,7 +107,7 @@ class Thumbnail(object):
             if self.vimiv.library.treeview.is_focus():
                 self.vimiv.library.treeview.grab_focus()
             # Manipulate bar is useless in thumbnail mode
-            if self.vimiv.manipulate.toggled:
+            if self.vimiv.manipulate.scrolled_win.is_visible():
                 self.vimiv.manipulate.toggle()
         else:
             self.vimiv.statusbar.vimiv.statusbar.err_message("No open image")

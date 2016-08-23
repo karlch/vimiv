@@ -20,7 +20,6 @@ class Manipulate(object):
 
     Attributes:
         vimiv: The main vimiv class to interact with.
-        toggled: If True the manipulation bar is visible.
         manipulations. List of possible manipulations. Includes brightness,
             contrast, sharpness and optimize.
         scrolled_win: Gtk.ScrolledWindow for the widgets so they are accessible
@@ -41,7 +40,6 @@ class Manipulate(object):
         self.vimiv = vimiv
 
         # Settings
-        self.toggled = False
         self.manipulations = [1, 1, 1, False]
 
         # A scrollable window so all tools are always accessible
@@ -274,8 +272,7 @@ class Manipulate(object):
 
     def toggle(self):
         """Toggle the manipulation bar."""
-        if self.toggled:
-            self.toggled = False
+        if self.scrolled_win.is_visible():
             self.scrolled_win.hide()
             self.vimiv.image.scrolled_win.grab_focus()
             self.vimiv.statusbar.update_info()
@@ -290,7 +287,6 @@ class Manipulate(object):
                 self.vimiv.statusbar.err_message(
                     "Manipulating Gifs is not supported")
             except:
-                self.toggled = True
                 self.scrolled_win.show()
                 self.scale_bri.grab_focus()
                 self.vimiv.statusbar.update_info()
@@ -458,7 +454,7 @@ class Manipulate(object):
             manipulation: Name of manipulation to run.
             num: Value for setting the slider.
         """
-        if not self.toggled:
+        if not self.scrolled_win.is_visible():
             if not self.vimiv.paths:
                 self.vimiv.statusbar.err_message("No image to manipulate")
                 return

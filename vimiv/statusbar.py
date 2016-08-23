@@ -147,7 +147,7 @@ class Statusbar(object):
         """Return which widget is currently focused."""
         if self.vimiv.library.treeview.is_focus():
             return "<b>-- LIBRARY --</b>"
-        elif self.vimiv.manipulate.toggled:
+        elif self.vimiv.manipulate.scrolled_win.is_visible():
             return "<b>-- MANIPULATE --</b>"
         elif self.vimiv.thumbnail.toggled:
             return "<b>-- THUMBNAIL --</b>"
