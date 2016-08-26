@@ -148,6 +148,11 @@ class CommandlineTest(TestCase):
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
         self.assertFalse(self.vimiv.commandline.search_positions)
 
+    def test_alias(self):
+        """Add an alias."""
+        self.vimiv.commandline.alias("testalias")
+        self.assertTrue("testalias" in self.vimiv.aliases)
+
     def tearDown(self):
         os.chdir(self.working_directory)
         self.vimiv.library.reload(os.getcwd())
