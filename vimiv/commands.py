@@ -26,7 +26,6 @@ class Commands(object):
             "center": [self.vimiv.image.center_window],
             "clear_trash": [self.vimiv.fileextras.clear, 'Trash'],
             "clear_thumbs": [self.vimiv.fileextras.clear, 'Thumbnails'],
-            "command": [self.vimiv.commandline.focus],
             "delete": [self.vimiv.manipulate.delete],
             "discard_changes": [self.vimiv.manipulate.button_clicked, "w",
                                 False],
@@ -37,6 +36,7 @@ class Commands(object):
             "fit_vert": [self.vimiv.image.zoom_to, 0, False, True],
             "flip": [self.vimiv.manipulate.flip],
             "format": [self.vimiv.fileextras.format_files],
+            "fullscreen": [self.vimiv.window.toggle_fullscreen],
             "grow_lib": [self.vimiv.library.resize, True, False],
             "last": [self.vimiv.image.move_pos, True],
             "last_lib": [self.vimiv.library.move_pos, True],
@@ -114,6 +114,6 @@ class Commands(object):
             "search": [self.vimiv.commandline.cmd_search],
             "search_next": [self.vimiv.commandline.search_move, 1],
             "search_prev": [self.vimiv.commandline.search_move, 1, False],
-            "fullscreen": [self.vimiv.window.toggle_fullscreen]}
+            "command": [self.vimiv.commandline.focus]}
 
         self.vimiv.functions.update(self.vimiv.commands)

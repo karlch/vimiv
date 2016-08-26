@@ -130,9 +130,6 @@ Delete all files in ~/.vimiv/Trash.
 .BR clear_thumbs
 Delete all files in ~/.vimiv/Thumbnails/.
 .TP
-.BR command
-Enter the command line.
-.TP
 .BR delete\ 
 Delete the current image
 .TP
@@ -165,6 +162,9 @@ in the form of "formatstring001.ending", "formatstring002.ending" and so on. If
 all currently open images support exif data the formatstring can include "%Y", 
 "%m", "%d", "%H", "%M", and "%S". See date(1) if you aren't sure what these 
 mean.
+.TP
+.BR fullscreen
+Toggle fullscreen.
 .TP
 .BR grow_lib\ value
 Increase the library width by value. Defaults to 20.
@@ -351,8 +351,8 @@ Navigate to [COUNT] next search result.
 .BR search_prev
 Navigate to [COUNT] previous search result.
 .TP
-.BR fullscreen
-Toggle fullscreen.
+.BR command
+Enter the command line.
 .TP
 .BR $direction
 $direction is one of left, down, up or right.
