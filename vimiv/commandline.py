@@ -503,3 +503,12 @@ class CommandLine(object):
         """Reset all search parameters to null."""
         self.search_positions = []
         self.search_pos = 0
+
+    def alias(self, alias, *command):
+        """Add an alias.
+
+        Args:
+            alias: The alias to set up.
+            command: Command to be called.
+        """
+        self.vimiv.aliases[alias] = " ".join(command)

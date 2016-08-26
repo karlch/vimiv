@@ -21,6 +21,7 @@ class Commands(object):
         # Dictionary with command names and the corresponding functions
         self.vimiv.commands = {
             "accept_changes": [self.vimiv.manipulate.button_clicked, "w", True],
+            "alias": [self.vimiv.commandline.alias],
             "autorotate": [self.vimiv.manipulate.rotate_auto],
             "center": [self.vimiv.image.center_window],
             "clear_trash": [self.vimiv.fileextras.clear, 'Trash'],
