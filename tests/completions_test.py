@@ -30,7 +30,7 @@ class CompletionsTest(TestCase):
         """Completion of internal commands."""
         self.vimiv.commandline.entry.set_text(":a")
         self.vimiv.completions.complete()
-        expected_completions = ["accept_changes", "autorotate"]
+        expected_completions = ["accept_changes", "alias", "autorotate"]
         self.assertEqual(self.vimiv.completions.completions,
                          expected_completions)
 
