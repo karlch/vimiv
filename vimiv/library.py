@@ -240,12 +240,10 @@ class Library(object):
         self.remember_pos(os.getcwd(), count)
         # Tags
         if os.getcwd() == self.vimiv.tags.directory:
-            self.vimiv.tags.load(fil)
             # Close if selected twice
             if fil == self.vimiv.tags.last:
                 self.toggle()
-            # Remember last tag selected
-            self.vimiv.tags.last = fil
+            self.vimiv.tags.load(fil)
             return
         # Rest
         if os.path.isdir(fil):  # Open the directory
