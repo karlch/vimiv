@@ -30,6 +30,14 @@ class LibraryTest(TestCase):
         self.lib.toggle()
         self.assertTrue(self.lib.treeview.is_focus())
 
+    def test_toggle_with_slideshow(self):
+        """Toggle the library with running slideshow."""
+        self.lib.toggle()
+        self.vimiv.slideshow.toggle()
+        self.lib.toggle()
+        self.assertFalse(self.vimiv.slideshow.running)
+        self.assertTrue(self.lib.treeview.is_focus())
+
     def test_file_select(self):
         """Select file in library."""
         # Directory by position

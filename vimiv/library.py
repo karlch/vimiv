@@ -123,6 +123,9 @@ class Library(object):
                             break
             # Do not play Gifs with the lib
             self.vimiv.image.animation_toggled = True
+            # Stop the slideshow
+            if self.vimiv.slideshow.running:
+                self.vimiv.slideshow.toggle()
             self.focus(True)
             # Markings and other stuff might have changed
             self.reload(os.getcwd())
