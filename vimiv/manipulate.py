@@ -331,8 +331,6 @@ class Manipulate(object):
         if imageactions.manipulate_all(orig, out, self.manipulations):
             self.vimiv.statusbar.err_message(
                 "Optimize failed. Is imagemagick installed?")
-        # Reset optimize so it isn't repeated all the time
-        self.manipulations[3] = False
 
         # Show the edited image
         self.vimiv.image.image.clear()
@@ -444,8 +442,12 @@ class Manipulate(object):
         Args:
             button: Gtk.Button that was clicked.
         """
-        self.manipulations[3] = True
-        self.manipulate_image()
+        # Do not repeat optimize
+        if self.manipulations[3]:
+            return
+        else:
+            self.manipulations[3] = True
+            self.manipulate_image()
 
     def cmd_edit(self, manipulation, num="0"):
         """Run the specified manipulation.
