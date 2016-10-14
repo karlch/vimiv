@@ -78,7 +78,7 @@ class CommandLine(object):
         # Monospaced font
         self.info.set_name("CompletionInfo")
         completion_provider = Gtk.CssProvider()
-        completion_css = "#CompletionInfo { font: monospace; }".encode()
+        completion_css = "#CompletionInfo { font-family: monospace; }".encode()
         completion_provider.load_from_data(completion_css)
         Gtk.StyleContext.add_provider_for_screen(
             Gdk.Screen.get_default(), completion_provider,
