@@ -4,6 +4,7 @@ The most important changes between the versions are listed here.
 #### v0.7 (unreleased)
 * Add zooming of thumbnails
 * Add support for aliases
+* Compatability with Gtk 3.22
 
 #### v0.6.1
 * Bugfix release after implementing a testsuite
