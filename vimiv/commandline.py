@@ -340,7 +340,7 @@ class CommandLine(object):
                 arg = "(" + arg + ")"
                 function = function.replace(arg, argstr)
                 exec(function)
-        else:  # Through an error
+        else:  # Throw an error if the command does not exist
             self.vimiv.statusbar.err_message("No such command: %s" % (cmd))
 
     def history_search(self, down):
