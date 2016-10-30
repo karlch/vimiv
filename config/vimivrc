@@ -14,6 +14,7 @@ recursive: no
 rescale_svg: yes
 overzoom: no
 search_case_sensitive: yes
+incsearch: yes
 cache_thumbnails: yes
 
 [LIBRARY] ######################################################################

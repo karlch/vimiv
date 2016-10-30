@@ -51,7 +51,6 @@ class CommandLine(object):
                            self.vimiv.keyhandler.run, "COMMAND")
         self.entry.connect("changed", self.check_close)
         self.entry.connect("changed", self.reset_tab_count)
-        self.entry.connect("changed", self.incremental_search)
         self.entry.set_hexpand(True)
         self.info = Gtk.Label()
         self.info.set_hexpand(True)
@@ -94,6 +93,8 @@ class CommandLine(object):
         self.search_pos = 0
         self.search_positions = []
         self.search_case = general["search_case_sensitive"]
+        if general["incsearch"]:
+            self.entry.connect("changed", self.incremental_search)
 
         # List of threads
         self.running_threads = []
