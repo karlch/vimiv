@@ -51,6 +51,7 @@ class CommandLine(object):
                            self.vimiv.keyhandler.run, "COMMAND")
         self.entry.connect("changed", self.check_close)
         self.entry.connect("changed", self.reset_tab_count)
+        self.entry.connect("changed", self.incremental_search)
         self.entry.set_hexpand(True)
         self.info = Gtk.Label()
         self.info.set_hexpand(True)
@@ -382,6 +383,9 @@ class CommandLine(object):
         self.grid.show()
         # Remember what widget was focused before
         if self.vimiv.library.treeview.is_focus():
+            last_path = self.vimiv.library.treeview.get_cursor()[0]
+            last_index = last_path.get_indices()[0]
+            self.last_filename = self.vimiv.library.files[last_index]
             self.vimiv.window.last_focused = "lib"
         elif self.vimiv.manipulate.scrolled_win.is_visible():
             self.vimiv.window.last_focused = "man"
@@ -398,8 +402,10 @@ class CommandLine(object):
         # Remove all completions shown and the text currently inserted
         self.info.set_text("")
         self.entry.set_text("")
+        self.reset_search()
         # Refocus the remembered widget
         if self.vimiv.window.last_focused == "lib":
+            self.vimiv.library.reload(".", self.last_filename)
             self.vimiv.library.focus(True)
         elif self.vimiv.window.last_focused == "man":
             self.vimiv.manipulate.scale_bri.grab_focus()
@@ -430,19 +436,31 @@ class CommandLine(object):
         self.vimiv.completions.cycling = False
         self.info.hide()
 
+    def incremental_search(self, entry):
+        """Run a search for every entered character.
+
+        Args:
+            entry: The Gtk.Entry to check.
+        """
+        text = entry.get_text()
+        if not self.vimiv.window.last_focused == "lib" or len(text) < 2:
+            return
+        elif text[0] == "/":
+            self.search(text.lstrip("/"), True)
+
     def cmd_search(self):
         """Prepend search character '/' to the cmd_line and open it."""
         self.focus()
         self.entry.set_text("/")
         self.entry.set_position(-1)
 
-    def search(self, searchstr):
+    def search(self, searchstr, incsearch=False):
         """Run a search on the appropriate filelist.
 
         Args:
             searchstr: The search string to parse.
         """
-        if self.vimiv.library.treeview.is_focus():
+        if self.vimiv.window.last_focused == "lib":
             paths = self.vimiv.library.files
         else:
             paths = self.vimiv.paths
@@ -458,16 +476,18 @@ class CommandLine(object):
                 if searchstr.lower() in fil.lower():
                     self.search_positions.append(i)
 
-        if self.vimiv.library.treeview.is_focus():
+        if self.vimiv.window.last_focused == "lib":
             self.vimiv.library.reload(os.getcwd(), search=True)
+            if incsearch:
+                self.entry.grab_focus()
 
         # Move to first result or throw an error
         if self.search_positions:
-            self.search_move()
+            self.search_move(incsearch=incsearch)
         else:
             self.vimiv.statusbar.err_message("No matching file")
 
-    def search_move(self, index=0, forward=True):
+    def search_move(self, index=0, forward=True, incsearch=False):
         """Move to the next or previous search.
 
         Args:
@@ -489,7 +509,7 @@ class CommandLine(object):
             path = self.search_positions[self.search_pos]
             self.vimiv.library.treeview.set_cursor(Gtk.TreePath(path),
                                                    None, False)
-            if len(self.search_positions) == 1:
+            if len(self.search_positions) == 1 and not incsearch:
                 self.vimiv.library.file_select(self.vimiv.library.treeview,
                                                Gtk.TreePath(path),
                                                None,
