@@ -52,5 +52,6 @@ class ParserTest(TestCase):
         image_bindings = keybindings["IMAGE"]
         self.assertEqual(image_bindings["j"], "down")
 
+
 if __name__ == '__main__':
     main()

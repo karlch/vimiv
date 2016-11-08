@@ -17,5 +17,6 @@ class MainTest(TestCase):
         """Run through vimiv main once."""
         v_main.main(True)
 
+
 if __name__ == '__main__':
     main()

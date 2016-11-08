@@ -58,5 +58,6 @@ class HelpersTest(TestCase):
     def tearDown(self):
         shutil.rmtree("tmp_testdir")
 
+
 if __name__ == '__main__':
     main()
