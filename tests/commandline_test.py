@@ -155,7 +155,9 @@ class CommandlineTest(TestCase):
         self.assertEqual(self.vimiv.commandline.entry.get_text(), "/")
         # Search should be done automatically
         self.vimiv.commandline.entry.set_text("/vi")
-        self.assertEqual(self.vimiv.commandline.search_positions, [2])
+        expected_pos = self.vimiv.library.files.index("vimiv")
+        self.assertEqual(self.vimiv.commandline.search_positions,
+                         [expected_pos])
         focused_path = self.vimiv.library.treeview.get_cursor()[0]
         position = focused_path.get_indices()[0]
         focused_file = self.vimiv.library.files[position]
