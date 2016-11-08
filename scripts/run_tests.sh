@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Runs tests for vimiv in Xvfb
+# Run tests for vimiv in Xvfb
 
 # Receive current testimages
 (

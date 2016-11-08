@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# Copy all vimiv icons to the correct icon directory
+
 DESTDIR=$1
 
 for i in 16 32 64 128 256 512; do
