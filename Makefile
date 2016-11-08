@@ -1,5 +1,4 @@
 SRC := vimiv
-VERSION   := 0.6.1
 
 PREFIX    := /usr
 MANPREFIX := $(PREFIX)/share/man
