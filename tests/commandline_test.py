@@ -148,6 +148,22 @@ class CommandlineTest(TestCase):
         self.vimiv.commandline.handler(self.vimiv.commandline.entry)
         self.assertFalse(self.vimiv.commandline.search_positions)
 
+    def test_incsearch(self):
+        """Incsearch."""
+        dir_before = os.getcwd()
+        self.vimiv.commandline.cmd_search()
+        self.assertEqual(self.vimiv.commandline.entry.get_text(), "/")
+        # Search should be done automatically
+        self.vimiv.commandline.entry.set_text("/vi")
+        self.assertEqual(self.vimiv.commandline.search_positions, [2])
+        focused_path = self.vimiv.library.treeview.get_cursor()[0]
+        position = focused_path.get_indices()[0]
+        focused_file = self.vimiv.library.files[position]
+        self.assertEqual(focused_file, "vimiv")
+        # Not accepted -> Back to the default position
+        self.vimiv.commandline.leave()
+        self.assertEqual(os.getcwd(), dir_before)
+
     def test_alias(self):
         """Add an alias."""
         self.vimiv.commandline.alias("testalias")
