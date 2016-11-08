@@ -5,6 +5,7 @@ The most important changes between the versions are listed here.
 * Add zooming of thumbnails
 * Add support for aliases
 * Compatability with Gtk 3.22
+* Add incsearch
 
 #### v0.6.1
 * Bugfix release after implementing a testsuite
