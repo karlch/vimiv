@@ -19,17 +19,16 @@ fi
 
 # Start Xvfb if possible
 if [[ ! -f /tmp/.X1-lock ]]; then
-    Xvfb -screen 1 800x600x24 :1 & xvfb_pid="$!"
+    Xvfb :42 -screen 0 800x600x24 1>/dev/null 2>&1 & xvfb_pid="$!"
     sleep 2
-    DISPLAY=":1" herbstluftwm & herbst_pid="$!"
-    sleep 1
+
     # We need this so all directories are generated before running tests.
-    (DISPLAY=":1" python3 tests/main_test.py 1>/dev/null 2>&1 && \
-        printf "Vimiv tests can be run.\n\n") || \
+    (DISPLAY=":42" python3 tests/main_test.py 1>/dev/null 2>&1 && \
+        printf "Vimiv tests can be run.\n\n" && DISPLAY=":42" nosetests) || \
         (printf "Main test failed.\n" && exit 1)
-    DISPLAY=":1" nosetests
+
     kill "$xvfb_pid"
-    kill "$herbst_pid"
+    printf "Killed Xvfb.\n"
 else
     printf "Close the running Xserver running on DISPLAY :1 to start Xvfb.\n"
     exit 1
