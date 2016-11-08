@@ -27,7 +27,7 @@ install:
 	install -Dm644 vimiv.desktop $(DESTDIR)/usr/share/applications/vimiv.desktop
 	install -Dm644 man/vimiv.1 $(DESTDIR)$(MANPREFIX)/man1/vimiv.1
 	install -Dm644 man/vimivrc.5 $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5
-	icons/install_icons.sh $(DESTDIR)
+	scripts/install_icons.sh $(DESTDIR)
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/vimiv
@@ -37,7 +37,7 @@ uninstall:
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/vimiv.1.gz
 	rm -f $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5
 	rm -f $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5.gz
-	icons/remove_icons.sh $(DESTDIR)
+	scripts/remove_icons.sh $(DESTDIR)
 	@printf "python-setuptools does not provide an uninstall option.\n"
 	@printf "To completely remove vimiv you will have to remove all related"
 	@printf " files from /usr/lib/python3.x/site-packages/.\n"
@@ -45,7 +45,7 @@ uninstall:
 	@printf " in install_log.txt.\n"
 
 test:
-	@tests/run_tests.sh
+	@scripts/run_tests.sh
 
 lint:
 	pylint vimiv/*.py vimiv/vimiv tests/*.py
