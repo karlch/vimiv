@@ -30,7 +30,6 @@ install:
 	scripts/install_icons.sh $(DESTDIR)
 
 uninstall:
-	rm -f $(DESTDIR)$(PREFIX)/bin/vimiv
 	rm -rf $(DESTDIR)/etc/vimiv/
 	rm -f $(DESTDIR)/usr/share/applications/vimiv.desktop
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/vimiv.1
@@ -38,11 +37,7 @@ uninstall:
 	rm -f $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5
 	rm -f $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5.gz
 	scripts/remove_icons.sh $(DESTDIR)
-	@printf "python-setuptools does not provide an uninstall option.\n"
-	@printf "To completely remove vimiv you will have to remove all related"
-	@printf " files from /usr/lib/python3.x/site-packages/.\n"
-	@printf "A list of files should have been generated during make install"
-	@printf " in install_log.txt.\n"
+	scripts/uninstall_pythonpkg.sh
 
 test:
 	@scripts/run_tests.sh
