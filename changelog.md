@@ -1,7 +1,7 @@
 ## Changelog
 The most important changes between the versions are listed here.
 
-#### v0.7 (unreleased)
+#### v0.7
 * Add zooming of thumbnails
 * Add support for aliases
 * Compatability with Gtk 3.22
