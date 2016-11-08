@@ -30,6 +30,7 @@ class CommandLine(object):
         search_pos: Position when navigating through search results.
         search_positions: Search results as positions.
         search_case: If True, search case sensitively.
+        last_filename: File that was last selected in the library, if any.
         running_threads: List of all running threads.
     """
 
@@ -95,6 +96,7 @@ class CommandLine(object):
         self.search_case = general["search_case_sensitive"]
         if general["incsearch"]:
             self.entry.connect("changed", self.incremental_search)
+        self.last_filename = ""
 
         # List of threads
         self.running_threads = []
@@ -414,6 +416,7 @@ class CommandLine(object):
             self.vimiv.thumbnail.iconview.grab_focus()
         else:
             self.vimiv.image.scrolled_win.grab_focus()
+        self.last_filename = ""
 
     def check_close(self, entry):
         """Close the entry if the colon/slash is deleted.
