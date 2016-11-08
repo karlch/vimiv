@@ -386,9 +386,15 @@ class CommandLine(object):
         self.grid.show()
         # Remember what widget was focused before
         if self.vimiv.library.treeview.is_focus():
-            last_path = self.vimiv.library.treeview.get_cursor()[0]
-            last_index = last_path.get_indices()[0]
-            self.last_filename = self.vimiv.library.files[last_index]
+            # In the library remember current file to refocus if incsearch was
+            # not applied
+            try:
+                last_path = self.vimiv.library.treeview.get_cursor()[0]
+                last_index = last_path.get_indices()[0]
+                self.last_filename = self.vimiv.library.files[last_index]
+            # Only works if there is a filelist
+            except:
+                self.last_filename = ""
             self.vimiv.window.last_focused = "lib"
         elif self.vimiv.manipulate.scrolled_win.is_visible():
             self.vimiv.window.last_focused = "man"
