@@ -489,14 +489,20 @@ class CommandLine(object):
                 if searchstr.lower() in fil.lower():
                     self.search_positions.append(i)
 
+        # Reload library to show search results
         if self.vimiv.window.last_focused == "lib":
-            self.vimiv.library.reload(os.getcwd(), self.last_filename, search=True)
+            self.vimiv.library.reload(os.getcwd(), self.last_filename,
+                                      search=True)
 
         # Move to first result or throw an error
         if self.search_positions:
             self.search_move(incsearch=incsearch)
         else:
-            self.vimiv.statusbar.err_message("No matching file")
+            if incsearch:
+                self.entry.grab_focus()
+                self.entry.set_position(-1)
+            else:
+                self.vimiv.statusbar.err_message("No matching file")
 
     def search_move(self, forward=True, incsearch=False):
         """Move to the next or previous search.
@@ -540,6 +546,7 @@ class CommandLine(object):
                                                False)
             if incsearch:
                 self.entry.grab_focus()
+                self.entry.set_position(-1)
         else:
             self.vimiv.keyhandler.num_str = str(next_pos + 1)
             self.vimiv.image.move_pos()
