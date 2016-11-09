@@ -166,23 +166,29 @@ class Vimiv(Gtk.Window):
 
         Return: Current position as Int or filename.
         """
-        if self.library.treeview.is_focus():
-            path = self.library.treeview.get_cursor()[0]
-            filelist = self.library.files
-        elif self.thumbnail.iconview.is_focus():
-            path = self.thumbnail.iconview.get_cursor()[1]
-            filelist = self.paths
-        try:
-            position = path.get_indices()[0]
+        if not self.image.scrolled_win.is_focus():
+            if self.library.treeview.is_focus():
+                path = self.library.treeview.get_cursor()[0]
+                filelist = self.library.files
+            elif self.thumbnail.iconview.is_focus():
+                path = self.thumbnail.iconview.get_cursor()[1]
+                filelist = self.paths
+            try:
+                position = path.get_indices()[0]
+                if get_filename:
+                    return filelist[position]
+                else:
+                    return position
+            except:
+                if get_filename:
+                    return ""
+                else:
+                    return 0
+        else:
             if get_filename:
-                return filelist[position]
+                return self.paths[self.index]
             else:
-                return position
-        except:
-            if get_filename:
-                return ""
-            else:
-                return 0
+                return self.index
 
     def main(self):
         """Starting point for the vimiv class."""
