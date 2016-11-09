@@ -189,7 +189,8 @@ class Thumbnails:
                 im.thumbnail(self.thumbsize, Image.ANTIALIAS)
                 save_image(im, outfile)
         except:
-            default_infile = "/usr/share/icons/Adwaita/256x256/status/dialog-error.png"
+            default_infile = \
+                "/usr/share/icons/Adwaita/256x256/status/dialog-error.png"
             copyfile(default_infile, outfile)
         self.thumblist.append(outfile)
         self.thumbdict[outfile] = infile
