@@ -6,6 +6,9 @@ from shutil import copyfile
 from subprocess import Popen, PIPE
 from threading import Thread
 from PIL import Image, ImageEnhance
+from gi import require_version
+require_version('Gtk', '3.0')
+from gi.repository import Gtk
 
 
 def save_image(im, filename):
@@ -189,8 +192,9 @@ class Thumbnails:
                 im.thumbnail(self.thumbsize, Image.ANTIALIAS)
                 save_image(im, outfile)
         except:
-            default_infile = \
-                "/usr/share/icons/Adwaita/256x256/status/dialog-error.png"
+            icon_theme = Gtk.IconTheme.get_default()
+            icon_info = icon_theme.lookup_icon("dialog-error", 256, 0)
+            default_infile = icon_info.get_filename()
             copyfile(default_infile, outfile)
         self.thumblist.append(outfile)
         self.thumbdict[outfile] = infile
