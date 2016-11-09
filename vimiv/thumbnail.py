@@ -180,8 +180,9 @@ class Thumbnail(object):
             if reload_image:
                 thumbnails = Thumbnails([thumb], self.sizes[-1])
                 new_thumb = thumbnails.thumbnails_create()[0]
-                self.elements[index] = new_thumb[0]
+                self.elements[index] = new_thumb
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.elements[index])
+            print(self.elements[index])
 
             name = os.path.basename(self.elements[index])
             name = name.split(".")[0]
