@@ -28,7 +28,7 @@ class Thumbnail(object):
         pos: Current position in the Gtk.IconView.
         elements: List containing names of current thumbnail-files.
         pixbuf_max: List containing current thumbnail-pixbufs at maximum size.
-        listsotre: Gtk.ListStore containing thumbnail pixbufs and names.
+        liststore: Gtk.ListStore containing thumbnail pixbufs and names.
         iconview: Gtk.IconView to display thumbnails.
         columns: Amount of columns that fit into the window.
     """
