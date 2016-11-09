@@ -531,6 +531,8 @@ class CommandLine(object):
         if self.vimiv.library.grid.is_visible():
             self.vimiv.library.treeview.set_cursor(Gtk.TreePath(next_pos),
                                                    None, False)
+            self.vimiv.library.treeview.scroll_to_cell(Gtk.TreePath(next_pos),
+                                                       None, True, 0.5, 0)
             if len(self.search_positions) == 1 and not self.incsearch:
                 self.vimiv.library.file_select(self.vimiv.library.treeview,
                                                Gtk.TreePath(next_pos),
