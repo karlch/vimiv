@@ -27,9 +27,9 @@ class CommandLine(object):
         history: List of commandline history to save.
         pos: Position in history completion.
         sub_history: Parts of the history that match entered text.
-        search_pos: Position when navigating through search results.
         search_positions: Search results as positions.
         search_case: If True, search case sensitively.
+        incsearch: If True, enable incremental search in the library.
         last_filename: File that was last selected in the library, if any.
         running_threads: List of all running threads.
     """
@@ -91,10 +91,10 @@ class CommandLine(object):
         # Defaults
         self.pos = 0
         self.sub_history = []
-        self.search_pos = 0
         self.search_positions = []
         self.search_case = general["search_case_sensitive"]
-        if general["incsearch"]:
+        self.incsearch = general["incsearch"]
+        if self.incsearch:
             self.entry.connect("changed", self.incremental_search)
         self.last_filename = ""
 
@@ -121,10 +121,12 @@ class CommandLine(object):
         if command[1:] in self.vimiv.aliases.keys():
             command = ":" + self.vimiv.aliases[command[1:]]
         # And close the cmd line
-        self.leave()
         if command[0] == "/":  # Search
-            self.search(command.lstrip("/"))
+            self.leave(True)
+            if not self.incsearch or not self.vimiv.library.treeview.is_focus():
+                self.search(command.lstrip("/"))
         else:  # Run a command
+            self.leave()
             cmd = command.lstrip(":")
             # If there was no command just leave
             if not cmd:
@@ -405,16 +407,18 @@ class CommandLine(object):
         self.entry.grab_focus()
         self.entry.set_position(-1)
 
-    def leave(self):
+    def leave(self, search=False):
         """Close the command line."""
         self.grid.hide()
         # Remove all completions shown and the text currently inserted
         self.info.set_text("")
         self.entry.set_text("")
-        self.reset_search()
+        if not search:
+            self.reset_search()
         # Refocus the remembered widget
         if self.vimiv.window.last_focused == "lib":
-            self.vimiv.library.reload(".", self.last_filename)
+            if not search:
+                self.vimiv.library.reload(".", self.last_filename)
             self.vimiv.library.focus(True)
         elif self.vimiv.window.last_focused == "man":
             self.vimiv.manipulate.scale_bri.grab_focus()
@@ -434,7 +438,7 @@ class CommandLine(object):
         self.pos = 0
         text = entry.get_text()
         if not text or text[0] not in ":/":
-            self.leave()
+            self.leave(True)
 
     def reset_tab_count(self, entry):
         """Reset the amount of tab presses if new text is entered.
@@ -473,9 +477,8 @@ class CommandLine(object):
         if self.vimiv.window.last_focused == "lib":
             paths = self.vimiv.library.files
         else:
-            paths = self.vimiv.paths
+            paths = [os.path.basename(path) for path in self.vimiv.paths]
         self.search_positions = []
-        self.search_pos = 0
 
         if self.search_case:
             for i, fil in enumerate(paths):
@@ -487,9 +490,7 @@ class CommandLine(object):
                     self.search_positions.append(i)
 
         if self.vimiv.window.last_focused == "lib":
-            self.vimiv.library.reload(os.getcwd(), search=True)
-            if incsearch:
-                self.entry.grab_focus()
+            self.vimiv.library.reload(os.getcwd(), self.last_filename, search=True)
 
         # Move to first result or throw an error
         if self.search_positions:
@@ -497,42 +498,54 @@ class CommandLine(object):
         else:
             self.vimiv.statusbar.err_message("No matching file")
 
-    def search_move(self, index=0, forward=True, incsearch=False):
+    def search_move(self, forward=True, incsearch=False):
         """Move to the next or previous search.
 
         Args:
-            index: How much to move.
             forward: If true, move forwards. Else move backwards.
+            incsearch: If true, running from incsearch.
         """
+        pos = self.vimiv.get_pos()
+        next_pos = 0
         # Correct handling of index
         if self.vimiv.keyhandler.num_str:
             index = int(self.vimiv.keyhandler.num_str)
             self.vimiv.keyhandler.num_str = ""
-        if forward:
-            self.search_pos += index
         else:
-            self.search_pos -= index
-        self.search_pos = self.search_pos % len(self.search_positions)
+            index = 1
+        # If backwards act on inverted list
+        if forward:
+            search_list = self.search_positions
+        else:
+            search_list = self.search_positions[::-1]
+        # Find next match depending on current position
+        for i, search_pos in enumerate(search_list):
+            if search_pos > pos and forward or search_pos < pos and not forward:
+                next_pos = search_list[(i + index - 1) % len(search_list)]
+                break
+            elif search_pos == pos:
+                next_pos = search_list[(i + index) % len(search_list)]
+                break
 
-        # Select file depending on library
+        # Select new file in library or image
         if self.vimiv.library.grid.is_visible():
-            path = self.search_positions[self.search_pos]
-            self.vimiv.library.treeview.set_cursor(Gtk.TreePath(path),
+            self.vimiv.library.treeview.set_cursor(Gtk.TreePath(next_pos),
                                                    None, False)
-            if len(self.search_positions) == 1 and not incsearch:
+            if len(self.search_positions) == 1 and not self.incsearch:
                 self.vimiv.library.file_select(self.vimiv.library.treeview,
-                                               Gtk.TreePath(path),
+                                               Gtk.TreePath(next_pos),
                                                None,
                                                False)
+            if incsearch:
+                self.entry.grab_focus()
         else:
-            self.vimiv.keyhandler.num_str = str(
-                self.search_positions[self.search_pos] + 1)
+            self.vimiv.keyhandler.num_str = str(next_pos + 1)
             self.vimiv.image.move_pos()
+
 
     def reset_search(self):
         """Reset all search parameters to null."""
         self.search_positions = []
-        self.search_pos = 0
 
     def alias(self, alias, *command):
         """Add an alias.

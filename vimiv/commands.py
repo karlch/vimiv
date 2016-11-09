@@ -112,8 +112,8 @@ class Commands(object):
             "up_lib": [self.vimiv.library.scroll, "k"],
             "up_page": [self.vimiv.keyhandler.scroll, "K"],
             "search": [self.vimiv.commandline.cmd_search],
-            "search_next": [self.vimiv.commandline.search_move, 1],
-            "search_prev": [self.vimiv.commandline.search_move, 1, False],
+            "search_next": [self.vimiv.commandline.search_move],
+            "search_prev": [self.vimiv.commandline.search_move, False],
             "command": [self.vimiv.commandline.focus]}
 
         self.vimiv.functions.update(self.vimiv.commands)
