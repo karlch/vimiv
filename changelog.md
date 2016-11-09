@@ -1,6 +1,13 @@
 ## Changelog
 The most important changes between the versions are listed here.
 
+#### v0.7.1 (unreleased)
+* Bugfix release
+* Always start search at current position
+* Fix incsearch when search has no results
+* Fix search problems when image and library are open
+* Failed thumbnails now show up as error icon
+
 #### v0.7
 * Add zooming of thumbnails
 * Add support for aliases
