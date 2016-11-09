@@ -125,6 +125,12 @@ class CommandLine(object):
             self.leave(True)
             if not self.incsearch or not self.vimiv.library.treeview.is_focus():
                 self.search(command.lstrip("/"))
+            elif self.incsearch and len(self.search_positions) == 1:
+                self.vimiv.library.file_select(self.vimiv.library.treeview,
+                                               Gtk.TreePath(
+                                                   self.vimiv.get_pos()),
+                                               None,
+                                               False)
         else:  # Run a command
             self.leave()
             cmd = command.lstrip(":")
