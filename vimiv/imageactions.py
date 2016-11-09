@@ -2,6 +2,7 @@
 # encoding: utf-8
 """Actions which act on the actual image file."""
 import os
+from shutil import copyfile
 from subprocess import Popen, PIPE
 from threading import Thread
 from PIL import Image, ImageEnhance
@@ -124,7 +125,6 @@ class Thumbnails:
         thumbnails: Cached thumbnails that have been created already.
         thumblist: List of required thumbnails.
         thumbdict: Dictionary with required thumbnails and original filename.
-        errutple: Tuple containing failed thumbnails and their position.
         threads: Threads that are running for thumbnail creation.
     """
 
@@ -145,7 +145,6 @@ class Thumbnails:
         self.thumbdict = {}  # Asserts thumbnails to their original file
         # Tuple containing all files for which thumbnail creation failed and
         # their position
-        self.errtuple = ([], [])
         self.threads = []
 
     def thumbnails_create(self):
@@ -170,24 +169,30 @@ class Thumbnails:
 
         while self.threads:
             self.threads[0].join()
-        self.errtuple[0].sort()
-        self.errtuple[1].sort(key=self.filelist.index)
         self.thumblist.sort(
             key=lambda x: self.filelist.index(self.thumbdict[x]))
-        return self.thumblist, self.errtuple
+        return self.thumblist
 
     def thread_for_thumbnails(self, infile, outfile, position):
-        """Create thumbnail in an extra thread."""
+        """Create thumbnail in an extra thread.
+
+        If thumbnail creation fails, defaults to the Adwaita dialog error.
+
+        Args:
+            infile: Image file to operate on.
+            outfile: Name of thumbnail file to write to.
+            position: Integer position of this thumbnail in the filelist.
+        """
         try:
             with open(infile, "rb") as image_file:
                 im = Image.open(image_file)
                 im.thumbnail(self.thumbsize, Image.ANTIALIAS)
                 save_image(im, outfile)
-                self.thumblist.append(outfile)
-                self.thumbdict[outfile] = infile
         except:
-            self.errtuple[0].append(position)
-            self.errtuple[1].append(infile)
+            default_infile = "/usr/share/icons/Adwaita/256x256/status/dialog-error.png"
+            copyfile(default_infile, outfile)
+        self.thumblist.append(outfile)
+        self.thumbdict[outfile] = infile
         self.threads.pop(0)
 
 

@@ -24,7 +24,6 @@ class Thumbnail(object):
         cache: If True, cache thumbnails.
         directory: Directory in which thumbnails are stored.
         timer_id: ID of the currently running GLib.Timeout.
-        errorpos: List containing the positions of images where thumbnail
             creation failed.
         pos: Current position in the Gtk.IconView.
         elements: List containing names of current thumbnail-files.
@@ -53,7 +52,6 @@ class Thumbnail(object):
         self.cache = general["cache_thumbnails"]
         self.directory = os.path.join(self.vimiv.directory, "Thumbnails")
         self.timer_id = GLib.Timeout
-        self.errorpos = []
         self.elements = []
         self.pixbuf_max = []
 
@@ -87,9 +85,6 @@ class Thumbnail(object):
         self.toggle()
         count = path.get_indices()[0] + 1
         self.vimiv.keyhandler.vimiv.keyhandler.num_clear()
-        for i in self.errorpos:
-            if count > i:
-                count += 1
         self.vimiv.keyhandler.vimiv.keyhandler.num_str = str(count)
         self.vimiv.image.move_pos()
 
@@ -112,8 +107,7 @@ class Thumbnail(object):
         else:
             self.vimiv.statusbar.vimiv.statusbar.err_message("No open image")
         # Update info for the current mode
-        if not self.errorpos:
-            self.vimiv.statusbar.update_info()
+        self.vimiv.statusbar.update_info()
 
     def calculate_columns(self):
         """Calculate how many columns fit into the current window."""
@@ -136,8 +130,7 @@ class Thumbnail(object):
         self.pixbuf_max = []
         # Create thumbnails
         thumbnails = Thumbnails(self.vimiv.paths, self.sizes[-1])
-        self.elements, errtuple = thumbnails.thumbnails_create()
-        self.errorpos = errtuple[0]
+        self.elements = thumbnails.thumbnails_create()
         # Draw the icon view instead of the image
         if not toggled:
             self.vimiv.image.scrolled_win.remove(self.vimiv.image.viewport)
@@ -163,22 +156,12 @@ class Thumbnail(object):
         # Focus the current immage
         self.iconview.grab_focus()
         pos = (self.vimiv.index) % len(self.vimiv.paths)
-        for i in self.errorpos:
-            if pos > i:
-                pos -= 1
         self.move_to_pos(pos)
 
         # Remove the files again if the thumbnails should not be cached
         if not self.cache:
             for thumb in self.elements:
                 os.remove(thumb)
-
-        # Show error message if necessary
-        if self.errorpos:
-            failed_files = ", ".join(
-                [os.path.basename(image) for image in errtuple[1]])
-            self.vimiv.statusbar.err_message(
-                "Thumbnail creation for %s failed" % (failed_files))
 
     def reload(self, thumb, index, reload_image=True):
         """Reload the thumbnails of manipulated images.
@@ -191,9 +174,6 @@ class Thumbnail(object):
         """
         # Remember position
         old_path = self.iconview.get_cursor()[1]
-        for i in self.errorpos:
-            if index > i:
-                index -= 1
         liststore_iter = self.liststore.get_iter(index)
         self.liststore.remove(liststore_iter)
         try:
@@ -224,7 +204,7 @@ class Thumbnail(object):
         """
         new_pos = self.vimiv.get_pos()
         # Get last element
-        last = len(self.vimiv.paths) - len(self.errorpos) - 1
+        last = len(self.vimiv.paths) - 1
         # Check for a user prefixed step
         if self.vimiv.keyhandler.num_str:
             step = int(self.vimiv.keyhandler.num_str)

@@ -26,10 +26,6 @@ class Mark(object):
             current = os.path.abspath(self.vimiv.get_pos(True))
         elif self.vimiv.thumbnail.toggled:
             index = self.vimiv.get_pos()
-            # Remove errors and reload the thumb_name
-            for i in self.vimiv.thumbnail.errorpos:
-                if index >= i:
-                    index += 1
             current = self.vimiv.paths[index]
         else:
             current = self.vimiv.paths[self.vimiv.index]
