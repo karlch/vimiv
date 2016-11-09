@@ -534,7 +534,7 @@ class CommandLine(object):
                 break
 
         # Select new file in library or image
-        if self.vimiv.library.grid.is_visible():
+        if self.vimiv.window.last_focused == "lib":
             self.vimiv.library.treeview.set_cursor(Gtk.TreePath(next_pos),
                                                    None, False)
             self.vimiv.library.treeview.scroll_to_cell(Gtk.TreePath(next_pos),
@@ -547,10 +547,9 @@ class CommandLine(object):
             if incsearch:
                 self.entry.grab_focus()
                 self.entry.set_position(-1)
-        else:
+        elif self.vimiv.window.last_focused == "im":
             self.vimiv.keyhandler.num_str = str(next_pos + 1)
             self.vimiv.image.move_pos()
-
 
     def reset_search(self):
         """Reset all search parameters to null."""
