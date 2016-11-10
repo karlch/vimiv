@@ -1,7 +1,7 @@
 ## Changelog
 The most important changes between the versions are listed here.
 
-#### v0.7.1 (unreleased)
+#### v0.7.1
 * Bugfix release
 * Always start search at current position
 * Fix incsearch when search has no results
