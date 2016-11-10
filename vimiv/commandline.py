@@ -130,11 +130,9 @@ class CommandLine(object):
                 self.search(command.lstrip("/"))
             # Auto select single file
             elif self.incsearch and len(self.search_positions) == 1:
-                self.vimiv.library.file_select(self.vimiv.library.treeview,
-                                               Gtk.TreePath(
-                                                    self.vimiv.get_pos()),
-                                                    None,
-                                                    False)
+                self.vimiv.library.file_select(
+                    self.vimiv.library.treeview,
+                    Gtk.TreePath(self.vimiv.get_pos()), None, False)
         else:  # Run a command
             self.leave()
             cmd = command.lstrip(":")
@@ -468,7 +466,8 @@ class CommandLine(object):
         """
         text = entry.get_text()
         if (not self.vimiv.window.last_focused == "lib"
-            and not self.vimiv.window.last_focused == "thu") or len(text) < 2:
+                and not self.vimiv.window.last_focused == "thu") \
+                or len(text) < 2:
             return
         elif text[0] == "/":
             self.search(text.lstrip("/"), True)
@@ -555,10 +554,9 @@ class CommandLine(object):
                                                        None, True, 0.5, 0)
             # Auto select single file
             if len(self.search_positions) == 1 and not self.incsearch:
-                self.vimiv.library.file_select(self.vimiv.library.treeview,
-                                               Gtk.TreePath(next_pos),
-                                               None,
-                                               False)
+                self.vimiv.library.file_select(
+                    self.vimiv.library.treeview, Gtk.TreePath(next_pos), None,
+                    False)
             if incsearch:
                 self.entry.grab_focus()
                 self.entry.set_position(-1)
@@ -577,7 +575,7 @@ class CommandLine(object):
             else:
                 for index in self.search_positions:
                     self.vimiv.thumbnail.reload(
-                            self.vimiv.thumbnail.elements[index], index, False)
+                        self.vimiv.thumbnail.elements[index], index, False)
                 self.vimiv.thumbnail.move_to_pos(next_pos)
 
     def reset_search(self):
