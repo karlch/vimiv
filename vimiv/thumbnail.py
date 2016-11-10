@@ -28,6 +28,7 @@ class Thumbnail(object):
         pos: Current position in the Gtk.IconView.
         elements: List containing names of current thumbnail-files.
         pixbuf_max: List containing current thumbnail-pixbufs at maximum size.
+        markup: Markup string used to highlight search results.
         liststore: Gtk.ListStore containing thumbnail pixbufs and names.
         iconview: Gtk.IconView to display thumbnails.
         columns: Amount of columns that fit into the window.
@@ -54,6 +55,7 @@ class Thumbnail(object):
         self.timer_id = GLib.Timeout
         self.elements = []
         self.pixbuf_max = []
+        self.markup = self.vimiv.library.markup.replace("fore", "back")
 
         # Prepare thumbnail sizes for zooming of thumbnails
         self.set_sizes()
@@ -190,7 +192,7 @@ class Thumbnail(object):
             if thumb in self.vimiv.mark.marked:
                 name = name + " [*]"
             elif index in self.vimiv.commandline.search_positions:
-                name = self.vimiv.library.markup  + '<b>' + name + '</b></span>'
+                name = self.markup  + '<b>' + name + '</b></span>'
             self.liststore.insert(index, [pixbuf, name])
             self.iconview.select_path(old_path)
             cell_renderer = self.iconview.get_cells()[0]
