@@ -7,6 +7,7 @@ from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib
 from vimiv.imageactions import Thumbnails
+from vimiv.fileactions import populate
 
 
 class Thumbnail(object):
@@ -84,25 +85,57 @@ class Thumbnail(object):
             iconview: Gtk.IconView that emitted the signal.
             path: Gtk.TreePath of the activated thumbnail.
         """
-        self.toggle()
+        self.toggle(True)
         count = path.get_indices()[0] + 1
         self.vimiv.keyhandler.vimiv.keyhandler.num_clear()
         self.vimiv.keyhandler.vimiv.keyhandler.num_str = str(count)
         self.vimiv.image.move_pos()
 
-    def toggle(self):
-        """Toggle thumbnail mode."""
+    def toggle(self, select_image=False):
+        """Toggle thumbnail mode.
+
+        Args:
+            select_image: If True an image was selected. Never focus the library
+                then.
+        """
+        # Close
         if self.toggled:
             self.vimiv.image.scrolled_win.remove(self.iconview)
             self.vimiv.image.scrolled_win.add(self.vimiv.image.viewport)
-            self.vimiv.image.update()
-            self.vimiv.image.scrolled_win.grab_focus()
+            if self.vimiv.window.last_focused == "im" or select_image:
+                self.vimiv.image.scrolled_win.grab_focus()
+                # If we come from the library there may not be an image to
+                # update
+                if not self.vimiv.window.last_focused == "lib":
+                    self.vimiv.image.update()
+            elif self.vimiv.window.last_focused == "lib":
+                self.vimiv.library.focus()
+                # Re-expand the library if there is no image and the setting
+                # applies
+                if self.vimiv.library.expand:
+                    try:
+                        self.vimiv.image.pixbuf_original.get_height()
+                    except:
+                        self.vimiv.library.scrollable_treeview.set_size_request(
+                            self.vimiv.winsize[0], 10)
             self.toggled = False
-        elif self.vimiv.paths:
+        # Open thumbnail mode differently depending on where we come from
+        elif self.vimiv.paths and self.vimiv.image.scrolled_win.is_focus():
+            self.vimiv.window.last_focused = "im"
             self.show()
-            # Let the library keep focus
-            if self.vimiv.library.treeview.is_focus():
-                self.vimiv.library.treeview.grab_focus()
+            # Manipulate bar is useless in thumbnail mode
+            if self.vimiv.manipulate.scrolled_win.is_visible():
+                self.vimiv.manipulate.toggle()
+        elif self.vimiv.library.files \
+                and self.vimiv.library.treeview.is_focus():
+            self.vimiv.window.last_focused = "lib"
+            self.vimiv.paths, self.vimiv.index = \
+                populate(self.vimiv.library.files)
+            if self.vimiv.paths:
+                self.vimiv.library.scrollable_treeview.set_size_request(
+                    self.vimiv.library.width, 10)
+                self.vimiv.image.scrolled_win.show()
+            self.show()
             # Manipulate bar is useless in thumbnail mode
             if self.vimiv.manipulate.scrolled_win.is_visible():
                 self.vimiv.manipulate.toggle()
