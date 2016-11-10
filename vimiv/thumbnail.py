@@ -108,6 +108,7 @@ class Thumbnail(object):
                 self.vimiv.manipulate.toggle()
         else:
             self.vimiv.statusbar.vimiv.statusbar.err_message("No open image")
+            return
         # Update info for the current mode
         self.vimiv.statusbar.update_info()
 
