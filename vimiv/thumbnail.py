@@ -189,6 +189,8 @@ class Thumbnail(object):
 
             if thumb in self.vimiv.mark.marked:
                 name = name + " [*]"
+            elif index in self.vimiv.commandline.search_positions:
+                name = self.vimiv.library.markup  + '<b>' + name + '</b></span>'
             self.liststore.insert(index, [pixbuf, name])
             self.iconview.select_path(old_path)
             cell_renderer = self.iconview.get_cells()[0]

@@ -559,6 +559,11 @@ class CommandLine(object):
         elif self.vimiv.window.last_focused == "im":
             self.vimiv.keyhandler.num_str = str(next_pos + 1)
             self.vimiv.image.move_pos()
+        elif self.vimiv.window.last_focused == "thu":
+            for index in self.search_positions:
+                self.vimiv.thumbnail.reload(
+                        self.vimiv.thumbnail.elements[index], index, False)
+            self.vimiv.thumbnail.move_to_pos(next_pos)
 
     def reset_search(self):
         """Reset all search parameters to null."""
