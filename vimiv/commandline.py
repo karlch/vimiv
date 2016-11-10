@@ -123,14 +123,18 @@ class CommandLine(object):
         # And close the cmd line
         if command[0] == "/":  # Search
             self.leave(True)
-            if not self.incsearch or not self.vimiv.library.treeview.is_focus():
+            # Do not search again if incsearch was running
+            if not (self.vimiv.library.treeview.is_focus() or
+                    self.vimiv.thumbnail.iconview.is_focus()) or \
+                    not self.incsearch:
                 self.search(command.lstrip("/"))
+            # Auto select single file
             elif self.incsearch and len(self.search_positions) == 1:
                 self.vimiv.library.file_select(self.vimiv.library.treeview,
                                                Gtk.TreePath(
-                                                   self.vimiv.get_pos()),
-                                               None,
-                                               False)
+                                                    self.vimiv.get_pos()),
+                                                    None,
+                                                    False)
         else:  # Run a command
             self.leave()
             cmd = command.lstrip(":")
@@ -463,7 +467,8 @@ class CommandLine(object):
             entry: The Gtk.Entry to check.
         """
         text = entry.get_text()
-        if not self.vimiv.window.last_focused == "lib" or len(text) < 2:
+        if (not self.vimiv.window.last_focused == "lib"
+            and not self.vimiv.window.last_focused == "thu") or len(text) < 2:
             return
         elif text[0] == "/":
             self.search(text.lstrip("/"), True)
@@ -542,12 +547,13 @@ class CommandLine(object):
             if search_pos == search_list[-1]:
                 next_pos = search_list[0]
 
-        # Select new file in library or image
+        # Select new file in library, image or thumbnail
         if self.vimiv.window.last_focused == "lib":
             self.vimiv.library.treeview.set_cursor(Gtk.TreePath(next_pos),
                                                    None, False)
             self.vimiv.library.treeview.scroll_to_cell(Gtk.TreePath(next_pos),
                                                        None, True, 0.5, 0)
+            # Auto select single file
             if len(self.search_positions) == 1 and not self.incsearch:
                 self.vimiv.library.file_select(self.vimiv.library.treeview,
                                                Gtk.TreePath(next_pos),
@@ -560,10 +566,19 @@ class CommandLine(object):
             self.vimiv.keyhandler.num_str = str(next_pos + 1)
             self.vimiv.image.move_pos()
         elif self.vimiv.window.last_focused == "thu":
-            for index in self.search_positions:
-                self.vimiv.thumbnail.reload(
-                        self.vimiv.thumbnail.elements[index], index, False)
-            self.vimiv.thumbnail.move_to_pos(next_pos)
+            # In incsearch reload all thumbnails, otherwise only the ones
+            # searched for
+            if incsearch:
+                for index, thumb in enumerate(self.vimiv.thumbnail.elements):
+                    self.vimiv.thumbnail.reload(thumb, index, False)
+                self.vimiv.thumbnail.move_to_pos(next_pos)
+                self.entry.grab_focus()
+                self.entry.set_position(-1)
+            else:
+                for index in self.search_positions:
+                    self.vimiv.thumbnail.reload(
+                            self.vimiv.thumbnail.elements[index], index, False)
+                self.vimiv.thumbnail.move_to_pos(next_pos)
 
     def reset_search(self):
         """Reset all search parameters to null."""
