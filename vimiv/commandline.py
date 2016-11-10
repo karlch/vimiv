@@ -538,6 +538,9 @@ class CommandLine(object):
             elif search_pos == pos:
                 next_pos = search_list[(i + index) % len(search_list)]
                 break
+            # Correctly wrap when on last element
+            if search_pos == search_list[-1]:
+                next_pos = search_list[0]
 
         # Select new file in library or image
         if self.vimiv.window.last_focused == "lib":
