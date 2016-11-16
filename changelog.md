@@ -2,7 +2,10 @@
 The most important changes between the versions are listed here.
 
 #### v0.7.2 (unreleased)
-* Search in thumbnail mode
+* Add search in thumbnail mode
+* Make it possible to go straight to thumbnail mode from library
+* t is bound to thumbnail mode in library now instead of toggling show\_hidden
+  per default
 
 #### v0.7.1
 * Bugfix release
