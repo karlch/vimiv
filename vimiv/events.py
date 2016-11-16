@@ -62,12 +62,6 @@ class Window(object):
             self.vimiv.unfullscreen()
         else:
             self.vimiv.fullscreen()
-        # Adjust the image if necessary
-        if self.vimiv.paths:
-            if self.vimiv.image.user_zoomed:
-                self.vimiv.image.update_image()
-            else:
-                self.vimiv.image.zoom_to(0)
 
     def auto_resize(self, window):
         """Automatically resize widgets when window is resized.
