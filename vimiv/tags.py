@@ -82,13 +82,10 @@ class TagHandler(object):
         self.vimiv.paths = populate(tagged_images)[0]
         if self.vimiv.paths:
             self.vimiv.image.scrolled_win.show()
+            self.vimiv.library.scrollable_treeview.set_hexpand(False)
             self.vimiv.image.move_index(False, False, 0)
             # Focus in library if it is open
             if self.vimiv.library.grid.is_visible():
-                self.vimiv.library.scrollable_treeview.set_size_request(
-                    self.vimiv.library.width, 10)
-                # Find out tag position
-                # self.vimiv.library.remember_pos(self.directory, 2)
                 self.vimiv.library.reload(self.directory)
                 tag_pos = self.vimiv.library.files.index(tagname)
                 self.vimiv.library.treeview.set_cursor(Gtk.TreePath(tag_pos),

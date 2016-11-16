@@ -78,6 +78,7 @@ class Library(object):
         # Pack everything
         self.scrollable_treeview = Gtk.ScrolledWindow()
         self.scrollable_treeview.set_vexpand(True)
+        self.scrollable_treeview.set_size_request(self.width, 10)
         self.grid.attach(self.scrollable_treeview, 0, 0, 1, 1)
         # Treeview
         self.treeview = Gtk.TreeView()
@@ -91,11 +92,10 @@ class Library(object):
                               self.vimiv.keyhandler.run, "LIBRARY")
         # Call the function to create the treeview
         self.update_treeview()
-        # Resize accordingly
-        if self.vimiv.paths or not self.expand:
-            self.scrollable_treeview.set_size_request(self.width, 10)
-        else:
-            self.scrollable_treeview.set_size_request(self.vimiv.winsize[0], 10)
+        # Set the hexpand property if requested in the configfile
+        if (not self.vimiv.paths or isinstance(self.vimiv.paths, str)) \
+                and self.expand:
+            self.treeview.set_hexpand(True)
 
     def toggle(self):
         """Toggle the library."""
@@ -110,8 +110,7 @@ class Library(object):
                 # Hide the non existing image and expand if necessary
                 self.vimiv.image.vimiv.image.scrolled_win.hide()
                 if self.expand:
-                    self.scrollable_treeview.set_size_request(
-                        self.vimiv.winsize[0], 10)
+                    self.scrollable_treeview.set_hexpand(True)
             else:  # Try to focus the current image in the library
                 image = self.vimiv.paths[self.vimiv.index]
                 image_path = os.path.dirname(image)
@@ -262,7 +261,7 @@ class Library(object):
                     index += 1
             self.vimiv.paths, self.vimiv.index = populate(self.files)
             if self.vimiv.paths:
-                self.scrollable_treeview.set_size_request(self.width, 10)
+                self.scrollable_treeview.set_hexpand(False)
                 self.vimiv.image.scrolled_win.show()
             # Show the selected file, if thumbnail toggled go out
             if self.vimiv.thumbnail.toggled:

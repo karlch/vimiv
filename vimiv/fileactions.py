@@ -263,8 +263,7 @@ class FileExtras(object):
             self.vimiv.paths, self.vimiv.index = populate(files)
             self.vimiv.image.move_pos()
             if self.vimiv.library.expand and not self.vimiv.paths:
-                self.vimiv.library.grid.set_size_request(self.vimiv.winsize[0],
-                                                         10)
+                self.vimiv.library.treeview.set_hexpand(True)
             if self.vimiv.thumbnail.toggled:
                 for i, image in self.vimiv.paths:
                     self.vimiv.thumbnail.reload(image, i, False)

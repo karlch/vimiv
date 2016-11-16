@@ -116,8 +116,8 @@ class Thumbnail(object):
                     try:
                         self.vimiv.image.pixbuf_original.get_height()
                     except:
-                        self.vimiv.library.scrollable_treeview.set_size_request(
-                            self.vimiv.winsize[0], 10)
+                        self.vimiv.image.scrolled_win.hide()
+                        self.vimiv.library.scrollable_treeview.set_hexpand(True)
             self.toggled = False
         # Open thumbnail mode differently depending on where we come from
         elif self.vimiv.paths and self.vimiv.image.scrolled_win.is_focus():
@@ -131,9 +131,8 @@ class Thumbnail(object):
             self.vimiv.window.last_focused = "lib"
             self.vimiv.paths, self.vimiv.index = \
                 populate(self.vimiv.library.files)
+            self.vimiv.library.scrollable_treeview.set_hexpand(False)
             if self.vimiv.paths:
-                self.vimiv.library.scrollable_treeview.set_size_request(
-                    self.vimiv.library.width, 10)
                 self.vimiv.image.scrolled_win.show()
             self.show()
             # Manipulate bar is useless in thumbnail mode

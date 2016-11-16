@@ -311,8 +311,7 @@ class CommandLine(object):
                                 Gtk.TreePath(i), None, False)
                             break
                     # Show the image
-                    self.vimiv.library.scrollable_treeview.set_size_request(
-                        self.vimiv.library.width, 10)
+                    self.vimiv.library.scrollable_treeview.set_hexpand(False)
                     self.vimiv.image.scrolled_win.show()
                 else:
                     self.vimiv.library.move_up(abspath, True)

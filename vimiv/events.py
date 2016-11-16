@@ -75,9 +75,6 @@ class Window(object):
                     self.vimiv.thumbnail.calculate_columns()
                 if not self.vimiv.image.user_zoomed:
                     self.vimiv.image.zoom_to(0)
-            elif not self.vimiv.paths and self.vimiv.library.expand:
-                self.vimiv.library.scrollable_treeview.set_size_request(
-                    self.vimiv.winsize[0], 10)
             self.vimiv.commandline.info.set_max_width_chars(
                 self.vimiv.winsize[0] / 16)
 

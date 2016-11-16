@@ -224,6 +224,4 @@ class Vimiv(Gtk.Window):
             self.library.reload(os.getcwd())
             if self.library.expand:
                 self.image.vimiv.image.scrolled_win.hide()
-                self.library.scrollable_treeview.set_size_request(
-                    self.winsize[0], 10)
             self.statusbar.err_message("No valid paths, opening library viewer")
