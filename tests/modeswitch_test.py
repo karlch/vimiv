@@ -84,6 +84,7 @@ class ModeSwitchTestImage(TestCase):
     def tearDownClass(cls):
         os.chdir(cls.initial_directory)
 
+
 class ModeSwitchTestLibrary(TestCase):
     """Mode Switching Tests starting from library mode."""
 
@@ -124,7 +125,7 @@ class ModeSwitchTestLibrary(TestCase):
         self.vimiv.thumbnail.toggle()
         self.assertTrue(self.vimiv.library.treeview.is_focus())
         self.assertNotEqual(self.vimiv.image.scrolled_win.get_child(),
-                         self.vimiv.thumbnail.iconview)
+                            self.vimiv.thumbnail.iconview)
 
     def tearDown(self):
         os.chdir(self.working_directory)
