@@ -139,7 +139,7 @@ class Vimiv(Gtk.Window):
         self.add(self.overlay)
 
     def quit(self, force=False):
-        """Quit the main loop, printi marked files and save history.
+        """Quit the main loop, print marked files and save history.
 
         Args:
             force: If True quit even if an image was edited.
