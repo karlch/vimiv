@@ -129,7 +129,8 @@ class CommandLine(object):
                     not self.incsearch:
                 self.search(command.lstrip("/"))
             # Auto select single file
-            elif self.incsearch and len(self.search_positions) == 1:
+            elif self.incsearch and len(self.search_positions) == 1 and \
+                    self.vimiv.library.treeview.is_focus():
                 self.vimiv.library.file_select(
                     self.vimiv.library.treeview,
                     Gtk.TreePath(self.vimiv.get_pos()), None, False)
@@ -498,10 +499,19 @@ class CommandLine(object):
                 if searchstr.lower() in fil.lower():
                     self.search_positions.append(i)
 
-        # Reload library to show search results
+        # Reload library and thumbnails to show search results
         if self.vimiv.window.last_focused == "lib":
             self.vimiv.library.reload(os.getcwd(), self.last_filename,
                                       search=True)
+        elif self.vimiv.window.last_focused == "thu":
+            if incsearch:
+                self.vimiv.thumbnail.iconview.grab_focus()
+                for index, thumb in enumerate(self.vimiv.thumbnail.elements):
+                    self.vimiv.thumbnail.reload(thumb, index, False)
+            else:
+                for index in self.search_positions:
+                    self.vimiv.thumbnail.reload(
+                        self.vimiv.thumbnail.elements[index], index, False)
 
         # Move to first result or throw an error
         if self.search_positions:
@@ -563,19 +573,10 @@ class CommandLine(object):
             self.vimiv.keyhandler.num_str = str(next_pos + 1)
             self.vimiv.image.move_pos()
         elif self.vimiv.window.last_focused == "thu":
-            # In incsearch reload all thumbnails, otherwise only the ones
-            # searched for
+            self.vimiv.thumbnail.move_to_pos(next_pos)
             if incsearch:
-                for index, thumb in enumerate(self.vimiv.thumbnail.elements):
-                    self.vimiv.thumbnail.reload(thumb, index, False)
-                self.vimiv.thumbnail.move_to_pos(next_pos)
                 self.entry.grab_focus()
                 self.entry.set_position(-1)
-            else:
-                for index in self.search_positions:
-                    self.vimiv.thumbnail.reload(
-                        self.vimiv.thumbnail.elements[index], index, False)
-                self.vimiv.thumbnail.move_to_pos(next_pos)
 
     def reset_search(self):
         """Reset all search parameters to null."""
