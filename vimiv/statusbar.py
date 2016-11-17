@@ -32,7 +32,7 @@ class Statusbar(object):
         general = settings["GENERAL"]
 
         # Default values
-        self.hidden = general["display_bar"]
+        self.hidden = not general["display_bar"]
         self.errors = []
         self.search_names = []
         self.search_positions = []

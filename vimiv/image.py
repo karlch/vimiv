@@ -248,6 +248,7 @@ class Image(object):
                 raise ValueError
             self.update(update_gif=False)
         except:
+            print("this is the danger zone")
             self.vimiv.statusbar.err_message(
                 "Warning: Object cannot be zoomed (further)")
 

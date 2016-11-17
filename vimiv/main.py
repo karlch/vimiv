@@ -204,6 +204,9 @@ class Vimiv(Gtk.Window):
         self.show_all()
         self.manipulate.scrolled_win.hide()
         self.commandline.grid.hide()
+        # Statusbar depending on setting
+        if self.statusbar.hidden:
+            self.statusbar.bar.hide()
 
         # Show the image if an imagelist exists
         if self.paths:
@@ -215,12 +218,9 @@ class Vimiv(Gtk.Window):
             # Start in slideshow mode?
             if self.slideshow.at_start:
                 self.slideshow.toggle()
-            self.statusbar.toggle()
-        # Just open the library if no paths were given
         else:
             # Slideshow without paths makes no sense
             self.slideshow.running = False
-            self.statusbar.toggle()
             self.library.reload(os.getcwd())
             if self.library.expand:
                 self.image.vimiv.image.scrolled_win.hide()

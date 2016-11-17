@@ -97,8 +97,14 @@ class Library(object):
                 and self.expand:
             self.treeview.set_hexpand(True)
 
-    def toggle(self):
-        """Toggle the library."""
+    def toggle(self, update_image=True):
+        """Toggle the library.
+
+        Args:
+            update_image: If True update the image shown. Always the case except
+            for when running toggle after file_select(), as file_select() does
+            this by itself.
+        """
         if self.grid.is_visible():
             self.remember_pos(os.getcwd(), self.vimiv.get_pos())
             self.grid.hide()
@@ -129,13 +135,14 @@ class Library(object):
             # Markings and other stuff might have changed
             self.reload(os.getcwd())
         # Resize image and grid if necessary
-        if self.vimiv.paths:
+        if self.vimiv.paths and update_image:
             if self.vimiv.thumbnail.toggled:
                 self.vimiv.thumbnail.calculate_columns()
-            if not self.vimiv.image.user_zoomed:
+            elif not self.vimiv.image.user_zoomed:
                 self.vimiv.image.zoom_to(0)
-        #  Change the toggle state of animation
-        self.vimiv.image.update()
+            else:
+                #  Change the toggle state of animation
+                self.vimiv.image.update()
 
     def focus(self, focus_library=True):
         """Set or remove focus from the library.
@@ -263,15 +270,16 @@ class Library(object):
             if self.vimiv.paths:
                 self.scrollable_treeview.set_hexpand(False)
                 self.vimiv.image.scrolled_win.show()
+                # Close the library depending on key and repeat
+                if close:
+                    # We do not need to update the image as it is done later
+                    # anyway
+                    self.toggle(update_image=False)
+                self.vimiv.image.move_index(delta=index)
             # Show the selected file, if thumbnail toggled go out
             if self.vimiv.thumbnail.toggled:
                 self.vimiv.thumbnail.toggle()
                 self.treeview.grab_focus()
-            self.vimiv.image.move_index(delta=index)
-            # Close the library depending on key and repeat
-            if close:
-                self.toggle()
-                self.vimiv.image.update()
 
     def move_up(self, directory="..", start=False):
         """Move up a directory or to a specific one in the library.

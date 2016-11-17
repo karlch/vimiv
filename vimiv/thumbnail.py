@@ -104,10 +104,6 @@ class Thumbnail(object):
             self.vimiv.image.scrolled_win.add(self.vimiv.image.viewport)
             if self.vimiv.window.last_focused == "im" or select_image:
                 self.vimiv.image.scrolled_win.grab_focus()
-                # If we come from the library there may not be an image to
-                # update
-                if not self.vimiv.window.last_focused == "lib":
-                    self.vimiv.image.update()
             elif self.vimiv.window.last_focused == "lib":
                 self.vimiv.library.focus()
                 # Re-expand the library if there is no image and the setting
