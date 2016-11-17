@@ -122,7 +122,7 @@ class CommandLine(object):
             command = ":" + self.vimiv.aliases[command[1:]]
         # And close the cmd line
         if command[0] == "/":  # Search
-            self.leave(True)
+            self.reset_text()
             # Do not search again if incsearch was running
             if not (self.vimiv.library.treeview.is_focus() or
                     self.vimiv.thumbnail.iconview.is_focus()) or \
@@ -135,7 +135,7 @@ class CommandLine(object):
                     self.vimiv.library.treeview,
                     Gtk.TreePath(self.vimiv.get_pos()), None, False)
         else:  # Run a command
-            self.leave()
+            self.reset_text()
             cmd = command.lstrip(":")
             # If there was no command just leave
             if not cmd:
@@ -168,13 +168,12 @@ class CommandLine(object):
         Args:
             cmd: The command to run.
         """
+        fil = self.vimiv.get_pos(True)
         # Check on which file(s) % and * should operate
         if self.vimiv.window.last_focused == "lib" and self.vimiv.library.files:
             filelist = self.vimiv.library.files
-            fil = self.vimiv.get_pos(True)
-        elif self.vimiv.paths:
+        elif self.vimiv.window.last_focused in ["thu", "im"]:
             filelist = self.vimiv.paths
-            fil = self.vimiv.paths[self.vimiv.index]
         else:
             filelist = []
             fil = ""
@@ -415,26 +414,13 @@ class CommandLine(object):
         self.entry.grab_focus()
         self.entry.set_position(-1)
 
-    def leave(self, search=False):
-        """Close the command line."""
-        self.grid.hide()
-        # Remove all completions shown and the text currently inserted
+    def reset_text(self):
+        """Empty info and entry text to close the commandline.
+
+        Trigger check_close() and therefore leave()
+        """
         self.info.set_text("")
         self.entry.set_text("")
-        if not search:
-            self.reset_search()
-        # Refocus the remembered widget
-        if self.vimiv.window.last_focused == "lib":
-            if not search:
-                self.vimiv.library.reload(".", self.last_filename)
-            self.vimiv.library.focus(True)
-        elif self.vimiv.window.last_focused == "man":
-            self.vimiv.manipulate.scale_bri.grab_focus()
-        elif self.vimiv.window.last_focused == "thu":
-            self.vimiv.thumbnail.iconview.grab_focus()
-        else:
-            self.vimiv.image.scrolled_win.grab_focus()
-        self.last_filename = ""
 
     def check_close(self, entry):
         """Close the entry if the colon/slash is deleted.
@@ -446,7 +432,21 @@ class CommandLine(object):
         self.pos = 0
         text = entry.get_text()
         if not text or text[0] not in ":/":
-            self.leave(True)
+            self.leave()
+
+    def leave(self):
+        """Apply actions to close the commandline."""
+        self.grid.hide()
+        # Refocus the remembered widget
+        if self.vimiv.window.last_focused == "lib":
+            self.vimiv.library.focus(True)
+        elif self.vimiv.window.last_focused == "man":
+            self.vimiv.manipulate.scale_bri.grab_focus()
+        elif self.vimiv.window.last_focused == "thu":
+            self.vimiv.thumbnail.iconview.grab_focus()
+        else:
+            self.vimiv.image.scrolled_win.grab_focus()
+        self.last_filename = ""
 
     def reset_tab_count(self, entry):
         """Reset the amount of tab presses if new text is entered.

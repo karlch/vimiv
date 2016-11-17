@@ -168,7 +168,7 @@ class Library(object):
             entered.
         """
         if not search:
-            self.vimiv.commandline.reset_search()
+            self.vimiv.commandline.search_positions = []
         # Remove old columns
         for column in self.treeview.get_columns():
             self.treeview.remove_column(column)
