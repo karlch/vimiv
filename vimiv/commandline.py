@@ -168,37 +168,13 @@ class CommandLine(object):
         Args:
             cmd: The command to run.
         """
-        fil = self.vimiv.get_pos(True)
-        # Check on which file(s) % and * should operate
-        if self.vimiv.window.last_focused == "lib" and self.vimiv.library.files:
-            filelist = self.vimiv.library.files
-        elif self.vimiv.window.last_focused in ["thu", "im"]:
-            filelist = self.vimiv.paths
-        else:
-            filelist = []
-            fil = ""
-        # Always operate on marked files if they exist
-        if self.vimiv.mark.marked:
-            filelist = self.vimiv.mark.marked
-        # Escape spaces for the shell
-        fil = fil.replace(" ", "\\\\\\\\ ")
-        for i, f in enumerate(filelist):
-            filelist[i] = f.replace(" ", "\\\\\\\\ ")
-        cmd = cmd[1:]
-        # Substitute % and * with escaping
-        cmd = re.sub(r'(?<!\\)(%)', fil, cmd)
-        cmd = re.sub(r'(?<!\\)(\*)', " ".join(filelist), cmd)
-        cmd = re.sub(r'(\\)(?!\\)', '', cmd)
+        cmd = self.expand_filenames(cmd)
         # Run the command in an extra thread
         directory = os.getcwd()
         cmd_thread = Thread(target=self.thread_for_external, args=(cmd,
                                                                    directory))
         self.running_threads.append(cmd_thread)
         cmd_thread.start()
-        # Undo the escaping
-        fil = fil.replace("\\\\\\\\ ", " ")
-        for i, f in enumerate(filelist):
-            filelist[i] = f.replace("\\\\\\\\ ", " ")
 
     def thread_for_external(self, cmd, directory):
         """Start a new thread for external commands.
@@ -233,6 +209,35 @@ class CommandLine(object):
             cmd = e.split()[-1]
             self.vimiv.statusbar.err_message("Command %s not found" % (cmd))
         self.running_threads.pop()
+
+    def expand_filenames(self, cmd):
+        """Expand % and * for the command to run.
+
+        Args:
+            cmd: The command to run.
+        """
+        fil = self.vimiv.get_pos(True)
+        # Check on which file(s) % and * should operate
+        if self.vimiv.window.last_focused == "lib" and self.vimiv.library.files:
+            filelist = self.vimiv.library.files[:]
+        elif self.vimiv.window.last_focused in ["thu", "im"]:
+            filelist = self.vimiv.paths[:]
+        else:
+            filelist = []
+            fil = ""
+        # Always operate on marked files if they exist
+        if self.vimiv.mark.marked:
+            filelist = self.vimiv.mark.marked[:]
+        # Escape spaces for the shell
+        fil = fil.replace(" ", "\\\\\\\\ ")
+        for i, f in enumerate(filelist):
+            filelist[i] = f.replace(" ", "\\\\\\\\ ")
+        cmd = cmd[1:]
+        # Substitute % and * with escaping
+        cmd = re.sub(r'(?<!\\)(%)', fil, cmd)
+        cmd = re.sub(r'(?<!\\)(\*)', " ".join(filelist), cmd)
+        cmd = re.sub(r'(\\)(?!\\)', '', cmd)
+        return cmd
 
     def pipe(self, pipe_input):
         """Run output of external command in a pipe.
