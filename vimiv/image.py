@@ -366,7 +366,7 @@ class Image(object):
         except:
             return
         max_pos = len(self.vimiv.paths)
-        current = self.vimiv.get_pos()
+        current = self.vimiv.get_pos(force_widget="im")
         # Move to definition by keys or end/beg
         if self.vimiv.keyhandler.num_str:
             pos = int(self.vimiv.keyhandler.num_str)
