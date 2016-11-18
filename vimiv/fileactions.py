@@ -247,26 +247,37 @@ class FileExtras(object):
             pipe: If True, input came from a pipe. Therefore run pipe.
             pipe_input: Command that comes from pipe.
         """
+        old_pos = self.vimiv.get_pos()
+        # Reload library remembering position
         if (directory == os.getcwd() and directory != self.vimiv.tags.directory
                 and self.vimiv.library.grid.is_visible()):
-            if (self.vimiv.get_pos() >= 0 and self.vimiv.get_pos() <=
-                    len(self.vimiv.library.files)):
+            if (old_pos >= 0 and old_pos <= len(self.vimiv.library.files)):
                 self.vimiv.library.remember_pos(directory, self.vimiv.get_pos())
             self.vimiv.library.reload(directory)
+            # Refocus other widgets is necessary
+            if self.vimiv.window.last_focused == "im":
+                self.vimiv.image.scrolled_win.grab_focus()
+            elif self.vimiv.window.last_focused == "thu":
+                self.vimiv.thumbnail.iconview.grab_focus()
+        # Reload image/thumbnail
         if self.vimiv.paths and reload_path:
-            pathdir = os.path.dirname(self.vimiv.paths[self.vimiv.index])
+            # Get all files in directory again
+            pathdir = os.path.dirname(self.vimiv.paths[old_pos])
             files = sorted(os.listdir(pathdir))
             for i, fil in enumerate(files):
                 files[i] = os.path.join(pathdir, fil)
-            # Remember current pos
-            self.vimiv.keyhandler.num_str = str(self.vimiv.index + 1)
             self.vimiv.paths, self.vimiv.index = populate(files)
-            self.vimiv.image.move_pos()
+            # Expand library if set by user and all paths were removed
             if self.vimiv.library.expand and not self.vimiv.paths:
                 self.vimiv.library.treeview.set_hexpand(True)
+            # Refocus the current position
             if self.vimiv.thumbnail.toggled:
                 for i, image in enumerate(self.vimiv.paths):
                     self.vimiv.thumbnail.reload(image, i, False)
+                self.vimiv.thumbnail.move_to_pos(old_pos)
+            else:
+                self.vimiv.keyhandler.num_str = str(old_pos + 1)
+                self.vimiv.image.move_pos()
         # Run the pipe
         if pipe:
             self.vimiv.commandline.pipe(pipe_input)
