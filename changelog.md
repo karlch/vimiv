@@ -6,6 +6,8 @@ The most important changes between the versions are listed here.
 * Make it possible to go straight to thumbnail mode from library
 * t is bound to thumbnail mode in library now instead of toggling show\_hidden
   per default
+* Fix fullscreen behaviour in some DEs
+* Minor code optimization and tweaks
 
 #### v0.7.1
 * Bugfix release
