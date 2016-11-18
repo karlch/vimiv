@@ -251,7 +251,7 @@ class FileExtras(object):
         # Reload library remembering position
         if (directory == os.getcwd() and directory != self.vimiv.tags.directory
                 and self.vimiv.library.grid.is_visible()):
-            if (old_pos >= 0 and old_pos <= len(self.vimiv.library.files)):
+            if old_pos >= 0 and old_pos <= len(self.vimiv.library.files):
                 self.vimiv.library.remember_pos(directory, self.vimiv.get_pos())
             self.vimiv.library.reload(directory)
             # Refocus other widgets is necessary

@@ -9,8 +9,8 @@ from vimiv.parser import parse_config
 from vimiv.fileactions import populate
 
 
-class CommandlineTest(TestCase):
-    """Command Line Tests."""
+class ExpansionTest(TestCase):
+    """Expansion Tests."""
 
     @classmethod
     def setUpClass(cls):
@@ -52,6 +52,7 @@ class CommandlineTest(TestCase):
         expected_cmd = "!echo " + " ".join(self.vimiv.paths)
         received_cmd = self.vimiv.commandline.expand_filenames(":!echo *")
         self.assertEqual(expected_cmd, received_cmd)
+
 
 if __name__ == '__main__':
     main()
