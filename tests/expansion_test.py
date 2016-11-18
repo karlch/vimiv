@@ -3,6 +3,7 @@
 """Expansion of % and * tests for vimiv's test suite."""
 
 
+import os
 from unittest import TestCase, main
 import vimiv.main as v_main
 from vimiv.parser import parse_config
@@ -14,6 +15,7 @@ class ExpansionTest(TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.working_directory = os.getcwd()
         paths, index = populate(["vimiv/testimages/arch_001.jpg"], False, False)
         cls.settings = parse_config()
         cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
@@ -52,6 +54,10 @@ class ExpansionTest(TestCase):
         expected_cmd = "!echo " + " ".join(self.vimiv.paths)
         received_cmd = self.vimiv.commandline.expand_filenames(":!echo *")
         self.assertEqual(expected_cmd, received_cmd)
+
+    @classmethod
+    def tearDownClass(cls):
+        os.chdir(cls.working_directory)
 
 
 if __name__ == '__main__':
