@@ -106,7 +106,8 @@ class Library(object):
             this by itself.
         """
         if self.grid.is_visible():
-            self.remember_pos(os.getcwd(), self.vimiv.get_pos())
+            self.remember_pos(os.getcwd(),
+                              self.vimiv.get_pos(force_widget="lib"))
             self.grid.hide()
             self.vimiv.image.animation_toggled = False  # Now play Gifs
             self.focus(False)
@@ -448,7 +449,8 @@ class Library(object):
         """
         # Handle the specific keys
         if direction == "h":  # Behave like ranger
-            self.remember_pos(os.getcwd(), self.vimiv.get_pos())
+            self.remember_pos(os.getcwd(),
+                              self.vimiv.get_pos(force_widget="lib"))
             self.move_up()
         elif direction == "l":
             self.file_select(self.treeview, self.treeview.get_cursor()[0],
@@ -460,11 +462,11 @@ class Library(object):
             else:
                 step = 1
             if direction == "j":
-                new_pos = self.vimiv.get_pos() + step
+                new_pos = self.vimiv.get_pos(force_widget="lib") + step
                 if new_pos >= len(self.file_liststore):
                     new_pos = len(self.file_liststore) - 1
             else:
-                new_pos = self.vimiv.get_pos() - step
+                new_pos = self.vimiv.get_pos(force_widget="lib") - step
                 if new_pos < 0:
                     new_pos = 0
             self.move_pos(True, new_pos)

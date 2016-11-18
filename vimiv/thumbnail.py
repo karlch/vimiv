@@ -236,7 +236,7 @@ class Thumbnail(object):
         Args:
             direction: Direction to scroll in. One of "hjkl".
         """
-        new_pos = self.vimiv.get_pos()
+        new_pos = self.vimiv.get_pos(force_widget="thu")
         # Get last element
         last = len(self.vimiv.paths) - 1
         # Check for a user prefixed step
@@ -256,7 +256,7 @@ class Thumbnail(object):
         # Allow numbers to be passed directly
         else:
             new_pos = direction
-        # Do not scroll to self.vimiv.paths that don't exist
+        # Do not scroll to paths that don't exist
         if new_pos < 0:
             new_pos = 0
         elif new_pos > last:
@@ -301,7 +301,7 @@ class Thumbnail(object):
 
         # Set columns and refocus current image
         self.calculate_columns()
-        self.move_to_pos(self.vimiv.get_pos())
+        self.move_to_pos(self.vimiv.get_pos(force_widget="thu"))
 
     def scale_thumb(self, pixbuf_max):
         """Scale the thumbnail image to self.size.
