@@ -219,15 +219,15 @@ class CommandLine(object):
         fil = self.vimiv.get_pos(True)
         # Check on which file(s) % and * should operate
         if self.vimiv.window.last_focused == "lib" and self.vimiv.library.files:
-            filelist = self.vimiv.library.files[:]
+            filelist = list(self.vimiv.library.files)
         elif self.vimiv.window.last_focused in ["thu", "im"]:
-            filelist = self.vimiv.paths[:]
+            filelist = list(self.vimiv.paths)
         else:
             filelist = []
             fil = ""
         # Always operate on marked files if they exist
         if self.vimiv.mark.marked:
-            filelist = self.vimiv.mark.marked[:]
+            filelist = list(self.vimiv.mark.marked)
         # Escape spaces for the shell
         fil = fil.replace(" ", "\\\\\\\\ ")
         for i, f in enumerate(filelist):
