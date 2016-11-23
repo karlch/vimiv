@@ -212,7 +212,8 @@ class VimivComplete(object):
             commandlist = list(self.vimiv.commands.keys())
             aliaslist = list(self.vimiv.aliases.keys())
             complete_commandlist = sorted(commandlist + aliaslist)
-            completion = Completion(command, complete_commandlist)
+            completion = Completion(command, complete_commandlist, numstr,
+                                    self.vimiv.library.show_hidden)
             self.output, self.compstr, self.completions = completion.complete()
             self.completions_reordered = self.completions
 
