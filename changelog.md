@@ -8,6 +8,7 @@ The most important changes between the versions are listed here.
   per default
 * Fix fullscreen behaviour in some DEs
 * Minor code optimization and tweaks
+* Display usefull error messages when a setting in the configfile is invalid.
 
 #### v0.7.1
 * Bugfix release
