@@ -226,8 +226,14 @@ def add_aliases(config, settings):
         settings: Dictionary of modified settings.
         message: Error message filled with aliases that cannot be parsed.
     """
-    alias_section = config["ALIASES"]
     message = ""
+
+    try:
+        alias_section = config["ALIASES"]
+    except KeyError:
+        # Default to no aliases if the section does not exist in the configfile
+        alias_section = dict()
+
     for alias in alias_section.keys():
         try:
             settings["ALIASES"][alias] = alias_section[alias]
