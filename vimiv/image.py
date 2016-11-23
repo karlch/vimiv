@@ -328,6 +328,9 @@ class Image(object):
             else:
                 self.pixbuf_iter = self.pixbuf_original.get_iter()
                 self.zoom_percent = 1
+            # If there was a running gif, remove the timer
+            if self.timer_id:
+                self.pause_gif()
             # If one simply reloads the file the info shouldn't be updated
             if delta:
                 self.update()
