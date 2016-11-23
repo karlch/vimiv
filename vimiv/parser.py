@@ -222,7 +222,12 @@ def add_aliases(config, settings):
     """
     alias_section = config["ALIASES"]
     for alias in alias_section.keys():
-        settings["ALIASES"][alias] = alias_section[alias]
+        try:
+            settings["ALIASES"][alias] = alias_section[alias]
+        except configparser.InterpolationError as e:
+            message = e.message + ".\nParsing alias '" + alias + "' failed.\n" \
+                      + "If you meant to use % for current file, use %%."
+            error_message(message)
 
     return settings
 
