@@ -109,7 +109,6 @@ class Library(object):
             self.remember_pos(os.getcwd(),
                               self.vimiv.get_pos(force_widget="lib"))
             self.grid.hide()
-            self.vimiv.image.animation_toggled = False  # Now play Gifs
             self.focus(False)
         else:
             self.grid.show()
@@ -127,8 +126,6 @@ class Library(object):
                         if fil == image_name:
                             self.remember_pos(os.getcwd(), i)
                             break
-            # Do not play Gifs with the lib
-            self.vimiv.image.animation_toggled = True
             # Stop the slideshow
             if self.vimiv.slideshow.running:
                 self.vimiv.slideshow.toggle()
