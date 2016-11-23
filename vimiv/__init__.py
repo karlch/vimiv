@@ -13,7 +13,6 @@ try:
 
 except ImportError as import_error:
     message = import_error.msg + "\n" + "Are all dependencies installed?"
-    print(message)
     error_message(message)
     sys.exit(1)
 

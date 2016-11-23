@@ -105,6 +105,9 @@ def error_message(message, running_tests=False):
         message: The message to display.
         running_tests: If True running from testsuite. Do not show popup.
     """
+    # Always print the error message first
+    print("\033[91mError:\033[0m", message)
+    # Then display a Gtk Popup
     popup = Gtk.Dialog(title="vimiv - Error", transient_for=Gtk.Window())
     popup.add_button("Close", Gtk.ResponseType.CLOSE)
     message_label = Gtk.Label()

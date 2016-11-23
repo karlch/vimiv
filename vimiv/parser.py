@@ -280,12 +280,10 @@ def parse_keys():
             keys.read("/etc/vimiv/keys.conf")
         else:
             message = "Keyfile not found. Exiting."
-            print(message)
             error_message(message)
             sys.exit(1)
     except configparser.DuplicateOptionError as e:
         message = e.message + ".\n Duplicate keybinding. Exiting."
-        print(message)
         error_message(message)
         sys.exit(1)
 
@@ -299,7 +297,6 @@ def parse_keys():
     except KeyError as e:
         message = "Missing section " + str(e) + " in keys.conf.\n" \
                   + "Refer to vimivrc(5) to fix your config."
-        print(message)
         error_message(message)
         sys.exit(1)
 
