@@ -219,7 +219,6 @@ def add_aliases(config, settings):
     """Add aliases from the configfile to the ALIASES section of settings.
 
     Args:
-        key: One of "GENERAL" or "LIBRARY" indicating the main section.
         config: configparser.ConfigParser of the configfile.
         settings: Dictionary of settings to operate on.
 
