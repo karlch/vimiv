@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-"""Test the opening of different filetypes with vimiv."""
+"""Test the opening of different file-types with vimiv."""
 
 import os
 from unittest import TestCase, main
@@ -10,7 +10,7 @@ from vimiv.parser import parse_config
 
 
 class OpeningTest(TestCase):
-    """Open with different filetypes Test."""
+    """Open with different file-types Test."""
 
     def setUp(self):
         self.working_directory = os.getcwd()

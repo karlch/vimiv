@@ -184,7 +184,7 @@ class Thumbnail(object):
         # Set columns
         self.calculate_columns()
 
-        # Focus the current immage
+        # Focus the current image
         self.iconview.grab_focus()
         pos = (self.vimiv.index) % len(self.vimiv.paths)
         self.move_to_pos(pos)
@@ -244,7 +244,7 @@ class Thumbnail(object):
             step = int(self.vimiv.keyhandler.num_str)
         else:
             step = 1
-        # Check for the specified thumbnail and handle exceptons
+        # Check for the specified thumbnail and handle exceptions
         if direction == "h":
             new_pos -= step
         elif direction == "k":
@@ -265,7 +265,7 @@ class Thumbnail(object):
         self.move_to_pos(new_pos)
 
     def move_to_pos(self, pos):
-        """Set focus on position in iconview and center it.
+        """Set focus on position in iconview and centre it.
 
         Args:
             pos: The position to focus.

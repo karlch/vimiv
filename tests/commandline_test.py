@@ -13,7 +13,7 @@ from vimiv.parser import parse_config
 
 
 def refresh_gui(delay=0):
-    """Refresh the gui as the Gtk.main() loop is not running when testing.
+    """Refresh the GUI as the Gtk.main() loop is not running when testing.
 
     Args:
         delay: Time to wait before refreshing.

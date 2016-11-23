@@ -201,7 +201,7 @@ class CommandLine(object):
                 GLib.timeout_add(1, self.vimiv.fileextras.reload_changes,
                                  directory, True, from_pipe, out)
             # Reload everything after an external command if we haven't moved,
-            # you never know what happend ...
+            # you never know what happened ...
             # Must be in a timer because not all Gtk stuff can be accessed from
             # an external thread
         except FileNotFoundError as e:
@@ -260,7 +260,7 @@ class CommandLine(object):
         if os.path.isdir(startout):
             self.vimiv.library.move_up(startout)
         elif os.path.isfile(startout):
-            # Remember oldfile if no image was in filelist
+            # Remember old file if no image was in filelist
             if self.vimiv.paths:
                 old_pos = [self.vimiv.paths[self.vimiv.index]]
                 self.vimiv.paths = []
@@ -367,7 +367,7 @@ class CommandLine(object):
         Updates the text of self.entry with the matching history search.
 
         Args:
-            down: If True, search downwards. Else search updwards.
+            down: If True, search downwards. Else search upwards.
         """
         # Shortly disconnect the change signal
         self.entry.disconnect_by_func(self.check_close)

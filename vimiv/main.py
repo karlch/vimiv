@@ -39,7 +39,7 @@ def main(running_tests=False):
 
     args = settings["GENERAL"]["paths"]
 
-    # Recursive and shuffling requiered immediately by populate
+    # Recursive and shuffling required immediately by populate
     recursive = settings["GENERAL"]["recursive"]
     shuffle_paths = settings["GENERAL"]["shuffle"]
 

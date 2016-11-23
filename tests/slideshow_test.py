@@ -13,7 +13,7 @@ from vimiv.fileactions import populate
 
 
 def refresh_gui(vimiv=None):
-    """Refresh the gui as the Gtk.main() loop is not running when testing.
+    """Refresh the GUI as the Gtk.main() loop is not running when testing.
 
     Args:
         delay: Time to wait before refreshing.

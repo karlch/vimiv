@@ -31,7 +31,7 @@ class Window(object):
                                       self)
         self.last_focused = ""
 
-        # The configruations from vimivrc
+        # The configurations from vimivrc
         general = settings["GENERAL"]
 
         # General

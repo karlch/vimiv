@@ -30,7 +30,7 @@ class Image(object):
         zoom_percent: Percentage to zoom to compared to the original size.
         imsize: Size of the displayed image as a tuple.
         pixbuf_original: Original image.
-        pixbuf_iter: Iter of displayes animation.
+        pixbuf_iter: Iter of displayed animation.
         timer_id: Id of current animation timer.
     """
 
@@ -170,7 +170,7 @@ class Image(object):
     def get_available_size(self):
         """Receive size not occupied by other Widgets.
 
-        Substracts other widgets (manipulte, statusbar, library) from window
+        Substracts other widgets (manipulate, statusbar, library) from window
         size and returns the available size.
 
         Return: Tuple of available size.
