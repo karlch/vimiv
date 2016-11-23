@@ -171,9 +171,12 @@ def overwrite_section(key, config, settings):
         config: configparser.ConfigParser of the configfile.
         settings: Dictionary of settings to operate on.
 
-    Return: Dictionary of modified settings.
+    Return:
+        settings: Dictionary of modified settings.
+        message: Error message for settings that are given in an invalid way.
     """
     section = config[key]
+    message = ""
     for setting in section.keys():
         # Parse the setting so it gets the correct value
         try:
@@ -206,8 +209,10 @@ def overwrite_section(key, config, settings):
 
             settings[key][setting] = file_set
         except ValueError:
-            continue
-    return settings
+            message += "Invalid setting '%s' for '%s'.\n" \
+                "Falling back to default '%s'.\n\n" \
+                % (section[setting], setting, settings[key][setting])
+    return settings, message
 
 
 def add_aliases(config, settings):
@@ -218,18 +223,20 @@ def add_aliases(config, settings):
         config: configparser.ConfigParser of the configfile.
         settings: Dictionary of settings to operate on.
 
-    Return: Dictionary of modified settings.
+    Return:
+        settings: Dictionary of modified settings.
+        message: Error message filled with aliases that cannot be parsed.
     """
     alias_section = config["ALIASES"]
+    message = ""
     for alias in alias_section.keys():
         try:
             settings["ALIASES"][alias] = alias_section[alias]
         except configparser.InterpolationError as e:
-            message = e.message + ".\nParsing alias '" + alias + "' failed.\n" \
-                      + "If you meant to use % for current file, use %%."
-            error_message(message)
+            message += e.message + ".\nParsing alias '" + alias + "' failed." \
+                + "\nIf you meant to use % for current file, use %%."
 
-    return settings
+    return settings, message
 
 
 def parse_config():
@@ -240,6 +247,9 @@ def parse_config():
     settings = set_defaults()
     configfiles = check_configs(["/etc/vimiv/vimivrc",
                                  os.path.expanduser("~/.vimiv/vimivrc")])
+    # Error message, gets filled with invalid sections in the user's configfile.
+    # If any exist, a popup is displayed at startup.
+    message = ""
 
     # Iterate through the configfiles overwriting settings accordingly
     for configfile in configfiles:
@@ -247,9 +257,13 @@ def parse_config():
         config.read(configfile)
         keys = [key for key in config.keys() if key in ["GENERAL", "LIBRARY"]]
         for key in keys:
-            settings = overwrite_section(key, config, settings)
-        settings = add_aliases(config, settings)
+            settings, partial_message = overwrite_section(key, config, settings)
+            message += partial_message
+        settings, partial_message = add_aliases(config, settings)
+        message += partial_message
 
+    if message:
+        error_message(message)
     return settings
 
 
