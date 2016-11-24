@@ -5,8 +5,8 @@ MANPREFIX := $(PREFIX)/share/man
 
 default:
 	@printf "There is nothing to do.\n"
-	@printf "Run sudo make install to install vimiv.\n"
-	@printf "Run make options for a list of all options.\n"
+	@printf "Run 'sudo make install' to install vimiv.\n"
+	@printf "Run 'make options' for a list of all options.\n"
 
 options: help
 	@printf "\nOptions:\n"
@@ -15,7 +15,7 @@ options: help
 	@printf "DESTDIR = $(DESTDIR)\n"
 
 help:
-	@printf "make help:     	Print help.\n"
+	@printf "make help:              Print help.\n"
 	@printf "make options:        	Print help and list all options.\n"
 	@printf "make install:        	Install $(SRC).\n"
 	@printf "make uninstall: 	Uninstall $(SRC).\n"
