@@ -119,11 +119,11 @@ class Vimiv(Gtk.Window):
         self.statusbar = Statusbar(self, settings)
         self.completions = VimivComplete(self)
         self.slideshow = Slideshow(self, settings)
-        self.window = Window(self, settings)
         self.image = Image(self, settings)
         self.library = Library(self, settings)
         self.thumbnail = Thumbnail(self, settings)
         self.manipulate = Manipulate(self, settings)
+        self.window = Window(self, settings)
         Commands(self, settings)
 
         # Pack library, statusbar and manipulate

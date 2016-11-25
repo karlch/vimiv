@@ -41,6 +41,13 @@ class Window(object):
 
         # Connect
         self.vimiv.connect("check-resize", self.auto_resize)
+        for widget in [self.vimiv.library.treeview,
+                       self.vimiv.thumbnail.iconview,
+                       self.vimiv.manipulate.scale_bri,
+                       self.vimiv.manipulate.scale_con,
+                       self.vimiv.manipulate.scale_sha,
+                       self.vimiv.image.image]:
+            widget.connect("button-release-event", self.focus_on_mouse_click)
 
     def on_window_state_change(self, event, window=None):
         """Handle fullscreen/unfullscreen correctly.
@@ -77,6 +84,15 @@ class Window(object):
                     self.vimiv.image.zoom_to(0)
             self.vimiv.commandline.info.set_max_width_chars(
                 self.vimiv.winsize[0] / 16)
+
+    def focus_on_mouse_click(self, widget, event_button):
+        """Update statusbar with the currently focused widget after mouse click.
+
+        Args:
+            widget: The widget that emitted the signal.
+            event_button: Mouse button that was pressed.
+        """
+        self.vimiv.statusbar.update_info()
 
 
 class KeyHandler(object):
