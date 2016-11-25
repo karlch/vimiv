@@ -38,6 +38,9 @@ def get_args():
     parser.add_argument("-R", "--no-recursive", action="store_true",
                         dest="no_recursive",
                         help="don't search given directories recursively")
+    parser.add_argument("-v", "--version", action="store_true",
+                        dest="show_version",
+                        help="print version information and exit")
     parser.add_argument("--slideshow", action="store_true",
                         help="start slideshow immediately")
     parser.add_argument("--start-from-desktop", action="store_true",
@@ -66,6 +69,9 @@ def parse_args(parser, settings, arguments=None):
         args = parser.parse_args(arguments)
     else:
         args = parser.parse_args()
+    if args.show_version:
+        print("vimiv 0.7.2-devel")
+        sys.exit(0)
     if args.sbar:
         settings["GENERAL"]["display_bar"] = True
     if args.hide_sbar:
