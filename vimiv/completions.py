@@ -99,7 +99,7 @@ class Completion():
             for i, comp in enumerate(completions):
                 completions[i] = " ".join(comp.split()[1:])
 
-        # A string with possible completions for the info if here is more
+        # A string with possible completions for the info if there is more
         # than one completion
         if len(completions) > 1:
             compstr = "  ".join(completions)
@@ -226,7 +226,7 @@ class VimivComplete(object):
             self.vimiv.commandline.info.show()
 
         # Cycle through completions on multiple tab
-        if self.output == previous_output and self.completions:
+        if self.output == previous_output and len(self.completions) > 1:
             if self.cycling:
                 if inverse:
                     self.tab_presses -= 1
