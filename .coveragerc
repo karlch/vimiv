@@ -6,5 +6,5 @@ omit =
 [report]
 exclude_lines =
     pragma: no cover
-    if not runnin_tests:
+    if not running_tests:
 precision = 2
