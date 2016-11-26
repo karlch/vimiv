@@ -24,6 +24,7 @@ from vimiv.slideshow import Slideshow
 from vimiv.events import KeyHandler, Window
 from vimiv.tags import TagHandler
 from vimiv.mark import Mark
+from vimiv.information import Information
 
 
 def main(running_tests=False):
@@ -124,6 +125,7 @@ class Vimiv(Gtk.Window):
         self.thumbnail = Thumbnail(self, settings)
         self.manipulate = Manipulate(self, settings)
         self.window = Window(self, settings)
+        self.information = Information()
         Commands(self, settings)
 
         # Pack library, statusbar and manipulate

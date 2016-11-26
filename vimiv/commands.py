@@ -76,6 +76,7 @@ class Commands(object):
             "tag_remove": [self.vimiv.tags.remove],
             "tag_write": [self.vimiv.tags.write, self.vimiv.mark.marked],
             "thumbnail": [self.vimiv.thumbnail.toggle],
+            "version": [self.vimiv.information.show_version_info],
             "zoom_in": [self.vimiv.image.zoom_delta, +.25],
             "zoom_out": [self.vimiv.image.zoom_delta, -.25],
             "zoom_to": [self.vimiv.image.zoom_to],

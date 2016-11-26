@@ -6,6 +6,7 @@ import configparser
 import os
 import sys
 from vimiv.helpers import error_message
+from vimiv.information import Information
 
 
 def get_args():
@@ -70,7 +71,8 @@ def parse_args(parser, settings, arguments=None):
     else:
         args = parser.parse_args()
     if args.show_version:
-        print("vimiv 0.7.2-devel")
+        information = Information()
+        print(information.get_version())
         sys.exit(0)
     if args.sbar:
         settings["GENERAL"]["display_bar"] = True
