@@ -198,8 +198,15 @@ class CommandLine(object):
                 err = err.decode('utf-8').split("\n")[0]
                 self.vimiv.statusbar.err_message(err)
             else:
+                # Only reload paths if the path directory or any file was in the
+                # command
+                reload_path = False
+                if os.path.basename(os.getcwd()) in cmd or \
+                        [fil for fil in self.vimiv.paths
+                         if os.path.basename(fil) in cmd]:
+                    reload_path = True
                 GLib.timeout_add(1, self.vimiv.fileextras.reload_changes,
-                                 directory, True, from_pipe, out)
+                                 directory, reload_path, from_pipe, out)
             # Reload everything after an external command if we haven't moved,
             # you never know what happened ...
             # Must be in a timer because not all Gtk stuff can be accessed from
