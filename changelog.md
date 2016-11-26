@@ -9,6 +9,7 @@ The most important changes between the versions are listed here.
 * Fix fullscreen behaviour in some DEs
 * Minor code optimization and tweaks
 * Display useful error messages when a setting in the configfile is invalid.
+* Add :version command and --version flag
 
 #### v0.7.1
 * Bugfix release
