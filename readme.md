@@ -51,7 +51,8 @@ the keys.conf for all keybindings. See vimivrc(5) for further information.
 ## Installation
 Be sure to install the dependencies first. A simple `sudo make install` should
 then suffice. For arch-users there is an AUR package called vimiv for the latest
-stable version and vimiv-git for the developing branch.
+stable version and vimiv-git for the developing branch. If you do not use the
+AUR package, you may need to update your icon cache after installation.
 
 To remove vimiv the standard `sudo make uninstall` works.
 
