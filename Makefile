@@ -28,6 +28,7 @@ install:
 	install -Dm644 man/vimiv.1 $(DESTDIR)$(MANPREFIX)/man1/vimiv.1
 	install -Dm644 man/vimivrc.5 $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5
 	scripts/install_icons.sh $(DESTDIR)
+	gtk-update-icon-cache /usr/share/icons/hicolor/
 
 uninstall:
 	rm -rf $(DESTDIR)/etc/vimiv/
@@ -38,6 +39,7 @@ uninstall:
 	rm -f $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5.gz
 	scripts/remove_icons.sh $(DESTDIR)
 	scripts/uninstall_pythonpkg.sh
+	gtk-update-icon-cache /usr/share/icons/hicolor/
 
 test:
 	@scripts/run_tests.sh
