@@ -256,6 +256,10 @@ class Library(object):
         if os.path.isdir(fil):  # Open the directory
             self.move_up(fil)
         else:  # Focus the image and populate a new list from the dir
+            # If thumbnail toggled, go out
+            if self.vimiv.thumbnail.toggled:
+                self.vimiv.thumbnail.toggle()
+                self.treeview.grab_focus()
             if self.vimiv.paths and fil in self.vimiv.paths[self.vimiv.index]:
                 close = True  # Close if file selected twice
             index = 0  # Catch directories to focus correctly
@@ -274,10 +278,6 @@ class Library(object):
                     # anyway
                     self.toggle(update_image=False)
                 self.vimiv.image.move_index(delta=index)
-            # Show the selected file, if thumbnail toggled go out
-            if self.vimiv.thumbnail.toggled:
-                self.vimiv.thumbnail.toggle()
-                self.treeview.grab_focus()
 
     def move_up(self, directory="..", start=False):
         """Move up a directory or to a specific one in the library.

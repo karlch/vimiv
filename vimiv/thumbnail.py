@@ -119,9 +119,6 @@ class Thumbnail(object):
         elif self.vimiv.paths and self.vimiv.image.scrolled_win.is_focus():
             self.vimiv.window.last_focused = "im"
             self.show()
-            # Manipulate bar is useless in thumbnail mode
-            if self.vimiv.manipulate.scrolled_win.is_visible():
-                self.vimiv.manipulate.toggle()
         elif self.vimiv.library.files \
                 and self.vimiv.library.treeview.is_focus():
             self.vimiv.window.last_focused = "lib"
@@ -131,12 +128,12 @@ class Thumbnail(object):
             if self.vimiv.paths:
                 self.vimiv.image.scrolled_win.show()
             self.show()
-            # Manipulate bar is useless in thumbnail mode
-            if self.vimiv.manipulate.scrolled_win.is_visible():
-                self.vimiv.manipulate.toggle()
         else:
             self.vimiv.statusbar.vimiv.statusbar.err_message("No open image")
             return
+        # Manipulate bar is useless in thumbnail mode
+        if self.vimiv.manipulate.scrolled_win.is_visible():
+            self.vimiv.manipulate.toggle()
         # Update info for the current mode
         self.vimiv.statusbar.update_info()
 
