@@ -414,6 +414,10 @@ class Library(object):
         files = listdir_wrapper(directory, self.show_hidden)
         self.filesize = {}
         for fil in files:
+            # Catch broken symlinks
+            if os.path.islink(fil) and \
+                    not os.path.exists(os.path.realpath(fil)):
+                continue
             # Number of images in directory as filesize
             if os.path.isdir(fil):
                 try:
