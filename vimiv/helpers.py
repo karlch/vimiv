@@ -40,24 +40,11 @@ def listdir_wrapper(path, show_hidden=False):
         show_hidden: If true, show hidden files. Else do not.
     Return: Sorted list of files in path.
     """
+    all_files = sorted(os.listdir(os.path.expanduser(path)))
     if show_hidden:
-        files = os.listdir(os.path.expanduser(path))
+        return all_files
     else:
-        files = listdir_nohidden(path)
-
-    return sorted(list(files))
-
-
-def listdir_nohidden(path):
-    """The nohidden part of listdir_wrapper.
-
-    Args:
-        path: Path of the directory in which os.listdir is called.
-    """
-    files = os.listdir(os.path.expanduser(path))
-    for fil in files:
-        if not fil.startswith("."):
-            yield fil
+        return [fil for fil in all_files if not fil.startswith(".")]
 
 
 def read_file(filename):
