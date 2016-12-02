@@ -157,8 +157,8 @@ class Thumbnails:
             # Correct name
             thumb_ext = ".thumbnail_%dx%d" % (self.thumbsize[0],
                                               self.thumbsize[1])
-            outfile_ext = infile.split(".")[0] + thumb_ext + ".png"
-            outfile_base = os.path.basename(outfile_ext)
+            infile_base = os.path.basename(infile)
+            outfile_base = infile_base.split(".")[0] + thumb_ext + ".png"
             outfile = os.path.join(self.directory, outfile_base)
             # Only if they aren't cached already
             if outfile_base not in self.thumbnails:
