@@ -3,7 +3,6 @@
 """Wrappers around standard library functions used in vimiv."""
 
 import os
-from subprocess import Popen, PIPE
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -20,17 +19,17 @@ scrolltypes["K"] = (Gtk.ScrollType.START, False)
 scrolltypes["L"] = (Gtk.ScrollType.END, True)
 
 # A list of all external commands
-external_commands = []
-try:
-    p = Popen('echo $PATH | tr \':\' \'\n\' | xargs -n 1 ls -1',
-              stdout=PIPE, stderr=PIPE, shell=True)
-    out, err = p.communicate()
-    out = out.decode('utf-8').split()
-    for cmd in sorted(list(set(out))):
-        external_commands.append("!" + cmd)
-except:
-    external_commands = []
-external_commands = tuple(external_commands)
+pathenv = os.environ.get('PATH')
+if pathenv is not None:
+    executables = set()
+    for bindir in pathenv.split(':'):
+        try:
+            executables |= set(["!" + exe for exe in os.listdir(bindir)])
+        except OSError:
+            continue
+    external_commands = tuple(sorted(list(executables)))
+else:
+    external_commands = ()
 
 
 def listdir_wrapper(path, show_hidden=False):
