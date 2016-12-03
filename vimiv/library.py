@@ -29,8 +29,6 @@ class Library(object):
             amount of images in it.
         desktop_start_dir: Directory to start in if launched from desktop.
         files: Files in the library.
-        datalist: List containing information on files (formatted name, size,
-            mark indicator).
         filesize: Dictionary storing the size of files.
         file_liststore: Gtk.ListStore for the file information to be displayed.
         grid: Gtk.Grid containing the TreeView and the border.
@@ -63,7 +61,6 @@ class Library(object):
 
         # Defaults
         self.files = []
-        self.datalist = []
         self.filesize = {}
         # Filelist in a liststore model
         self.file_liststore = Gtk.ListStore(int, str, str, str)
@@ -210,7 +207,7 @@ class Library(object):
         Return:
             The created datalist.
         """
-        self.datalist = []
+        datalist = []
         self.files = self.filelist_create()
         # Remove unsupported files if one isn't in the tags directory
         if os.getcwd() != self.vimiv.tags.directory:
@@ -231,9 +228,9 @@ class Library(object):
                 markup_string = "<b>" + markup_string + "</b>"
             if i in self.vimiv.commandline.search_positions:
                 markup_string = self.markup + markup_string + '</span>'
-            self.datalist.append([markup_string, size, is_marked])
+            datalist.append([markup_string, size, is_marked])
 
-        return self.datalist
+        return datalist
 
     def file_select(self, treeview, path, column, close):
         """Show image or open directory for activated file in library.
