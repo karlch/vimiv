@@ -183,7 +183,8 @@ class Library(object):
         """Create the file_filter for the treeview.
 
         Args:
-            datalist:
+            datalist: Datalist given by self.datalist_create() containing
+                filename, filesize and markup_string.
 
         Return:
             Gtk.ListStore.filter_new to use as treeview model.
@@ -205,7 +206,7 @@ class Library(object):
         """Create the list of data for the file_filter model.
 
         Return:
-            The created datalist.
+            The created datalist. Contains [filename, filesize, markup_string].
         """
         datalist = []
         self.files = self.filelist_create()
