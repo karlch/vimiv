@@ -385,7 +385,7 @@ class Image(object):
         except:
             self.vimiv.statusbar.err_message("Warning: Unsupported index")
             return False
-        # Do the math and move
+        # Do the maths and move
         dif = pos - current - 1
         if self.vimiv.thumbnail.toggled:
             pos -= 1

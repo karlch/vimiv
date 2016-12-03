@@ -414,7 +414,7 @@ class Library(object):
         files = listdir_wrapper(directory, self.show_hidden)
         self.filesize = {}
         for fil in files:
-            # Catch broken symlinks
+            # Catch broken symbolic links
             if os.path.islink(fil) and \
                     not os.path.exists(os.path.realpath(fil)):
                 continue
