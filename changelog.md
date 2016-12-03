@@ -1,6 +1,13 @@
 ## Changelog
 The most important changes between the versions are listed here.
 
+#### v0.7.3
+* Bugfix release
+* Fix thumbnail creation for input files with dot (thanks aszlig)
+* Use native python to generate list of external commands (thanks aszlig)
+* Do not use commandline arguments in test mode (thanks aszlig)
+* Catch broken symlinks in the library and filter them
+
 #### v0.7.2
 * Add search in thumbnail mode
 * Make it possible to go straight to thumbnail mode from library
