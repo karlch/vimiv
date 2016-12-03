@@ -27,7 +27,7 @@ from vimiv.mark import Mark
 from vimiv.information import Information
 
 
-def main(running_tests=False):
+def main(arguments, running_tests=False):
     """Starting point for vimiv.
 
     Args:
@@ -36,7 +36,7 @@ def main(running_tests=False):
     parser = get_args()
     parse_dirs()
     settings = parse_config()
-    settings = parse_args(parser, settings)
+    settings = parse_args(parser, settings, arguments)
 
     args = settings["GENERAL"]["paths"]
 

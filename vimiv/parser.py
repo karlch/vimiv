@@ -56,7 +56,7 @@ def get_args():
     return parser
 
 
-def parse_args(parser, settings, arguments=None):
+def parse_args(parser, settings, arguments):
     """Parse the arguments and return the modified settings.
 
     Args:
@@ -66,10 +66,7 @@ def parse_args(parser, settings, arguments=None):
 
     Return: Modified settings after parsing the arguments.
     """
-    if arguments:
-        args = parser.parse_args(arguments)
-    else:
-        args = parser.parse_args()
+    args = parser.parse_args(arguments)
     if args.show_version:
         information = Information()
         print(information.get_version())
