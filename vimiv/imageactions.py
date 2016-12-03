@@ -211,7 +211,8 @@ def manipulate_all(image, outfile, manipulations):
         outfile: File to save the manipulated image to.
         Manipulations: Values of manipulations to apply.
 
-    Return: 1 for errors, 0 else.
+    Return:
+        1 for errors, 0 else.
     """
     if manipulations[3]:  # Optimize
         try:

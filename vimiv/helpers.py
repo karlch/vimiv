@@ -38,7 +38,8 @@ def listdir_wrapper(path, show_hidden=False):
     Args:
         path: Path of the directory in which os.listdir is called.
         show_hidden: If true, show hidden files. Else do not.
-    Return: Sorted list of files in path.
+    Return:
+        Sorted list of files in path.
     """
     all_files = sorted(os.listdir(os.path.expanduser(path)))
     if show_hidden:
@@ -52,7 +53,8 @@ def read_file(filename):
 
     Args:
         filename: The name of the file to be read.
-    Return: Content of filename in a list.
+    Return:
+        Content of filename in a list.
     """
     content = []
     try:
@@ -72,7 +74,8 @@ def sizeof_fmt(num):
     Args:
         num: Filesize in bytes.
 
-    Return: Filesize in human-readable format.
+    Return:
+        Filesize in human-readable format.
     """
     for unit in ['B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
         if abs(num) < 1024.0:

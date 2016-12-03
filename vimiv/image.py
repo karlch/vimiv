@@ -71,7 +71,8 @@ class Image(object):
 
         Args:
             force: If True move and ignore any editing.
-        Return: 0 if no edits were done or force, 1 else.
+        Return:
+            0 if no edits were done or force, 1 else.
         """
         if self.vimiv.paths:
             if "EDIT" in self.vimiv.paths[self.vimiv.index]:
@@ -89,7 +90,8 @@ class Image(object):
         Args:
             z_width: If True zoom to width.
             z_height: If True zoom to height.
-        Return: Zoom percentage.
+        Return:
+            Zoom percentage.
         """
         # Size of the file
         pbo_width = self.pixbuf_original.get_width()
@@ -173,7 +175,8 @@ class Image(object):
         Substracts other widgets (manipulate, statusbar, library) from window
         size and returns the available size.
 
-        Return: Tuple of available size.
+        Return:
+            Tuple of available size.
         """
         if self.vimiv.window.fullscreen:
             size = self.vimiv.screensize

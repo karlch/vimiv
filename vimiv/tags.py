@@ -34,7 +34,8 @@ class TagHandler(object):
         Args:
             tagname: Name of tag to operate on.
 
-        Return: List of images in the tag called tagname.
+        Return:
+            List of images in the tag called tagname.
         """
         tagfile_name = os.path.join(self.directory, tagname)
         tagged_images = read_file(tagfile_name)

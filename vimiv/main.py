@@ -167,7 +167,8 @@ class Vimiv(Gtk.Window):
         get_filename: If True return filename instead of position.
         force_widget: String to force getting the position of a widget
 
-        Return: Current position as Int or filename.
+        Return:
+            Current position as Int or filename.
         """
         # Find widget to work on
         if force_widget:

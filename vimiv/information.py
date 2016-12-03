@@ -20,7 +20,8 @@ class Information():
     def get_version(self):
         """Return current version.
 
-        Return: String of the current version.
+        Return:
+            String of the current version.
         """
         return self.version
 

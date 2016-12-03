@@ -20,7 +20,8 @@ def recursive_search(directory):
 
     Args:
         directory: Directory to search for images.
-    Return: List of images in directory.
+    Return:
+        List of images in directory.
     """
     # pylint: disable=unused-variable
     for root, dirs, files in os.walk(directory):
@@ -66,7 +67,8 @@ def populate(args, recursive=False, shuffle_paths=False):
         args: Paths given.
         recursive: If True search path recursively for images.
         shuffle_paths: If True shuffle found paths randomly.
-    Return: Found paths, position of first given path.
+    Return:
+        Found paths, position of first given path.
     """
     paths = []
     # Default to current directory for recursive search

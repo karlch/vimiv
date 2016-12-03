@@ -73,7 +73,8 @@ class Window(object):
     def auto_resize(self, window):
         """Automatically resize widgets when window is resized.
 
-        Args: window: The window which emitted the resize event.
+        Args:
+            window: The window which emitted the resize event.
         """
         if self.vimiv.get_size() != self.vimiv.winsize:
             self.vimiv.winsize = self.vimiv.get_size()

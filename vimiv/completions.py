@@ -74,7 +74,8 @@ class Completion():
         Args:
             completions: List of possible completions.
             comp_type: Completion type (internal, external, path, tag).
-        Return: Formatted completions, best match.
+        Return:
+            Formatted completions, best match.
         """
         # Output, start with : and the prepended numbers
         output = ":" + self.repeat
@@ -144,7 +145,8 @@ class Completion():
         Args:
             path: (Partial) name of the path to run completion on.
             external_command: If True, path comes from an external command.
-        Return: List containing formatted matching paths.
+        Return:
+            List containing formatted matching paths.
         """
         # Directory of the path, default to .
         directory = os.path.dirname(path) if os.path.dirname(path) else path
@@ -277,7 +279,8 @@ class VimivComplete(object):
         Args:
             output: Test from commandline entry.
             completion: Proposed completion string.
-        Return: String with everything but the common match between output and
+        Return:
+            String with everything but the common match between output and
             completion.
         """
         for i in range(len(completion)):

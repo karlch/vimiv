@@ -12,7 +12,8 @@ from vimiv.information import Information
 def get_args():
     """Create the argparse parser and return it.
 
-    Return: argparse.ArgumentParser with the possible arguments.
+    Return:
+        argparse.ArgumentParser with the possible arguments.
     """
     usage = '%(prog)s [options] [paths ...]'
     parser = argparse.ArgumentParser(usage=usage)

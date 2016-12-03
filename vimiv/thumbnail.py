@@ -306,7 +306,8 @@ class Thumbnail(object):
         Args:
             pixbuf_max: Pixbuf at maximum thumbnail size to scale.
 
-        Return: The scaled pixbuf.
+        Return:
+            The scaled pixbuf.
         """
         width = \
             pixbuf_max.get_width() * (float(self.size[0]) / self.max_size[0])

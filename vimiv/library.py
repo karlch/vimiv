@@ -188,7 +188,8 @@ class Library(object):
         Args:
             datalist:
 
-        Return: Gtk.ListStore.filter_new to use as treeview model.
+        Return:
+            Gtk.ListStore.filter_new to use as treeview model.
         """
         # Reset
         self.file_liststore = Gtk.ListStore(int, str, str, str)
@@ -206,7 +207,8 @@ class Library(object):
     def datalist_create(self):
         """Create the list of data for the file_filter model.
 
-        Return: The created datalist.
+        Return:
+            The created datalist.
         """
         self.datalist = []
         self.files = self.filelist_create()
@@ -446,7 +448,8 @@ class Library(object):
         Args:
             direction: One of 'hjkl' defining the scroll direction.
 
-        Return: True to deactivate default key-bindings for arrow keys.
+        Return:
+            True to deactivate default key-bindings for arrow keys.
         """
         # Handle the specific keys
         if direction == "h":  # Behave like ranger
