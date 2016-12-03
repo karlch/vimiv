@@ -2,4 +2,6 @@
 # Disabled:
 # D102-105: Check for docstrings is handled by pylint.
 # D203: No blank lines before class docstrings.
-ignore = D102,D103,D104,D105,D203
+# D213: Multi-line docstring summary should start at the second line, we use
+#       D212 Muli-line docstring summary should start at the first line
+ignore = D102,D103,D104,D105,D203,D213
