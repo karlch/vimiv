@@ -30,11 +30,11 @@ class Library(object):
         desktop_start_dir: Directory to start in if launched from desktop.
         files: Files in the library.
         filesize: Dictionary storing the size of files.
-        file_liststore: Gtk.ListStore for the file information to be displayed.
         grid: Gtk.Grid containing the TreeView and the border.
         scrollable_treeview: Gtk.ScrolledWindow in which the TreeView gets
             packed.
-        treeview: Gtk.TreeView object with file_liststore as model.
+        treeview: Gtk.TreeView object with own liststore model containing
+            number, filename, filesize and is_marked.
     """
 
     def __init__(self, vimiv, settings):
@@ -62,8 +62,6 @@ class Library(object):
         # Defaults
         self.files = []
         self.filesize = {}
-        # Filelist in a liststore model
-        self.file_liststore = Gtk.ListStore(int, str, str, str)
 
         # Grid with treeview and border
         self.grid = Gtk.Grid()
@@ -168,8 +166,7 @@ class Library(object):
         for column in self.treeview.get_columns():
             self.treeview.remove_column(column)
         # Tree View
-        current_file_filter = self.file_filter_create(self.datalist_create())
-        self.treeview.set_model(current_file_filter)
+        self.treeview.set_model(self.liststore_create())
         # Add the columns
         for i, name in enumerate(["Num", "Name", "Size", "M"]):
             renderer = Gtk.CellRendererText()
@@ -179,36 +176,14 @@ class Library(object):
                 column.set_max_width(20)
             self.treeview.append_column(column)
 
-    def file_filter_create(self, datalist):
-        """Create the file_filter for the treeview.
-
-        Args:
-            datalist: Datalist given by self.datalist_create() containing
-                filename, filesize and markup_string.
+    def liststore_create(self):
+        """Create the Gtk.ListStore containing information on supported files.
 
         Return:
-            Gtk.ListStore.filter_new to use as treeview model.
+            The created liststore containing
+            [count, filename, filesize, markup_string].
         """
-        # Reset
-        self.file_liststore = Gtk.ListStore(int, str, str, str)
-        # Numerate each filename
-        count = 0
-        for data in datalist:
-            count += 1
-            data.insert(0, count)
-            # The data into the filelist
-            self.file_liststore.append(data)
-
-        current_file_filter = self.file_liststore.filter_new()
-        return current_file_filter
-
-    def datalist_create(self):
-        """Create the list of data for the file_filter model.
-
-        Return:
-            The created datalist. Contains [filename, filesize, markup_string].
-        """
-        datalist = []
+        liststore = Gtk.ListStore(int, str, str, str)
         self.files = self.filelist_create()
         # Remove unsupported files if one isn't in the tags directory
         if os.getcwd() != self.vimiv.tags.directory:
@@ -229,9 +204,9 @@ class Library(object):
                 markup_string = "<b>" + markup_string + "</b>"
             if i in self.vimiv.commandline.search_positions:
                 markup_string = self.markup + markup_string + '</span>'
-            datalist.append([markup_string, size, marked_string])
+            liststore.append([i + 1, markup_string, size, marked_string])
 
-        return datalist
+        return liststore
 
     def file_select(self, treeview, path, column, close):
         """Show image or open directory for activated file in library.
@@ -465,8 +440,8 @@ class Library(object):
                 step = 1
             if direction == "j":
                 new_pos = self.vimiv.get_pos(force_widget="lib") + step
-                if new_pos >= len(self.file_liststore):
-                    new_pos = len(self.file_liststore) - 1
+                if new_pos >= len(self.treeview.get_model()):
+                    new_pos = len(self.treeview.get_model()) - 1
             else:
                 new_pos = self.vimiv.get_pos(force_widget="lib") - step
                 if new_pos < 0:
