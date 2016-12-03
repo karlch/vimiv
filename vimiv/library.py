@@ -219,16 +219,16 @@ class Library(object):
         for i, fil in enumerate(self.files):
             markup_string = fil
             size = self.filesize[fil]
-            is_marked = ""
+            marked_string = ""
             if os.path.islink(fil):
                 markup_string = markup_string + "  →  " + os.path.realpath(fil)
             if os.path.abspath(fil) in self.vimiv.mark.marked:
-                is_marked = "[*]"
+                marked_string = "[*]"
             if os.path.isdir(fil):
                 markup_string = "<b>" + markup_string + "</b>"
             if i in self.vimiv.commandline.search_positions:
                 markup_string = self.markup + markup_string + '</span>'
-            datalist.append([markup_string, size, is_marked])
+            datalist.append([markup_string, size, marked_string])
 
         return datalist
 
