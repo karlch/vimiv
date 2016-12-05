@@ -21,7 +21,7 @@ class CommandLine(object):
 
     Attributes:
         vimiv: The main vimiv class to interact with.
-        grid: Gtdk.Grid which packs the other objects.
+        grid: Gtk.Grid which packs the other objects.
         entry: Gtk.Entry as commandline entry.
         info: Gtk.Label to show completion information.
         history: List of commandline history to save.
@@ -97,8 +97,6 @@ class CommandLine(object):
         if self.incsearch:
             self.entry.connect("changed", self.incremental_search)
         self.last_filename = ""
-
-        # List of threads
         self.running_threads = []
 
     def handler(self, entry):
@@ -110,7 +108,7 @@ class CommandLine(object):
         Args:
             entry: The Gtk.Entry from which the command comes.
         """
-        # Only close completions if the tabbing is open
+        # Only close completions if currently tabbing through results
         if self.vimiv.completions.cycling:
             self.vimiv.completions.reset()
             self.info.hide()
@@ -121,31 +119,30 @@ class CommandLine(object):
         if command[1:] in self.vimiv.aliases.keys():
             command = ":" + self.vimiv.aliases[command[1:]]
         # And close the cmd line
+        self.reset_text()
         if command[0] == "/":  # Search
-            self.reset_text()
             # Do not search again if incsearch was running
             if not (self.vimiv.library.treeview.is_focus() or
                     self.vimiv.thumbnail.iconview.is_focus()) or \
                     not self.incsearch:
                 self.search(command.lstrip("/"))
-            # Auto select single file
+            # Auto select single file in the library
             elif self.incsearch and len(self.search_positions) == 1 and \
                     self.vimiv.library.treeview.is_focus():
                 self.vimiv.library.file_select(
                     self.vimiv.library.treeview,
                     Gtk.TreePath(self.vimiv.get_pos()), None, False)
         else:  # Run a command
-            self.reset_text()
             cmd = command.lstrip(":")
             # If there was no command just leave
             if not cmd:
                 return
-            # Parse different starts
+            # Run something different depending on first char in cmd
             if cmd[0] == "!":
                 self.run_external_command(cmd)
             elif cmd[0] == "~" or cmd[0] == "." or cmd[0] == "/":
                 self.run_path(cmd)
-            else:
+            else:  # Default to internal cmd
                 self.vimiv.keyhandler.num_str = ""  # Be able to repeat commands
                 while True:
                     try:
@@ -156,7 +153,7 @@ class CommandLine(object):
                     except:
                         break
                 self.run_command(cmd)
-        # Save the cmd to a list
+        # Save the cmd to the history list avoiding duplicates
         if command in self.history:
             self.history.remove(command)
         self.history.insert(0, command)
@@ -169,7 +166,7 @@ class CommandLine(object):
             cmd: The command to run.
         """
         cmd = self.expand_filenames(cmd)
-        # Run the command in an extra thread
+        # Run the command in an extra thread, useful e.g. for gimp %
         directory = os.getcwd()
         cmd_thread = Thread(target=self.thread_for_external, args=(cmd,
                                                                    directory))
@@ -198,6 +195,10 @@ class CommandLine(object):
                 err = err.decode('utf-8').split("\n")[0]
                 self.vimiv.statusbar.err_message(err)
             else:
+                # Reload everything after an external command if we haven't
+                # moved, you never know what happened ... Must be in a timer
+                # because not all Gtk stuff can be accessed from an external
+                # thread.
                 # Only reload paths if the path directory or any file was in the
                 # command
                 reload_path = False
@@ -207,10 +208,6 @@ class CommandLine(object):
                     reload_path = True
                 GLib.timeout_add(1, self.vimiv.fileextras.reload_changes,
                                  directory, reload_path, from_pipe, out)
-            # Reload everything after an external command if we haven't moved,
-            # you never know what happened ...
-            # Must be in a timer because not all Gtk stuff can be accessed from
-            # an external thread
         except FileNotFoundError as e:
             e = str(e)
             cmd = e.split()[-1]
@@ -225,25 +222,25 @@ class CommandLine(object):
         """
         fil = self.vimiv.get_pos(True)
         # Check on which file(s) % and * should operate
-        if self.vimiv.window.last_focused == "lib" and self.vimiv.library.files:
+        if self.vimiv.mark.marked:  # Always use marked files if they exist
+            filelist = list(self.vimiv.mark.marked)
+        elif self.vimiv.window.last_focused == "lib":
             filelist = list(self.vimiv.library.files)
         elif self.vimiv.window.last_focused in ["thu", "im"]:
             filelist = list(self.vimiv.paths)
-        else:
+        else:  # Empty filelist as a fallback
             filelist = []
-            fil = ""
-        # Always operate on marked files if they exist
-        if self.vimiv.mark.marked:
-            filelist = list(self.vimiv.mark.marked)
-        # Escape spaces for the shell
-        fil = fil.replace(" ", "\\\\\\\\ ")
-        for i, f in enumerate(filelist):
-            filelist[i] = f.replace(" ", "\\\\\\\\ ")
-        cmd = cmd[1:]
-        # Substitute % and * with escaping
-        cmd = re.sub(r'(?<!\\)(%)', fil, cmd)
-        cmd = re.sub(r'(?<!\\)(\*)', " ".join(filelist), cmd)
-        cmd = re.sub(r'(\\)(?!\\)', '', cmd)
+        # Only do substitution if a filelist exists
+        if filelist:
+            # Escape spaces for the shell
+            fil = fil.replace(" ", "\\\\\\\\ ")
+            for i, f in enumerate(filelist):
+                filelist[i] = f.replace(" ", "\\\\\\\\ ")
+            cmd = cmd[1:]
+            # Substitute % and * with escaping
+            cmd = re.sub(r'(?<!\\)(%)', fil, cmd)
+            cmd = re.sub(r'(?<!\\)(\*)', " ".join(filelist), cmd)
+            cmd = re.sub(r'(\\)(?!\\)', '', cmd)
         return cmd
 
     def pipe(self, pipe_input):
@@ -256,7 +253,7 @@ class CommandLine(object):
         """
         # Leave if no pipe_input came
         if not pipe_input:
-            self.vimiv.statusbar.err_message("No pipe_input from pipe")
+            self.vimiv.statusbar.err_message("No input from pipe")
             return
         # Make the pipe_input a file
         pipe_input = pipe_input.decode('utf-8')
@@ -284,8 +281,7 @@ class CommandLine(object):
             elif old_pos:  # Nothing found, go back
                 self.vimiv.paths, self.vimiv.index = populate(old_pos)
                 self.vimiv.statusbar.err_message("No image found")
-        else:
-            # Run every line as an internal command
+        else:  # Run every line as an internal command
             for cmd in pipe_input:
                 self.run_command(cmd)
 
@@ -295,16 +291,12 @@ class CommandLine(object):
         Args:
             path: The path to run on.
         """
-        # Expand home
-        if path[0] == "~":
-            path = os.path.expanduser("~") + path[1:]
-        try:
-            path = os.path.abspath(path)
-            if not os.path.exists(path):
-                raise ValueError
-            elif os.path.isdir(path):
+        # Expand home and use absolute path
+        path = os.path.abspath(os.path.expanduser(path))
+        if os.path.exists(path):
+            if os.path.isdir(path):
+                # Focus directory in the library
                 self.vimiv.library.move_up(path)
-                # If we open the library it must be focused as well
                 self.vimiv.window.last_focused = "lib"
             else:
                 # If it is an image open it
@@ -313,9 +305,9 @@ class CommandLine(object):
                 self.vimiv.index = 0
                 self.vimiv.image.move_index(True, False, index)
                 #  Reload library in lib mode, do not open it in image mode
-                abspath = os.path.dirname(path)
+                pathdir = os.path.dirname(path)
                 if self.vimiv.window.last_focused == "lib":
-                    self.vimiv.library.move_up(abspath)
+                    self.vimiv.library.move_up(pathdir)
                     # Focus it in the treeview so it can be accessed via "l"
                     for i, fil in enumerate(self.vimiv.library.files):
                         if fil in path:
@@ -326,8 +318,8 @@ class CommandLine(object):
                     self.vimiv.library.scrollable_treeview.set_hexpand(False)
                     self.vimiv.image.scrolled_win.show()
                 else:
-                    self.vimiv.library.move_up(abspath, True)
-        except:
+                    self.vimiv.library.move_up(pathdir, True)
+        else:
             self.vimiv.statusbar.err_message("Warning: Not a valid path")
 
     def run_command(self, cmd):
@@ -338,22 +330,19 @@ class CommandLine(object):
         """
         parts = cmd.split()
         if "set" in cmd:
-            arg = parts[2:]
+            given_args = parts[2:]
             cmd = " ".join(parts[:2])
         else:
-            arg = parts[1:]
+            given_args = parts[1:]
             cmd = parts[0]
         # Check if the command exists
         if cmd in self.vimiv.commands.keys():  # Run it
             function = self.vimiv.commands[cmd][0]
             default_args = self.vimiv.commands[cmd][1:]
-            arg = default_args + arg
+            args = default_args + given_args
             # Check for wrong arguments
             try:
-                if arg:
-                    function(*arg)
-                else:
-                    function()
+                function(*args)
             except TypeError as e:
                 self.vimiv.statusbar.err_message(str(e))
             except SyntaxError:
@@ -361,9 +350,9 @@ class CommandLine(object):
                        "and special chars quoted?")
                 self.vimiv.err_message(err)
             except NameError as e:
-                argstr = "('" + arg + "')"
-                arg = "(" + arg + ")"
-                function = function.replace(arg, argstr)
+                argstr = "('" + args + "')"
+                args = "(" + args + ")"
+                function = function.replace(args, argstr)
                 exec(function)
         else:  # Throw an error if the command does not exist
             self.vimiv.statusbar.err_message("No such command: %s" % (cmd))
@@ -376,7 +365,7 @@ class CommandLine(object):
         Args:
             down: If True, search downwards. Else search upwards.
         """
-        # Shortly disconnect the change signal
+        # Shortly disconnect the change signal as it resets the history search
         self.entry.disconnect_by_func(self.check_close)
         # Only parts of the history that match the entered text
         if not self.sub_history:
@@ -391,7 +380,7 @@ class CommandLine(object):
             self.pos -= 1
         else:
             self.pos += 1
-        self.pos = self.pos % (len(self.sub_history))
+        self.pos = self.pos % len(self.sub_history)
         self.entry.set_text(self.sub_history[self.pos])
         self.entry.set_position(-1)
         # Reconnect when done
