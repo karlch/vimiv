@@ -19,7 +19,14 @@ class VimivTestCase(TestCase):
         cls.init_test(cls)
 
     def init_test(self, settings={}, paths=[], index=0, arguments=[]):
-        """TODO"""
+        """Initialize a testable vimiv object saved as self.vimiv.
+
+        Args:
+            settings: Settings passed to vimiv.
+            paths: Paths passed to vimiv.
+            index: Index in paths.
+            arguments: Commandline arguments for vimiv.
+        """
         # A new ID for every generated vimiv class
         vimiv_id = "org.vimiv" + str(time()).replace(".", "")
         # Create vimiv class with settings, paths, ...
