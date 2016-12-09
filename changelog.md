@@ -1,6 +1,10 @@
 ## Changelog
 The most important changes between the versions are listed here.
 
+#### v0.8 (unreleased)
+* Rewrite large parts to make vimiv a Gtk.Application
+* Fix parser, broken since 0.7.3
+
 #### v0.7.3
 * Bugfix release
 * Fix thumbnail creation for input files with dot (thanks aszlig)
