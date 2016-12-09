@@ -139,7 +139,7 @@ class CommandLine(object):
             elif cmd[0] == "~" or cmd[0] == "." or cmd[0] == "/":
                 self.run_path(cmd)
             else:  # Default to internal cmd
-                self.app["keyhandler"].num_str = ""  # Be able to repeat commands
+                self.app["keyhandler"].num_str = ""  # Used to repeat commands
                 while True:
                     try:
                         num = int(cmd[0])
@@ -503,7 +503,7 @@ class CommandLine(object):
         # Reload library and thumbnails to show search results
         if self.app["window"].last_focused == "lib":
             self.app["library"].reload(os.getcwd(), self.last_filename,
-                                      search=True)
+                                       search=True)
         elif self.app["window"].last_focused == "thu":
             if incsearch:
                 self.app["thumbnail"].iconview.grab_focus()
@@ -559,9 +559,9 @@ class CommandLine(object):
         # Select new file in library, image or thumbnail
         if self.app["window"].last_focused == "lib":
             self.app["library"].treeview.set_cursor(Gtk.TreePath(next_pos),
-                                                   None, False)
+                                                    None, False)
             self.app["library"].treeview.scroll_to_cell(Gtk.TreePath(next_pos),
-                                                       None, True, 0.5, 0)
+                                                        None, True, 0.5, 0)
             # Auto select single file
             if len(self.search_positions) == 1 and not self.incsearch:
                 self.app["library"].file_select(

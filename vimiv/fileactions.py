@@ -206,8 +206,8 @@ class FileExtras(object):
                         if not (exif and 306 in exif):
                             raise AttributeError
             except:
-                self.app["statusbar"].err_message("No exif data for %s available"
-                                                 % (fil))
+                self.app["statusbar"].err_message(
+                    "No exif data for %s available" % (fil))
                 return
 
         for i, fil in enumerate(self.app.paths):

@@ -11,7 +11,7 @@ class ParserTest(TestCase):
     """Different parsers from parser.py test."""
 
     def setUp(self):
-        self.parser = parser.get_args()
+        self.parser = parser.create_parser()
         self.config_settings = parser.parse_config()
 
     def test_parse_dirs(self):

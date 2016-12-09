@@ -94,8 +94,8 @@ class KeyHandler(object):
             self.app["thumbnail"].move_direction(direction)
         else:
             self.app["image"].scrolled_win.emit('scroll-child',
-                                               scrolltypes[direction][0],
-                                               scrolltypes[direction][1])
+                                                scrolltypes[direction][0],
+                                                scrolltypes[direction][1])
         return True  # Deactivates default bindings (here for Arrows)
 
     def num_append(self, num):

@@ -10,6 +10,7 @@ from vimiv.parser import create_parser, parse_dirs, parse_config, parse_args
 from vimiv.fileactions import populate
 from vimiv.app import Vimiv
 
+
 def main(arguments, vimiv_id="org.vimiv"):
     """Starting point for vimiv.
 

@@ -48,7 +48,8 @@ class Manipulate(object):
         grid = Gtk.Grid()
         grid.set_column_spacing(6)
         grid.set_border_width(6)
-        grid.connect("key_press_event", self.app["keyhandler"].run, "MANIPULATE")
+        grid.connect("key_press_event", self.app["keyhandler"].run,
+                     "MANIPULATE")
         self.scrolled_win.add_with_viewport(grid)
 
         # A list to save the changes being done
@@ -121,7 +122,7 @@ class Manipulate(object):
         if self.app["library"].grid.is_visible():
             if self.app.get_pos():
                 self.app["library"].remember_pos(os.getcwd(),
-                                                self.app.get_pos() - 1)
+                                                 self.app.get_pos() - 1)
             self.app["library"].reload(os.getcwd())
         if self.app["image"].scrolled_win.is_focus():
             del self.app.paths[self.app.index]
@@ -183,7 +184,8 @@ class Manipulate(object):
             # Rotate the image shown
             if self.app.paths[self.app.index] in images:
                 self.app["image"].pixbuf_original = \
-                    self.app["image"].pixbuf_original.rotate_simple((90 * cwise))
+                    self.app["image"].pixbuf_original.rotate_simple(
+                        (90 * cwise))
                 self.app["image"].update(False)
             if rotate_file:
                 # Rotate all files in external thread
@@ -277,7 +279,7 @@ class Manipulate(object):
             self.app["image"].scrolled_win.grab_focus()
             self.app["statusbar"].update_info()
         elif self.app.paths and not(self.app["thumbnail"].toggled or
-                                      self.app["library"].treeview.is_focus()):
+                                    self.app["library"].treeview.is_focus()):
             if os.path.islink(self.app.paths[self.app.index]):
                 self.app["statusbar"].err_message(
                     "Manipulating symbolik links is not supported")
@@ -429,8 +431,10 @@ class Manipulate(object):
                 self.app["image"].pixbuf_original.get_static_image()
             self.app.paths[self.app.index] = path
             if not self.app["window"].is_fullscreen:
-                self.app["image"].imsize = self.app["image"].get_available_size()
-            self.app["image"].zoom_percent = self.app["image"].get_zoom_percent()
+                self.app["image"].imsize = \
+                    self.app["image"].get_available_size()
+            self.app["image"].zoom_percent = \
+                self.app["image"].get_zoom_percent()
             self.app["image"].update()
         # Done
         self.toggle()

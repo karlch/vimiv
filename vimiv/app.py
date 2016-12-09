@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
+"""Main application class of vimiv."""
 
 import os
 from gi import require_version
@@ -20,6 +21,7 @@ from vimiv.tags import TagHandler
 from vimiv.mark import Mark
 from vimiv.information import Information
 from vimiv.window import Window
+
 
 class Vimiv(Gtk.Application):
     """Main vimiv application class inheriting from Gtk.Application.
@@ -48,7 +50,7 @@ class Vimiv(Gtk.Application):
         """
         Gtk.Application.__init__(self, application_id=application_id,
                                  flags=Gio.ApplicationFlags.SEND_ENVIRONMENT)
-        self.connect("activate", self.activate)
+        self.connect("activate", self.activate_vimiv)
         self.settings = {}
         self.paths = []
         self.index = 0
@@ -61,7 +63,7 @@ class Vimiv(Gtk.Application):
         screen = Gdk.Screen()
         self.screensize = [screen.width(), screen.height()]
 
-    def activate(self, app):
+    def activate_vimiv(self, app):
         """Starting point for the vimiv application.
 
         Args:
@@ -103,7 +105,8 @@ class Vimiv(Gtk.Application):
             self["library"].reload(os.getcwd())
             if self["library"].expand:
                 self["image"].scrolled_win.hide()
-            self["statusbar"].err_message("No valid paths, opening library viewer")
+            self["statusbar"].err_message(
+                "No valid paths, opening library viewer")
 
     def set_settings(self, settings):
         """Set self.settings to settings."""

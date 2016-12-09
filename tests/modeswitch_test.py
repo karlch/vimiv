@@ -90,7 +90,8 @@ class ModeSwitchTestLibrary(VimivTestCase):
     def test_library_image(self):
         """Switch between library and image mode."""
         self.assertTrue(self.vimiv["library"].treeview.is_focus())
-        path = Gtk.TreePath([self.vimiv["library"].files.index("arch-logo.png")])
+        path = Gtk.TreePath(
+            [self.vimiv["library"].files.index("arch-logo.png")])
         self.vimiv["library"].file_select(None, path, None, True)
         self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
         self.assertTrue(self.vimiv["image"].scrolled_win.is_visible())

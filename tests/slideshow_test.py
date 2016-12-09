@@ -2,7 +2,6 @@
 # encoding: utf-8
 """Test slideshow.py for vimiv's test suite."""
 
-import os
 from unittest import main
 from gi import require_version
 require_version('Gtk', '3.0')

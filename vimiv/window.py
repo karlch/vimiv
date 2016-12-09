@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
+"""Window class for vimiv."""
+
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
@@ -36,7 +38,7 @@ class Window(Gtk.ApplicationWindow):
 
         self.connect('destroy', self.app.quit)
         self.add_events(Gdk.EventMask.KEY_PRESS_MASK |
-                                        Gdk.EventMask.POINTER_MOTION_MASK)
+                        Gdk.EventMask.POINTER_MOTION_MASK)
 
         # Set initial window size
         try:
@@ -50,12 +52,10 @@ class Window(Gtk.ApplicationWindow):
         # Fullscreen
         if Gtk.get_minor_version() > 10:
             self.connect_data('window-state-event',
-                                    Window.on_window_state_change,
-                                    self)
+                              Window.on_window_state_change, self)
         else:
             self.connect_object('window-state-event',
-                                      Window.on_window_state_change,
-                                      self)
+                                Window.on_window_state_change, self)
         if start_fullscreen:
             self.toggle_fullscreen()
 
@@ -79,10 +79,10 @@ class Window(Gtk.ApplicationWindow):
         """
         if window:
             window.is_fullscreen = bool(Gdk.WindowState.FULLSCREEN
-                                     & event.new_window_state)
+                                        & event.new_window_state)
         else:
             self.is_fullscreen = bool(Gdk.WindowState.FULLSCREEN
-                                   & event.new_window_state)
+                                      & event.new_window_state)
 
     def toggle_fullscreen(self):
         """Toggle fullscreen."""

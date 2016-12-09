@@ -113,7 +113,8 @@ class Thumbnail(object):
                         self.app["image"].pixbuf_original.get_height()
                     except:
                         self.app["image"].scrolled_win.hide()
-                        self.app["library"].scrollable_treeview.set_hexpand(True)
+                        self.app["library"].scrollable_treeview.set_hexpand(
+                            True)
             self.toggled = False
         # Open thumbnail mode differently depending on where we come from
         elif self.app.paths and self.app["image"].scrolled_win.is_focus():

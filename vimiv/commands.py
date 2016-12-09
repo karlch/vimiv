@@ -20,7 +20,8 @@ class Commands(object):
 
         # Dictionary with command names and the corresponding functions
         self.app.commands = {
-            "accept_changes": [self.app["manipulate"].button_clicked, "w", True],
+            "accept_changes": [self.app["manipulate"].button_clicked, "w",
+                               True],
             "alias": [self.app["commandline"].alias],
             "autorotate": [self.app["manipulate"].rotate_auto],
             "center": [self.app["image"].center_window],

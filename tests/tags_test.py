@@ -7,6 +7,7 @@ from unittest import main
 from vimiv.helpers import read_file
 from vimiv_testcase import VimivTestCase
 
+
 class TagsTest(VimivTestCase):
     """Tag Tests."""
 
@@ -16,7 +17,8 @@ class TagsTest(VimivTestCase):
 
     def test_tag_create_remove(self):
         """Create and remove a tag."""
-        taglist = ["vimiv/testimages/arch-logo.png", "vimiv/testimages/arch_001.jpg"]
+        taglist = ["vimiv/testimages/arch-logo.png",
+                   "vimiv/testimages/arch_001.jpg"]
         taglist = [os.path.abspath(image) for image in taglist]
         self.vimiv["tags"].write(taglist, "arch_test_tag")
         created_file = os.path.expanduser("~/.vimiv/Tags/arch_test_tag")
@@ -39,7 +41,8 @@ class TagsTest(VimivTestCase):
 
     def test_tag_load(self):
         """Load a tag."""
-        taglist = ["vimiv/testimages/arch-logo.png", "vimiv/testimages/arch_001.jpg"]
+        taglist = ["vimiv/testimages/arch-logo.png",
+                   "vimiv/testimages/arch_001.jpg"]
         taglist = [os.path.abspath(image) for image in taglist]
         self.vimiv["tags"].write(taglist, "arch_test_tag")
         self.vimiv["tags"].load("arch_test_tag")

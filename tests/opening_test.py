@@ -80,5 +80,6 @@ class OpeningTest(VimivTestCase):
         os.chdir(self.working_directory)
         self.vimiv.quit()
 
+
 if __name__ == '__main__':
     main()
