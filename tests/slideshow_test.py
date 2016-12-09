@@ -3,13 +3,12 @@
 """Test slideshow.py for vimiv's test suite."""
 
 import os
-from unittest import TestCase, main
+from unittest import main
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
-import vimiv.main as v_main
-from vimiv.parser import parse_config
 from vimiv.fileactions import populate
+from vimiv_testcase import VimivTestCase
 
 
 def refresh_gui(vimiv=None):
@@ -23,18 +22,14 @@ def refresh_gui(vimiv=None):
         Gtk.main_iteration_do(False)
 
 
-class SlideshowTest(TestCase):
+class SlideshowTest(VimivTestCase):
     """Slideshow Tests."""
 
     @classmethod
     def setUpClass(cls):
-        cls.working_directory = os.getcwd()
-        os.chdir("vimiv")
-        cls.settings = parse_config()
-        paths, index = populate(["testimages/arch_001.jpg"])
-        cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
-        cls.slideshow = cls.vimiv.slideshow
-        cls.vimiv.main()
+        paths, index = populate(["vimiv/testimages/arch_001.jpg"])
+        cls.init_test(cls, paths=paths, index=index)
+        cls.slideshow = cls.vimiv["slideshow"]
 
     def test_toggle(self):
         """Toggle slideshow."""
@@ -44,10 +39,10 @@ class SlideshowTest(TestCase):
         self.slideshow.toggle()
         self.assertFalse(self.slideshow.running)
         # Throw some errors
-        self.vimiv.thumbnail.toggled = True
+        self.vimiv["thumbnail"].toggled = True
         self.slideshow.toggle()
         self.assertFalse(self.slideshow.running)
-        self.vimiv.thumbnail.toggled = False
+        self.vimiv["thumbnail"].toggled = False
         paths_before = self.vimiv.paths
         self.vimiv.paths = []
         self.slideshow.toggle()
@@ -64,7 +59,7 @@ class SlideshowTest(TestCase):
         self.slideshow.set_delay(None, "+")
         self.assertEqual(self.slideshow.delay, 3.0)
         # Set via toggle
-        self.vimiv.keyhandler.num_str = "2"
+        self.vimiv["keyhandler"].num_str = "2"
         self.slideshow.toggle()
         self.assertEqual(self.slideshow.delay, 2.0)
 
@@ -74,7 +69,7 @@ class SlideshowTest(TestCase):
         self.slideshow.toggle()
         # Set delay when running
         self.slideshow.set_delay(0.001)
-        self.assertEqual(self.vimiv.slideshow.delay, 0.001)
+        self.assertEqual(self.slideshow.delay, 0.001)
         for i in range(1, 6):
             refresh_gui(self.vimiv)
             self.assertEqual(self.vimiv.index, i)
@@ -85,10 +80,6 @@ class SlideshowTest(TestCase):
         if self.slideshow.running:
             self.slideshow.toggle()
         self.slideshow.delay = 2.0
-
-    @classmethod
-    def tearDownClass(cls):
-        os.chdir(cls.working_directory)
 
 
 if __name__ == '__main__':

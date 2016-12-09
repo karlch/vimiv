@@ -155,13 +155,13 @@ def is_image(filename):
 class FileExtras(object):
     """Extra fileactions for vimiv."""
 
-    def __init__(self, vimiv):
-        """Receive and set vimiv class.
+    def __init__(self, app):
+        """Receive and set main vimiv application.
 
         Args:
-            vimiv: The main vimiv class to interact with.
+            app: The main vimiv class to interact with.
         """
-        self.vimiv = vimiv
+        self.app = app
 
     def clear(self, directory_name):
         """Remove all files in directory (Trash or Thumbnails).
@@ -187,30 +187,30 @@ class FileExtras(object):
             string: Formatstring to use.
         """
         # Catch problems
-        if self.vimiv.library.treeview.is_focus():
+        if self.app["library"].treeview.is_focus():
             message = "Format only works on opened image files"
-            self.vimiv.statusbar.err_message(message)
+            self.app["statusbar"].err_message(message)
             return
-        if not self.vimiv.paths:
-            self.vimiv.statusbar.err_message("No files in path")
+        if not self.app.paths:
+            self.app["statusbar"].err_message("No files in path")
             return
 
         # Check if exifdata is available and needed
         tofind = ("%" in string)
         if tofind:
             try:
-                for fil in self.vimiv.paths:
+                for fil in self.app.paths:
                     with open(fil) as image_file:
                         im = Image.open(image_file)
                         exif = im._getexif()
                         if not (exif and 306 in exif):
                             raise AttributeError
             except:
-                self.vimiv.statusbar.err_message("No exif data for %s available"
+                self.app["statusbar"].err_message("No exif data for %s available"
                                                  % (fil))
                 return
 
-        for i, fil in enumerate(self.vimiv.paths):
+        for i, fil in enumerate(self.app.paths):
             ending = os.path.splitext(fil)[1]
             num = "%03d" % (i + 1)
             # Exif stuff
@@ -250,40 +250,40 @@ class FileExtras(object):
             pipe_input: Command that comes from pipe.
         """
         # Reload library remembering position
-        if (directory == os.getcwd() and directory != self.vimiv.tags.directory
-                and self.vimiv.library.grid.is_visible()):
-            old_pos_lib = self.vimiv.get_pos(False, "lib")
+        if (directory == os.getcwd() and directory != self.app["tags"].directory
+                and self.app["library"].grid.is_visible()):
+            old_pos_lib = self.app.get_pos(False, "lib")
             if old_pos_lib >= 0 and \
-                    old_pos_lib <= len(self.vimiv.library.files):
-                self.vimiv.library.remember_pos(directory, old_pos_lib)
-            self.vimiv.library.reload(directory)
+                    old_pos_lib <= len(self.app["library"].files):
+                self.app["library"].remember_pos(directory, old_pos_lib)
+            self.app["library"].reload(directory)
             # Refocus other widgets is necessary
-            if self.vimiv.window.last_focused == "im":
-                self.vimiv.image.scrolled_win.grab_focus()
-            elif self.vimiv.window.last_focused == "thu":
-                self.vimiv.thumbnail.iconview.grab_focus()
+            if self.app["window"].last_focused == "im":
+                self.app["image"].scrolled_win.grab_focus()
+            elif self.app["window"].last_focused == "thu":
+                self.app["thumbnail"].iconview.grab_focus()
         # Reload image/thumbnail
-        if self.vimiv.paths and reload_path:
-            old_pos_im = self.vimiv.get_pos(False, "im")
+        if self.app.paths and reload_path:
+            old_pos_im = self.app.get_pos(False, "im")
             # Get all files in directory again
-            pathdir = os.path.dirname(self.vimiv.paths[old_pos_im])
+            pathdir = os.path.dirname(self.app.paths[old_pos_im])
             files = sorted(os.listdir(pathdir))
             for i, fil in enumerate(files):
                 files[i] = os.path.join(pathdir, fil)
-            self.vimiv.paths, self.vimiv.index = populate(files)
+            self.app.paths, self.app.index = populate(files)
             # Expand library if set by user and all paths were removed
-            if self.vimiv.library.expand and not self.vimiv.paths:
-                self.vimiv.library.treeview.set_hexpand(True)
+            if self.app["library"].expand and not self.app.paths:
+                self.app["library"].treeview.set_hexpand(True)
             # Refocus the current position
-            if self.vimiv.thumbnail.toggled:
-                old_pos_thu = self.vimiv.get_pos(False, "thu")
-                for i, image in enumerate(self.vimiv.paths):
-                    self.vimiv.thumbnail.reload(image, i, False)
-                self.vimiv.thumbnail.move_to_pos(old_pos_thu)
+            if self.app["thumbnail"].toggled:
+                old_pos_thu = self.app.get_pos(False, "thu")
+                for i, image in enumerate(self.app.paths):
+                    self.app["thumbnail"].reload(image, i, False)
+                self.app["thumbnail"].move_to_pos(old_pos_thu)
             else:
-                self.vimiv.keyhandler.num_str = str(old_pos_im + 1)
-                self.vimiv.image.move_pos()
+                self.app["keyhandler"].num_str = str(old_pos_im + 1)
+                self.app["image"].move_pos()
         # Run the pipe
         if pipe:
-            self.vimiv.commandline.pipe(pipe_input)
+            self.app["commandline"].pipe(pipe_input)
         return False  # To stop the timer

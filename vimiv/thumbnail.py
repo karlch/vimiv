@@ -16,7 +16,7 @@ class Thumbnail(object):
     Includes the iconview with the thumnbails and all actions that apply to it.
 
     Attributes:
-        vimiv: The main vimiv class to interact with.
+        app: The main vimiv application to interact with.
         toggled: If True the library is visible.
         size: Tuple containing the size of thumbnails.
         max_size: Tuple containing the maximum size of thumbnails.
@@ -35,14 +35,14 @@ class Thumbnail(object):
         columns: Amount of columns that fit into the window.
     """
 
-    def __init__(self, vimiv, settings):
+    def __init__(self, app, settings):
         """Create the necessary objects and settings.
 
         Args:
-            vimiv: The main vimiv class to interact with.
+            app: The main application class to interact with.
             settings: Settings from configfiles to use.
         """
-        self.vimiv = vimiv
+        self.app = app
         general = settings["GENERAL"]
 
         # Settings
@@ -52,11 +52,11 @@ class Thumbnail(object):
         self.possible_sizes = [(64, 64), (128, 128), (256, 256), (512, 512)]
         self.current_size = 0
         self.cache = general["cache_thumbnails"]
-        self.directory = os.path.join(self.vimiv.directory, "Thumbnails")
+        self.directory = os.path.join(self.app.directory, "Thumbnails")
         self.timer_id = GLib.Timeout
         self.elements = []
         self.pixbuf_max = []
-        self.markup = self.vimiv.library.markup.replace("fore", "back")
+        self.markup = self.app["library"].markup.replace("fore", "back")
 
         # Prepare thumbnail sizes for zooming of thumbnails
         self.set_sizes()
@@ -67,7 +67,7 @@ class Thumbnail(object):
         self.liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str)
         self.iconview = Gtk.IconView.new()
         self.iconview.connect("item-activated", self.iconview_clicked)
-        self.iconview.connect("key_press_event", self.vimiv.keyhandler.run,
+        self.iconview.connect("key_press_event", self.app["keyhandler"].run,
                               "THUMBNAIL")
         self.iconview.set_model(self.liststore)
         self.columns = 0
@@ -87,9 +87,9 @@ class Thumbnail(object):
         """
         self.toggle(True)
         count = path.get_indices()[0] + 1
-        self.vimiv.keyhandler.vimiv.keyhandler.num_clear()
-        self.vimiv.keyhandler.vimiv.keyhandler.num_str = str(count)
-        self.vimiv.image.move_pos()
+        self.app["keyhandler"].num_clear()
+        self.app["keyhandler"].num_str = str(count)
+        self.app["image"].move_pos()
 
     def toggle(self, select_image=False):
         """Toggle thumbnail mode.
@@ -100,48 +100,48 @@ class Thumbnail(object):
         """
         # Close
         if self.toggled:
-            self.vimiv.image.scrolled_win.remove(self.iconview)
-            self.vimiv.image.scrolled_win.add(self.vimiv.image.viewport)
-            if self.vimiv.window.last_focused == "im" or select_image:
-                self.vimiv.image.scrolled_win.grab_focus()
-            elif self.vimiv.window.last_focused == "lib":
-                self.vimiv.library.focus()
+            self.app["image"].scrolled_win.remove(self.iconview)
+            self.app["image"].scrolled_win.add(self.app["image"].viewport)
+            if self.app["window"].last_focused == "im" or select_image:
+                self.app["image"].scrolled_win.grab_focus()
+            elif self.app["window"].last_focused == "lib":
+                self.app["library"].focus()
                 # Re-expand the library if there is no image and the setting
                 # applies
-                if self.vimiv.library.expand:
+                if self.app["library"].expand:
                     try:
-                        self.vimiv.image.pixbuf_original.get_height()
+                        self.app["image"].pixbuf_original.get_height()
                     except:
-                        self.vimiv.image.scrolled_win.hide()
-                        self.vimiv.library.scrollable_treeview.set_hexpand(True)
+                        self.app["image"].scrolled_win.hide()
+                        self.app["library"].scrollable_treeview.set_hexpand(True)
             self.toggled = False
         # Open thumbnail mode differently depending on where we come from
-        elif self.vimiv.paths and self.vimiv.image.scrolled_win.is_focus():
-            self.vimiv.window.last_focused = "im"
+        elif self.app.paths and self.app["image"].scrolled_win.is_focus():
+            self.app["window"].last_focused = "im"
             self.show()
-        elif self.vimiv.library.files \
-                and self.vimiv.library.treeview.is_focus():
-            self.vimiv.window.last_focused = "lib"
-            self.vimiv.paths, self.vimiv.index = \
-                populate(self.vimiv.library.files)
-            self.vimiv.library.scrollable_treeview.set_hexpand(False)
-            if self.vimiv.paths:
-                self.vimiv.image.scrolled_win.show()
+        elif self.app["library"].files \
+                and self.app["library"].treeview.is_focus():
+            self.app["window"].last_focused = "lib"
+            self.app.paths, self.app.index = \
+                populate(self.app["library"].files)
+            self.app["library"].scrollable_treeview.set_hexpand(False)
+            if self.app.paths:
+                self.app["image"].scrolled_win.show()
             self.show()
         else:
-            self.vimiv.statusbar.vimiv.statusbar.err_message("No open image")
+            self.app["statusbar"].err_message("No open image")
             return
         # Manipulate bar is useless in thumbnail mode
-        if self.vimiv.manipulate.scrolled_win.is_visible():
-            self.vimiv.manipulate.toggle()
+        if self.app["manipulate"].scrolled_win.is_visible():
+            self.app["manipulate"].toggle()
         # Update info for the current mode
-        self.vimiv.statusbar.update_info()
+        self.app["statusbar"].update_info()
 
     def calculate_columns(self):
         """Calculate how many columns fit into the current window."""
-        window_width = self.vimiv.winsize[0]
-        if self.vimiv.library.grid.is_visible():
-            width = window_width - self.vimiv.library.width
+        window_width = self.app["window"].winsize[0]
+        if self.app["library"].grid.is_visible():
+            width = window_width - self.app["library"].width
         else:
             width = window_width
         self.columns = int(width / (self.size[0] + 30))
@@ -157,12 +157,12 @@ class Thumbnail(object):
         self.liststore.clear()
         self.pixbuf_max = []
         # Create thumbnails
-        thumbnails = Thumbnails(self.vimiv.paths, self.sizes[-1])
+        thumbnails = Thumbnails(self.app.paths, self.sizes[-1])
         self.elements = thumbnails.thumbnails_create()
         # Draw the icon view instead of the image
         if not toggled:
-            self.vimiv.image.scrolled_win.remove(self.vimiv.image.viewport)
-            self.vimiv.image.scrolled_win.add(self.iconview)
+            self.app["image"].scrolled_win.remove(self.app["image"].viewport)
+            self.app["image"].scrolled_win.add(self.iconview)
         # Show the window
         self.iconview.show()
         self.toggled = True
@@ -174,7 +174,7 @@ class Thumbnail(object):
             pixbuf = self.scale_thumb(pixbuf_max)
             name = os.path.basename(thumb)
             name = name.split(".")[0]
-            if self.vimiv.paths[i] in self.vimiv.mark.marked:
+            if self.app.paths[i] in self.app["mark"].marked:
                 name = name + " [*]"
             self.liststore.append([pixbuf, name])
 
@@ -183,7 +183,7 @@ class Thumbnail(object):
 
         # Focus the current image
         self.iconview.grab_focus()
-        pos = (self.vimiv.index) % len(self.vimiv.paths)
+        pos = (self.app.index) % len(self.app.paths)
         self.move_to_pos(pos)
 
         # Remove the files again if the thumbnails should not be cached
@@ -215,9 +215,9 @@ class Thumbnail(object):
             name = os.path.basename(self.elements[index])
             name = name.split(".")[0]
 
-            if thumb in self.vimiv.mark.marked:
+            if thumb in self.app["mark"].marked:
                 name = name + " [*]"
-            elif index in self.vimiv.commandline.search_positions:
+            elif index in self.app["commandline"].search_positions:
                 name = self.markup + '<b>' + name + '</b></span>'
             self.liststore.insert(index, [pixbuf, name])
             self.iconview.select_path(old_path)
@@ -225,7 +225,7 @@ class Thumbnail(object):
             self.iconview.set_cursor(old_path, cell_renderer, False)
         except:
             message = "Reload of manipulated thumbnails failed"
-            self.vimiv.statusbar.err_message(message)
+            self.app["statusbar"].err_message(message)
 
     def move_direction(self, direction):
         """Scroll with "hjkl".
@@ -233,12 +233,12 @@ class Thumbnail(object):
         Args:
             direction: Direction to scroll in. One of "hjkl".
         """
-        new_pos = self.vimiv.get_pos(force_widget="thu")
+        new_pos = self.app.get_pos(force_widget="thu")
         # Get last element
-        last = len(self.vimiv.paths) - 1
+        last = len(self.app.paths) - 1
         # Check for a user prefixed step
-        if self.vimiv.keyhandler.num_str:
-            step = int(self.vimiv.keyhandler.num_str)
+        if self.app["keyhandler"].num_str:
+            step = int(self.app["keyhandler"].num_str)
         else:
             step = 1
         # Check for the specified thumbnail and handle exceptions
@@ -272,7 +272,7 @@ class Thumbnail(object):
         self.iconview.set_cursor(Gtk.TreePath(pos), cell_renderer, False)
         self.iconview.scroll_to_path(Gtk.TreePath(pos), True, 0.5, 0.5)
         # Clear the user prefixed step
-        self.vimiv.keyhandler.num_clear()
+        self.app["keyhandler"].num_clear()
 
     def zoom(self, inc=True):
         """Zoom thumbnails.
@@ -298,7 +298,7 @@ class Thumbnail(object):
 
         # Set columns and refocus current image
         self.calculate_columns()
-        self.move_to_pos(self.vimiv.get_pos(force_widget="thu"))
+        self.move_to_pos(self.app.get_pos(force_widget="thu"))
 
     def scale_thumb(self, pixbuf_max):
         """Scale the thumbnail image to self.size.

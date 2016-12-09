@@ -3,25 +3,20 @@
 """Test library.py for vimiv's test suite."""
 
 import os
-from unittest import TestCase, main
+from unittest import main
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
-import vimiv.main as v_main
-from vimiv.parser import parse_config
+from vimiv_testcase import VimivTestCase
 
 
-class LibraryTest(TestCase):
+class LibraryTest(VimivTestCase):
     """Test Library."""
 
     @classmethod
     def setUpClass(cls):
-        cls.working_directory = os.getcwd()
-        os.chdir("vimiv")
-        cls.settings = parse_config()
-        cls.vimiv = v_main.Vimiv(cls.settings, "testimages", 0)
-        cls.vimiv.main()
-        cls.lib = cls.vimiv.library
+        cls.init_test(cls, paths="vimiv/testimages/")
+        cls.lib = cls.vimiv["library"]
 
     def test_toggle(self):
         """Toggle the library."""
@@ -33,9 +28,9 @@ class LibraryTest(TestCase):
     def test_toggle_with_slideshow(self):
         """Toggle the library with running slideshow."""
         self.lib.toggle()
-        self.vimiv.slideshow.toggle()
+        self.vimiv["slideshow"].toggle()
         self.lib.toggle()
-        self.assertFalse(self.vimiv.slideshow.running)
+        self.assertFalse(self.vimiv["slideshow"].running)
         self.assertTrue(self.lib.treeview.is_focus())
 
     def test_file_select(self):
@@ -60,7 +55,7 @@ class LibraryTest(TestCase):
         # Library closed, image has focus
         self.assertFalse(self.lib.treeview.is_focus())
         self.assertFalse(self.lib.grid.is_focus())
-        self.assertTrue(self.vimiv.image.scrolled_win.is_focus())
+        self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
         # Reopen and back to beginning
         self.lib.toggle()
         self.lib.treeview.set_cursor([Gtk.TreePath(0)], None, False)
@@ -72,19 +67,19 @@ class LibraryTest(TestCase):
         self.lib.move_pos()
         self.assertEqual(self.vimiv.get_pos(True), "vimiv.tiff")
         # 3g
-        self.vimiv.keyhandler.num_str = "3"
+        self.vimiv["keyhandler"].num_str = "3"
         self.lib.move_pos()
         self.assertEqual(self.vimiv.get_pos(True), "arch_001.jpg")
-        self.assertFalse(self.vimiv.keyhandler.num_str)
+        self.assertFalse(self.vimiv["keyhandler"].num_str)
         # g
         self.lib.move_pos(False)
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         # Throw an error
-        self.vimiv.keyhandler.num_str = "300"
+        self.vimiv["keyhandler"].num_str = "300"
         self.lib.move_pos()
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         expected_message = "Warning: Unsupported index"
-        received_message = self.vimiv.statusbar.left_label.get_text()
+        received_message = self.vimiv["statusbar"].left_label.get_text()
         self.assertEqual(expected_message, received_message)
 
     def test_resize(self):
@@ -111,10 +106,10 @@ class LibraryTest(TestCase):
         # Throw errors
         self.lib.resize(False, False, "hi")
         expected_message = "Library width must be an integer"
-        received_message = self.vimiv.statusbar.left_label.get_text()
+        received_message = self.vimiv["statusbar"].left_label.get_text()
         self.assertEqual(expected_message, received_message)
         self.lib.resize(False, True, "hi")
-        received_message = self.vimiv.statusbar.left_label.get_text()
+        received_message = self.vimiv["statusbar"].left_label.get_text()
         self.assertEqual(expected_message, received_message)
 
     def test_scroll(self):
@@ -127,10 +122,10 @@ class LibraryTest(TestCase):
         self.lib.scroll("k")
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         # 3j
-        self.vimiv.keyhandler.num_str = "3"
+        self.vimiv["keyhandler"].num_str = "3"
         self.lib.scroll("j")
         self.assertEqual(self.vimiv.get_pos(True), "directory")
-        self.assertFalse(self.vimiv.keyhandler.num_str)
+        self.assertFalse(self.vimiv["keyhandler"].num_str)
         # l
         expected_path = os.path.abspath("directory")
         self.lib.scroll("l")
@@ -143,13 +138,9 @@ class LibraryTest(TestCase):
         # Remember pos
         self.assertEqual(self.vimiv.get_pos(True), "directory")
         # Back to beginning
-        self.vimiv.keyhandler.num_str = "3"
+        self.vimiv["keyhandler"].num_str = "3"
         self.lib.scroll("k")
         self.assertEqual(self.vimiv.get_pos(True), "animation")
-
-    @classmethod
-    def tearDownClass(cls):
-        os.chdir(cls.working_directory)
 
 
 if __name__ == '__main__':

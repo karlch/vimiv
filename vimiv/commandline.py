@@ -11,16 +11,12 @@ from gi.repository import Gtk, Gdk, GLib
 from vimiv.fileactions import populate
 from vimiv.helpers import read_file
 
-# Directories
-vimivdir = os.path.expanduser("~/.vimiv")
-tagdir = os.path.join(vimivdir, "Tags")
-
 
 class CommandLine(object):
     """Commandline of vimiv.
 
     Attributes:
-        vimiv: The main vimiv class to interact with.
+        app: The main vimiv application to interact with.
         grid: Gtk.Grid which packs the other objects.
         entry: Gtk.Entry as commandline entry.
         info: Gtk.Label to show completion information.
@@ -34,14 +30,14 @@ class CommandLine(object):
         running_threads: List of all running threads.
     """
 
-    def __init__(self, vimiv, settings):
+    def __init__(self, app, settings):
         """Create the necessary objects and settings.
 
         Args:
-            vimiv: The main vimiv class to interact with.
+            app: The main vimiv application to interact with.
             settings: Settings from configfiles to use.
         """
-        self.vimiv = vimiv
+        self.app = app
         general = settings["GENERAL"]
 
         # Command line
@@ -49,7 +45,7 @@ class CommandLine(object):
         self.entry = Gtk.Entry()
         self.entry.connect("activate", self.handler)
         self.entry.connect("key_press_event",
-                           self.vimiv.keyhandler.run, "COMMAND")
+                           self.app["keyhandler"].run, "COMMAND")
         self.entry.connect("changed", self.check_close)
         self.entry.connect("changed", self.reset_tab_count)
         self.entry.set_hexpand(True)
@@ -61,7 +57,7 @@ class CommandLine(object):
         self.grid.attach(self.entry, 0, 1, 1, 1)
         # Make it nice using CSS
         self.grid.set_name("CommandLine")
-        style = self.vimiv.get_style_context()
+        style = Gtk.Window().get_style_context()
         color = style.get_background_color(Gtk.StateType.NORMAL)
         color_str = "#CommandLine { background-color: " + color.to_string() \
             + "; }"
@@ -109,29 +105,29 @@ class CommandLine(object):
             entry: The Gtk.Entry from which the command comes.
         """
         # Only close completions if currently tabbing through results
-        if self.vimiv.completions.cycling:
-            self.vimiv.completions.reset()
+        if self.app["completions"].cycling:
+            self.app["completions"].reset()
             self.info.hide()
             return
         # cmd from input
         command = entry.get_text()
         # Check for alias and update command
-        if command[1:] in self.vimiv.aliases.keys():
-            command = ":" + self.vimiv.aliases[command[1:]]
+        if command[1:] in self.app.aliases.keys():
+            command = ":" + self.app.aliases[command[1:]]
         # And close the cmd line
         self.reset_text()
         if command[0] == "/":  # Search
             # Do not search again if incsearch was running
-            if not (self.vimiv.library.treeview.is_focus() or
-                    self.vimiv.thumbnail.iconview.is_focus()) or \
+            if not (self.app["library"].treeview.is_focus() or
+                    self.app["thumbnail"].iconview.is_focus()) or \
                     not self.incsearch:
                 self.search(command.lstrip("/"))
             # Auto select single file in the library
             elif self.incsearch and len(self.search_positions) == 1 and \
-                    self.vimiv.library.treeview.is_focus():
-                self.vimiv.library.file_select(
-                    self.vimiv.library.treeview,
-                    Gtk.TreePath(self.vimiv.get_pos()), None, False)
+                    self.app["library"].treeview.is_focus():
+                self.app["library"].file_select(
+                    self.app["library"].treeview,
+                    Gtk.TreePath(self.app.get_pos()), None, False)
         else:  # Run a command
             cmd = command.lstrip(":")
             # If there was no command just leave
@@ -143,12 +139,12 @@ class CommandLine(object):
             elif cmd[0] == "~" or cmd[0] == "." or cmd[0] == "/":
                 self.run_path(cmd)
             else:  # Default to internal cmd
-                self.vimiv.keyhandler.num_str = ""  # Be able to repeat commands
+                self.app["keyhandler"].num_str = ""  # Be able to repeat commands
                 while True:
                     try:
                         num = int(cmd[0])
-                        self.vimiv.keyhandler.num_str = \
-                            self.vimiv.keyhandler.num_str + str(num)
+                        self.app["keyhandler"].num_str = \
+                            self.app["keyhandler"].num_str + str(num)
                         cmd = cmd[1:]
                     except:
                         break
@@ -193,7 +189,7 @@ class CommandLine(object):
             out, err = p.communicate()
             if p.returncode:
                 err = err.decode('utf-8').split("\n")[0]
-                self.vimiv.statusbar.err_message(err)
+                self.app["statusbar"].err_message(err)
             else:
                 # Reload everything after an external command if we haven't
                 # moved, you never know what happened ... Must be in a timer
@@ -203,15 +199,15 @@ class CommandLine(object):
                 # command
                 reload_path = False
                 if os.path.basename(os.getcwd()) in cmd or \
-                        [fil for fil in self.vimiv.paths
+                        [fil for fil in self.app.paths
                          if os.path.basename(fil) in cmd]:
                     reload_path = True
-                GLib.timeout_add(1, self.vimiv.fileextras.reload_changes,
+                GLib.timeout_add(1, self.app["fileextras"].reload_changes,
                                  directory, reload_path, from_pipe, out)
         except FileNotFoundError as e:
             e = str(e)
             cmd = e.split()[-1]
-            self.vimiv.statusbar.err_message("Command %s not found" % (cmd))
+            self.app["statusbar"].err_message("Command %s not found" % (cmd))
         self.running_threads.pop()
 
     def expand_filenames(self, cmd):
@@ -220,14 +216,18 @@ class CommandLine(object):
         Args:
             cmd: The command to run.
         """
-        fil = self.vimiv.get_pos(True)
+        # TODO make this cleaner
+        try:
+            fil = self.app.get_pos(True)
+        except:
+            return cmd
         # Check on which file(s) % and * should operate
-        if self.vimiv.mark.marked:  # Always use marked files if they exist
-            filelist = list(self.vimiv.mark.marked)
-        elif self.vimiv.window.last_focused == "lib":
-            filelist = list(self.vimiv.library.files)
-        elif self.vimiv.window.last_focused in ["thu", "im"]:
-            filelist = list(self.vimiv.paths)
+        if self.app["mark"].marked:  # Always use marked files if they exist
+            filelist = list(self.app["mark"].marked)
+        elif self.app["window"].last_focused == "lib":
+            filelist = list(self.app["library"].files)
+        elif self.app["window"].last_focused in ["thu", "im"]:
+            filelist = list(self.app.paths)
         else:  # Empty filelist as a fallback
             filelist = []
         # Only do substitution if a filelist exists
@@ -253,7 +253,7 @@ class CommandLine(object):
         """
         # Leave if no pipe_input came
         if not pipe_input:
-            self.vimiv.statusbar.err_message("No input from pipe")
+            self.app["statusbar"].err_message("No input from pipe")
             return
         # Make the pipe_input a file
         pipe_input = pipe_input.decode('utf-8')
@@ -262,25 +262,25 @@ class CommandLine(object):
         startout = pipe_input[0]
         # Do different stuff depending on the first line of pipe_input
         if os.path.isdir(startout):
-            self.vimiv.library.move_up(startout)
+            self.app["library"].move_up(startout)
         elif os.path.isfile(startout):
             # Remember old file if no image was in filelist
-            if self.vimiv.paths:
-                old_pos = [self.vimiv.paths[self.vimiv.index]]
-                self.vimiv.paths = []
+            if self.app.paths:
+                old_pos = [self.app.paths[self.app.index]]
+                self.app.paths = []
             else:
                 old_pos = []
             # Populate filelist
-            self.vimiv.paths, self.vimiv.index = populate(pipe_input)
-            if self.vimiv.paths:  # Images were found
-                self.vimiv.image.scrolled_win.show()
-                self.vimiv.image.move_index(False, False, 0)
+            self.app.paths, self.app.index = populate(pipe_input)
+            if self.app.paths:  # Images were found
+                self.app["image"].scrolled_win.show()
+                self.app["image"].move_index(False, False, 0)
                 # Close library if necessary
-                if self.vimiv.library.grid.is_visible():
-                    self.vimiv.library.toggle()
+                if self.app["library"].grid.is_visible():
+                    self.app["library"].toggle()
             elif old_pos:  # Nothing found, go back
-                self.vimiv.paths, self.vimiv.index = populate(old_pos)
-                self.vimiv.statusbar.err_message("No image found")
+                self.app.paths, self.app.index = populate(old_pos)
+                self.app["statusbar"].err_message("No image found")
         else:  # Run every line as an internal command
             for cmd in pipe_input:
                 self.run_command(cmd)
@@ -296,31 +296,31 @@ class CommandLine(object):
         if os.path.exists(path):
             if os.path.isdir(path):
                 # Focus directory in the library
-                self.vimiv.library.move_up(path)
-                self.vimiv.window.last_focused = "lib"
+                self.app["library"].move_up(path)
+                self.app["window"].last_focused = "lib"
             else:
                 # If it is an image open it
-                self.vimiv.paths = []
-                self.vimiv.paths, index = populate([path])
-                self.vimiv.index = 0
-                self.vimiv.image.move_index(True, False, index)
+                self.app.paths = []
+                self.app.paths, index = populate([path])
+                self.app.index = 0
+                self.app["image"].move_index(True, False, index)
                 #  Reload library in lib mode, do not open it in image mode
                 pathdir = os.path.dirname(path)
-                if self.vimiv.window.last_focused == "lib":
-                    self.vimiv.library.move_up(pathdir)
+                if self.app["window"].last_focused == "lib":
+                    self.app["library"].move_up(pathdir)
                     # Focus it in the treeview so it can be accessed via "l"
-                    for i, fil in enumerate(self.vimiv.library.files):
+                    for i, fil in enumerate(self.app["library"].files):
                         if fil in path:
-                            self.vimiv.library.treeview.set_cursor(
+                            self.app["library"].treeview.set_cursor(
                                 Gtk.TreePath(i), None, False)
                             break
                     # Show the image
-                    self.vimiv.library.scrollable_treeview.set_hexpand(False)
-                    self.vimiv.image.scrolled_win.show()
+                    self.app["library"].scrollable_treeview.set_hexpand(False)
+                    self.app["image"].scrolled_win.show()
                 else:
-                    self.vimiv.library.move_up(pathdir, True)
+                    self.app["library"].move_up(pathdir, True)
         else:
-            self.vimiv.statusbar.err_message("Warning: Not a valid path")
+            self.app["statusbar"].err_message("Warning: Not a valid path")
 
     def run_command(self, cmd):
         """Run the correct internal command.
@@ -336,26 +336,26 @@ class CommandLine(object):
             given_args = parts[1:]
             cmd = parts[0]
         # Check if the command exists
-        if cmd in self.vimiv.commands.keys():  # Run it
-            function = self.vimiv.commands[cmd][0]
-            default_args = self.vimiv.commands[cmd][1:]
+        if cmd in self.app.commands.keys():  # Run it
+            function = self.app.commands[cmd][0]
+            default_args = self.app.commands[cmd][1:]
             args = default_args + given_args
             # Check for wrong arguments
             try:
                 function(*args)
             except TypeError as e:
-                self.vimiv.statusbar.err_message(str(e))
+                self.app["statusbar"].err_message(str(e))
             except SyntaxError:
                 err = ("SyntaxError: are all strings closed " +
                        "and special chars quoted?")
-                self.vimiv.err_message(err)
+                self.app["statusbar"].err_message(err)
             except NameError as e:
                 argstr = "('" + args + "')"
                 args = "(" + args + ")"
                 function = function.replace(args, argstr)
                 exec(function)
         else:  # Throw an error if the command does not exist
-            self.vimiv.statusbar.err_message("No such command: %s" % (cmd))
+            self.app["statusbar"].err_message("No such command: %s" % (cmd))
 
     def history_search(self, down):
         """Search through history with substring match.
@@ -391,27 +391,27 @@ class CommandLine(object):
         # Colon for text
         self.entry.set_text(":")
         # Remove old error messages
-        self.vimiv.statusbar.update_info()
+        self.app["statusbar"].update_info()
         # Show/hide the relevant stuff
         self.grid.show()
         # Remember what widget was focused before
-        if self.vimiv.library.treeview.is_focus():
+        if self.app["library"].treeview.is_focus():
             # In the library remember current file to refocus if incsearch was
             # not applied
             try:
-                last_path = self.vimiv.library.treeview.get_cursor()[0]
+                last_path = self.app["library"].treeview.get_cursor()[0]
                 last_index = last_path.get_indices()[0]
-                self.last_filename = self.vimiv.library.files[last_index]
+                self.last_filename = self.app["library"].files[last_index]
             # Only works if there is a filelist
             except:
                 self.last_filename = ""
-            self.vimiv.window.last_focused = "lib"
-        elif self.vimiv.manipulate.scrolled_win.is_visible():
-            self.vimiv.window.last_focused = "man"
-        elif self.vimiv.thumbnail.toggled:
-            self.vimiv.window.last_focused = "thu"
+            self.app["window"].last_focused = "lib"
+        elif self.app["manipulate"].scrolled_win.is_visible():
+            self.app["window"].last_focused = "man"
+        elif self.app["thumbnail"].toggled:
+            self.app["window"].last_focused = "thu"
         else:
-            self.vimiv.window.last_focused = "im"
+            self.app["window"].last_focused = "im"
         self.entry.grab_focus()
         self.entry.set_position(-1)
 
@@ -439,14 +439,14 @@ class CommandLine(object):
         """Apply actions to close the commandline."""
         self.grid.hide()
         # Refocus the remembered widget
-        if self.vimiv.window.last_focused == "lib":
-            self.vimiv.library.focus(True)
-        elif self.vimiv.window.last_focused == "man":
-            self.vimiv.manipulate.scale_bri.grab_focus()
-        elif self.vimiv.window.last_focused == "thu":
-            self.vimiv.thumbnail.iconview.grab_focus()
+        if self.app["window"].last_focused == "lib":
+            self.app["library"].focus(True)
+        elif self.app["window"].last_focused == "man":
+            self.app["manipulate"].scale_bri.grab_focus()
+        elif self.app["window"].last_focused == "thu":
+            self.app["thumbnail"].iconview.grab_focus()
         else:
-            self.vimiv.image.scrolled_win.grab_focus()
+            self.app["image"].scrolled_win.grab_focus()
         self.last_filename = ""
 
     def reset_tab_count(self, entry):
@@ -455,8 +455,8 @@ class CommandLine(object):
         Args:
             entry: The Gtk.Entry to check.
         """
-        self.vimiv.completions.tab_presses = 0
-        self.vimiv.completions.cycling = False
+        self.app["completions"].tab_presses = 0
+        self.app["completions"].cycling = False
         self.info.hide()
 
     def incremental_search(self, entry):
@@ -466,8 +466,8 @@ class CommandLine(object):
             entry: The Gtk.Entry to check.
         """
         text = entry.get_text()
-        if (not self.vimiv.window.last_focused == "lib"
-                and not self.vimiv.window.last_focused == "thu") \
+        if (not self.app["window"].last_focused == "lib"
+                and not self.app["window"].last_focused == "thu") \
                 or len(text) < 2:
             return
         elif text[0] == "/":
@@ -485,10 +485,10 @@ class CommandLine(object):
         Args:
             searchstr: The search string to parse.
         """
-        if self.vimiv.window.last_focused == "lib":
-            paths = self.vimiv.library.files
+        if self.app["window"].last_focused == "lib":
+            paths = self.app["library"].files
         else:
-            paths = [os.path.basename(path) for path in self.vimiv.paths]
+            paths = [os.path.basename(path) for path in self.app.paths]
         self.search_positions = []
 
         if self.search_case:
@@ -501,18 +501,18 @@ class CommandLine(object):
                     self.search_positions.append(i)
 
         # Reload library and thumbnails to show search results
-        if self.vimiv.window.last_focused == "lib":
-            self.vimiv.library.reload(os.getcwd(), self.last_filename,
+        if self.app["window"].last_focused == "lib":
+            self.app["library"].reload(os.getcwd(), self.last_filename,
                                       search=True)
-        elif self.vimiv.window.last_focused == "thu":
+        elif self.app["window"].last_focused == "thu":
             if incsearch:
-                self.vimiv.thumbnail.iconview.grab_focus()
-                for index, thumb in enumerate(self.vimiv.thumbnail.elements):
-                    self.vimiv.thumbnail.reload(thumb, index, False)
+                self.app["thumbnail"].iconview.grab_focus()
+                for index, thumb in enumerate(self.app["thumbnail"].elements):
+                    self.app["thumbnail"].reload(thumb, index, False)
             else:
                 for index in self.search_positions:
-                    self.vimiv.thumbnail.reload(
-                        self.vimiv.thumbnail.elements[index], index, False)
+                    self.app["thumbnail"].reload(
+                        self.app["thumbnail"].elements[index], index, False)
 
         # Move to first result or throw an error
         if self.search_positions:
@@ -522,7 +522,7 @@ class CommandLine(object):
                 self.entry.grab_focus()
                 self.entry.set_position(-1)
             else:
-                self.vimiv.statusbar.err_message("No matching file")
+                self.app["statusbar"].err_message("No matching file")
 
     def search_move(self, forward=True, incsearch=False):
         """Move to the next or previous search.
@@ -531,12 +531,12 @@ class CommandLine(object):
             forward: If true, move forwards. Else move backwards.
             incsearch: If true, running from incsearch.
         """
-        pos = self.vimiv.get_pos()
+        pos = self.app.get_pos()
         next_pos = 0
         # Correct handling of index
-        if self.vimiv.keyhandler.num_str:
-            index = int(self.vimiv.keyhandler.num_str)
-            self.vimiv.keyhandler.num_str = ""
+        if self.app["keyhandler"].num_str:
+            index = int(self.app["keyhandler"].num_str)
+            self.app["keyhandler"].num_str = ""
         else:
             index = 1
         # If backwards act on inverted list
@@ -557,24 +557,24 @@ class CommandLine(object):
                 next_pos = search_list[0]
 
         # Select new file in library, image or thumbnail
-        if self.vimiv.window.last_focused == "lib":
-            self.vimiv.library.treeview.set_cursor(Gtk.TreePath(next_pos),
+        if self.app["window"].last_focused == "lib":
+            self.app["library"].treeview.set_cursor(Gtk.TreePath(next_pos),
                                                    None, False)
-            self.vimiv.library.treeview.scroll_to_cell(Gtk.TreePath(next_pos),
+            self.app["library"].treeview.scroll_to_cell(Gtk.TreePath(next_pos),
                                                        None, True, 0.5, 0)
             # Auto select single file
             if len(self.search_positions) == 1 and not self.incsearch:
-                self.vimiv.library.file_select(
-                    self.vimiv.library.treeview, Gtk.TreePath(next_pos), None,
+                self.app["library"].file_select(
+                    self.app["library"].treeview, Gtk.TreePath(next_pos), None,
                     False)
             if incsearch:
                 self.entry.grab_focus()
                 self.entry.set_position(-1)
-        elif self.vimiv.window.last_focused == "im":
-            self.vimiv.keyhandler.num_str = str(next_pos + 1)
-            self.vimiv.image.move_pos()
-        elif self.vimiv.window.last_focused == "thu":
-            self.vimiv.thumbnail.move_to_pos(next_pos)
+        elif self.app["window"].last_focused == "im":
+            self.app["keyhandler"].num_str = str(next_pos + 1)
+            self.app["image"].move_pos()
+        elif self.app["window"].last_focused == "thu":
+            self.app["thumbnail"].move_to_pos(next_pos)
             if incsearch:
                 self.entry.grab_focus()
                 self.entry.set_position(-1)
@@ -590,4 +590,4 @@ class CommandLine(object):
             alias: The alias to set up.
             command: Command to be called.
         """
-        self.vimiv.aliases[alias] = " ".join(command)
+        self.app.aliases[alias] = " ".join(command)

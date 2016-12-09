@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-"""Library part of self.vimiv."""
+"""Library part of self.app."""
 
 import os
 from gi import require_version
@@ -16,7 +16,7 @@ class Library(object):
     Includes the treeview with the library and all actions that apply to it
 
     Attributes:
-        vimiv: The main vimiv class to interact with.
+        app: The main vimiv application to interact with.
         dir_pos: Dictionary that stores position in directories.
         show_at_start: If True show library at startup.
         default_width: Setting for the default width of the library.
@@ -37,14 +37,14 @@ class Library(object):
             number, filename, filesize and is_marked.
     """
 
-    def __init__(self, vimiv, settings):
+    def __init__(self, app, settings):
         """Create the necessary objects and settings.
 
         Args:
-            vimiv: The main vimiv class to interact with.
+            app: The main vimiv application to interact with.
             settings: Settings from configfiles to use.
         """
-        self.vimiv = vimiv
+        self.app = app
         library = settings["LIBRARY"]
 
         # Settings
@@ -84,11 +84,11 @@ class Library(object):
         # Handle key events
         self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK)
         self.treeview.connect("key_press_event",
-                              self.vimiv.keyhandler.run, "LIBRARY")
+                              self.app["keyhandler"].run, "LIBRARY")
         # Call the function to create the treeview
         self.update_treeview()
         # Set the hexpand property if requested in the configfile
-        if (not self.vimiv.paths or isinstance(self.vimiv.paths, str)) \
+        if (not self.app.paths or isinstance(self.app.paths, str)) \
                 and self.expand:
             self.treeview.set_hexpand(True)
 
@@ -102,18 +102,18 @@ class Library(object):
         """
         if self.grid.is_visible():
             self.remember_pos(os.getcwd(),
-                              self.vimiv.get_pos(force_widget="lib"))
+                              self.app.get_pos(force_widget="lib"))
             self.grid.hide()
             self.focus(False)
         else:
             self.grid.show()
-            if not self.vimiv.paths:
+            if not self.app.paths:
                 # Hide the non existing image and expand if necessary
-                self.vimiv.image.vimiv.image.scrolled_win.hide()
+                self.app["image"].scrolled_win.hide()
                 if self.expand:
                     self.scrollable_treeview.set_hexpand(True)
             else:  # Try to focus the current image in the library
-                image = self.vimiv.paths[self.vimiv.index]
+                image = self.app.paths[self.app.index]
                 image_path = os.path.dirname(image)
                 image_name = os.path.basename(image)
                 if image_path == os.getcwd():
@@ -122,20 +122,20 @@ class Library(object):
                             self.remember_pos(os.getcwd(), i)
                             break
             # Stop the slideshow
-            if self.vimiv.slideshow.running:
-                self.vimiv.slideshow.toggle()
+            if self.app["slideshow"].running:
+                self.app["slideshow"].toggle()
             self.focus(True)
             # Markings and other stuff might have changed
             self.reload(os.getcwd())
         # Resize image and grid if necessary
-        if self.vimiv.paths and update_image:
-            if self.vimiv.thumbnail.toggled:
-                self.vimiv.thumbnail.calculate_columns()
-            elif not self.vimiv.image.user_zoomed:
-                self.vimiv.image.zoom_to(0)
+        if self.app.paths and update_image:
+            if self.app["thumbnail"].toggled:
+                self.app["thumbnail"].calculate_columns()
+            elif not self.app["image"].user_zoomed:
+                self.app["image"].zoom_to(0)
             else:
                 #  Change the toggle state of animation
-                self.vimiv.image.update()
+                self.app["image"].update()
 
     def focus(self, focus_library=True):
         """Set or remove focus from the library.
@@ -148,9 +148,9 @@ class Library(object):
             if not self.grid.is_visible():
                 self.toggle()
         else:
-            self.vimiv.image.vimiv.image.scrolled_win.grab_focus()
+            self.app["image"].scrolled_win.grab_focus()
         # Update info for the current mode
-        self.vimiv.statusbar.update_info()
+        self.app["statusbar"].update_info()
 
     def update_treeview(self, search=False):
         """Renew the information in the treeview.
@@ -161,7 +161,7 @@ class Library(object):
             entered.
         """
         if not search:
-            self.vimiv.commandline.search_positions = []
+            self.app["commandline"].search_positions = []
         # Remove old columns
         for column in self.treeview.get_columns():
             self.treeview.remove_column(column)
@@ -186,7 +186,7 @@ class Library(object):
         liststore = Gtk.ListStore(int, str, str, str)
         self.files = self.filelist_create()
         # Remove unsupported files if one isn't in the tags directory
-        if os.getcwd() != self.vimiv.tags.directory:
+        if os.getcwd() != self.app["tags"].directory:
             self.files = [
                 possible_file
                 for possible_file in self.files
@@ -198,11 +198,11 @@ class Library(object):
             marked_string = ""
             if os.path.islink(fil):
                 markup_string = markup_string + "  →  " + os.path.realpath(fil)
-            if os.path.abspath(fil) in self.vimiv.mark.marked:
+            if os.path.abspath(fil) in self.app["mark"].marked:
                 marked_string = "[*]"
             if os.path.isdir(fil):
                 markup_string = "<b>" + markup_string + "</b>"
-            if i in self.vimiv.commandline.search_positions:
+            if i in self.app["commandline"].search_positions:
                 markup_string = self.markup + markup_string + '</span>'
             liststore.append([i + 1, markup_string, size, marked_string])
 
@@ -221,21 +221,21 @@ class Library(object):
         fil = self.files[count]
         self.remember_pos(os.getcwd(), count)
         # Tags
-        if os.getcwd() == self.vimiv.tags.directory:
+        if os.getcwd() == self.app["tags"].directory:
             # Close if selected twice
-            if fil == self.vimiv.tags.last:
+            if fil == self.app["tags"].last:
                 self.toggle()
-            self.vimiv.tags.load(fil)
+            self.app["tags"].load(fil)
             return
         # Rest
         if os.path.isdir(fil):  # Open the directory
             self.move_up(fil)
         else:  # Focus the image and populate a new list from the dir
             # If thumbnail toggled, go out
-            if self.vimiv.thumbnail.toggled:
-                self.vimiv.thumbnail.toggle()
+            if self.app["thumbnail"].toggled:
+                self.app["thumbnail"].toggle()
                 self.treeview.grab_focus()
-            if self.vimiv.paths and fil in self.vimiv.paths[self.vimiv.index]:
+            if self.app.paths and fil in self.app.paths[self.app.index]:
                 close = True  # Close if file selected twice
             index = 0  # Catch directories to focus correctly
             for f in self.files:
@@ -243,16 +243,16 @@ class Library(object):
                     break
                 elif os.path.isfile(f):
                     index += 1
-            self.vimiv.paths, self.vimiv.index = populate(self.files)
-            if self.vimiv.paths:
+            self.app.paths, self.app.index = populate(self.files)
+            if self.app.paths:
                 self.scrollable_treeview.set_hexpand(False)
-                self.vimiv.image.scrolled_win.show()
+                self.app["image"].scrolled_win.show()
                 # Close the library depending on key and repeat
                 if close:
                     # We do not need to update the image as it is done later
                     # anyway
                     self.toggle(update_image=False)
-                self.vimiv.image.move_index(delta=index)
+                self.app["image"].move_index(delta=index)
 
     def move_up(self, directory="..", start=False):
         """Move up a directory or to a specific one in the library.
@@ -268,7 +268,7 @@ class Library(object):
             if not start:
                 self.reload(os.getcwd(), curdir)
         except:
-            self.vimiv.statusbar.err_message("Error: directory not accessible")
+            self.app["statusbar"].err_message("Error: directory not accessible")
 
     def remember_pos(self, directory, position):
         """Write the current position in directory to the dir_pos dictionary.
@@ -310,18 +310,18 @@ class Library(object):
             defined_pos: If not empty defines the position to move to.
         """
         if not self.files:
-            self.vimiv.statusbar.err_message("Warning: Directory is empty")
+            self.app["statusbar"].err_message("Warning: Directory is empty")
             return
         max_pos = len(self.files) - 1
         # Direct call from scroll
         if isinstance(defined_pos, int):
             new_pos = defined_pos
         # Call from g/G via key-binding
-        elif self.vimiv.keyhandler.num_str:
-            new_pos = int(self.vimiv.keyhandler.num_str) - 1
-            self.vimiv.keyhandler.num_clear()
+        elif self.app["keyhandler"].num_str:
+            new_pos = int(self.app["keyhandler"].num_str) - 1
+            self.app["keyhandler"].num_clear()
             if new_pos < 0 or new_pos > max_pos:
-                self.vimiv.statusbar.err_message("Warning: Unsupported index")
+                self.app["statusbar"].err_message("Warning: Unsupported index")
                 return
         elif forward:
             new_pos = max_pos
@@ -331,7 +331,7 @@ class Library(object):
         self.treeview.scroll_to_cell(Gtk.TreePath(new_pos), None, True,
                                      0.5, 0)
         # Clear the prefix
-        self.vimiv.keyhandler.num_clear()
+        self.app["keyhandler"].num_clear()
 
     def resize(self, inc=True, require_val=False, val=None):
         """Resize the library and update the image if necessary.
@@ -348,7 +348,7 @@ class Library(object):
                 val = int(val)
             except:
                 message = "Library width must be an integer"
-                self.vimiv.statusbar.err_message(message)
+                self.app["statusbar"].err_message(message)
                 return
             self.width = val
         else:  # Grow/shrink by value
@@ -358,21 +358,21 @@ class Library(object):
                 val = int(val)
             except:
                 message = "Library width must be an integer"
-                self.vimiv.statusbar.err_message(message)
+                self.app["statusbar"].err_message(message)
                 return
             if inc:
                 self.width += val
             else:
                 self.width -= val
         # Set some reasonable limits to the library size
-        if self.width > self.vimiv.winsize[0] - 200:
-            self.width = self.vimiv.winsize[0] - 200
+        if self.width > self.app["window"].winsize[0] - 200:
+            self.width = self.app["window"].winsize[0] - 200
         elif self.width < 100:
             self.width = 100
         self.scrollable_treeview.set_size_request(self.width, 10)
         # Rezoom image
-        if not self.vimiv.image.user_zoomed and self.vimiv.paths:
-            self.vimiv.image.zoom_to(0)
+        if not self.app["image"].user_zoomed and self.app.paths:
+            self.app["image"].zoom_to(0)
 
     def toggle_hidden(self):
         """Toggle showing of hidden files."""
@@ -427,23 +427,23 @@ class Library(object):
         # Handle the specific keys
         if direction == "h":  # Behave like ranger
             self.remember_pos(os.getcwd(),
-                              self.vimiv.get_pos(force_widget="lib"))
+                              self.app.get_pos(force_widget="lib"))
             self.move_up()
         elif direction == "l":
             self.file_select(self.treeview, self.treeview.get_cursor()[0],
                              None, False)
         else:
             # Scroll the tree checking for a user step
-            if self.vimiv.keyhandler.num_str:
-                step = int(self.vimiv.keyhandler.num_str)
+            if self.app["keyhandler"].num_str:
+                step = int(self.app["keyhandler"].num_str)
             else:
                 step = 1
             if direction == "j":
-                new_pos = self.vimiv.get_pos(force_widget="lib") + step
+                new_pos = self.app.get_pos(force_widget="lib") + step
                 if new_pos >= len(self.treeview.get_model()):
                     new_pos = len(self.treeview.get_model()) - 1
             else:
-                new_pos = self.vimiv.get_pos(force_widget="lib") - step
+                new_pos = self.app.get_pos(force_widget="lib") - step
                 if new_pos < 0:
                     new_pos = 0
             self.move_pos(True, new_pos)

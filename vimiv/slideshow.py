@@ -9,7 +9,7 @@ class Slideshow(object):
     """Handle everything related to slideshow for vimiv.
 
     Attributes:
-        vimiv: The main vimiv class to interact with.
+        app: The main application class to interact with.
         at_start: If True start the slideshow after startup.
         delay: Slideshow delay between images.
         timer_id: ID of the currently running GLib.Timeout.
@@ -18,14 +18,14 @@ class Slideshow(object):
         running: If True the slideshow is running.
     """
 
-    def __init__(self, vimiv, settings):
+    def __init__(self, app, settings):
         """Create the necessary objects and settings.
 
         Args:
-            vimiv: The main vimiv class to interact with.
+            app: The main vimiv application to interact with.
             settings: Settings from configfiles to use.
         """
-        self.vimiv = vimiv
+        self.app = app
         general = settings["GENERAL"]
 
         self.at_start = general["start_slideshow"]
@@ -36,29 +36,29 @@ class Slideshow(object):
 
     def toggle(self):
         """Toggle the slideshow or update the delay."""
-        if not self.vimiv.paths:
+        if not self.app.paths:
             message = "No valid paths, starting slideshow failed"
-            self.vimiv.statusbar.err_message(message)
+            self.app["statusbar"].err_message(message)
             return
-        if self.vimiv.thumbnail.toggled:
+        if self.app["thumbnail"].toggled:
             message = "Slideshow makes no sense in thumbnail mode"
-            self.vimiv.statusbar.err_message(message)
+            self.app["statusbar"].err_message(message)
             return
-        # Delay changed via vimiv.keyhandler.num_str?
-        if self.vimiv.keyhandler.num_str:
-            self.set_delay(float(self.vimiv.keyhandler.num_str))
+        # Delay changed via vimiv["keyhandler"].num_str?
+        if self.app["keyhandler"].num_str:
+            self.set_delay(float(self.app["keyhandler"].num_str))
         # If the delay wasn't changed in any way just toggle the slideshow
         else:
             self.running = not self.running
             if self.running:
-                self.start_index = self.vimiv.index
+                self.start_index = self.app.index
                 self.timer_id = GLib.timeout_add(1000 * self.delay,
-                                                 self.vimiv.image.move_index,
+                                                 self.app["image"].move_index,
                                                  True, False, 1)
             else:
-                self.vimiv.statusbar.lock = False
+                self.app["statusbar"].lock = False
                 GLib.source_remove(self.timer_id)
-        self.vimiv.statusbar.update_info()
+        self.app["statusbar"].update_info()
 
     def set_delay(self, val, key=""):
         """Set slideshow delay.
@@ -75,11 +75,11 @@ class Slideshow(object):
             self.delay += 0.2
         elif val:
             self.delay = float(val)
-            self.vimiv.keyhandler.num_str = ""
+            self.app["keyhandler"].num_str = ""
         # If slideshow was running reload it
         if self.running:
             GLib.source_remove(self.timer_id)
             self.timer_id = GLib.timeout_add(1000 * self.delay,
-                                             self.vimiv.image.move_index,
+                                             self.app["image"].move_index,
                                              True, False, 1)
-            self.vimiv.statusbar.update_info()
+            self.app["statusbar"].update_info()

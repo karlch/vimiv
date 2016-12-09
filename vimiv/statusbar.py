@@ -12,7 +12,7 @@ class Statusbar(object):
     """Create the statusbar and handle all events for it.
 
     Attributes:
-        vimiv: The main vimiv class to interact with.
+        app: The main vimiv application to interact with.
         hidden: If True the statusbar is not visible.
         errors: List of errors.
         search_names: List of names of the search results.
@@ -27,8 +27,8 @@ class Statusbar(object):
         center_label: Gtk.Label containing mark status and slideshow info.
     """
 
-    def __init__(self, vimiv, settings):
-        self.vimiv = vimiv
+    def __init__(self, app, settings):
+        self.app = app
         general = settings["GENERAL"]
 
         # Default values
@@ -92,71 +92,71 @@ class Statusbar(object):
         # Left side
         try:
             # Directory if library is focused
-            if self.vimiv.library.treeview.is_focus():
+            if self.app["library"].treeview.is_focus():
                 self.left_label.set_text(os.getcwd())
             # Position, name and thumbnail size in thumb mode
-            elif self.vimiv.thumbnail.toggled:
-                pos = self.vimiv.get_pos()
-                name = os.path.basename(self.vimiv.paths[pos])
+            elif self.app["thumbnail"].toggled:
+                pos = self.app.get_pos()
+                name = os.path.basename(self.app.paths[pos])
                 message = "{0}/{1}  {2}  {3}". \
-                    format(pos + 1, len(self.vimiv.paths),
-                           name, self.vimiv.thumbnail.size)
+                    format(pos + 1, len(self.app.paths),
+                           name, self.app["thumbnail"].size)
                 self.left_label.set_text(message)
             # Image info in image mode
             else:
-                name = os.path.basename(self.vimiv.paths[self.vimiv.index])
+                name = os.path.basename(self.app.paths[self.app.index])
                 message = "{0}/{1}  {2}  [{3:.0f}%]". \
-                    format(self.vimiv.index + 1, len(self.vimiv.paths), name,
-                           self.vimiv.image.zoom_percent * 100)
+                    format(self.app.index + 1, len(self.app.paths), name,
+                           self.app["image"].zoom_percent * 100)
                 self.left_label.set_text(message)
         except:
             self.left_label.set_text("No open images")
         # Center
-        if not (self.vimiv.thumbnail.toggled or
-                self.vimiv.library.treeview.is_focus()) and self.vimiv.paths:
-            mark = "[*]" if self.vimiv.paths[self.vimiv.index] \
-                in self.vimiv.mark.marked else ""
+        if not (self.app["thumbnail"].toggled or
+                self.app["library"].treeview.is_focus()) and self.app.paths:
+            mark = "[*]" if self.app.paths[self.app.index] \
+                in self.app["mark"].marked else ""
         else:
             mark = ""
-        if self.vimiv.slideshow.running:
+        if self.app["slideshow"].running:
             slideshow = "[slideshow - {0:.1f}s]".format(
-                self.vimiv.slideshow.delay)
+                self.app["slideshow"].delay)
         else:
             slideshow = ""
         message = "{0}  {1}".format(mark, slideshow)
         self.center_label.set_text(message)
         # Right side
         mode = self.get_mode()
-        message = "{0:15}  {1:4}".format(mode, self.vimiv.keyhandler.num_str)
+        message = "{0:15}  {1:4}".format(mode, self.app["keyhandler"].num_str)
         self.right_label.set_markup(message)
         # Window title
         try:
-            name = os.path.basename(self.vimiv.paths[self.vimiv.index])
-            self.vimiv.set_title("vimiv - " + name)
+            name = os.path.basename(self.app.paths[self.app.index])
+            self.app["window"].set_title("vimiv - " + name)
         except:
-            self.vimiv.set_title("vimiv")
+            self.app["window"].set_title("vimiv")
         # Size of statusbar for resizing image
-        self.size = self.vimiv.statusbar.bar.get_allocated_height()
+        self.size = self.app["statusbar"].bar.get_allocated_height()
 
     def get_mode(self):
         """Return which widget is currently focused."""
-        if self.vimiv.library.treeview.is_focus():
+        if self.app["library"].treeview.is_focus():
             return "<b>-- LIBRARY --</b>"
-        elif self.vimiv.manipulate.scrolled_win.is_visible():
+        elif self.app["manipulate"].scrolled_win.is_visible():
             return "<b>-- MANIPULATE --</b>"
-        elif self.vimiv.thumbnail.toggled:
+        elif self.app["thumbnail"].toggled:
             return "<b>-- THUMBNAIL --</b>"
         else:
             return "<b>-- IMAGE --</b>"
 
     def toggle(self):
         """Toggle statusbar and resize image if necessary."""
-        if not self.hidden and not self.vimiv.commandline.entry.is_visible():
+        if not self.hidden and not self.app["commandline"].entry.is_visible():
             self.bar.hide()
         else:
             self.bar.show()
         self.hidden = not self.hidden
         # Resize the image if necessary
-        if not self.vimiv.image.user_zoomed and self.vimiv.paths and \
-                not self.vimiv.thumbnail.toggled:
-            self.vimiv.image.zoom_to(0)
+        if not self.app["image"].user_zoomed and self.app.paths and \
+                not self.app["thumbnail"].toggled:
+            self.app["image"].zoom_to(0)

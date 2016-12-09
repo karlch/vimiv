@@ -4,18 +4,18 @@
 
 import os
 import shutil
-from unittest import TestCase, main
+from unittest import main
 import vimiv.fileactions as fileactions
-import vimiv.main as v_main
-from vimiv.parser import parse_config
+from vimiv_testcase import VimivTestCase
 
 
-class FileActionsTest(TestCase):
+class FileActionsTest(VimivTestCase):
     """Fileactions Tests."""
 
-    def setUp(self):
-        self.working_directory = os.getcwd()
-        os.chdir("vimiv")
+    @classmethod
+    def setUpClass(cls):
+        cls.test_directory = os.path.abspath("vimiv/")
+        cls.init_test(cls, paths=cls.test_directory)
 
     def test_move_to_trash(self):
         """Move file to trash."""
@@ -47,9 +47,6 @@ class FileActionsTest(TestCase):
 
     def test_clear(self):
         """Clear Trash/Thumbnails."""
-        settings = parse_config()
-        vimiv = v_main.Vimiv(settings, [], 0)
-        vimiv.main()
         thumbdir = os.path.expanduser("~/.vimiv/Thumbnails")
         trashdir = os.path.expanduser("~/.vimiv/Trash")
         if not os.path.isdir("Thumbnail_bak"):
@@ -59,8 +56,8 @@ class FileActionsTest(TestCase):
         # Make sure there are some files in the directories
         os.system("touch ~/.vimiv/Trash/foo")
         os.system("touch ~/.vimiv/Thumbnails/foo")
-        vimiv.fileextras.clear("Thumbnails")
-        vimiv.fileextras.clear("Trash")
+        self.vimiv["fileextras"].clear("Thumbnails")
+        self.vimiv["fileextras"].clear("Trash")
         self.assertEqual(os.listdir(thumbdir), [])
         self.assertEqual(os.listdir(trashdir), [])
         # Move backups back to directory
@@ -73,11 +70,10 @@ class FileActionsTest(TestCase):
         """Format files according to a formatstring."""
         shutil.copytree("testimages/", "testimages_to_format/")
         os.chdir("testimages_to_format")
-        settings = parse_config()
+        self.vimiv.quit()
         paths, index = fileactions.populate(["arch_001.jpg"])
-        vimiv = v_main.Vimiv(settings, paths, index)
-        vimiv.main()
-        vimiv.fileextras.format_files("formatted_")
+        self.init_test(paths=paths, index=index)
+        self.vimiv["fileextras"].format_files("formatted_")
         files = [fil for fil in os.listdir() if "formatted_" in fil]
         files = sorted(files)
         expected_files = ["formatted_001.jpg", "formatted_002",
@@ -87,15 +83,15 @@ class FileActionsTest(TestCase):
         os.chdir("..")
         shutil.rmtree("testimages_to_format")
         # Should not work without a path
-        vimiv.paths = []
-        vimiv.fileextras.format_files("formatted_")
-        err_message = vimiv.statusbar.left_label.get_text()
+        self.vimiv.paths = []
+        self.vimiv["fileextras"].format_files("formatted_")
+        err_message = self.vimiv["statusbar"].left_label.get_text()
         expected_message = "No files in path"
         self.assertEqual(expected_message, err_message)
         # Should not work in library
-        vimiv.library.focus(True)
-        vimiv.fileextras.format_files("formatted_")
-        err_message = vimiv.statusbar.left_label.get_text()
+        self.vimiv["library"].focus(True)
+        self.vimiv["fileextras"].format_files("formatted_")
+        err_message = self.vimiv["statusbar"].left_label.get_text()
         expected_message = "Format only works on opened image files"
         self.assertEqual(expected_message, err_message)
 
@@ -103,11 +99,10 @@ class FileActionsTest(TestCase):
         """Format files according to a formatstring with EXIF data."""
         shutil.copytree("testimages/", "testimages_to_format/")
         os.chdir("testimages_to_format")
-        settings = parse_config()
+        self.vimiv.quit()
         paths, index = fileactions.populate(["arch_001.jpg"])
-        vimiv = v_main.Vimiv(settings, paths, index)
-        vimiv.main()
-        vimiv.fileextras.format_files("formatted_")
+        self.init_test(paths=paths, index=index)
+        self.vimiv["fileextras"].format_files("formatted_")
         files = [fil for fil in os.listdir() if "formatted_" in fil]
         files = sorted(files)
         expected_files = ["formatted_001.jpg", "formatted_002",
@@ -115,21 +110,21 @@ class FileActionsTest(TestCase):
                           "formatted_005.tiff", "formatted_006.png"]
         self.assertEqual(files, expected_files)
         # These files have no exif info
-        vimiv.fileextras.format_files("formatted_%y_")
-        err_message = vimiv.statusbar.left_label.get_text()
+        self.vimiv["fileextras"].format_files("formatted_%y_")
+        err_message = self.vimiv["statusbar"].left_label.get_text()
         expected_message = "No exif data for %s available" % \
             (os.path.abspath("formatted_001.jpg"))
         self.assertEqual(expected_message, err_message)
         # Should not work without a path
-        vimiv.paths = []
-        vimiv.fileextras.format_files("formatted_foo_")
-        err_message = vimiv.statusbar.left_label.get_text()
+        self.vimiv.paths = []
+        self.vimiv["fileextras"].format_files("formatted_foo_")
+        err_message = self.vimiv["statusbar"].left_label.get_text()
         expected_message = "No files in path"
         self.assertEqual(expected_message, err_message)
         # Should not work in library
-        vimiv.library.focus(True)
-        vimiv.fileextras.format_files("formatted_bar_")
-        err_message = vimiv.statusbar.left_label.get_text()
+        self.vimiv["library"].focus(True)
+        self.vimiv["fileextras"].format_files("formatted_bar_")
+        err_message = self.vimiv["statusbar"].left_label.get_text()
         expected_message = "Format only works on opened image files"
         self.assertEqual(expected_message, err_message)
         # Make sure nothing changed
@@ -142,7 +137,7 @@ class FileActionsTest(TestCase):
         # TODO file with exif data
 
     def tearDown(self):
-        os.chdir(self.working_directory)
+        os.chdir(self.test_directory)
 
 
 if __name__ == '__main__':

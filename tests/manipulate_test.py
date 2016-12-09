@@ -4,25 +4,20 @@
 
 import os
 import shutil
-from unittest import TestCase, main
-import vimiv.main as v_main
+from unittest import main
 from vimiv.fileactions import populate
-from vimiv.parser import parse_config
+from vimiv_testcase import VimivTestCase
 
 
-class ManipulateTest(TestCase):
+class ManipulateTest(VimivTestCase):
     """Manipulate Tests."""
 
     @classmethod
     def setUpClass(cls):
-        cls.working_directory = os.getcwd()
-        os.chdir("vimiv")
-        cls.settings = parse_config()
-        shutil.copytree("testimages", "testimages_man")
-        paths, index = populate(["testimages_man/arch-logo.png"])
-        cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
-        cls.vimiv.main()
-        cls.manipulate = cls.vimiv.manipulate
+        shutil.copytree("vimiv/testimages", "vimiv/testimages_man")
+        paths, index = populate(["vimiv/testimages_man/arch-logo.png"])
+        cls.init_test(cls, paths=paths, index=index)
+        cls.manipulate = cls.vimiv["manipulate"]
 
     def test_get_manipulated_images(self):
         """Get images to manipulate."""
@@ -33,11 +28,11 @@ class ManipulateTest(TestCase):
         # Marked images
         marked = ["arch-logo.png", "symlink_to_image"]
         marked = [os.path.abspath(image) for image in marked]
-        self.vimiv.mark.marked = marked
+        self.vimiv["mark"].marked = marked
         received_images = self.manipulate.get_manipulated_images("test")
         self.assertEqual(marked, received_images)
         # Reset mark
-        self.vimiv.mark.marked = []
+        self.vimiv["mark"].marked = []
 
     def test_delete(self):
         """Delete images."""
@@ -49,10 +44,10 @@ class ManipulateTest(TestCase):
 
     def test_rotate(self):
         """Rotate image."""
-        pixbuf = self.vimiv.image.image.get_pixbuf()
+        pixbuf = self.vimiv["image"].image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.manipulate.rotate(1, False)
-        pixbuf = self.vimiv.image.image.get_pixbuf()
+        pixbuf = self.vimiv["image"].image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertTrue(is_portrait)
 
@@ -69,7 +64,7 @@ class ManipulateTest(TestCase):
         self.manipulate.toggle()
         self.assertFalse(self.manipulate.scrolled_win.is_visible())
         self.assertFalse(self.manipulate.scale_bri.is_focus())
-        self.assertTrue(self.vimiv.image.scrolled_win.is_focus())
+        self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
 
     def test_manipulate_image(self):
         """Test manipulate image."""
@@ -110,6 +105,7 @@ class ManipulateTest(TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        cls.vimiv.quit()
         os.chdir(cls.working_directory)
         if os.path.isdir("./vimiv/testimages_man"):
             shutil.rmtree("vimiv/testimages_man")

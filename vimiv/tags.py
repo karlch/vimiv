@@ -13,19 +13,19 @@ class TagHandler(object):
     """Handle tags.
 
     Attributes:
-        vimiv: The main vimiv class to interact with.
+        app: The main vimiv application to interact with.
         directory: Directory in which tags are stored.
         last: Last tag that was loaded.
     """
 
-    def __init__(self, vimiv):
+    def __init__(self, app):
         """Create the necessary objects.
 
         Args:
-            vimiv: The main vimiv class to interact with.
+            app: The main vimiv application to interact with.
         """
-        self.vimiv = vimiv
-        self.directory = os.path.join(self.vimiv.directory, "Tags")
+        self.app = app
+        self.directory = os.path.join(self.app.directory, "Tags")
         self.last = ""
 
     def read(self, tagname):
@@ -67,7 +67,7 @@ class TagHandler(object):
             os.remove(tagfile_name)
         else:
             err = "Tagfile '%s' does not exist" % (tagname)
-            self.vimiv.statusbar.err_message(err)
+            self.app["statusbar"].err_message(err)
 
     def load(self, tagname):
         """Load all images in a tag as current filelist.
@@ -79,21 +79,21 @@ class TagHandler(object):
         # Read file and get all tagged images as list
         tagged_images = self.read(tagname)
         # Populate filelist
-        self.vimiv.paths = []
-        self.vimiv.paths = populate(tagged_images)[0]
-        if self.vimiv.paths:
-            self.vimiv.image.scrolled_win.show()
-            self.vimiv.library.scrollable_treeview.set_hexpand(False)
-            self.vimiv.image.move_index(False, False, 0)
+        self.app.paths = []
+        self.app.paths = populate(tagged_images)[0]
+        if self.app.paths:
+            self.app["image"].scrolled_win.show()
+            self.app["library"].scrollable_treeview.set_hexpand(False)
+            self.app["image"].move_index(False, False, 0)
             # Focus in library if it is open
-            if self.vimiv.library.grid.is_visible():
-                self.vimiv.library.reload(self.directory)
-                tag_pos = self.vimiv.library.files.index(tagname)
-                self.vimiv.library.treeview.set_cursor(Gtk.TreePath(tag_pos),
+            if self.app["library"].grid.is_visible():
+                self.app["library"].reload(self.directory)
+                tag_pos = self.app["library"].files.index(tagname)
+                self.app["library"].treeview.set_cursor(Gtk.TreePath(tag_pos),
                                                        None, False)
             # Remember last tag selected
             self.last = tagname
         else:
             message = "Tagfile '%s' has no valid images" % (tagname)
-            self.vimiv.statusbar.err_message(message)
+            self.app["statusbar"].err_message(message)
             self.last = ""

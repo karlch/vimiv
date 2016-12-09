@@ -3,13 +3,12 @@
 """Test thumbnail.py for vimiv's test suite."""
 
 import os
-from unittest import TestCase, main
+from unittest import main
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
-import vimiv.main as v_main
 from vimiv.fileactions import populate
-from vimiv.parser import parse_config
+from vimiv_testcase import VimivTestCase
 
 
 def create_tuples(max_val, insert=None):
@@ -24,18 +23,14 @@ def create_tuples(max_val, insert=None):
     return sorted(tuples)
 
 
-class ThumbnailTest(TestCase):
+class ThumbnailTest(VimivTestCase):
     """Test thumbnail."""
 
     @classmethod
     def setUpClass(cls):
-        cls.working_directory = os.getcwd()
-        os.chdir("vimiv")
-        cls.settings = parse_config()
-        paths, index = populate(["testimages/arch-logo.png"])
-        cls.vimiv = v_main.Vimiv(cls.settings, paths, index)
-        cls.vimiv.main()
-        cls.thumb = cls.vimiv.thumbnail
+        paths, index = populate(["vimiv/testimages/arch-logo.png"])
+        cls.init_test(cls, paths=paths, index=index)
+        cls.thumb = cls.vimiv["thumbnail"]
         cls.thumb.size = (128, 128)
         cls.thumb.max_size = (256, 256)
         cls.thumb.sizes = [(64, 64), (128, 128), (256, 256)]
@@ -77,7 +72,7 @@ class ThumbnailTest(TestCase):
         liststore_iter = self.thumb.liststore.get_iter(0)
         name = self.thumb.liststore.get_value(liststore_iter, 1)
         self.assertEqual(name, "arch-logo")
-        self.vimiv.mark.mark()
+        self.vimiv["mark"].mark()
         self.thumb.reload(self.vimiv.paths[0], 0)
         new_liststore_iter = self.thumb.liststore.get_iter(0)
         name = self.thumb.liststore.get_value(new_liststore_iter, 1)
@@ -138,10 +133,6 @@ class ThumbnailTest(TestCase):
         self.thumb.size = (128, 128)
         self.thumb.max_size = (256, 256)
         self.thumb.set_sizes()
-
-    @classmethod
-    def tearDownClass(cls):
-        os.chdir(cls.working_directory)
 
 
 if __name__ == '__main__':

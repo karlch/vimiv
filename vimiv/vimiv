@@ -5,4 +5,5 @@ import sys
 import vimiv
 
 if __name__ == '__main__':
-    sys.exit(vimiv.main.main(sys.argv))
+    Vimiv = vimiv.main.main(sys.argv)
+    Vimiv.run()
