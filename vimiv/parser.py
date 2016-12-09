@@ -9,7 +9,7 @@ from vimiv.helpers import error_message
 from vimiv.information import Information
 
 
-def get_args():
+def create_parser():
     """Create the argparse parser and return it.
 
     Return:
@@ -52,7 +52,7 @@ def get_args():
                         help="set the slideshow delay")
     parser.add_argument("-g", "--geometry", dest="geometry",
                         help="set the starting geometry")
-    parser.add_argument("path", nargs='*', default=[])
+    parser.add_argument("path", nargs="*", default=[])
 
     return parser
 

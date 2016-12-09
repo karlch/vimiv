@@ -6,7 +6,7 @@ Parses the necessary stuff and starts the Gtk instance.
 """
 
 import signal
-from vimiv.parser import get_args, parse_dirs, parse_config, parse_args
+from vimiv.parser import create_parser, parse_dirs, parse_config, parse_args
 from vimiv.fileactions import populate
 from vimiv.app import Vimiv
 
@@ -19,7 +19,7 @@ def main(arguments, vimiv_id="org.vimiv"):
     Return:
         The generated main vimiv application.
     """
-    parser = get_args()
+    parser = create_parser()
     parse_dirs()
     settings = parse_config()
     settings = parse_args(parser, settings, arguments)
