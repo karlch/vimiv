@@ -16,7 +16,7 @@ from vimiv.commandline import CommandLine
 from vimiv.commands import Commands
 from vimiv.completions import VimivComplete
 from vimiv.slideshow import Slideshow
-from vimiv.events import KeyHandler
+from vimiv.keyhandler import KeyHandler
 from vimiv.tags import TagHandler
 from vimiv.mark import Mark
 from vimiv.information import Information
