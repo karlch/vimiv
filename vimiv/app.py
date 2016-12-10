@@ -160,7 +160,11 @@ class Vimiv(Gtk.Application):
         # Statusbar depending on setting
         if self["statusbar"].hidden:
             self["statusbar"].bar.hide()
-
+        # Try to generate imagelist recursively from the current directory if
+        # recursive is given and not paths exist
+        if self.settings["GENERAL"]["recursive"] and not self.paths:
+            shuffle = self.settings["GENERAL"]["shuffle"]
+            self.paths, self.index = populate([os.getcwd()], True, shuffle)
         # Show the image if an imagelist exists
         if self.paths:
             self["image"].move_index(True, False, 0)

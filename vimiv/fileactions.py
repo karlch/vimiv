@@ -63,9 +63,6 @@ def populate(args, recursive=False, shuffle_paths=False):
         Found paths, position of first given path.
     """
     paths = []
-    # Default to current directory for recursive search
-    if not args and recursive:
-        args = [os.getcwd()]
     # If only one path is passed do special stuff
     single = None
     if len(args) == 1:
