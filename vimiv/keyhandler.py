@@ -6,7 +6,7 @@ from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gdk, GLib
 from vimiv.helpers import scrolltypes
-from vimiv.parser import parse_keys
+from vimiv.configparser import parse_keys
 
 
 class KeyHandler(object):

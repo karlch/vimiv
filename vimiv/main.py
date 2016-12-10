@@ -6,8 +6,7 @@ Parses the necessary stuff and starts the Gtk instance.
 """
 
 import signal
-from vimiv.parser import create_parser, parse_dirs, parse_config, parse_args
-from vimiv.fileactions import populate
+from vimiv.configparser import parse_dirs, parse_config
 from vimiv.app import Vimiv
 
 
@@ -20,21 +19,11 @@ def main(arguments, vimiv_id="org.vimiv"):
     Return:
         The generated main vimiv application.
     """
-    parser = create_parser()
     parse_dirs()
     settings = parse_config()
-    settings = parse_args(parser, settings, arguments)
 
-    args = settings["GENERAL"]["paths"]
-
-    # Recursive and shuffling required immediately by populate
-    recursive = settings["GENERAL"]["recursive"]
-    shuffle_paths = settings["GENERAL"]["shuffle"]
-
-    paths, index = populate(args, recursive, shuffle_paths)
     # Start the actual window
     signal.signal(signal.SIGINT, signal.SIG_DFL)  # ^C
     vimiv = Vimiv(vimiv_id)
     vimiv.set_settings(settings)
-    vimiv.set_paths(paths, index)
     return vimiv

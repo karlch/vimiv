@@ -3,11 +3,12 @@
 """Main application class of vimiv."""
 
 import os
+import sys
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, Gio
+from gi.repository import Gtk, Gdk, Gio, GLib
 from vimiv.image import Image
-from vimiv.fileactions import FileExtras
+from vimiv.fileactions import FileExtras, populate
 from vimiv.library import Library
 from vimiv.thumbnail import Thumbnail
 from vimiv.manipulate import Manipulate
@@ -48,8 +49,8 @@ class Vimiv(Gtk.Application):
         Args:
             application_id: The ID used to register vimiv. Default: org.vimiv.
         """
-        Gtk.Application.__init__(self, application_id=application_id,
-                                 flags=Gio.ApplicationFlags.SEND_ENVIRONMENT)
+        Gtk.Application.__init__(self, application_id=application_id)
+        self.set_flags(Gio.ApplicationFlags.HANDLES_OPEN)
         self.connect("activate", self.activate_vimiv)
         self.settings = {}
         self.paths = []
@@ -62,6 +63,71 @@ class Vimiv(Gtk.Application):
         # Sceen and window size TODO put somewhere else
         screen = Gdk.Screen()
         self.screensize = [screen.width(), screen.height()]
+        # Set up all commandline options
+        self.init_commandline_options()
+
+    def do_open(self, files, n_files, hint):
+        """Open files by populating self.paths and self.index.
+
+        Args:
+            files: List of Gio.Files.
+            n_files: Number of files.
+            hint: Special string for user, always empty in vimiv.
+        """
+        filenames = [fil.get_path() for fil in files]
+        self.paths, self.index = populate(filenames)
+
+        # activate vimiv after opening files
+        self.activate_vimiv(self)
+
+    def do_handle_local_options(self, options):
+        """Handle commandline arguments.
+
+        Args:
+            command_line:
+        """
+        if options.contains("version"):
+            information = Information()
+            print(information.get_version())
+            return 0  # To exit
+        if options.contains("bar"):
+            self.settings["GENERAL"]["display_bar"] = True
+        elif options.contains("no-bar"):
+            self.settings["GENERAL"]["display_bar"] = False
+        if options.contains("library"):
+            self.settings["LIBRARY"]["show_library"] = True
+        elif options.contains("no-library"):
+            self.settings["LIBRARY"]["show_library"] = False
+        if options.contains("fullscreen"):
+            self.settings["GENERAL"]["start_fullscreen"] = True
+        elif options.contains("no-fullscreen"):
+            self.settings["GENERAL"]["start_fullscreen"] = False
+        if options.contains("shuffle"):
+            self.settings["GENERAL"]["shuffle"] = True
+        elif options.contains("no-shuffle"):
+            self.settings["GENERAL"]["shuffle"] = False
+        if options.contains("recursive"):
+            self.settings["GENERAL"]["recursive"] = True
+        elif options.contains("no-recursive"):
+            self.settings["GENERAL"]["recursive"] = False
+        if options.contains("slideshow"):
+            self.settings["GENERAL"]["start_slideshow"] = True
+        if options.contains("start-from-desktop"):
+            self.settings["GENERAL"]["start_from_desktop"] = True
+        else:
+            self.settings["GENERAL"]["start_from_desktop"] = False
+            if not sys.stdin.isatty():
+                tty_paths = []
+                for line in sys.stdin:
+                    tty_paths.append(line.rstrip("\n"))
+                self.paths, self.index = populate(tty_paths)
+        if options.contains("slideshow-delay"):
+            delay = options.lookup_value("slideshow-delay").unpack()
+            self.settings["GENERAL"]["slideshow_delay"] = delay
+        if options.contains("geometry"):
+            geometry = options.lookup_value("geometry").unpack()
+            self.settings["GENERAL"]["geometry"] = geometry
+        return -1  # To continue
 
     def activate_vimiv(self, app):
         """Starting point for the vimiv application.
@@ -80,6 +146,8 @@ class Vimiv(Gtk.Application):
             else:
                 os.chdir(self.paths)
                 self.paths = []
+        elif self.settings["GENERAL"]["start_from_desktop"]:
+            os.chdir(self.settings["LIBRARY"]["desktop_start_dir"])
 
         # Show everything and then hide whatever needs to be hidden
         self["window"].show_all()
@@ -217,6 +285,31 @@ class Vimiv(Gtk.Application):
                 return self.paths[self.index]
             else:
                 return self.index
+
+    def init_commandline_options(self):
+        """Add all options in the comma"""
+        def add_option(name, short, help_str, flags=GLib.OptionFlags.NONE,
+                arg=GLib.OptionArg.NONE, value=None):
+            self.add_main_option(name, ord(short), flags, arg, help_str, value)
+        add_option("bar", "b", "Display statusbar")
+        add_option("no-bar", "B", "Hide statusbar")
+        add_option("library", "l", "Display library")
+        add_option("no-library", "L", "Hide library")
+        add_option("fullscreen", "f", "Start fullscreen")
+        add_option("no-fullscreen", "F", "Do not start fullscreen")
+        add_option("shuffle", "s", "Shuffle filelist")
+        add_option("no-shuffle", "S", "Do not shuffle filelist")
+        add_option("recursive", "r", "Search directory recursively for images")
+        add_option("no-recursive", "R",
+                   "Do not search directory recursively for images")
+        add_option("version", "v", "Print version information and exit")
+        add_option("slideshow", "_", "Start slideshow at startup")
+        add_option("start-from-desktop", "D",
+                   "Start using the desktop_start_dir as path")
+        add_option("slideshow-delay", "d", "Set slideshow delay",
+                   arg=GLib.OptionArg.DOUBLE, value="delay")
+        add_option("geometry", "g", "Set the starting geometry",
+                   arg=GLib.OptionArg.STRING, value="GEOMETRY")
 
     def __getitem__(self, name):
         """Convenience method to access widgets via self[name].
