@@ -39,8 +39,9 @@ class ParserTest(TestCase):
     def test_parse_args(self):
         """Check if command line arguments are parsed correctly."""
         # Set arguments to be different from default so they are run
-        args = ["--slideshow-delay", "5", "-B", "-l", "-r", "-g", "foo"]
         # TODO do this with Gtk
+        pass
+        # args = ["--slideshow-delay", "5", "-B", "-l", "-r", "-g", "foo"]
         # settings = parser.parse_args(self.parser, self.config_settings, args)
         # general = settings["GENERAL"]
         # self.assertFalse(general["display_bar"])

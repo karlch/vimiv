@@ -82,3 +82,4 @@ py
 imageactions
 whitespace
 gui
+windowsize

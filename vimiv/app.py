@@ -33,12 +33,12 @@ class Vimiv(Gtk.Application):
         paths: List of paths for images.
         index: Current position in paths.
         widgets: Dictionary of vimiv widgets.
-            widgets[widgetname] = Gtk.Widget
+            widgets[widget-name] = Gtk.Widget
         directory: Directory in which configfiles and data are stored.
         commands: Dictionary of commands.
-            commands[commandname] = [function, *args]
+            commands[command-name] = [function, *args]
         aliases: Dicionary of aliases to commands.
-            aliases[aliasname] = commandname
+            aliases[alias-name] = command-name
         functions: Dictionary of functions. Includes all commands and additional
             functions that cannot be called from the commandline.
         screensize: Available screensize.
@@ -69,6 +69,8 @@ class Vimiv(Gtk.Application):
         # Set up all commandline options
         self.init_commandline_options()
 
+    # Any different number of arguments will fail
+    # pylint: disable=arguments-differ
     def do_open(self, files, n_files, hint):
         """Open files by populating self.paths and self.index.
 
@@ -93,6 +95,8 @@ class Vimiv(Gtk.Application):
         # Activate vimiv after opening files
         self.activate_vimiv(self)
 
+    # Any different number of arguments will fail
+    # pylint: disable=arguments-differ
     def do_handle_local_options(self, options):
         """Handle commandline arguments.
 
@@ -286,8 +290,8 @@ class Vimiv(Gtk.Application):
     def init_commandline_options(self):
         """Add all possible commandline options."""
         def add_option(name, short, help_str, flags=GLib.OptionFlags.NONE,
-                arg=GLib.OptionArg.NONE, value=None):
-            """Adds a single option.
+                       arg=GLib.OptionArg.NONE, value=None):
+            """Add a single option.
 
             Args:
                 name: Long name of the option, called via --name.

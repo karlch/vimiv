@@ -38,7 +38,7 @@ class VimivTestCase(TestCase):
         # Set the required settings
         if key1:
             for i, section in enumerate(key1):
-                self.vimiv.settings[section][key2[i]] = val [i]
+                self.vimiv.settings[section][key2[i]] = val[i]
         self.vimiv.register()
         self.vimiv.do_startup(self.vimiv)
         if paths:
