@@ -36,7 +36,7 @@ class Window(Gtk.ApplicationWindow):
         general = settings["GENERAL"]
         start_fullscreen = general["start_fullscreen"]
 
-        self.connect('destroy', self.app.quit)
+        self.connect('destroy', self.app.quit_wrapper)
         self.add_events(Gdk.EventMask.KEY_PRESS_MASK |
                         Gdk.EventMask.POINTER_MOTION_MASK)
 
