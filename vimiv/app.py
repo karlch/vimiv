@@ -282,9 +282,19 @@ class Vimiv(Gtk.Application):
                 return self.index
 
     def init_commandline_options(self):
-        """Add all options in the comma"""
+        """Add all possible commandline options."""
         def add_option(name, short, help_str, flags=GLib.OptionFlags.NONE,
                 arg=GLib.OptionArg.NONE, value=None):
+            """Adds a single option.
+
+            Args:
+                name: Long name of the option, called via --name.
+                short: Short name of the option, called via -s.
+                help_str: Displayed help text when calling --help.
+                flags: GLib options.
+                arg: Type of the value to give after option.
+                value: Name of the value to give after the option.
+            """
             if short:
                 short = ord(short)
             self.add_main_option(name, short, flags, arg, help_str, value)
