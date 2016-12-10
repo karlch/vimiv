@@ -7,6 +7,7 @@ import sys
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, Gio, GLib
+from vimiv.configparser import parse_dirs, parse_config
 from vimiv.image import Image
 from vimiv.fileactions import FileExtras, populate
 from vimiv.library import Library
@@ -43,16 +44,18 @@ class Vimiv(Gtk.Application):
         screensize: Available screensize.
     """
 
-    def __init__(self, application_id):
+    def __init__(self, application_id="org.vimiv"):
         """Create the Gtk.Application and connect the activate signal.
 
         Args:
             application_id: The ID used to register vimiv. Default: org.vimiv.
         """
+        # Create directory structure and get settings
+        parse_dirs()
         Gtk.Application.__init__(self, application_id=application_id)
         self.set_flags(Gio.ApplicationFlags.HANDLES_OPEN)
         self.connect("activate", self.activate_vimiv)
-        self.settings = {}
+        self.settings = parse_config()
         self.paths = []
         self.index = 0
         self.widgets = {}

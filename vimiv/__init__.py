@@ -15,5 +15,3 @@ except ImportError as import_error:
     message = import_error.msg + "\n" + "Are all dependencies installed?"
     error_message(message)
     sys.exit(1)
-
-import vimiv.main

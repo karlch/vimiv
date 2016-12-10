@@ -14,6 +14,7 @@ options: help
 	@printf "PREFIX = $(PREFIX)\n"
 	@printf "MANPREFIX = $(MANPREFIX)\n"
 	@printf "DESTDIR = $(DESTDIR)\n"
+	@printf "LICENSEPREFIX = $(PREFIX)/share/licenses\n"
 
 help:
 	@printf "make help:              Print help.\n"
@@ -41,6 +42,9 @@ uninstall:
 	scripts/remove_icons.sh $(DESTDIR)
 	scripts/uninstall_pythonpkg.sh
 	rm -rf $(DESTDIR)$(LICENSEPREFIX)/vimiv/
+
+clean:
+	rm -rf build vimiv.egg-info/
 
 test:
 	@scripts/run_tests.sh
