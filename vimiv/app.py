@@ -75,6 +75,14 @@ class Vimiv(Gtk.Application):
             hint: Special string for user, always empty in vimiv.
         """
         filenames = [fil.get_path() for fil in files]
+        # Move to the directory of the first argument
+        if os.path.isdir(filenames[0]):
+            working_directory = filenames[0]
+        else:
+            working_directory = os.path.dirname(filenames[0])
+        if os.path.exists(working_directory):
+            os.chdir(working_directory)
+        # Populate list of images
         self.paths, self.index = populate(filenames)
 
         # activate vimiv after opening files
@@ -113,14 +121,12 @@ class Vimiv(Gtk.Application):
         if options.contains("slideshow"):
             self.settings["GENERAL"]["start_slideshow"] = True
         if options.contains("start-from-desktop"):
-            self.settings["GENERAL"]["start_from_desktop"] = True
-        else:
-            self.settings["GENERAL"]["start_from_desktop"] = False
-            if not sys.stdin.isatty():
-                tty_paths = []
-                for line in sys.stdin:
-                    tty_paths.append(line.rstrip("\n"))
-                self.paths, self.index = populate(tty_paths)
+            os.chdir(self.settings["LIBRARY"]["desktop_start_dir"])
+        elif not sys.stdin.isatty():
+            tty_paths = []
+            for line in sys.stdin:
+                tty_paths.append(line.rstrip("\n"))
+            self.paths, self.index = populate(tty_paths)
         if options.contains("slideshow-delay"):
             delay = options.lookup_value("slideshow-delay").unpack()
             self.settings["GENERAL"]["slideshow_delay"] = delay
@@ -138,17 +144,6 @@ class Vimiv(Gtk.Application):
         self.init_widgets()
         self.create_window_structure()
         app.add_window(self["window"])
-        # Move to the directory of the image
-        # TODO using isinstance is ugly
-        if self.paths:
-            if isinstance(self.paths, list):
-                os.chdir(os.path.dirname(self.paths[self.index]))
-            else:
-                os.chdir(self.paths)
-                self.paths = []
-        elif self.settings["GENERAL"]["start_from_desktop"]:
-            os.chdir(self.settings["LIBRARY"]["desktop_start_dir"])
-
         # Show everything and then hide whatever needs to be hidden
         self["window"].show_all()
         self["manipulate"].scrolled_win.hide()
@@ -290,7 +285,9 @@ class Vimiv(Gtk.Application):
         """Add all options in the comma"""
         def add_option(name, short, help_str, flags=GLib.OptionFlags.NONE,
                 arg=GLib.OptionArg.NONE, value=None):
-            self.add_main_option(name, ord(short), flags, arg, help_str, value)
+            if short:
+                short = ord(short)
+            self.add_main_option(name, short, flags, arg, help_str, value)
         add_option("bar", "b", "Display statusbar")
         add_option("no-bar", "B", "Hide statusbar")
         add_option("library", "l", "Display library")
@@ -303,10 +300,10 @@ class Vimiv(Gtk.Application):
         add_option("no-recursive", "R",
                    "Do not search directory recursively for images")
         add_option("version", "v", "Print version information and exit")
-        add_option("slideshow", "_", "Start slideshow at startup")
-        add_option("start-from-desktop", "D",
+        add_option("slideshow", 0, "Start slideshow at startup")
+        add_option("start-from-desktop", 0,
                    "Start using the desktop_start_dir as path")
-        add_option("slideshow-delay", "d", "Set slideshow delay",
+        add_option("slideshow-delay", 0, "Set slideshow delay",
                    arg=GLib.OptionArg.DOUBLE, value="delay")
         add_option("geometry", "g", "Set the starting geometry",
                    arg=GLib.OptionArg.STRING, value="GEOMETRY")

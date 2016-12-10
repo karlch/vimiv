@@ -35,29 +35,21 @@ def populate_single(arg, recursive):
     Args:
         arg: Single path given.
         recursive: If True search path recursively for images.
+    Return:
+        Generated list of paths.
     """
+    paths = []
     if os.path.isfile(arg):
         # Use parent directory
         directory = os.path.dirname(os.path.abspath(arg))
         basename = os.path.basename(os.path.abspath(arg))
-        args = listdir_wrapper(directory)
+        paths = listdir_wrapper(directory)
         # Set the argument to the beginning of the list
-        pos = args.index(basename)
-        args = args[pos:] + args[:pos]
-        for i, arg in enumerate(args):
-            args[i] = os.path.join(directory, arg)
-
-        return 0, args  # Success and the created filelist
-
-    elif os.path.isdir(arg):
-        if recursive:
-            args = sorted(recursive_search(arg))
-            return 0, args
-        else:
-            return 1, arg  # Failure and the directory
-
-    else:
-        return 1, "."  # Does not exist, use current directory
+        pos = paths.index(basename)
+        paths = [os.path.abspath(path) for path in paths[pos:] + paths[:pos]]
+    elif os.path.isdir(arg) and recursive:
+        paths = sorted(recursive_search(arg))
+    return paths
 
 
 def populate(args, recursive=False, shuffle_paths=False):
@@ -78,9 +70,7 @@ def populate(args, recursive=False, shuffle_paths=False):
     single = None
     if len(args) == 1:
         single = args[0]
-        error, args = populate_single(single, recursive)
-        if error:
-            return args, 0
+        args = populate_single(single, recursive)
 
     # Add everything
     for arg in args:
@@ -97,13 +87,7 @@ def populate(args, recursive=False, shuffle_paths=False):
     if shuffle_paths:
         shuffle(paths)
 
-    # Complete special stuff for single arg
-    if single and single in paths:
-        index = paths.index(single)
-    else:
-        index = 0
-
-    return paths, index
+    return paths, 0
 
 
 def move_to_trash(filelist):
