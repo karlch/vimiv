@@ -6,7 +6,6 @@ from unittest import main
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
-from vimiv.fileactions import populate
 from vimiv_testcase import VimivTestCase
 
 
@@ -26,8 +25,7 @@ class SlideshowTest(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
-        paths, index = populate(["vimiv/testimages/arch_001.jpg"])
-        cls.init_test(cls, paths=paths, index=index)
+        cls.init_test(cls, ["vimiv/testimages/arch_001.jpg"])
         cls.slideshow = cls.vimiv["slideshow"]
 
     def test_toggle(self):

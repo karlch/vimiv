@@ -7,7 +7,6 @@ from unittest import main
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
-from vimiv.fileactions import populate
 from vimiv_testcase import VimivTestCase
 
 
@@ -28,8 +27,7 @@ class ThumbnailTest(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
-        paths, index = populate(["vimiv/testimages/arch-logo.png"])
-        cls.init_test(cls, paths=paths, index=index)
+        cls.init_test(cls, ["vimiv/testimages/arch-logo.png"])
         cls.thumb = cls.vimiv["thumbnail"]
         cls.thumb.size = (128, 128)
         cls.thumb.max_size = (256, 256)

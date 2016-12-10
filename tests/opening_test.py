@@ -4,7 +4,6 @@
 
 import os
 from unittest import main
-from vimiv.fileactions import populate
 from vimiv_testcase import VimivTestCase
 
 
@@ -18,8 +17,7 @@ class OpeningTest(VimivTestCase):
     def test_opening_with_directory(self):
         """Opening with a directory."""
         expected_dir = os.path.abspath("vimiv/testimages")
-        paths, index = populate(["vimiv/testimages"], False, False)
-        self.init_test(paths=paths, index=index)
+        self.init_test(["vimiv/testimages"])
         self.assertEqual(expected_dir, os.getcwd())
         expected_files = ["animation", "arch-logo.png", "arch_001.jpg",
                           "directory", "symlink_to_image", "vimiv.bmp",
@@ -31,8 +29,7 @@ class OpeningTest(VimivTestCase):
     def test_opening_with_image(self):
         """Open with an image."""
         expected_dir = os.path.abspath("vimiv/testimages")
-        paths, index = populate(["vimiv/testimages/arch_001.jpg"], False, False)
-        self.init_test(paths=paths, index=index)
+        self.init_test(["vimiv/testimages/arch_001.jpg"])
         # Check moving and image population
         self.assertEqual(expected_dir, os.getcwd())
         expected_images = ["arch_001.jpg", "symlink_to_image", "vimiv.bmp",
@@ -43,9 +40,7 @@ class OpeningTest(VimivTestCase):
     def test_opening_with_symlink(self):
         """Open with a symlink to an image."""
         expected_dir = os.path.abspath("vimiv/testimages")
-        paths, index = populate(["vimiv/testimages/symlink_to_image"],
-                                False, False)
-        self.init_test(paths=paths, index=index)
+        self.init_test(["vimiv/testimages/symlink_to_image"])
         # Check moving and image population
         self.assertEqual(expected_dir, os.getcwd())
         expected_images = ["symlink_to_image", "vimiv.bmp", "vimiv.svg",
@@ -56,10 +51,7 @@ class OpeningTest(VimivTestCase):
     def test_opening_with_whitespace(self):
         """Open an image with whitespace and symlink in directory."""
         expected_dir = os.path.abspath("vimiv/testimages/directory/")
-        paths, index = \
-            populate(["vimiv/testimages/directory/symlink with spaces .jpg"],
-                     False, False)
-        self.init_test(paths=paths, index=index)
+        self.init_test(["vimiv/testimages/directory/symlink with spaces .jpg"])
         # Check moving and image population
         self.assertEqual(expected_dir, os.getcwd())
         expected_images = ["symlink with spaces .jpg"]
@@ -71,8 +63,7 @@ class OpeningTest(VimivTestCase):
         # Need to backup because we init in the wrong directory here
         working_dir = self.working_directory
         os.chdir("vimiv/testimages")
-        paths, index = populate([], True, False)
-        self.init_test(paths=paths, index=index)
+        self.init_test(["."], ["GENERAL"], ["recursive"], [True])
         self.assertEqual(8, len(self.vimiv.paths))
         self.working_directory = working_dir
 

@@ -7,9 +7,8 @@ from time import time
 from unittest import TestCase, main
 from gi import require_version
 require_version('Gtk', '3.0')
-import vimiv.main as v_main
+from gi.repository import Gio
 from vimiv.app import Vimiv
-from vimiv.parser import parse_config
 
 
 class VimivTestCase(TestCase):
@@ -22,28 +21,32 @@ class VimivTestCase(TestCase):
         cls.vimiv = Vimiv("org.vimiv")
         cls.init_test(cls)
 
-    def init_test(self, settings=None, paths=None, index=0, arguments=None):
+    def init_test(self, paths=None, key1=None, key2=None, val=None):
         """Initialize a testable vimiv object saved as self.vimiv.
 
         Args:
-            settings: Settings passed to vimiv.
             paths: Paths passed to vimiv.
-            index: Index in paths.
-            arguments: Commandline arguments for vimiv.
+            key1: List of keys of the sections for settings to be set.
+            key2: List of keys for settings to be set.
+            val: List of values for settings to be set.
         """
         self.working_directory = os.getcwd()
         # A new ID for every generated vimiv class
         vimiv_id = "org.vimiv" + str(time()).replace(".", "")
         # Create vimiv class with settings, paths, ...
-        self.vimiv = v_main.main(arguments, vimiv_id)
-        if not settings:
-            settings = parse_config()
-        self.vimiv.set_settings(settings)
-        self.vimiv.set_paths(paths, index)
-        # Start vimiv without running the main loop
+        self.vimiv = Vimiv(vimiv_id)
+        # Set the required settings
+        if key1:
+            for i, section in enumerate(key1):
+                self.vimiv.settings[section][key2[i]] = val [i]
         self.vimiv.register()
         self.vimiv.do_startup(self.vimiv)
-        self.vimiv.activate_vimiv(self.vimiv)
+        if paths:
+            # Create a list of Gio.Files for vimiv.do_open
+            files = [Gio.File.new_for_path(path) for path in paths]
+            self.vimiv.do_open(files, len(paths), "")
+        else:
+            self.vimiv.activate_vimiv(self.vimiv)
 
     @classmethod
     def tearDownClass(cls):

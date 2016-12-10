@@ -4,7 +4,6 @@
 
 import os
 from unittest import main
-from vimiv.fileactions import populate
 from vimiv_testcase import VimivTestCase
 
 
@@ -13,8 +12,7 @@ class MarkTest(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
-        paths, index = populate(["vimiv/testimages"])
-        cls.init_test(cls, paths=paths, index=index)
+        cls.init_test(cls, ["vimiv/testimages"])
         # Move away from directory
         cls.vimiv["library"].scroll("j")
 

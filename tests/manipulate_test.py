@@ -5,7 +5,6 @@
 import os
 import shutil
 from unittest import main
-from vimiv.fileactions import populate
 from vimiv_testcase import VimivTestCase
 
 
@@ -15,8 +14,7 @@ class ManipulateTest(VimivTestCase):
     @classmethod
     def setUpClass(cls):
         shutil.copytree("vimiv/testimages", "vimiv/testimages_man")
-        paths, index = populate(["vimiv/testimages_man/arch-logo.png"])
-        cls.init_test(cls, paths=paths, index=index)
+        cls.init_test(cls, ["vimiv/testimages_man/arch-logo.png"])
         cls.manipulate = cls.vimiv["manipulate"]
 
     def test_get_manipulated_images(self):

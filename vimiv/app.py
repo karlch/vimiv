@@ -86,7 +86,9 @@ class Vimiv(Gtk.Application):
         if os.path.exists(working_directory):
             os.chdir(working_directory)
         # Populate list of images
-        self.paths, self.index = populate(filenames)
+        recursive = self.settings["GENERAL"]["recursive"]
+        shuffle = self.settings["GENERAL"]["shuffle"]
+        self.paths, self.index = populate(filenames, recursive, shuffle)
 
         # Activate vimiv after opening files
         self.activate_vimiv(self)
@@ -174,14 +176,11 @@ class Vimiv(Gtk.Application):
             self["statusbar"].err_message(
                 "No valid paths, opening library viewer")
 
-    def set_settings(self, settings):
-        """Set self.settings to settings."""
-        self.settings = settings
-
     def set_paths(self, paths, index):
         """Set self.paths, self.index to paths, index."""
         self.paths = paths
         self.index = index
+        self.do_open(self.paths, len(self.paths), 0)
 
     def init_widgets(self):
         """Create all the other widgets and add them to the class."""

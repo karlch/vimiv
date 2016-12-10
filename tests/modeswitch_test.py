@@ -8,7 +8,6 @@ from unittest import main
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
-from vimiv.fileactions import populate
 from vimiv_testcase import VimivTestCase
 
 
@@ -17,8 +16,7 @@ class ModeSwitchTestImage(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
-        paths, index = populate(["vimiv/testimages/arch-logo.png"])
-        cls.init_test(cls, paths=paths, index=index)
+        cls.init_test(cls, ["vimiv/testimages/arch-logo.png"])
 
     def setUp(self):
         self.test_directory = os.getcwd()
@@ -81,8 +79,7 @@ class ModeSwitchTestLibrary(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
-        paths, index = populate(["vimiv/testimages/"])
-        cls.init_test(cls, paths=paths, index=index)
+        cls.init_test(cls, ["vimiv/testimages/"])
 
     def setUp(self):
         self.test_directory = os.getcwd()

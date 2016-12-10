@@ -4,7 +4,6 @@
 
 
 from unittest import main
-from vimiv.fileactions import populate
 from vimiv_testcase import VimivTestCase
 
 
@@ -13,8 +12,8 @@ class ExpansionTest(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
-        paths, index = populate(["vimiv/testimages/arch_001.jpg"], False, False)
-        cls.init_test(cls, paths=paths, index=index)
+        paths = ["vimiv/testimages/arch_001.jpg"]
+        cls.init_test(cls, paths)
 
     def test_expansion(self):
         """Expanding % and * in different modes."""

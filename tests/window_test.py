@@ -26,7 +26,7 @@ class WindowTest(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.init_test(cls, paths="vimiv/testimages/")
+        cls.init_test(cls, ["vimiv/testimages/"])
 
     def test_fullscreen(self):
         """Toggle fullscreen."""

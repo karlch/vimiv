@@ -15,7 +15,7 @@ class FileActionsTest(VimivTestCase):
     @classmethod
     def setUpClass(cls):
         cls.test_directory = os.path.abspath("vimiv/")
-        cls.init_test(cls, paths=cls.test_directory)
+        cls.init_test(cls, [cls.test_directory])
 
     def test_move_to_trash(self):
         """Move file to trash."""
@@ -71,8 +71,7 @@ class FileActionsTest(VimivTestCase):
         shutil.copytree("testimages/", "testimages_to_format/")
         os.chdir("testimages_to_format")
         self.vimiv.quit()
-        paths, index = fileactions.populate(["arch_001.jpg"])
-        self.init_test(paths=paths, index=index)
+        self.init_test(["arch_001.jpg"])
         self.vimiv["fileextras"].format_files("formatted_")
         files = [fil for fil in os.listdir() if "formatted_" in fil]
         files = sorted(files)
@@ -100,8 +99,7 @@ class FileActionsTest(VimivTestCase):
         shutil.copytree("testimages/", "testimages_to_format/")
         os.chdir("testimages_to_format")
         self.vimiv.quit()
-        paths, index = fileactions.populate(["arch_001.jpg"])
-        self.init_test(paths=paths, index=index)
+        self.init_test(["arch_001.jpg"])
         self.vimiv["fileextras"].format_files("formatted_")
         files = [fil for fil in os.listdir() if "formatted_" in fil]
         files = sorted(files)

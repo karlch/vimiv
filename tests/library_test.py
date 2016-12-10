@@ -15,7 +15,7 @@ class LibraryTest(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.init_test(cls, paths="vimiv/testimages/")
+        cls.init_test(cls, ["vimiv/testimages/"])
         cls.lib = cls.vimiv["library"]
 
     def test_toggle(self):

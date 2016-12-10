@@ -14,7 +14,7 @@ class KeyHandlerTest(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.init_test(cls, paths="vimiv/testimages/")
+        cls.init_test(cls, ["vimiv/testimages/"])
 
     def test_key_press(self):
         """Press key."""
