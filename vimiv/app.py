@@ -85,7 +85,7 @@ class Vimiv(Gtk.Application):
         # Populate list of images
         self.paths, self.index = populate(filenames)
 
-        # activate vimiv after opening files
+        # Activate vimiv after opening files
         self.activate_vimiv(self)
 
     def do_handle_local_options(self, options):
