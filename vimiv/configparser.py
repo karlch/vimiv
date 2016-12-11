@@ -41,7 +41,8 @@ def set_defaults():
                "recursive": False,
                "rescale_svg": True,
                "overzoom": False,
-               "cache_thumbnails": True}
+               "cache_thumbnails": True,
+               "copy_to_primary": False}
     library = {"show_library": False,
                "library_width": 300,
                "expand_lib": True,

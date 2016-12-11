@@ -16,6 +16,7 @@ overzoom: no
 search_case_sensitive: yes
 incsearch: yes
 cache_thumbnails: yes
+copy_to_primary: no
 
 [LIBRARY] ######################################################################
 show_library: no

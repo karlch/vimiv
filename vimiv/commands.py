@@ -27,6 +27,8 @@ class Commands(object):
             "center": [self.app["image"].center_window],
             "clear_trash": [self.app["fileextras"].clear, 'Trash'],
             "clear_thumbs": [self.app["fileextras"].clear, 'Thumbnails'],
+            "copy_basename": [self.app["fileextras"].copy_name, False],
+            "copy_abspath": [self.app["fileextras"].copy_name, True],
             "delete": [self.app["manipulate"].delete],
             "discard_changes": [self.app["manipulate"].button_clicked, "w",
                                 False],

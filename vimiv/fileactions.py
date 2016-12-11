@@ -6,7 +6,7 @@ import os
 import shutil
 from random import shuffle
 from PIL import Image
-from gi.repository import GdkPixbuf
+from gi.repository import GdkPixbuf, Gtk, Gdk
 from vimiv.helpers import listdir_wrapper
 
 # Directory for trash
@@ -141,8 +141,14 @@ class FileExtras(object):
 
         Args:
             app: The main vimiv class to interact with.
+            clipboard: Gtk Clipboard depending on config.
         """
         self.app = app
+        use_primary = self.app.settings["GENERAL"]["copy_to_primary"]
+        if use_primary:
+            self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+        else:
+            self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
 
     def clear(self, directory_name):
         """Remove all files in directory (Trash or Thumbnails).
@@ -268,3 +274,16 @@ class FileExtras(object):
         if pipe:
             self.app["commandline"].pipe(pipe_input)
         return False  # To stop the timer
+
+    def copy_name(self, abspath=False):
+        """Copy image name to clipboard.
+
+        Args:
+            abspath: Use absolute path or only the basename.
+        """
+        name = self.app.get_pos(True)
+        if abspath:
+            name = os.path.abspath(name)
+        else:
+            name = os.path.basename(name)
+        self.clipboard.set_text(name, -1)

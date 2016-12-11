@@ -61,6 +61,9 @@ If yes search incrementally when typing.
 .BR cache_thumbnails\ (Bool)
 If yes cache thumbnails.
 .TP
+.BR copy_to_primary\ (Bool)
+If yes copy to primary selection instead of to clipboard.
+.TP
 .BR show_library\ (Bool)
 If yes show the library at startup.
 .TP
@@ -132,6 +135,13 @@ Delete all files in ~/.vimiv/Trash.
 .TP
 .BR clear_thumbs
 Delete all files in ~/.vimiv/Thumbnails/.
+.TP
+.BR copy_basename
+Copy the basename of the currently selected image to clipboard or primary
+selection depending on the setting copy_to_primary.
+.TP
+.BR copy_abspath
+Like the above but use the absolute path instead of the basename.
 .TP
 .BR delete\ 
 Delete the current image
