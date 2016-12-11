@@ -5,6 +5,9 @@
 import os
 import shutil
 from unittest import main
+from gi import require_version
+require_version('Gtk', '3.0')
+from gi.repository import Gtk, Gdk
 import vimiv.fileactions as fileactions
 from vimiv_testcase import VimivTestCase
 
@@ -14,6 +17,7 @@ class FileActionsTest(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.compare_result = False  # Used for the clipboard comparison
         cls.test_directory = os.path.abspath("vimiv/")
         cls.init_test(cls, [cls.test_directory])
 
@@ -133,6 +137,22 @@ class FileActionsTest(VimivTestCase):
         os.chdir("..")
         shutil.rmtree("testimages_to_format")
         # TODO file with exif data
+
+    def test_clipboard(self):
+        """Copy image name to clipboard."""
+        def compare_text(clipboard, text, expected_text):
+            self.compare_result = text == expected_text
+        name = self.vimiv.get_pos(True)
+        basename = os.path.basename(name)
+        abspath = os.path.abspath(name)
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        # primary = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+        self.vimiv["fileextras"].copy_name(False)
+        clipboard.request_text(compare_text, basename)
+        self.assertTrue(self.compare_result)
+        self.vimiv["fileextras"].copy_name(True)
+        clipboard.request_text(compare_text, abspath)
+        self.assertTrue(self.compare_result)
 
     def tearDown(self):
         os.chdir(self.test_directory)
