@@ -184,12 +184,6 @@ class Vimiv(Gtk.Application):
             self["statusbar"].err_message(
                 "No valid paths, opening library viewer")
 
-    def set_paths(self, paths, index):
-        """Set self.paths, self.index to paths, index."""
-        self.paths = paths
-        self.index = index
-        self.do_open(self.paths, len(self.paths), 0)
-
     def init_widgets(self):
         """Create all the other widgets and add them to the class."""
         self["keyhandler"] = KeyHandler(self, self.settings)
@@ -349,7 +343,3 @@ class Vimiv(Gtk.Application):
             item: The actual widget to which name will refer.
         """
         self.widgets[name] = widget
-
-    def __contains__(self, name):
-        """Return True if a widget called name exists."""
-        return name in self.widgets
