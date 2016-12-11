@@ -474,27 +474,25 @@ class CommandLine(object):
 
         Args:
             searchstr: The search string to parse.
+            incsearch: Do incremental search or not.
         """
         if self.app["window"].last_focused == "lib":
             paths = self.app["library"].files
         else:
             paths = [os.path.basename(path) for path in self.app.paths]
-        self.search_positions = []
 
-        if self.search_case:
-            for i, fil in enumerate(paths):
-                if searchstr in fil:
-                    self.search_positions.append(i)
-        else:
-            for i, fil in enumerate(paths):
-                if searchstr.lower() in fil.lower():
-                    self.search_positions.append(i)
+        # Fill search_positions with matching files depending on search_case
+        self.search_positions = \
+            [paths.index(fil) for fil in paths
+             if searchstr in fil
+             or not self.search_case and searchstr.lower() in fil.lower()]
 
         # Reload library and thumbnails to show search results
         if self.app["window"].last_focused == "lib":
             self.app["library"].reload(os.getcwd(), self.last_filename,
                                        search=True)
         elif self.app["window"].last_focused == "thu":
+            # Reload all thumbnails in incsearch, only some otherwise
             if incsearch:
                 self.app["thumbnail"].iconview.grab_focus()
                 for index, thumb in enumerate(self.app["thumbnail"].elements):
@@ -507,12 +505,11 @@ class CommandLine(object):
         # Move to first result or throw an error
         if self.search_positions:
             self.search_move(incsearch=incsearch)
+        elif incsearch:
+            self.entry.grab_focus()
+            self.entry.set_position(-1)
         else:
-            if incsearch:
-                self.entry.grab_focus()
-                self.entry.set_position(-1)
-            else:
-                self.app["statusbar"].err_message("No matching file")
+            self.app["statusbar"].err_message("No matching file")
 
     def search_move(self, forward=True, incsearch=False):
         """Move to the next or previous search.
@@ -530,10 +527,9 @@ class CommandLine(object):
         else:
             index = 1
         # If backwards act on inverted list
-        if forward:
-            search_list = self.search_positions
-        else:
-            search_list = self.search_positions[::-1]
+        search_list = list(self.search_positions)
+        if not forward:
+            search_list.reverse()
         # Find next match depending on current position
         for i, search_pos in enumerate(search_list):
             if search_pos > pos and forward or search_pos < pos and not forward:
@@ -547,7 +543,8 @@ class CommandLine(object):
                 next_pos = search_list[0]
 
         # Select new file in library, image or thumbnail
-        if self.app["window"].last_focused == "lib":
+        last_focused = self.app["window"].last_focused
+        if last_focused == "lib":
             self.app["library"].treeview.set_cursor(Gtk.TreePath(next_pos),
                                                     None, False)
             self.app["library"].treeview.scroll_to_cell(Gtk.TreePath(next_pos),
@@ -557,17 +554,15 @@ class CommandLine(object):
                 self.app["library"].file_select(
                     self.app["library"].treeview, Gtk.TreePath(next_pos), None,
                     False)
-            if incsearch:
-                self.entry.grab_focus()
-                self.entry.set_position(-1)
-        elif self.app["window"].last_focused == "im":
+        elif last_focused == "im":
             self.app["keyhandler"].num_str = str(next_pos + 1)
             self.app["image"].move_pos()
         elif self.app["window"].last_focused == "thu":
             self.app["thumbnail"].move_to_pos(next_pos)
-            if incsearch:
-                self.entry.grab_focus()
-                self.entry.set_position(-1)
+        # Refocus entry if incsearch is appropriate
+        if incsearch and not self.app["window"].last_focused == "im":
+            self.entry.grab_focus()
+            self.entry.set_position(-1)
 
     def reset_search(self):
         """Reset all search parameters to null."""
