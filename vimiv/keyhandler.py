@@ -5,7 +5,6 @@
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gdk, GLib
-from vimiv.helpers import scrolltypes
 from vimiv.configparser import parse_keys
 
 
@@ -83,20 +82,6 @@ class KeyHandler(object):
                 return True  # Deactivates default bindings
             except:
                 return False
-
-    def scroll(self, direction):
-        """Scroll the correct object.
-
-        Args:
-            direction: Scroll direction to emit.
-        """
-        if self.app["thumbnail"].toggled:
-            self.app["thumbnail"].move_direction(direction)
-        else:
-            self.app["image"].scrolled_win.emit('scroll-child',
-                                                scrolltypes[direction][0],
-                                                scrolltypes[direction][1])
-        return True  # Deactivates default bindings (here for Arrows)
 
     def num_append(self, num):
         """Add a new char to num_str."""

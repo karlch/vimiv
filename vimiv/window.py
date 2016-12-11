@@ -5,6 +5,7 @@
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
+from vimiv.helpers import scrolltypes
 
 
 class Window(Gtk.ApplicationWindow):
@@ -115,3 +116,17 @@ class Window(Gtk.ApplicationWindow):
             event_button: Mouse button that was pressed.
         """
         self.app["statusbar"].update_info()
+
+    def scroll(self, direction):
+        """Scroll the correct object.
+
+        Args:
+            direction: Scroll direction to emit.
+        """
+        if self.app["thumbnail"].toggled:
+            self.app["thumbnail"].move_direction(direction)
+        else:
+            self.app["image"].scrolled_win.emit('scroll-child',
+                                                scrolltypes[direction][0],
+                                                scrolltypes[direction][1])
+        return True  # Deactivates default bindings (here for Arrows)
