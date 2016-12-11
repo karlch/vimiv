@@ -37,6 +37,7 @@ def set_defaults():
                "thumb_maxsize": (256, 256),
                "geometry": (800, 600),
                "search_case_sensitive": True,
+               "incsearch": True,
                "recursive": False,
                "rescale_svg": True,
                "overzoom": False,
