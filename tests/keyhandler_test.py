@@ -6,7 +6,7 @@ from unittest import main
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
-from vimiv_testcase import VimivTestCase
+from vimiv_testcase import VimivTestCase, refresh_gui
 
 
 class KeyHandlerTest(VimivTestCase):
@@ -28,6 +28,28 @@ class KeyHandlerTest(VimivTestCase):
         event.keyval = Gdk.keyval_from_name("O")
         self.vimiv["image"].scrolled_win.emit("key_press_event", event)
         self.assertTrue(self.vimiv["library"].treeview.is_focus())
+
+    def test_add_number(self):
+        """Add a number to the numstr by keypress."""
+        self.assertFalse(self.vimiv["keyhandler"].num_str)
+        event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
+        event.keyval = Gdk.keyval_from_name("2")
+        self.vimiv["library"].treeview.emit("key_press_event", event)
+        self.assertEqual(self.vimiv["keyhandler"].num_str, "2")
+        # Should be gone after a second
+        refresh_gui(1.5)
+        self.assertFalse(self.vimiv["keyhandler"].num_str)
+
+    def test_key_press_modifier(self):
+        """Press key with modifier."""
+        before = self.vimiv["library"].show_hidden
+        event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
+        event.keyval = Gdk.keyval_from_name("h")
+        event.state = Gdk.ModifierType.CONTROL_MASK
+        self.vimiv["library"].treeview.emit("key_press_event", event)
+        after = self.vimiv["library"].show_hidden
+        self.assertNotEqual(before, after)
+
 
 
 if __name__ == '__main__':
