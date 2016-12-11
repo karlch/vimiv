@@ -2,23 +2,8 @@
 # encoding: utf-8
 """Tests window.py for vimiv's test suite."""
 
-import time
 from unittest import main
-from gi import require_version
-require_version('Gtk', '3.0')
-from gi.repository import Gtk
-from vimiv_testcase import VimivTestCase
-
-
-def refresh_gui(delay=0):
-    """Refresh the GUI as the Gtk.main() loop is not running when testing.
-
-    Args:
-        delay: Time to wait before refreshing.
-    """
-    time.sleep(delay)
-    while Gtk.events_pending():
-        Gtk.main_iteration_do(False)
+from vimiv_testcase import VimivTestCase, refresh_gui
 
 
 class WindowTest(VimivTestCase):

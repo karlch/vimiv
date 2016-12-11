@@ -3,12 +3,23 @@
 """Wrapper of TestCase which sets up the vimiv class and quits it when done."""
 
 import os
-from time import time
+import time
 from unittest import TestCase, main
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gio
+from gi.repository import Gio, Gtk
 from vimiv.app import Vimiv
+
+
+def refresh_gui(delay=0):
+    """Refresh the GUI as the Gtk.main() loop is not running when testing.
+
+    Args:
+        delay: Time to wait before refreshing.
+    """
+    time.sleep(delay)
+    while Gtk.events_pending():
+        Gtk.main_iteration_do(False)
 
 
 class VimivTestCase(TestCase):
@@ -32,7 +43,7 @@ class VimivTestCase(TestCase):
         """
         self.working_directory = os.getcwd()
         # A new ID for every generated vimiv class
-        vimiv_id = "org.vimiv" + str(time()).replace(".", "")
+        vimiv_id = "org.vimiv" + str(time.time()).replace(".", "")
         # Create vimiv class with settings, paths, ...
         self.vimiv = Vimiv(vimiv_id)
         # Set the required settings
