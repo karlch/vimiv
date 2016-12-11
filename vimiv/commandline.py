@@ -176,38 +176,33 @@ class CommandLine(object):
             cmd: The command to run.
             directory: Directory which is affected by command.
         """
-        try:
-            # Possibility to "pipe to vimiv"
-            if cmd[-1] == "|":
-                cmd = cmd.rstrip("|")
-                p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
-                from_pipe = True
-            else:
-                p = Popen(cmd, stderr=PIPE, shell=True)
-                from_pipe = False
-            # Get output and error and run the command
-            out, err = p.communicate()
-            if p.returncode:
-                err = err.decode('utf-8').split("\n")[0]
-                self.app["statusbar"].err_message(err)
-            else:
-                # Reload everything after an external command if we haven't
-                # moved, you never know what happened ... Must be in a timer
-                # because not all Gtk stuff can be accessed from an external
-                # thread.
-                # Only reload paths if the path directory or any file was in the
-                # command
-                reload_path = False
-                if os.path.basename(os.getcwd()) in cmd or \
-                        [fil for fil in self.app.paths
-                         if os.path.basename(fil) in cmd]:
-                    reload_path = True
-                GLib.timeout_add(1, self.app["fileextras"].reload_changes,
-                                 directory, reload_path, from_pipe, out)
-        except FileNotFoundError as e:
-            e = str(e)
-            cmd = e.split()[-1]
-            self.app["statusbar"].err_message("Command %s not found" % (cmd))
+        # Possibility to "pipe to vimiv"
+        if cmd[-1] == "|":
+            cmd = cmd.rstrip("|")
+            p = Popen(cmd, stdout=PIPE, stderr=PIPE, shell=True)
+            from_pipe = True
+        else:
+            p = Popen(cmd, stderr=PIPE, shell=True)
+            from_pipe = False
+        # Get output and error and run the command
+        out, err = p.communicate()
+        if p.returncode:
+            err = err.decode('utf-8').split("\n")[0]
+            self.app["statusbar"].err_message(err)
+        else:
+            # Reload everything after an external command if we haven't
+            # moved, you never know what happened ... Must be in a timer
+            # because not all Gtk stuff can be accessed from an external
+            # thread.
+            # Only reload paths if the path directory or any file was in the
+            # command
+            reload_path = False
+            if os.path.basename(os.getcwd()) in cmd or \
+                    [fil for fil in self.app.paths
+                     if os.path.basename(fil) in cmd]:
+                reload_path = True
+            GLib.timeout_add(1, self.app["fileextras"].reload_changes,
+                             directory, reload_path, from_pipe, out)
         self.running_threads.pop()
 
     def expand_filenames(self, cmd):

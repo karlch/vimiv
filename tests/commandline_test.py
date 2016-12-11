@@ -65,13 +65,21 @@ class CommandlineTest(VimivTestCase):
         self.assertEqual(error_message, "No such command: useless_command")
 
     def test_run_external(self):
-        """Run an external command."""
+        """Run an external command and test failures."""
+        # Run command
         self.vimiv["commandline"].entry.set_text(":!touch tmp_foo")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.vimiv["commandline"].running_threads[0].join()
         files = os.listdir()
         self.assertTrue("tmp_foo" in files)
         os.remove("tmp_foo")
+        # Try to run a non-existent command
+        self.vimiv["commandline"].entry.set_text(":!foo_bar_baz")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.vimiv["commandline"].running_threads[0].join()
+        statusbar_text = self.vimiv["statusbar"].left_label.get_text()
+        self.assertEqual(statusbar_text,
+                         "/bin/sh: foo_bar_baz: command not found")
 
     def test_pipe(self):
         """Pipe a command to vimiv."""
@@ -167,6 +175,35 @@ class CommandlineTest(VimivTestCase):
         """Add an alias."""
         self.vimiv["commandline"].alias("testalias")
         self.assertTrue("testalias" in self.vimiv.aliases)
+
+    def test_history_search(self):
+        """Search through history."""
+        # First run some very fast commands
+        self.vimiv["commandline"].entry.set_text(":!ls")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.vimiv["commandline"].running_threads[0].join()
+        self.vimiv["commandline"].entry.set_text(":!echo foo_bar")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.vimiv["commandline"].running_threads[0].join()
+        self.vimiv["commandline"].entry.set_text(":!echo baz")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.vimiv["commandline"].running_threads[0].join()
+        # Check if they were added to the history correctly
+        self.assertIn(":!ls", self.vimiv["commandline"].history)
+        self.assertIn(":!echo foo_bar", self.vimiv["commandline"].history)
+        self.assertIn(":!echo baz", self.vimiv["commandline"].history)
+        # Set the text to :!e and search, should give the last two echos as
+        # first results
+        self.vimiv["commandline"].entry.set_text(":!e")
+        self.vimiv["commandline"].history_search(False)
+        self.assertEqual(self.vimiv["commandline"].entry.get_text(),
+                         ":!echo baz")
+        self.vimiv["commandline"].history_search(False)
+        self.assertEqual(self.vimiv["commandline"].entry.get_text(),
+                         ":!echo foo_bar")
+        self.vimiv["commandline"].history_search(True)
+        self.assertEqual(self.vimiv["commandline"].entry.get_text(),
+                         ":!echo baz")
 
     def tearDown(self):
         os.chdir(self.working_directory)
