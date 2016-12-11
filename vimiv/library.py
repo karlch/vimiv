@@ -116,11 +116,8 @@ class Library(object):
                 image = self.app.paths[self.app.index]
                 image_path = os.path.dirname(image)
                 image_name = os.path.basename(image)
-                if image_path == os.getcwd():
-                    for i, fil in enumerate(self.files):
-                        if fil == image_name:
-                            self.remember_pos(os.getcwd(), i)
-                            break
+                if image_path == os.getcwd() and image_name in self.files:
+                    self.remember_pos(os.getcwd(), self.files.index(image_name))
             # Stop the slideshow
             if self.app["slideshow"].running:
                 self.app["slideshow"].toggle()
@@ -293,11 +290,9 @@ class Library(object):
         if directory in self.dir_pos.keys():
             self.move_pos(True, self.dir_pos[directory])
         # Check if the last directory is in the current one
-        else:
-            for i, fil in enumerate(self.files):
-                if os.path.basename(last_directory) == fil:
-                    self.move_pos(True, i)
-                    break
+        elif os.path.basename(last_directory) in self.files:
+            self.move_pos(True,
+                          self.files.index(os.path.basename(last_directory)))
 
     def move_pos(self, forward=True, defined_pos=None):
         """Move to a specific position in the library.
