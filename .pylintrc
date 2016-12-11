@@ -12,13 +12,10 @@ disable=no-self-use,
         locally-disabled,
         too-many-ancestors,
         too-few-public-methods,
-        too-many-branches,
-        too-many-locals,
         too-many-public-methods,
         cyclic-import,
         too-many-instance-attributes,
         blacklisted-name,
-        too-many-lines,
         logging-format-interpolation,
         broad-except,
         bare-except,
@@ -46,7 +43,7 @@ no-docstring-rgx=(^_|^main$)
 
 [FORMAT]
 max-line-length=80
-max-module-lines=2000
+max-module-lines=1000
 ignore-long-lines=(<?https?://|^# Copyright 201\d|# (pylint|flake8): disable=)
 expected-line-ending-format=LF
 
