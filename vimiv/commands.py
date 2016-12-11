@@ -119,3 +119,6 @@ class Commands(object):
             "command": [self.app["commandline"].focus]}
 
         self.app.functions.update(self.app.commands)
+
+        # Generate completions as soon as commands exist
+        self.app["completions"].generate_commandlist()

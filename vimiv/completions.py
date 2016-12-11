@@ -16,50 +16,70 @@ class Completion():
 
     Attributes:
         command: Entered text in commandline.
-        completions: Available completions.
+        internal_completions: List of all internal vimiv commands.
         repeat: Prepended repeat number for command.
         show_hidden: If true, show hidden files. Else do not.
     """
 
-    def __init__(self, command, commandlist, repeat="", show_hidden=False):
+    def __init__(self):
         """Set default values for attributes."""
+        self.command = ""
+        self.internal_commands = []
+        self.repeat = ""
+        self.show_hidden = False
+
+    def set_command(self, command):
+        """Set the command for completion and strip numbers for repeat."""
+        if command:
+            while command[0].isdigit():
+                self.repeat += command[0]
+                command = command[1:]
         self.command = command
-        self.completions = commandlist  # internal commands (default completion)
-        self.repeat = repeat  # numstr for repetition
+
+    def set_internals(self, internal_commands):
+        """Set the list of internal vimiv commands."""
+        self.internal_commands = internal_commands
+
+    def set_show_hidden(self, show_hidden):
+        """Set the value for show hidden."""
         self.show_hidden = show_hidden
 
     def complete(self):
-        """Find out type of completion and execute the correct function."""
+        """Find out type of completion and execute the correct function.
+
+        Return:
+            output: Best matching completion.
+            compstr: Formatted string with all possible completions to show in
+                commandline info.
+            completions: List of possible completions.
+        """
         comp_type = "internal"
+        commands = list(self.internal_commands)
         # Generate list of possible completions depending on the type of
         # completion
         # Nothing entered -> checks are useless
         if self.command:
             # External commands are prefixed with an !
             if self.command[0] == "!":
-                self.completions = self.complete_external()
+                commands = self.complete_external()
                 comp_type = "external"
             # Paths are prefixed with a /
             elif self.command[0] in ["/", ".", "~"]:
-                self.completions = self.complete_path(self.command)
+                commands = self.complete_path(self.command)
                 comp_type = "path"
             # Tag commands
             elif re.match(r'^(tag_(write|remove|load) )', self.command):
-                self.completions = self.complete_tag()
+                commands = self.complete_tag()
                 comp_type = "tag"
 
         # Sort out the completions
         # Check if the entered text matches the beginning of a command
-        completions = []
         matchstr = '^(' + self.command + ')'
-        for item in self.completions:
-            if re.match(matchstr, item):
-                completions.append(item)
+        completions = [cmd for cmd in commands if re.match(matchstr, cmd)]
 
         # Find the best matching completion as output
         if completions:
             compstr, output = self.best_match(completions, comp_type)
-
         else:
             compstr = "  No matching completion"
             output = ":" + self.command
@@ -182,6 +202,7 @@ class VimivComplete(object):
         output: Best match to be set in the commandline entry.
         compstr: Formatted string with all possible completions to show in
             commandline info.
+        do_complete: Completion class defined above for completions.
     """
 
     def __init__(self, app):
@@ -193,6 +214,15 @@ class VimivComplete(object):
         self.completions_reordered = []
         self.output = ""
         self.compstr = ""
+        self.do_complete = Completion()
+
+    def generate_commandlist(self):
+        """Generate a sorted list of all internal commands."""
+        commandlist = list(self.app.commands.keys())
+        aliaslist = list(self.app.aliases.keys())
+        complete_commandlist = sorted(commandlist + aliaslist)
+        # Set the list of completions in the completion class
+        self.do_complete.set_internals(complete_commandlist)
 
     def complete(self, inverse=False):
         """Run completion for the commandline."""
@@ -200,18 +230,12 @@ class VimivComplete(object):
         previous_output = self.output
         if not self.cycling:
             command = self.app["commandline"].entry.get_text().lstrip(":")
-            # Strip prepending numbers
-            numstr = ""
-            while command[0].isdigit():
-                numstr += command[0]
-                command = command[1:]
-            # Generate completion class and get completions
-            commandlist = list(self.app.commands.keys())
-            aliaslist = list(self.app.aliases.keys())
-            complete_commandlist = sorted(commandlist + aliaslist)
-            completion = Completion(command, complete_commandlist, numstr,
-                                    self.app["library"].show_hidden)
-            self.output, self.compstr, self.completions = completion.complete()
+            # Get completions from completion class
+            self.do_complete.set_command(command)
+            self.do_complete.set_show_hidden(
+                self.app["library"].show_hidden)
+            self.output, self.compstr, self.completions = \
+                self.do_complete.complete()
             self.completions_reordered = self.completions
 
             # Set text
