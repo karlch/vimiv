@@ -313,19 +313,19 @@ class Vimiv(Gtk.Application):
             self.add_main_option(name, short, flags, arg, help_str, value)
         add_option("bar", "b", "Display statusbar")
         add_option("no-bar", "B", "Hide statusbar")
-        add_option("library", "l", "Display library")
-        add_option("no-library", "L", "Hide library")
         add_option("fullscreen", "f", "Start fullscreen")
         add_option("no-fullscreen", "F", "Do not start fullscreen")
-        add_option("shuffle", "s", "Shuffle filelist")
-        add_option("no-shuffle", "S", "Do not shuffle filelist")
+        add_option("library", "l", "Display library")
+        add_option("no-library", "L", "Hide library")
         add_option("recursive", "r", "Search directory recursively for images")
         add_option("no-recursive", "R",
                    "Do not search directory recursively for images")
+        add_option("shuffle", "s", "Shuffle filelist")
+        add_option("no-shuffle", "S", "Do not shuffle filelist")
         add_option("version", "v", "Print version information and exit")
-        add_option("slideshow", 0, "Start slideshow at startup")
         add_option("start-from-desktop", 0,
                    "Start using the desktop_start_dir as path")
+        add_option("slideshow", 0, "Start slideshow at startup")
         add_option("slideshow-delay", 0, "Set slideshow delay",
                    arg=GLib.OptionArg.DOUBLE, value="delay")
         add_option("geometry", "g", "Set the starting geometry",

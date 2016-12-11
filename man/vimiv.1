@@ -4,12 +4,13 @@ vimiv \- an image viewer with vim-like keybindings
 
 .SH SYNOPSIS
 .B vimiv
-.RB [ \-bBfFhlLrRsS ]
-.RB [ \-g,\ \-\-geometry
-.IR GEOMETRY ]
+.RB [ \-bBfFhlLrRsSv ]
+.RB [ \--start-from-desktop ]
 .RB [ \--slideshow ]
 .RB [ \--slideshow-delay
 .IR SLIDESHOW-DELAY ]
+.RB [ \-g,\ \--geometry
+.IR GEOMETRY ]
 .IR FILE[S]
 
 .SH DESCRIPTION
@@ -42,44 +43,42 @@ Additionally vimiv features a command line. All actions can be accessed via
 commands as well. A full list of commands is included in vimivrc(5).
 
 .SH OPTIONS
-.TP
-.B \-b
+
+.B "\-b, \--bar"
 display the statusbar
-.TP
-.B \-f
+.P
+.B "\-f, \--fullscreen"
 start in fullscreen
-.TP
-.B \-h
+.P
+.B "\-h, \--help"
 display a simple help text
-.TP
-.B \-l
+.P
+.B "\-l, \--library"
 display the library
-.TP
-.B \-r
+.P
+.B "\-r, \--recursive"
 search the directory recursively for images
-.TP
-.B \-s
+.P
+.B "\-s, \--shuffle"
 shuffle the filelist
-.TP
+.P
+.B "\-v, \--version"
+show version information and exit
+.P
 .B \--start-from-desktop
 start using the desktop_start_dir as path
-.TP
-.B \-v
-show version information and exit
-.TP
+.P
 .B \--slideshow
 start in slideshow mode
-.TP
+.P
 .BI "\--slideshow-delay " SLIDESHOW_DELAY
 set the slideshow delay
-.TP
-.BI "\-g " GEOMETRY
+.P
+.BI "\-g, \--geometry " GEOMETRY
 set the starting geometry
-.TP
-.BI "\--geometry " GEOMETRY
-same as \-g
-.TP
+.P
 All capitals negate the setting, so e.g. -B means do not display the statusbar.
+For the long version prepend no-, e.g. --no-bar.
 
 .SH CONFIGURATION
 All keyboard commands can be configured in the file keys.conf. Default settings
