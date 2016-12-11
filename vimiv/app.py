@@ -101,34 +101,37 @@ class Vimiv(Gtk.Application):
         """Handle commandline arguments.
 
         Args:
-            command_line:
+            options: The dictionary containing all options given to the
+                commandline.
+        Return:
+            Exitcode or -1 to continue
         """
+        def set_option(name, section, setting, value=0):
+            """Set a setting in self.settings according to commandline option.
+
+            Args:
+                name: Name of the commandline option
+                section: Name of section in self.settings to modify.
+                setting: Name of setting in self.settings to modify.
+                value: One of 0, 1 or 2.
+                    0: Set setting to False.
+                    1: Set setting to True.
+                    2: Set setting to value given in the commandline.
+            """
+            if options.contains(name):
+                valuedict = {0: False, 1: True}
+                if value == 2:
+                    valuedict[2] = options.lookup_value(name).unpack()
+                self.settings[section][setting] = valuedict[value]
+
+        # If the version option is given, print version and exit 0
         if options.contains("version"):
             information = Information()
             print(information.get_version())
-            return 0  # To exit
-        if options.contains("bar"):
-            self.settings["GENERAL"]["display_bar"] = True
-        elif options.contains("no-bar"):
-            self.settings["GENERAL"]["display_bar"] = False
-        if options.contains("library"):
-            self.settings["LIBRARY"]["show_library"] = True
-        elif options.contains("no-library"):
-            self.settings["LIBRARY"]["show_library"] = False
-        if options.contains("fullscreen"):
-            self.settings["GENERAL"]["start_fullscreen"] = True
-        elif options.contains("no-fullscreen"):
-            self.settings["GENERAL"]["start_fullscreen"] = False
-        if options.contains("shuffle"):
-            self.settings["GENERAL"]["shuffle"] = True
-        elif options.contains("no-shuffle"):
-            self.settings["GENERAL"]["shuffle"] = False
-        if options.contains("recursive"):
-            self.settings["GENERAL"]["recursive"] = True
-        elif options.contains("no-recursive"):
-            self.settings["GENERAL"]["recursive"] = False
-        if options.contains("slideshow"):
-            self.settings["GENERAL"]["start_slideshow"] = True
+            return 0
+        # If we start from desktop, move to the wanted directory
+        # Else if the input does not come from a tty, e.g. find sth | vimiv, set
+        # paths and index according to the input from the pipe
         if options.contains("start-from-desktop"):
             os.chdir(self.settings["LIBRARY"]["desktop_start_dir"])
         elif not sys.stdin.isatty():
@@ -136,12 +139,20 @@ class Vimiv(Gtk.Application):
             for line in sys.stdin:
                 tty_paths.append(line.rstrip("\n"))
             self.paths, self.index = populate(tty_paths)
-        if options.contains("slideshow-delay"):
-            delay = options.lookup_value("slideshow-delay").unpack()
-            self.settings["GENERAL"]["slideshow_delay"] = delay
-        if options.contains("geometry"):
-            geometry = options.lookup_value("geometry").unpack()
-            self.settings["GENERAL"]["geometry"] = geometry
+
+        set_option("bar", "GENERAL", "display_bar", 1)
+        set_option("no-bar", "GENERAL", "display_bar", 0)
+        set_option("library", "LIBRARY", "show_library", 1)
+        set_option("no-library", "LIBRARY", "show_library", 0)
+        set_option("fullscreen", "GENERAL", "start_fullscreen", 1)
+        set_option("no-fullscreen", "GENERAL", "start_fullscreen", 0)
+        set_option("shuffle", "GENERAL", "shuffle", 1)
+        set_option("no-shuffle", "GENERAL", "shuffle", 0)
+        set_option("recursive", "GENERAL", "recursive", 1)
+        set_option("no-recursive", "GENERAL", "recursive", 0)
+        set_option("slideshow", "GENERAL", "start_slideshow", 1)
+        set_option("slideshow-delay", "GENERAL", "slideshow_delay", 2)
+        set_option("geometry", "GENERAL", "geometry", 2)
         return -1  # To continue
 
     def activate_vimiv(self, app):
@@ -248,7 +259,7 @@ class Vimiv(Gtk.Application):
         force_widget: String to force getting the position of a widget
 
         Return:
-            Current position as Int or filename.
+            Current position as number or filename.
         """
         # Find widget to work on
         if force_widget:
@@ -270,20 +281,18 @@ class Vimiv(Gtk.Application):
                 filelist = self.paths
             try:
                 position = path.get_indices()[0]
-                if get_filename:
-                    return filelist[position]
-                else:
-                    return position
             except:
-                if get_filename:
-                    return ""
-                else:
-                    return 0
+                print("died")
+                position = 0
+                filelist = [""]
         else:
-            if get_filename:
-                return self.paths[self.index]
-            else:
-                return self.index
+            filelist = self.paths
+            position = self.index
+
+        if get_filename:
+            return filelist[position]
+        else:
+            return position
 
     def init_commandline_options(self):
         """Add all possible commandline options."""
