@@ -3,7 +3,13 @@ The most important changes between the versions are listed here.
 
 #### v0.8 (unreleased)
 * Rewrite large parts to make vimiv a Gtk.Application
-* Fix parser, broken since 0.7.3
+* Rewrite parser as Gtk parser
+* Rewrite open using the Gtk.Application do\_open method
+* Add command copy to clipboard which copies the currently selected image name
+  to clipboard or primary depending on the copy\_to\_primary setting. The
+  selection can be toggled using the set clipboard! command.
+* Default flip keybindings to | and _ because y and Y are used for the copy
+  method
 
 #### v0.7.3
 * Bugfix release
