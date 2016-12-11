@@ -53,35 +53,32 @@ class KeyHandler(object):
             keyname = "Shift+" + keyname.lower()
         if keyname == "ISO_Left_Tab":  # Tab is named really weird under shift
             keyname = "Shift+Tab"
-        try:  # Numbers for the num_str
-            if window == "COMMAND":
-                raise ValueError
-            int(keyname)
+        # Numbers for the num_str
+        if window != "COMMAND" and keyname.isdigit():
             self.num_append(keyname)
             return True
-        except:
-            try:
-                # Get the relevant keybindings for the window from the various
-                # sections in the keys.conf file
-                keys = self.keys[window]
-
-                # Get the command to which the pressed key is bound
-                func = keys[keyname]
-                if "set " in func:
-                    conf_args = []
-                else:
-                    func = func.split()
-                    conf_args = func[1:]
-                    func = func[0]
-                # From functions dictionary get the actual vimiv command
-                func = self.app.functions[func]
-                args = func[1:]
-                args.extend(conf_args)
+        # Get the relevant keybindings for the window from the various
+        # sections in the keys.conf file
+        keys = self.keys[window]
+        # Get the command to which the pressed key is bound and run it
+        if keyname in keys.keys():
+            func = keys[keyname]
+            if "set " in func:
+                conf_args = []
+            else:
+                func = func.split()
+                conf_args = func[1:]
                 func = func[0]
-                func(*args)
-                return True  # Deactivates default bindings
-            except:
-                return False
+            # From functions dictionary get the actual vimiv command
+            func = self.app.functions[func]
+            args = func[1:]
+            args.extend(conf_args)
+            func = func[0]
+            func(*args)
+            return True  # Deactivates default bindings
+        # Activate default keybindings
+        else:
+            return False
 
     def num_append(self, num):
         """Add a new char to num_str."""
