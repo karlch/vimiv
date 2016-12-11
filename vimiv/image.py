@@ -297,18 +297,15 @@ class Image(object):
             delta: Positions to move by.
             force: If True, move regardless of editing image.
         """
-        # Check if an image is opened
-        if not self.app.paths or self.app["thumbnail"].toggled:
+        # Check if an image is opened or if it has been edited
+        if not self.app.paths or self.app["thumbnail"].toggled or \
+                self.check_for_edit(force):
             return
-        # Check if image has been edited
-        if self.check_for_edit(force):
-            return
-        # Check for prepended numbers
+        # Check for prepended numbers and direction
         if key and self.app["keyhandler"].num_str:
-            delta *= int(self.app["keyhandler"].num_str)
-        # Forward or backward
-        if not forward:
-            delta *= -1
+            dir_dict = {True: 1, False: -1}
+            delta *= int(self.app["keyhandler"].num_str) * dir_dict[forward]
+
         self.app.index = (self.app.index + delta) % len(self.app.paths)
         self.user_zoomed = False
 
@@ -317,10 +314,36 @@ class Image(object):
             shuffle(self.app.paths)
 
         path = self.app.paths[self.app.index]
+        # Show the image at path and receive possible errors
+        returncode = self.show_image(path, delta is not 0)
+
+        # Info if slideshow returns to beginning
+        if self.app["slideshow"].running and not returncode:
+            if self.app.index is self.app["slideshow"].start_index:
+                message = "Info: back at beginning of slideshow"
+                self.app["statusbar"].lock = True
+                self.app["statusbar"].err_message(message)
+            else:
+                self.app["statusbar"].lock = False
+
+        self.app["keyhandler"].num_clear()
+        return True  # for the slideshow
+
+    def show_image(self, path, update_image=True):
+        """Show the image at position path.
+
+        Check for unexistent and unaccessible files.
+
+        Args:
+            path: The path in self.app.paths to operate on.
+        Return:
+            errorcode: 1 if there are errors, 0 else.
+        """
+        errorcode = 0
         try:
             if not os.path.exists(path):
                 self.app["manipulate"].delete()
-                return
+                errorcode = 1
             else:
                 self.pixbuf_original = GdkPixbuf.PixbufAnimation.new_from_file(
                     path)
@@ -335,27 +358,14 @@ class Image(object):
             if self.timer_id:
                 self.pause_gif()
             # If one simply reloads the file the info shouldn't be updated
-            if delta:
-                self.update()
-            else:
-                self.update(False)
-
-        except GLib.Error:  # File not accessible
+            self.update(update_image)
+        # File not accessible
+        except GLib.Error:
             self.app.paths.remove(path)
             self.app["statusbar"].err_message("Error: file not accessible")
             self.move_pos(False)
-
-        # Info if slideshow returns to beginning
-        if self.app["slideshow"].running:
-            if self.app.index is self.app["slideshow"].start_index:
-                message = "Info: back at beginning of slideshow"
-                self.app["statusbar"].lock = True
-                self.app["statusbar"].err_message(message)
-            else:
-                self.app["statusbar"].lock = False
-
-        self.app["keyhandler"].num_clear()
-        return True  # for the slideshow
+            errorcode = 1
+        return errorcode
 
     def move_pos(self, forward=True, force=False):
         """Move to specific position in paths.
