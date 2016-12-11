@@ -140,14 +140,9 @@ class CommandLine(object):
                 self.run_path(cmd)
             else:  # Default to internal cmd
                 self.app["keyhandler"].num_str = ""  # Used to repeat commands
-                while True:
-                    try:
-                        num = int(cmd[0])
-                        self.app["keyhandler"].num_str = \
-                            self.app["keyhandler"].num_str + str(num)
-                        cmd = cmd[1:]
-                    except:
-                        break
+                while cmd[0].isdigit():
+                    self.app["keyhandler"].num_str += cmd[0]
+                    cmd = cmd[1:]
                 self.run_command(cmd)
         # Save the cmd to the history list avoiding duplicates
         if command in self.history:

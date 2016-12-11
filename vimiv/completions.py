@@ -199,17 +199,12 @@ class VimivComplete(object):
         # Remember old completion
         previous_output = self.output
         if not self.cycling:
-            command = self.app["commandline"].entry.get_text()
-            command = command.lstrip(":")
+            command = self.app["commandline"].entry.get_text().lstrip(":")
             # Strip prepending numbers
             numstr = ""
-            while True:
-                try:
-                    num = int(command[0])
-                    numstr += str(num)
-                    command = command[1:]
-                except:
-                    break
+            while command[0].isdigit():
+                numstr += command[0]
+                command = command[1:]
             # Generate completion class and get completions
             commandlist = list(self.app.commands.keys())
             aliaslist = list(self.app.aliases.keys())
