@@ -146,13 +146,28 @@ class FileActionsTest(VimivTestCase):
         basename = os.path.basename(name)
         abspath = os.path.abspath(name)
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        # primary = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+        primary = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
+        # Copy basename and abspath to clipboard
         self.vimiv["fileextras"].copy_name(False)
         clipboard.request_text(compare_text, basename)
         self.assertTrue(self.compare_result)
+        self.compare_result = False
         self.vimiv["fileextras"].copy_name(True)
         clipboard.request_text(compare_text, abspath)
         self.assertTrue(self.compare_result)
+        self.compare_result = False
+        # Toggle to primary and copy basename
+        self.vimiv["fileextras"].toggle_clipboard()
+        self.vimiv["fileextras"].copy_name(False)
+        primary.request_text(compare_text, basename)
+        self.assertTrue(self.compare_result)
+        self.compare_result = False
+        # Toggle back to clipboard and copy basename
+        self.vimiv["fileextras"].toggle_clipboard()
+        self.vimiv["fileextras"].copy_name(False)
+        clipboard.request_text(compare_text, basename)
+        self.assertTrue(self.compare_result)
+        self.compare_result = False
 
     def tearDown(self):
         os.chdir(self.test_directory)

@@ -63,6 +63,7 @@ class Commands(object):
             "rotate": [self.app["manipulate"].rotate],
             "set animation!": [self.app["image"].toggle_animation],
             "set brightness": [self.app["manipulate"].cmd_edit, 'bri'],
+            "set clipboard!": [self.app["fileextras"].toggle_clipboard],
             "set contrast": [self.app["manipulate"].cmd_edit, 'con'],
             "set library_width": [self.app["library"].resize, None, True],
             "set overzoom!": [self.app["image"].toggle_overzoom],
