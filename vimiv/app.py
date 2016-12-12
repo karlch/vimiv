@@ -138,7 +138,7 @@ class Vimiv(Gtk.Application):
             self.directory = mkdtemp()
 
         # If we start from desktop, move to the wanted directory
-        # Else if the input does not come from a tty, e.g. find sth | vimiv, set
+        # Else if the input does not come from a tty, e.g. find "" | vimiv, set
         # paths and index according to the input from the pipe
         if options.contains("start-from-desktop"):
             os.chdir(self.settings["LIBRARY"]["desktop_start_dir"])

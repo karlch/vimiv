@@ -333,7 +333,7 @@ class Image(object):
     def show_image(self, path, update_image=True):
         """Show the image at position path.
 
-        Check for unexistent and unaccessible files.
+        Check for inexistent and inaccessible files.
 
         Args:
             path: The path in self.app.paths to operate on.

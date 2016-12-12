@@ -83,3 +83,9 @@ imageactions
 whitespace
 gui
 windowsize
+basedir
+tty
+mkdtemp
+abspath
+basename
+errorcode
