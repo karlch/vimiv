@@ -9,11 +9,6 @@ from PIL import Image
 from gi.repository import GdkPixbuf, Gtk, Gdk
 from vimiv.helpers import listdir_wrapper
 
-# Directory for trash
-vimivdir = os.path.join(os.path.expanduser("~"), ".vimiv")
-trashdir = os.path.join(vimivdir, "Trash")
-thumbdir = os.path.join(vimivdir, "Thumbnails")
-
 
 def recursive_search(directory):
     """Search a directory recursively for images.
@@ -87,18 +82,18 @@ def populate(args, recursive=False, shuffle_paths=False):
     return paths, 0
 
 
-def move_to_trash(filelist):
+def move_to_trash(filelist, trashdir):
     """Move every file in filelist to the Trash.
 
     If it is a directory, an error is thrown.
 
     Args:
         filelist: The list of files to operate on.
+        trashdir: The directory to move the files to.
     """
     # Create the directory if it isn't there yet
-    deldir = os.path.expanduser("~/.vimiv/Trash")
-    if not os.path.isdir(deldir):
-        os.mkdir(deldir)
+    if not os.path.isdir(trashdir):
+        os.mkdir(trashdir)
 
     # Loop over every file
     for im in filelist:
@@ -107,7 +102,7 @@ def move_to_trash(filelist):
         if os.path.exists(im):
             # Check if there is already a file with that name in the trash
             # If so, add numbers to the filename until it doesn't exist anymore
-            delfile = os.path.join(deldir, os.path.basename(im))
+            delfile = os.path.join(trashdir, os.path.basename(im))
             if os.path.exists(delfile):
                 backnum = 1
                 ndelfile = delfile + "." + str(backnum)
@@ -115,7 +110,7 @@ def move_to_trash(filelist):
                     backnum += 1
                     ndelfile = delfile + "." + str(backnum)
                 os.rename(delfile, ndelfile)
-            shutil.move(im, deldir)
+            shutil.move(im, trashdir)
 
         return 0  # Success
 
@@ -157,9 +152,9 @@ class FileExtras(object):
             directory_name: Directory to clear.
         """
         if directory_name == "Trash":
-            directory = trashdir
+            directory = self.app["image"].trashdir
         else:
-            directory = thumbdir
+            directory = self.app["thumbnail"].directory
         for fil in os.listdir(directory):
             fil = os.path.join(directory, fil)
             os.remove(fil)

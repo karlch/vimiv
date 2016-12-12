@@ -28,8 +28,8 @@ def set_defaults():
 
     Return: Dictionary of default settings.
     """
-    general = {"fullscreen": False,
-               "slideshow": False,
+    general = {"start_fullscreen": False,
+               "start_slideshow": False,
                "slideshow_delay": 2,
                "shuffle": False,
                "display_bar": True,
@@ -218,9 +218,13 @@ def parse_keys():
     return keybindings
 
 
-def parse_dirs():
-    """Check for and create all required directories in ~/.vimiv."""
-    vimivdir = os.path.expanduser("~/.vimiv")
+def parse_dirs(basedir):
+    """Check for and create all required directories basedir.
+
+    Args:
+        basedir: The base directory of vimiv. ~/.vimiv or mkdtemp()
+    """
+    vimivdir = os.path.expanduser(basedir)
     tagdir = os.path.join(vimivdir, "Tags")
     thumbdir = os.path.join(vimivdir, "Thumbnails")
     trashdir = os.path.join(vimivdir, "Trash")

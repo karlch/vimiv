@@ -116,7 +116,7 @@ class Manipulate(object):
             if message:
                 self.app["statusbar"].err_message(message)
                 images.remove(i)
-        move_to_trash(images)
+        move_to_trash(images, self.app["image"].trashdir)
 
         # Reload stuff if needed
         if self.app["library"].grid.is_visible():

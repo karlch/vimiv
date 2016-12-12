@@ -4,10 +4,12 @@
 
 import os
 import sys
+from shutil import rmtree
+from tempfile import mkdtemp
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, Gio, GLib
-from vimiv.configparser import parse_dirs, parse_config
+from vimiv.configparser import parse_dirs, parse_config, set_defaults
 from vimiv.image import Image
 from vimiv.fileactions import FileExtras, populate
 from vimiv.library import Library
@@ -50,8 +52,7 @@ class Vimiv(Gtk.Application):
         Args:
             application_id: The ID used to register vimiv. Default: org.vimiv.
         """
-        # Create directory structure and get settings
-        parse_dirs()
+        # Init application and set default values
         Gtk.Application.__init__(self, application_id=application_id)
         self.set_flags(Gio.ApplicationFlags.HANDLES_OPEN)
         self.connect("activate", self.activate_vimiv)
@@ -129,6 +130,13 @@ class Vimiv(Gtk.Application):
             information = Information()
             print(information.get_version())
             return 0
+        # Temp basedir removes all current settings and sets them to default
+        if options.contains("temp-basedir"):
+            print(self.settings["GENERAL"])
+            self.settings = set_defaults()
+            print(self.settings["GENERAL"])
+            self.directory = mkdtemp()
+
         # If we start from desktop, move to the wanted directory
         # Else if the input does not come from a tty, e.g. find sth | vimiv, set
         # paths and index according to the input from the pipe
@@ -161,6 +169,7 @@ class Vimiv(Gtk.Application):
         Args:
             app: The application itself.
         """
+        parse_dirs(self.directory)
         self.init_widgets()
         self.create_window_structure()
         app.add_window(self["window"])
@@ -243,12 +252,15 @@ class Vimiv(Gtk.Application):
         if self["image"].check_for_edit(force):
             return
         # Save the history
-        histfile = os.path.expanduser("~/.vimiv/history")
+        histfile = os.path.join(self.directory, "history")
         histfile = open(histfile, 'w')
         for cmd in self["commandline"].history:
             cmd += "\n"
             histfile.write(cmd)
         histfile.close()
+        # Remove temporary directory
+        if "/tmp/" in self.directory:
+            rmtree(self.directory)
         # Call Gtk.Application.quit()
         self.quit()
 
@@ -330,6 +342,7 @@ class Vimiv(Gtk.Application):
                    arg=GLib.OptionArg.DOUBLE, value="delay")
         add_option("geometry", "g", "Set the starting geometry",
                    arg=GLib.OptionArg.STRING, value="GEOMETRY")
+        add_option("temp-basedir", 0, "Use a temporary basedir")
 
     def __getitem__(self, name):
         """Convenience method to access widgets via self[name].

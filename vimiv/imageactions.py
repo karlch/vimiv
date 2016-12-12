@@ -131,7 +131,7 @@ class Thumbnails:
         threads: Threads that are running for thumbnail creation.
     """
 
-    def __init__(self, filelist, thumbsize):
+    def __init__(self, filelist, thumbsize, thumbdir):
         """Create default settings.
 
         Args:
@@ -140,7 +140,7 @@ class Thumbnails:
         """
         self.filelist = filelist
         self.thumbsize = thumbsize
-        self.directory = os.path.expanduser("~/.vimiv/Thumbnails")
+        self.directory = thumbdir
         if not os.path.isdir(self.directory):
             os.mkdir(self.directory)
         self.thumbnails = os.listdir(self.directory)

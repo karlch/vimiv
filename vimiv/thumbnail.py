@@ -158,7 +158,7 @@ class Thumbnail(object):
         self.liststore.clear()
         self.pixbuf_max = []
         # Create thumbnails
-        thumbnails = Thumbnails(self.app.paths, self.sizes[-1])
+        thumbnails = Thumbnails(self.app.paths, self.sizes[-1], self.directory)
         self.elements = thumbnails.thumbnails_create()
         # Draw the icon view instead of the image
         if not toggled:
@@ -207,7 +207,7 @@ class Thumbnail(object):
         self.liststore.remove(liststore_iter)
         try:
             if reload_image:
-                thumbnails = Thumbnails([thumb], self.sizes[-1])
+                thumbnails = Thumbnails([thumb], self.sizes[-1], self.directory)
                 new_thumb = thumbnails.thumbnails_create()[0]
                 self.elements[index] = new_thumb
             pixbuf_max = self.pixbuf_max[index]

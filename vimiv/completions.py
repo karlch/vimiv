@@ -26,6 +26,7 @@ class Completion():
         self.command = ""
         self.internal_commands = []
         self.repeat = ""
+        self.tagdir = ""
         self.show_hidden = False
 
     def set_command(self, command):
@@ -39,6 +40,10 @@ class Completion():
     def set_internals(self, internal_commands):
         """Set the list of internal vimiv commands."""
         self.internal_commands = internal_commands
+
+    def set_tagdir(self, tagdir):
+        """Set the directory in which tags are stored."""
+        self.tagdir = tagdir
 
     def set_show_hidden(self, show_hidden):
         """Set the value for show hidden."""
@@ -131,8 +136,7 @@ class Completion():
 
     def complete_tag(self):
         """Append the available tag names to an internal tag command."""
-        tags = listdir_wrapper(os.path.expanduser("~/.vimiv/Tags"),
-                               self.show_hidden)
+        tags = listdir_wrapper(self.tagdir, self.show_hidden)
         completions = []
         for tag in tags:
             completions.append(self.command.split()[0] + " " + tag)
@@ -215,6 +219,7 @@ class VimivComplete(object):
         self.output = ""
         self.compstr = ""
         self.do_complete = Completion()
+        self.do_complete.set_tagdir(self.app["tags"].directory)
 
     def generate_commandlist(self):
         """Generate a sorted list of all internal commands."""

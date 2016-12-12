@@ -11,6 +11,7 @@ vimiv \- an image viewer with vim-like keybindings
 .IR SLIDESHOW-DELAY ]
 .RB [ \-g,\ \--geometry
 .IR GEOMETRY ]
+.RB [ \--temp-basedir
 .IR FILE[S]
 
 .SH DESCRIPTION
@@ -76,6 +77,9 @@ set the slideshow delay
 .P
 .BI "\-g, \--geometry " GEOMETRY
 set the starting geometry
+.P
+.BI "\--temp-basedir"
+use a temporary basedir
 .P
 All capitals negate the setting, so e.g. -B means do not display the statusbar.
 For the long version prepend no-, e.g. --no-bar.

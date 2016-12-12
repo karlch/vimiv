@@ -82,7 +82,7 @@ class CommandLine(object):
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         # Cmd history from file
-        self.history = read_file(os.path.expanduser("~/.vimiv/history"))
+        self.history = read_file(os.path.join(self.app.directory, "history"))
 
         # Defaults
         self.pos = 0
