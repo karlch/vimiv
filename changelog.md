@@ -10,6 +10,7 @@ The most important changes between the versions are listed here.
   selection can be toggled using the set clipboard! command.
 * Default flip keybindings to | and _ because y and Y are used for the copy
   method
+* Implement --temp-basedir flag
 
 #### v0.7.3
 * Bugfix release
