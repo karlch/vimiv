@@ -7,7 +7,6 @@ reports=n
 enable=all
 disable=no-self-use,
         fixme,
-        duplicate-code,
         global-statement,
         locally-disabled,
         too-many-ancestors,
