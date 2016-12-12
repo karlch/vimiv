@@ -294,7 +294,6 @@ class Vimiv(Gtk.Application):
             try:
                 position = path.get_indices()[0]
             except:
-                print("died")
                 position = 0
                 filelist = [""]
         else:
