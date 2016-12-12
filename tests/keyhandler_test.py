@@ -51,6 +51,5 @@ class KeyHandlerTest(VimivTestCase):
         self.assertNotEqual(before, after)
 
 
-
 if __name__ == '__main__':
     main()

@@ -283,7 +283,6 @@ class FileExtras(object):
             name = os.path.basename(name)
         self.clipboard.set_text(name, -1)
 
-
     def toggle_clipboard(self):
         """Toggle between primary and clipboard selection."""
         primary = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
