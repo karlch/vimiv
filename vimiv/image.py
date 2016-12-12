@@ -303,8 +303,9 @@ class Image(object):
             return
         # Check for prepended numbers and direction
         if key and self.app["keyhandler"].num_str:
-            dir_dict = {True: 1, False: -1}
-            delta *= int(self.app["keyhandler"].num_str) * dir_dict[forward]
+            delta *= int(self.app["keyhandler"].num_str)
+        if not forward:
+            delta *= -1
 
         self.app.index = (self.app.index + delta) % len(self.app.paths)
         self.user_zoomed = False
