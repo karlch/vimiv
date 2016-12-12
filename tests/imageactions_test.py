@@ -18,6 +18,7 @@ class ImageActionsTest(TestCase):
         shutil.copyfile("arch_001.jpg", "image_to_edit.jpg")
         self.filename = os.path.abspath("image_to_edit.jpg")
         self.files = [self.filename]
+        self.thumbdir = os.path.expanduser("~/.vimiv/Thumbnails")
 
     def test_rotate(self):
         """Rotate image file."""
@@ -37,7 +38,8 @@ class ImageActionsTest(TestCase):
 
     def test_thumbnails_create(self):
         """Creation of thumbnail files."""
-        thumbnails = imageactions.Thumbnails(self.files, (128, 128))
+        thumbnails = imageactions.Thumbnails(self.files, (128, 128),
+                                             self.thumbdir)
         thumbnails.thumbnails_create()
         thumbnail = os.path.expanduser(
             "~/.vimiv/Thumbnails/image_to_edit.thumbnail_128x128.png")

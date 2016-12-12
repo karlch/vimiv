@@ -20,6 +20,7 @@ class FileActionsTest(VimivTestCase):
         cls.compare_result = False  # Used for the clipboard comparison
         cls.test_directory = os.path.abspath("vimiv/")
         cls.init_test(cls, [cls.test_directory])
+        cls.trashdir = os.path.join(cls.vimiv.directory, "Trash")
 
     def test_move_to_trash(self):
         """Move file to trash."""
@@ -27,17 +28,17 @@ class FileActionsTest(VimivTestCase):
         shutil.copyfile("arch_001.jpg", "image_to_edit.jpg")
         filename = os.path.abspath("image_to_edit.jpg")
         files = [filename]
-        fileactions.move_to_trash(files)
-        trashed_file = os.path.expanduser("~/.vimiv/Trash/image_to_edit.jpg")
+        fileactions.move_to_trash(files, self.trashdir)
+        trashed_file = os.path.join(self.trashdir, "image_to_edit.jpg")
         self.assertTrue(os.path.isfile(trashed_file))
         # Repeat, to check if backing up works
         shutil.copyfile("arch_001.jpg", "image_to_edit.jpg")
-        fileactions.move_to_trash(files)
-        trashed_file1 = os.path.expanduser("~/.vimiv/Trash/image_to_edit.jpg.1")
+        fileactions.move_to_trash(files, self.trashdir)
+        trashed_file1 = os.path.join(self.trashdir, "image_to_edit.jpg.1")
         self.assertTrue(os.path.isfile(trashed_file1))
         shutil.copyfile("arch_001.jpg", "image_to_edit.jpg")
-        fileactions.move_to_trash(files)
-        trashed_file2 = os.path.expanduser("~/.vimiv/Trash/image_to_edit.jpg.2")
+        fileactions.move_to_trash(files, self.trashdir)
+        trashed_file2 = os.path.join(self.trashdir, "image_to_edit.jpg.2")
         self.assertTrue(os.path.isfile(trashed_file2))
         # Clear the files
         os.remove(trashed_file)

@@ -15,8 +15,8 @@ class ParserTest(TestCase):
 
     def test_parse_dirs(self):
         """Check if all directories where created correctly."""
-        parser.parse_dirs()
         vimivdir = os.path.join(os.path.expanduser('~'), ".vimiv")
+        parser.parse_dirs(vimivdir)
         trashdir = os.path.join(vimivdir, "Trash")
         tagdir = os.path.join(vimivdir, "Tags")
         thumbdir = os.path.join(vimivdir, "Thumbnails")
@@ -29,7 +29,7 @@ class ParserTest(TestCase):
         library = self.config_settings["LIBRARY"]
         amount_general_settings = len(general.keys())
         amount_library_settings = len(library.keys())
-        self.assertEqual(amount_general_settings, 17)
+        self.assertEqual(amount_general_settings, 15)
         self.assertEqual(amount_library_settings, 8)
         self.assertFalse(general["start_fullscreen"])
         self.assertEqual(general["slideshow_delay"], 2)
