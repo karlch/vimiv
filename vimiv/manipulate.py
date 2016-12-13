@@ -50,7 +50,7 @@ class Manipulate(object):
         grid.set_border_width(6)
         grid.connect("key_press_event", self.app["keyhandler"].run,
                      "MANIPULATE")
-        self.scrolled_win.add_with_viewport(grid)
+        self.scrolled_win.add(grid)
 
         # A list to save the changes being done
         self.manipulations = [1, 1, 1, False]
