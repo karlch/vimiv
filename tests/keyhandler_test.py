@@ -36,8 +36,9 @@ class KeyHandlerTest(VimivTestCase):
         event.keyval = Gdk.keyval_from_name("2")
         self.vimiv["library"].treeview.emit("key_press_event", event)
         self.assertEqual(self.vimiv["keyhandler"].num_str, "2")
-        # Should be gone after a second
-        refresh_gui(1.5)
+        # Clear manually, GLib timeout should definitely work as well if the
+        # code runs without errors
+        self.vimiv["keyhandler"].num_clear()
         self.assertFalse(self.vimiv["keyhandler"].num_str)
 
     def test_key_press_modifier(self):
