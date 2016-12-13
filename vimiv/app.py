@@ -64,9 +64,6 @@ class Vimiv(Gtk.Application):
         self.commands = {}
         self.aliases = {}
         self.functions = {}
-        # Sceen and window size TODO put somewhere else
-        screen = Gdk.Screen()
-        self.screensize = [screen.width(), screen.height()]
         # Set up all commandline options
         self.init_commandline_options()
 

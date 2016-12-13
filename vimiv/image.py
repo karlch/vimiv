@@ -178,10 +178,7 @@ class Image(object):
         Return:
             Tuple of available size.
         """
-        if self.app["window"].is_fullscreen:
-            size = self.app.screensize
-        else:
-            size = self.app["window"].get_size()
+        size = self.app["window"].get_size()
         if self.app["library"].grid.is_visible():
             size = (size[0] - self.app["library"].width, size[1])
         if not self.app["statusbar"].hidden:
@@ -203,7 +200,7 @@ class Image(object):
             # Catch some unreasonable zooms
             if (self.pixbuf_original.get_height() * self.zoom_percent < 50 or
                     self.pixbuf_original.get_height() * self.zoom_percent >
-                    self.app.screensize[0] * 5):
+                    self.app["window"].get_size()[0] * 5):
                 raise ValueError
             self.user_zoomed = True
             self.update(update_gif=False)
@@ -246,7 +243,7 @@ class Image(object):
             # Catch some unreasonable zooms
             if (self.pixbuf_original.get_height() * self.zoom_percent < 5 or
                     self.pixbuf_original.get_height() * self.zoom_percent >
-                    self.app.screensize[0] * 5):
+                    self.app["window"].get_size()[0] * 5):
                 self.zoom_percent = before
                 raise ValueError
             self.update(update_gif=False)
