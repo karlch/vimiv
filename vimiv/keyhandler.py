@@ -70,11 +70,16 @@ class KeyHandler(object):
                 conf_args = func[1:]
                 func = func[0]
             # From functions dictionary get the actual vimiv command
-            func = self.app.functions[func]
-            args = func[1:]
-            args.extend(conf_args)
-            func = func[0]
-            func(*args)
+            try:
+                func = self.app.functions[func]
+                args = func[1:]
+                args.extend(conf_args)
+                func = func[0]
+                func(*args)
+            except KeyError as e:
+                message = "Invalid command " + str(e) + " bound to '" \
+                    + keyname + "'"
+                self.app["statusbar"].err_message(message)
             return True  # Deactivates default bindings
         # Activate default keybindings
         else:
