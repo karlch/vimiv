@@ -386,6 +386,7 @@ class CommandLine(object):
             self.app["window"].last_focused = "im"
         self.entry.grab_focus()
         self.entry.set_position(-1)
+        self.app["statusbar"].update_info()
 
     def reset_text(self):
         """Empty info and entry text to close the commandline.
@@ -421,6 +422,7 @@ class CommandLine(object):
         else:
             self.app["image"].scrolled_win.grab_focus()
         self.last_filename = ""
+        self.app["statusbar"].update_info()
 
     def reset_tab_count(self, entry):
         """Reset the amount of tab presses if new text is entered.

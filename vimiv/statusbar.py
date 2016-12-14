@@ -96,44 +96,45 @@ class Statusbar(object):
         if self.was_hidden:
             self.was_hidden = False
             self.toggle()
+        # Get mode first
+        mode = self.get_mode()
         # Left side
-        try:
-            # Directory if library is focused
-            if self.app["library"].treeview.is_focus():
-                self.left_label.set_text(os.getcwd())
-            # Position, name and thumbnail size in thumb mode
-            elif self.app["thumbnail"].toggled:
-                pos = self.app.get_pos()
-                name = os.path.basename(self.app.paths[pos])
-                message = "{0}/{1}  {2}  {3}". \
-                    format(pos + 1, len(self.app.paths),
-                           name, self.app["thumbnail"].size)
-                self.left_label.set_text(message)
-            # Image info in image mode
-            else:
-                name = os.path.basename(self.app.paths[self.app.index])
-                message = "{0}/{1}  {2}  [{3:.0f}%]". \
-                    format(self.app.index + 1, len(self.app.paths), name,
-                           self.app["image"].zoom_percent * 100)
-                self.left_label.set_text(message)
-        except:
+        # Directory if library is focused
+        if "LIBRARY" in mode:
+            self.left_label.set_text(os.getcwd())
+        # Position, name and thumbnail size in thumb mode
+        elif "THUMBNAIL" in mode:
+            pos = self.app.get_pos()
+            name = os.path.basename(self.app.get_pos(True))
+            message = "{0}/{1}  {2}  {3}".format(pos + 1,
+                                                 len(self.app.paths),
+                                                 name,
+                                                 self.app["thumbnail"].size)
+            self.left_label.set_text(message)
+        # in commandline
+        elif "COMMAND" in mode:
+            # TODO useful information in the commandline
+            self.left_label.set_text("")
+        elif self.app.paths:
+            name = os.path.basename(self.app.paths[self.app.index])
+            message = "{0}/{1}  {2}  [{3:.0f}%]".format(
+                self.app.index + 1, len(self.app.paths), name,
+                self.app["image"].zoom_percent * 100)
+            self.left_label.set_text(message)
+        else:
             self.left_label.set_text("No open images")
         # Center
-        if not (self.app["thumbnail"].toggled or
-                self.app["library"].treeview.is_focus()) and self.app.paths:
-            mark = "[*]" if self.app.paths[self.app.index] \
-                in self.app["mark"].marked else ""
-        else:
-            mark = ""
-        if self.app["slideshow"].running:
-            slideshow = "[slideshow - {0:.1f}s]".format(
-                self.app["slideshow"].delay)
-        else:
-            slideshow = ""
+        mark = "[*]" \
+            if ("IMAGE" in mode or "MANIPULATE" in mode) \
+            and self.app.paths \
+            and self.app.paths[self.app.index] in self.app["mark"].marked \
+            else ""
+        slideshow = \
+            "[slideshow - {0:.1f}s]".format(self.app["slideshow"].delay) \
+            if self.app["slideshow"].running else ""
         message = "{0}  {1}".format(mark, slideshow)
         self.center_label.set_text(message)
         # Right side
-        mode = self.get_mode()
         message = "{0:15}  {1:4}".format(mode, self.app["keyhandler"].num_str)
         self.right_label.set_markup(message)
         # Window title
@@ -147,7 +148,9 @@ class Statusbar(object):
 
     def get_mode(self):
         """Return which widget is currently focused."""
-        if self.app["library"].treeview.is_focus():
+        if self.app["commandline"].entry.is_focus():
+            return "<b>-- COMMAND --</b>"
+        elif self.app["library"].treeview.is_focus():
             return "<b>-- LIBRARY --</b>"
         elif self.app["manipulate"].scrolled_win.is_visible():
             return "<b>-- MANIPULATE --</b>"
