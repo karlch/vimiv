@@ -36,12 +36,13 @@ def populate_single(arg, recursive):
     paths = []
     if os.path.isfile(arg):
         # Use parent directory
-        directory = os.path.dirname(os.path.abspath(arg))
-        basename = os.path.basename(os.path.abspath(arg))
+        directory = os.path.dirname(arg)
+        basename = os.path.basename(arg)
         paths = listdir_wrapper(directory)
         # Set the argument to the beginning of the list
         pos = paths.index(basename)
-        paths = [os.path.abspath(path) for path in paths[pos:] + paths[:pos]]
+        paths = [os.path.join(directory, path)
+                 for path in paths[pos:] + paths[:pos]]
     elif os.path.isdir(arg) and recursive:
         paths = sorted(recursive_search(arg))
     return paths
