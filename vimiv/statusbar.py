@@ -57,10 +57,11 @@ class Statusbar(object):
         self.bar.add(self.center_label)
         self.bar.add(self.right_label)
         self.bar.set_valign(Gtk.Align.END)
-        self.bar.set_margin_left(6)
-        self.bar.set_margin_right(6)
-        self.bar.set_margin_top(6)
-        self.bar.set_margin_bottom(6)
+        padding = self.app.settings["GENERAL"]["commandline_padding"]
+        self.bar.set_margin_left(padding)
+        self.bar.set_margin_right(padding)
+        self.bar.set_margin_top(padding)
+        self.bar.set_margin_bottom(padding)
 
     def err_message(self, message):
         """Push an error message to the statusbar.

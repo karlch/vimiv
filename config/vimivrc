@@ -17,6 +17,7 @@ search_case_sensitive: yes
 incsearch: yes
 cache_thumbnails: yes
 copy_to_primary: no
+commandline_padding: 6
 
 [LIBRARY] ######################################################################
 show_library: no

@@ -42,7 +42,8 @@ def set_defaults():
                "rescale_svg": True,
                "overzoom": False,
                "cache_thumbnails": True,
-               "copy_to_primary": False}
+               "copy_to_primary": False,
+               "commandline_padding": 6}
     library = {"show_library": False,
                "library_width": 300,
                "expand_lib": True,
@@ -85,7 +86,7 @@ def overwrite_section(key, config, settings):
                     raise ValueError
                 file_set = tuple(file_set)
             elif setting in ["library_width", "slideshow_delay",
-                             "file_check_amount"]:
+                             "file_check_amount", "commandline_padding"]:
                 # Must be an integer
                 file_set = int(section[setting])
             elif setting == "border_width":

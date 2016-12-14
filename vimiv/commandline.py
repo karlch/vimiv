@@ -51,9 +51,10 @@ class CommandLine(object):
         self.info.set_hexpand(True)
         self.info.set_valign(Gtk.Align.CENTER)
         self.info.set_ellipsize(Pango.EllipsizeMode.END)
-        self.info.set_margin_left(6)
-        self.info.set_margin_right(6)
-        self.info.set_margin_bottom(6)
+        padding = self.app.settings["GENERAL"]["commandline_padding"]
+        self.info.set_margin_left(padding)
+        self.info.set_margin_right(padding)
+        self.info.set_margin_bottom(padding)
 
         # Monospaced font
         self.info.set_name("CompletionInfo")
