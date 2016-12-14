@@ -85,8 +85,16 @@ class Library(object):
         self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK)
         self.treeview.connect("key_press_event",
                               self.app["keyhandler"].run, "LIBRARY")
-        # Call the function to create the treeview
-        self.update_treeview()
+        # Add the columns
+        for i, name in enumerate(["Num", "Name", "Size", "M"]):
+            renderer = Gtk.CellRendererText()
+            column = Gtk.TreeViewColumn(name, renderer, markup=i)
+            if name == "Name":
+                column.set_expand(True)
+                column.set_max_width(20)
+            self.treeview.append_column(column)
+        # Set the liststore model
+        self.treeview.set_model(self.liststore_create())
         # Set the hexpand property if requested in the configfile
         if (not self.app.paths or isinstance(self.app.paths, str)) \
                 and self.expand:
@@ -148,30 +156,6 @@ class Library(object):
             self.app["image"].scrolled_win.grab_focus()
         # Update info for the current mode
         self.app["statusbar"].update_info()
-
-    def update_treeview(self, search=False):
-        """Renew the information in the treeview.
-
-        Args:
-            search: If True a search was performed. Necessary to highlight
-            search results and delete search items if a new directory is
-            entered.
-        """
-        if not search:
-            self.app["commandline"].search_positions = []
-        # Remove old columns
-        for column in self.treeview.get_columns():
-            self.treeview.remove_column(column)
-        # Tree View
-        self.treeview.set_model(self.liststore_create())
-        # Add the columns
-        for i, name in enumerate(["Num", "Name", "Size", "M"]):
-            renderer = Gtk.CellRendererText()
-            column = Gtk.TreeViewColumn(name, renderer, markup=i)
-            if name == "Name":
-                column.set_expand(True)
-                column.set_max_width(20)
-            self.treeview.append_column(column)
 
     def liststore_create(self):
         """Create the Gtk.ListStore containing information on supported files.
@@ -284,7 +268,11 @@ class Library(object):
             last_directory: Directory that was last opened in the library.
             search: If True the reload request comes from a search
         """
-        self.update_treeview(search)
+        # Reset search positions
+        if not search:
+            self.app["commandline"].search_positions = []
+        # Create model in new directory
+        self.treeview.set_model(self.liststore_create())
         self.focus(True)
         # Check if there is a saved position
         if directory in self.dir_pos.keys():
