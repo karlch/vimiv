@@ -173,7 +173,8 @@ class Vimiv(Gtk.Application):
         # Show everything and then hide whatever needs to be hidden
         self["window"].show_all()
         self["manipulate"].scrolled_win.hide()
-        self["commandline"].grid.hide()
+        self["commandline"].entry.hide()
+        self["commandline"].info.hide()
         # Statusbar depending on setting
         if self["statusbar"].hidden:
             self["statusbar"].bar.hide()
@@ -229,12 +230,30 @@ class Vimiv(Gtk.Application):
         main_grid.attach(self["library"].grid, 0, 0, 1, 1)
         main_grid.attach(self["image"].scrolled_win, 1, 0, 1, 1)
         main_grid.attach(self["manipulate"].scrolled_win, 0, 1, 2, 1)
-        main_grid.attach(self["statusbar"].bar, 0, 2, 2, 1)
+
+        overlay_grid = Gtk.Grid()
+        overlay_grid.attach(self["statusbar"].bar, 0, 0, 1, 1)
+        overlay_grid.attach(self["commandline"].info, 0, 1, 1, 1)
+        overlay_grid.attach(self["commandline"].entry, 0, 2, 1, 1)
+        overlay_grid.set_valign(Gtk.Align.END)
+
+        # Make it nice using CSS
+        overlay_grid.set_name("CommandLine")
+        style = Gtk.Window().get_style_context()
+        color = style.get_background_color(Gtk.StateType.NORMAL)
+        color_str = "#CommandLine { background-color: " + color.to_string() \
+            + "; }"
+        command_provider = Gtk.CssProvider()
+        command_css = color_str.encode()
+        command_provider.load_from_data(command_css)
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), command_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         # Overlay contains grid mainly and adds commandline as floating
         overlay = Gtk.Overlay()
         overlay.add(main_grid)
-        overlay.add_overlay(self["commandline"].grid)
+        overlay.add_overlay(overlay_grid)
         self["window"].add(overlay)
 
     def quit_wrapper(self, force=False):

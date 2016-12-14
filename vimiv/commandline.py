@@ -7,7 +7,7 @@ from threading import Thread
 from subprocess import Popen, PIPE
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib
+from gi.repository import Gtk, Gdk, GLib, Pango
 from vimiv.fileactions import populate
 from vimiv.helpers import read_file
 
@@ -17,7 +17,6 @@ class CommandLine(object):
 
     Attributes:
         app: The main vimiv application to interact with.
-        grid: Gtk.Grid which packs the other objects.
         entry: Gtk.Entry as commandline entry.
         info: Gtk.Label to show completion information.
         history: List of commandline history to save.
@@ -41,7 +40,6 @@ class CommandLine(object):
         general = settings["GENERAL"]
 
         # Command line
-        self.grid = Gtk.Grid()
         self.entry = Gtk.Entry()
         self.entry.connect("activate", self.handler)
         self.entry.connect("key_press_event",
@@ -52,24 +50,9 @@ class CommandLine(object):
         self.info = Gtk.Label()
         self.info.set_hexpand(True)
         self.info.set_valign(Gtk.Align.CENTER)
-        self.info.set_halign(Gtk.Align.START)
-        self.grid.attach(self.info, 0, 0, 1, 1)
-        self.grid.attach(self.entry, 0, 1, 1, 1)
-        # Make it nice using CSS
-        self.grid.set_name("CommandLine")
-        style = Gtk.Window().get_style_context()
-        color = style.get_background_color(Gtk.StateType.NORMAL)
-        color_str = "#CommandLine { background-color: " + color.to_string() \
-            + "; }"
-        command_provider = Gtk.CssProvider()
-        command_css = color_str.encode()
-        command_provider.load_from_data(command_css)
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(), command_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-        # Alignment and spacing
-        self.grid.set_valign(Gtk.Align.END)
-        self.info.set_margin_top(6)
+        self.info.set_ellipsize(Pango.EllipsizeMode.END)
+        self.info.set_margin_left(6)
+        self.info.set_margin_right(6)
         self.info.set_margin_bottom(6)
 
         # Monospaced font
@@ -383,7 +366,7 @@ class CommandLine(object):
         # Remove old error messages
         self.app["statusbar"].update_info()
         # Show/hide the relevant stuff
-        self.grid.show()
+        self.entry.show()
         # Remember what widget was focused before
         if self.app["library"].treeview.is_focus():
             # In the library remember current file to refocus if incsearch was
@@ -427,7 +410,8 @@ class CommandLine(object):
 
     def leave(self):
         """Apply actions to close the commandline."""
-        self.grid.hide()
+        self.entry.hide()
+        self.info.hide()
         # Refocus the remembered widget
         if self.app["window"].last_focused == "lib":
             self.app["library"].focus(True)
