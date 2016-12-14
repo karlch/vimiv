@@ -178,6 +178,7 @@ class Vimiv(Gtk.Application):
         # Statusbar depending on setting
         if self["statusbar"].hidden:
             self["statusbar"].bar.hide()
+        self["statusbar"].set_separator_height()
         # Try to generate imagelist recursively from the current directory if
         # recursive is given and not paths exist
         if self.settings["GENERAL"]["recursive"] and not self.paths:
@@ -230,6 +231,7 @@ class Vimiv(Gtk.Application):
         main_grid.attach(self["library"].grid, 0, 0, 1, 1)
         main_grid.attach(self["image"].scrolled_win, 1, 0, 1, 1)
         main_grid.attach(self["manipulate"].scrolled_win, 0, 1, 2, 1)
+        main_grid.attach(self["statusbar"].separator, 0, 2, 2, 1)
 
         overlay_grid = Gtk.Grid()
         overlay_grid.attach(self["statusbar"].bar, 0, 0, 1, 1)

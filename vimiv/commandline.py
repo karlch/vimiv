@@ -48,8 +48,6 @@ class CommandLine(object):
         self.entry.connect("changed", self.reset_tab_count)
         self.entry.set_hexpand(True)
         self.info = Gtk.Label()
-        self.info.set_hexpand(True)
-        self.info.set_valign(Gtk.Align.CENTER)
         self.info.set_ellipsize(Pango.EllipsizeMode.END)
         padding = self.app.settings["GENERAL"]["commandline_padding"]
         self.info.set_margin_left(padding)

@@ -183,8 +183,7 @@ class Image(object):
             size = (size[0] - self.app["library"].width, size[1])
         if not self.app["statusbar"].hidden:
             size = (size[0], size[1]
-                    - self.app["statusbar"].bar.get_allocated_height()
-                    - 2 * self.app["statusbar"].bar.get_border_width())
+                    - self.app["statusbar"].separator.get_margin_top() - 2)
         return size
 
     def zoom_delta(self, delta):

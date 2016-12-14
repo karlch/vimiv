@@ -25,6 +25,8 @@ class Statusbar(object):
         left_label: Gtk.Label containing position, name and zoom.
         right_label: Gtk.Label containing mode and prefixed numbers.
         center_label: Gtk.Label containing mark status and slideshow info.
+        separator: Gtk.Separator used as background of the statusbar. Makes sure
+            the other widgets do not interfere with the overlaying bar.
     """
 
     def __init__(self, app, settings):
@@ -53,15 +55,16 @@ class Statusbar(object):
         self.center_label.set_justify(Gtk.Justification.CENTER)
         self.center_label.set_hexpand(True)
         # Add them all
-        self.bar.add(self.left_label)
-        self.bar.add(self.center_label)
-        self.bar.add(self.right_label)
-        self.bar.set_valign(Gtk.Align.END)
+        self.bar.attach(self.left_label, 0, 0, 1, 1)
+        self.bar.attach(self.center_label, 1, 0, 1, 1)
+        self.bar.attach(self.right_label, 2, 0, 1, 1)
+        # Padding and separator
         padding = self.app.settings["GENERAL"]["commandline_padding"]
         self.bar.set_margin_left(padding)
         self.bar.set_margin_right(padding)
         self.bar.set_margin_top(padding)
         self.bar.set_margin_bottom(padding)
+        self.separator = Gtk.Separator()
 
     def err_message(self, message):
         """Push an error message to the statusbar.
@@ -157,10 +160,19 @@ class Statusbar(object):
         """Toggle statusbar and resize image if necessary."""
         if not self.hidden and not self.app["commandline"].entry.is_visible():
             self.bar.hide()
+            self.separator.hide()
         else:
             self.bar.show()
+            self.separator.show()
         self.hidden = not self.hidden
         # Resize the image if necessary
         if not self.app["image"].user_zoomed and self.app.paths and \
                 not self.app["thumbnail"].toggled:
             self.app["image"].zoom_to(0)
+
+    def set_separator_height(self):
+        """Set height of the separator used as background of the statusbar."""
+        bar_height = self.bar.get_allocated_height()
+        padding = self.app.settings["GENERAL"]["commandline_padding"]
+        separator_height = bar_height + 2 * padding
+        self.separator.set_margin_top(separator_height)
