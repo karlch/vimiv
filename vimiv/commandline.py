@@ -7,7 +7,7 @@ from threading import Thread
 from subprocess import Popen, PIPE
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib, Pango
+from gi.repository import Gtk, GLib
 from vimiv.fileactions import populate
 from vimiv.helpers import read_file
 
@@ -18,7 +18,6 @@ class CommandLine(object):
     Attributes:
         app: The main vimiv application to interact with.
         entry: Gtk.Entry as commandline entry.
-        info: Gtk.Label to show completion information.
         history: List of commandline history to save.
         pos: Position in history completion.
         sub_history: Parts of the history that match entered text.
@@ -45,23 +44,7 @@ class CommandLine(object):
         self.entry.connect("key_press_event",
                            self.app["keyhandler"].run, "COMMAND")
         self.entry.connect("changed", self.check_close)
-        self.entry.connect("changed", self.reset_tab_count)
         self.entry.set_hexpand(True)
-        self.info = Gtk.Label()
-        self.info.set_ellipsize(Pango.EllipsizeMode.END)
-        padding = self.app.settings["GENERAL"]["commandline_padding"]
-        self.info.set_margin_left(padding)
-        self.info.set_margin_right(padding)
-        self.info.set_margin_bottom(padding)
-
-        # Monospaced font
-        self.info.set_name("CompletionInfo")
-        completion_provider = Gtk.CssProvider()
-        completion_css = "#CompletionInfo { font-family: monospace; }".encode()
-        completion_provider.load_from_data(completion_css)
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(), completion_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
         # Cmd history from file
         self.history = read_file(os.path.join(self.app.directory, "history"))
@@ -87,9 +70,9 @@ class CommandLine(object):
             entry: The Gtk.Entry from which the command comes.
         """
         # Only close completions if currently tabbing through results
-        if self.app["completions"].cycling:
+        if self.app["completions"].tab_presses != 0:
+            self.app["completions"].activate(None, None, None)
             self.app["completions"].reset()
-            self.info.hide()
             return
         # cmd from input
         command = entry.get_text()
@@ -362,10 +345,9 @@ class CommandLine(object):
         """Open and focus the command line."""
         # Colon for text
         self.entry.set_text(":")
-        # Remove old error messages
-        self.app["statusbar"].update_info()
         # Show/hide the relevant stuff
         self.entry.show()
+        self.app["completions"].show()
         # Remember what widget was focused before
         if self.app["library"].treeview.is_focus():
             # In the library remember current file to refocus if incsearch was
@@ -386,6 +368,7 @@ class CommandLine(object):
             self.app["window"].last_focused = "im"
         self.entry.grab_focus()
         self.entry.set_position(-1)
+        # Update info for command mode
         self.app["statusbar"].update_info()
 
     def reset_text(self):
@@ -393,7 +376,6 @@ class CommandLine(object):
 
         Trigger check_close() and therefore leave()
         """
-        self.info.set_text("")
         self.entry.set_text("")
 
     def check_close(self, entry):
@@ -410,8 +392,10 @@ class CommandLine(object):
 
     def leave(self):
         """Apply actions to close the commandline."""
+        self.app["completions"].treeview.scroll_to_point(0, 0)
         self.entry.hide()
-        self.info.hide()
+        self.app["completions"].hide()
+        self.app["completions"].reset()
         # Refocus the remembered widget
         if self.app["window"].last_focused == "lib":
             self.app["library"].focus(True)
@@ -423,16 +407,6 @@ class CommandLine(object):
             self.app["image"].scrolled_win.grab_focus()
         self.last_filename = ""
         self.app["statusbar"].update_info()
-
-    def reset_tab_count(self, entry):
-        """Reset the amount of tab presses if new text is entered.
-
-        Args:
-            entry: The Gtk.Entry to check.
-        """
-        self.app["completions"].tab_presses = 0
-        self.app["completions"].cycling = False
-        self.info.hide()
 
     def incremental_search(self, entry):
         """Run a search for every entered character.

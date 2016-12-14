@@ -18,20 +18,6 @@ scrolltypes["J"] = (Gtk.ScrollType.END, False)
 scrolltypes["K"] = (Gtk.ScrollType.START, False)
 scrolltypes["L"] = (Gtk.ScrollType.END, True)
 
-# A list of all external commands
-pathenv = os.environ.get('PATH')
-if pathenv is not None:
-    executables = set()
-    for bindir in pathenv.split(':'):
-        try:
-            executables |= set(["!" + exe for exe in os.listdir(bindir)])
-        except OSError:
-            continue
-    external_commands = tuple(sorted(list(executables)))
-else:
-    external_commands = ()
-
-
 def listdir_wrapper(path, show_hidden=False):
     """Reimplementation of os.listdir which mustn't show hidden files.
 
@@ -115,3 +101,33 @@ def error_message(message, running_tests=False):
     if not running_tests:
         popup.run()
         popup.destroy()
+
+def read_info_from_man():
+    """Read information on commands from the vimivrc.5 manpage.
+
+    Return:
+        A dictionary containing commandnames and information on them.
+    """
+    infodict = {}
+    with open("/usr/share/man/man5/vimivrc.5") as f:
+        man_text = f.read()
+    sections = man_text.split("\n\n")
+    # Get section with command information
+    for i, section in enumerate(sections):
+        if ".SH COMMANDS" in section:
+            command_section = sections[i+1]
+            break
+    # Loop over every command
+    for command in command_section.split(".TP"):
+        lines = command.split("\n")
+        if len(lines) > 2:
+            name = lines[1].lstrip(".BR ").replace("\\", "").replace(
+                "[COUNT]", "").rstrip()
+            if "set" in name:
+                name = " ".join(name.split()[0:2])
+            else:
+                name = name.split()[0]
+            info = " ".join(lines[2:])
+            info = info.split(". ")[0].replace("[COUNT]", "")
+            infodict[name] = info
+    return infodict

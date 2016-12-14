@@ -122,13 +122,13 @@ The following commands can additionally be run from the command line.
 
 .TP
 .BR accept_changes
-Accept changes made in the manipulation bar and close the bar.
+Accept changes made in the manipulation bar and close it.
 .TP
 .BR alias\ "alias"\ "commandname"
-Add an alias called "alias" which will run "commandname" when called.
+Add an alias called "alias" for "commandname".
 .TP
 .BR autorotate
-Rotate all images in the current filelist automatically according to EXIF data.
+Rotate all images in the current filelist according to EXIF data.
 .TP
 .BR center\ 
 Scroll to the center of the image.
@@ -137,20 +137,21 @@ Scroll to the center of the image.
 Delete all files in ~/.vimiv/Trash.
 .TP
 .BR clear_thumbs
-Delete all files in ~/.vimiv/Thumbnails/.
+Delete all files in ~/.vimiv/Thumbnails.
 .TP
 .BR copy_basename
-Copy the basename of the currently selected image to clipboard or primary
-selection depending on the setting copy_to_primary.
+Copy the basename of the currently selected image to clipboard. The selection is
+either clipboard or primary depending on the setting copy_to_primary.
 .TP
 .BR copy_abspath
-Like the above but use the absolute path instead of the basename.
+Copy the abspath of the currently selected image to clipboard. The selection is
+either clipboard or primary depending on the setting copy_to_primary.
 .TP
 .BR delete\ 
 Delete the current image
 .TP
 .BR discard_changes
-Discard changes made in the manipulation bar and close the bar.
+Discard changes made in the manipulation bar and close it.
 .TP
 .BR first\ \ 
 Move to the first image in filelist of Image/Thumbnail mode.
@@ -170,7 +171,11 @@ Fit the image horizontally into the window.
 Fit the image vertically into the window.
 .TP
 .BR flip\ (1/0)
-If 1 is appended, flip horizontally. If 0 is appended, flip vertically.
+Flip the image. If 1 is appended, flip horizontally. If 0 is appended, flip
+vertically.
+.TP
+.BR focus_library
+Focus the library.
 .TP
 .BR format\ "formatstring"
 Format all currently open filenames. This will rename all currently open images 
@@ -301,14 +306,16 @@ file doesn't exist, it will be created. If it does, the names will be appended
 if they aren't in the tagfile already.
 .TP
 .BR tag_load\ tagname
-Load all images in the tagfile "tagname" into the current filelist in image
-mode.
+Load all images in the tagfile "tagname" into image mode.
 .TP
 .BR tag_remove\ tagname
 Delete the tagfile "tagname".
 .TP
 .BR thumbnail
 Toggle thumbnail mode.
+.TP
+.BR unfocus_library
+Focus widget last focused before the library.
 .TP
 .BR version
 Show pop-up with version information.
@@ -318,6 +325,12 @@ Zoom in.
 .TP
 .BR zoom_out
 Zoom out.
+.TP
+.BR zoom_thumb_in
+Increase thumbnail size.
+.TP
+.BR zoom_thumb_out
+Decrease thumbnail size.
 .TP
 .BR zoom_to\ Float.
 Zoom to Float.

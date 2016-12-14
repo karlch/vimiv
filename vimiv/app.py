@@ -18,7 +18,7 @@ from vimiv.manipulate import Manipulate
 from vimiv.statusbar import Statusbar
 from vimiv.commandline import CommandLine
 from vimiv.commands import Commands
-from vimiv.completions import VimivComplete
+from vimiv.completions import Completion
 from vimiv.slideshow import Slideshow
 from vimiv.keyhandler import KeyHandler
 from vimiv.tags import TagHandler
@@ -174,7 +174,7 @@ class Vimiv(Gtk.Application):
         self["window"].show_all()
         self["manipulate"].scrolled_win.hide()
         self["commandline"].entry.hide()
-        self["commandline"].info.hide()
+        self["completions"].hide()
         # Statusbar depending on setting
         if self["statusbar"].hidden:
             self["statusbar"].bar.hide()
@@ -211,7 +211,7 @@ class Vimiv(Gtk.Application):
         self["mark"] = Mark(self, self.settings)
         self["fileextras"] = FileExtras(self)
         self["statusbar"] = Statusbar(self, self.settings)
-        self["completions"] = VimivComplete(self)
+        self["completions"] = Completion(self)
         self["slideshow"] = Slideshow(self, self.settings)
         self["image"] = Image(self, self.settings)
         self["library"] = Library(self, self.settings)
@@ -235,7 +235,7 @@ class Vimiv(Gtk.Application):
 
         overlay_grid = Gtk.Grid()
         overlay_grid.attach(self["statusbar"].bar, 0, 0, 1, 1)
-        overlay_grid.attach(self["commandline"].info, 0, 1, 1, 1)
+        overlay_grid.attach(self["completions"].info, 0, 1, 1, 1)
         overlay_grid.attach(self["commandline"].entry, 0, 2, 1, 1)
         overlay_grid.set_valign(Gtk.Align.END)
 

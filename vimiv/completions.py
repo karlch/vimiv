@@ -4,312 +4,259 @@
 
 import os
 import re
+from gi import require_version
+require_version('Gtk', '3.0')
+from gi.repository import Gtk
 from vimiv.helpers import listdir_wrapper
-from vimiv.helpers import external_commands
+from vimiv.helpers import read_info_from_man
 from vimiv.fileactions import is_image
 
 
 class Completion():
-    """Class for the commandline completion.
-
-    Contains different functions for the different completion types.
+    """Completion for vimiv's commandline.
 
     Attributes:
-        command: Entered text in commandline.
-        internal_completions: List of all internal vimiv commands.
-        repeat: Prepended repeat number for command.
-        show_hidden: If true, show hidden files. Else do not.
+        app: The main vimiv application to interact with.
+        liststores: Dictionary containing the liststore models for different
+            completion types.
+        entry: The commandline entry.
+        info: ScrolledWindow containing the completion information.
+        tab_position: Position when tabbing through completion elements.
+        tab_presses: Amount of tab presses.
     """
 
-    def __init__(self):
-        """Set default values for attributes."""
-        self.command = ""
-        self.internal_commands = []
-        self.repeat = ""
-        self.tagdir = ""
-        self.show_hidden = False
-
-    def set_command(self, command):
-        """Set the command for completion and strip numbers for repeat."""
-        if command:
-            while command[0].isdigit():
-                self.repeat += command[0]
-                command = command[1:]
-        self.command = command
-
-    def set_internals(self, internal_commands):
-        """Set the list of internal vimiv commands."""
-        self.internal_commands = internal_commands
-
-    def set_tagdir(self, tagdir):
-        """Set the directory in which tags are stored."""
-        self.tagdir = tagdir
-
-    def set_show_hidden(self, show_hidden):
-        """Set the value for show hidden."""
-        self.show_hidden = show_hidden
-
-    def complete(self):
-        """Find out type of completion and execute the correct function.
-
-        Return:
-            output: Best matching completion.
-            compstr: Formatted string with all possible completions to show in
-                commandline info.
-            completions: List of possible completions.
-        """
-        comp_type = "internal"
-        commands = list(self.internal_commands)
-        # Generate list of possible completions depending on the type of
-        # completion
-        # Nothing entered -> checks are useless
-        if self.command:
-            # External commands are prefixed with an !
-            if self.command[0] == "!":
-                commands = self.complete_external()
-                comp_type = "external"
-            # Paths are prefixed with a /
-            elif self.command[0] in ["/", ".", "~"]:
-                commands = self.complete_path(self.command)
-                comp_type = "path"
-            # Tag commands
-            elif re.match(r'^(tag_(write|remove|load) )', self.command):
-                commands = self.complete_tag()
-                comp_type = "tag"
-
-        # Sort out the completions
-        # Check if the entered text matches the beginning of a command
-        matchstr = '^(' + self.command + ')'
-        completions = [cmd for cmd in commands if re.match(matchstr, cmd)]
-
-        # Find the best matching completion as output
-        if completions:
-            compstr, output = self.best_match(completions, comp_type)
-        else:
-            compstr = "  No matching completion"
-            output = ":" + self.command
-
-        # Return the best matching completion and the string with all
-        # suggestions
-        return output, compstr, completions
-
-    def best_match(self, completions, comp_type):
-        """Find the best matching completion.
+    def __init__(self, app):
+        """Create the necessary objects and settings.
 
         Args:
-            completions: List of possible completions.
-            comp_type: Completion type (internal, external, path, tag).
-        Return:
-            Formatted completions, best match.
+            app: The main vimiv application to interact with.
         """
-        # Output, start with : and the prepended numbers
-        output = ":" + self.repeat
-        # Find last equal character
-        first = completions[0]
-        last = completions[-1]
-        for i, char in enumerate(first):
-            if char == last[i]:
-                output += char
-            else:
-                break
+        self.app = app
+        # Create liststore dictionary with the filter used.
+        self.liststores = {"internal": [Gtk.ListStore(str, str)],
+                           "external": [Gtk.ListStore(str, str)],
+                           "path": [Gtk.ListStore(str, str)],
+                           "tag": [Gtk.ListStore(str, str)],
+                           "search": [Gtk.ListStore(str, str)]}
+        for liststore in self.liststores.values():
+            comp_filter = liststore[0].filter_new()
+            comp_filter.set_visible_func(self.completion_filter)
+            liststore.append(comp_filter)
+        # Use the commandline entry here and connect to the refilter method
+        self.entry = self.app["commandline"].entry
+        self.entry.connect("changed", self.refilter)
+        # Create treeview
+        self.treeview = Gtk.TreeView()
+        self.treeview.set_enable_search(False)
+        self.treeview.set_headers_visible(False)
+        renderer = Gtk.CellRendererText()
+        command_column = Gtk.TreeViewColumn("Command", renderer, markup=0)
+        command_column.set_expand(True)
+        self.treeview.append_column(command_column)
+        info_column = Gtk.TreeViewColumn("Info", renderer, markup=1)
+        self.treeview.append_column(info_column)
+        self.treeview.connect("row-activated", self.activate)
+        # Scrolled window for the completion info
+        self.info = Gtk.ScrolledWindow()
+        padding = self.app.settings["GENERAL"]["commandline_padding"]
+        self.info.set_margin_left(padding)
+        self.info.set_margin_right(padding)
+        self.info.set_size_request(10, 200)
+        self.info.add(self.treeview)
+        # Defaults
+        self.tab_position = 0
+        self.tab_presses = 0
 
-        # Only show the filename if completing self.paths
-        if comp_type == "path":
-            for i, comp in enumerate(completions):
-                if comp.endswith("/"):
-                    completions[i] = comp.split("/")[-2] + "/"
+    def complete(self, inverse=False):
+        """Run completion.
+
+        Try to entter the best matching completion into the entry. On more than
+        one tab start to run through the possible completions.
+
+        Args:
+            inverse: If True, tabbing backwards.
+        """
+        maximum = len(self.treeview.get_model())
+        # Try to set best match first
+        if not self.tab_presses:
+            best_match = ":"
+            comp_type = self.get_comp_type()
+            liststore = self.liststores[comp_type][1]
+            first = str(liststore[0][0])
+            last = str(liststore[-1][0])
+            for i, char in enumerate(first):
+                if char == last[i]:
+                    best_match += char
                 else:
-                    completions[i] = os.path.basename(comp)
-        # And only the tags if completing tags
-        elif comp_type == "tag":
-            for i, comp in enumerate(completions):
-                completions[i] = " ".join(comp.split()[1:])
-
-        # A string with possible completions for the info if there is more
-        # than one completion
-        if len(completions) > 1:
-            compstr = "  ".join(completions)
+                    break
+            if best_match != self.entry.get_text():
+                self.entry.set_text(best_match)
+                self.entry.set_position(-1)
+                return
+        # Set position according to direction and move
+        elif inverse:
+            self.tab_position -= 1
         else:
-            compstr = ""
+            self.tab_position += 1
+        self.tab_presses += 1
+        new_position = self.tab_position % maximum
+        self.treeview.set_cursor(Gtk.TreePath(new_position), None, False)
+        self.treeview.scroll_to_cell(Gtk.TreePath(new_position),
+                                     None, True, 0.5, 0)
+        return True  # Deactivate default keybinding (here for Tab)
 
-        return compstr, output
+    def show(self):
+        """Show the completion information."""
+        # Hacky way to not show the last selected item
+        last = len(self.treeview.get_model()) - 1
+        self.treeview.set_cursor(Gtk.TreePath(last), None, False)
+        self.treeview.scroll_to_cell(Gtk.TreePath(0), None, True, 0.5, 0)
+        self.info.show()
 
-    def complete_tag(self):
-        """Append the available tag names to an internal tag command."""
-        tags = listdir_wrapper(self.tagdir, self.show_hidden)
-        completions = []
-        for tag in tags:
-            completions.append(self.command.split()[0] + " " + tag)
-        return completions
+    def hide(self):
+        """Hide the completion information."""
+        self.info.hide()
 
-    def complete_external(self):
-        """Complete external commands."""
-        arguments = self.command.split()
-        # Check if path completion would be useful
-        # Assumed the case if we have more than one argument and the last one is
-        # not an option
-        if len(arguments) > 1 and arguments[-1][0] != "-":
-            # Path to be completed is last argument
-            path = arguments[-1]
-            files = self.complete_path(path, True)
-            # Command is everything ahead
-            cmd = " ".join(arguments[:-1])
-            # Join both for a commandlist
-            commandlist = []
-            for fil in files:
-                commandlist.append(cmd + " " + fil)
-            return sorted(commandlist)
-        # If no path is necessary return a list of all external commands
+    def activate(self, treeview, path, column):
+        """Enter the completion text of the treeview into the commandline.
+
+        Args:
+            treeview: TreeView that was activated.
+            path: Activated TreePath.
+            column: Activated TreeViewColumn.
+        """
+        if treeview:
+            count = path.get_indices()[0]
         else:
-            return external_commands
+            count = self.tab_position
+        comp_type = self.get_comp_type()
+        row = self.liststores[comp_type][1][count]
+        self.entry.set_text(":" + row[0])
+        self.entry.set_position(-1)
 
-    def complete_path(self, path, external_command=False):
+    def get_comp_type(self, command=""):
+        """Get the current completion type depending on command.
+
+        Args:
+            command: The command to check completion type for. If there is none,
+                default to getting the text from self.entry.
+        Return:
+            The completion type to use.
+        """
+        if not command:
+            command = self.entry.get_text()
+        if command and command[0] != ":":
+            return "search"
+        command = command.lstrip(":")
+        # Nothing entered -> checks are useless
+        if command:
+            # External commands are prefixed with an !
+            if command[0] == "!":
+                return "external"
+            # Paths are prefixed with a /
+            elif command[0] in ["/", ".", "~"]:
+                return "path"
+            # Tag commands
+            elif re.match(r'^(tag_(write|remove|load) )', command):
+                return "tag"
+        return "internal"
+
+    def complete_path(self, path):
         """Complete paths.
 
         Args:
             path: (Partial) name of the path to run completion on.
-            external_command: If True, path comes from an external command.
         Return:
             List containing formatted matching paths.
         """
+        self.liststores["path"][0].clear()
         # Directory of the path, default to .
         directory = os.path.dirname(path) if os.path.dirname(path) else path
         if not os.path.exists(os.path.expanduser(directory)):
             directory = "."
         # Files in that directory
-        files = listdir_wrapper(directory, self.show_hidden)
+        files = listdir_wrapper(directory, self.app["library"].show_hidden)
         # Format them neatly depending on directory and type
-        filelist = []
         for fil in files:
-            if directory != "." or not external_command:
-                fil = os.path.join(directory, fil)
+            fil = os.path.join(directory, fil)
             # Directory
             if os.path.isdir(os.path.expanduser(fil)):
-                filelist.append(fil + "/")
+                self.liststores["path"][0].append([fil + "/", ""])
             # Acceptable file
-            elif is_image(fil) or external_command:
-                filelist.append(fil)
-        return filelist
+            elif is_image(fil):
+                self.liststores["path"][0].append([fil, ""])
 
-
-class VimivComplete(object):
-    """Interface between Completion and vimiv for commandline completion.
-
-    Attributes:
-        app: The main vimiv application to interact with.
-        tab_presses: Times tab has been pressed without any other text being
-            entered.
-        cycling: If True, cycle through possible completions.
-        completions: Available completions.
-        completions_reordered: Completions ordered according to current tab
-            position.
-        output: Best match to be set in the commandline entry.
-        compstr: Formatted string with all possible completions to show in
-            commandline info.
-        do_complete: Completion class defined above for completions.
-    """
-
-    def __init__(self, app):
-        """Set default values for attributes."""
-        self.app = app
-        self.tab_presses = 0
-        self.cycling = False
-        self.completions = []
-        self.completions_reordered = []
-        self.output = ""
-        self.compstr = ""
-        self.do_complete = Completion()
-        self.do_complete.set_tagdir(self.app["tags"].directory)
-
-    def generate_commandlist(self):
-        """Generate a sorted list of all internal commands."""
-        commandlist = list(self.app.commands.keys())
-        aliaslist = list(self.app.aliases.keys())
-        complete_commandlist = sorted(commandlist + aliaslist)
-        # Set the list of completions in the completion class
-        self.do_complete.set_internals(complete_commandlist)
-
-    def complete(self, inverse=False):
-        """Run completion for the commandline."""
-        # Remember old completion
-        previous_output = self.output
-        if not self.cycling:
-            command = self.app["commandline"].entry.get_text().lstrip(":")
-            # Get completions from completion class
-            self.do_complete.set_command(command)
-            self.do_complete.set_show_hidden(
-                self.app["library"].show_hidden)
-            self.output, self.compstr, self.completions = \
-                self.do_complete.complete()
-            self.completions_reordered = self.completions
-
-            # Set text
-            self.app["commandline"].entry.set_text(self.output)
-            self.app["commandline"].info.set_markup(self.compstr)
-            self.app["commandline"].entry.set_position(-1)
-
-        if len(self.completions) > 1:
-            self.app["commandline"].info.show()
-
-        # Cycle through completions on multiple tab
-        if self.output == previous_output and len(self.completions) > 1:
-            if self.cycling:
-                if inverse:
-                    self.tab_presses -= 1
-                else:
-                    self.tab_presses += 1
-            command_position = self.tab_presses % len(self.completions)
-            command = self.completions[command_position]
-            prepended = self.not_common(self.output, command)
-            new_text = prepended + command
-            # Remember tab_presses because changing text resets
-            tab_presses = self.tab_presses
-            self.app["commandline"].entry.set_text(new_text)
-            self.tab_presses = tab_presses
-            self.app["commandline"].entry.set_position(-1)
-            # Get maximum and current pos to always show current completion
-            line_length = self.app["commandline"].info.get_max_width_chars() * 2
-            cur_index = self.completions_reordered.index(command)
-            cur_pos = len("  ".join(
-                self.completions_reordered[0:cur_index + 1]))
-            # Rewrap if we are out of the displayable area
-            if cur_pos > line_length:
-                self.completions_reordered = \
-                    self.completions[command_position:] + \
-                    self.completions[:command_position]
-                cur_index = 0
-            highlight = self.app["library"].markup + \
-                "<b>" + command + "</b></span>"
-            completions = list(self.completions_reordered)  # Pythonic list copy
-            completions[cur_index] = highlight
-            compstr = "  ".join(completions)
-            self.app["commandline"].info.set_markup(compstr)
-            self.app["commandline"].info.show()
-            self.cycling = True
-
-        return True  # Deactivates default bindings (here for Tab)
-
-    def reset(self):
-        """Empty completions and all corresponding values."""
-        self.tab_presses = 0
-        self.cycling = False
-        self.completions = []
-        self.compstr = ""
-        self.app["commandline"].info.set_markup(self.compstr)
-
-    def not_common(self, output, completion):
-        """Receive prepended text from output.
+    def complete_tag(self, command):
+        """Append the available tag names to an internal tag command.
 
         Args:
-            output: Test from commandline entry.
-            completion: Proposed completion string.
-        Return:
-            String with everything but the common match between output and
-            completion.
+            command: The internal command to complete.
         """
-        for i in range(len(completion)):
-            end = len(completion) - i
-            possible_ending = completion[:end]
-            if output.endswith(possible_ending):
-                return output.rstrip(possible_ending)
-        return output
+        self.liststores["tag"][0].clear()
+        tags = listdir_wrapper(self.app["tags"].directory,
+                               self.app["library"].show_hidden)
+        for tag in tags:
+            self.liststores["tag"][0].append([command.split()[0] + " " + tag,
+                                              ""])
+
+    #  The two functions currently only hide the commandline but are implemented
+    #  for possible future usage.
+    def complete_search(self):
+        """Hide the info as it has no use in search."""
+        self.info.hide()
+
+    def complete_external(self):
+        """Hide the info as it has no use in external."""
+        self.info.hide()
+
+    def generate_commandlist(self):
+        """Generate a list of internal vimiv commands and store it."""
+        commands = list(self.app.commands.keys())
+        aliases = list(self.app.aliases.keys())
+        all_commands = sorted(commands + aliases)
+        infodict = read_info_from_man()
+        for command in all_commands:
+            if command in infodict.keys():
+                info = infodict[command]
+            elif command in self.app.aliases:
+                info = "Alias to " + self.app.aliases[command]
+            else:
+                info = ""
+            info = "<i>" + info + "</i>"
+            self.liststores["internal"][0].append([command, info])
+
+    def completion_filter(self, model, treeiter, data):
+        """Filter function used in the liststores to filter completions.
+
+        Args:
+            model: The liststore model to filter.
+            treeiter: The TreeIter representing a row in the model.
+            data: User appended data, here the completion mode.
+        Return:
+            True for a match, False else.
+        """
+        command = self.entry.get_text().lstrip(":")
+        return model[treeiter][0].startswith(command)
+
+    def refilter(self, entry):
+        """Refilter the completion list according to the text in entry."""
+        comp_type = self.get_comp_type()
+        command = entry.get_text().lstrip(":")
+        if command:
+            self.info.show()
+        if comp_type == "path":
+            self.complete_path(command)
+        elif comp_type == "tag":
+            self.complete_tag(command)
+        elif comp_type == "search":
+            self.complete_search()
+        elif comp_type == "external":
+            self.complete_external()
+        self.treeview.set_model(self.liststores[comp_type][1])
+        self.liststores[comp_type][1].refilter()
+        self.reset()
+
+    def reset(self):
+        """Reset all inernal counts."""
+        self.tab_position = 0
+        self.tab_presses = 0
