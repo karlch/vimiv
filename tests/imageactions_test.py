@@ -7,6 +7,7 @@ import shutil
 from unittest import TestCase, main
 from PIL import Image
 import vimiv.imageactions as imageactions
+from vimiv_testcase import compare_images
 
 
 class ImageActionsTest(TestCase):
@@ -16,6 +17,7 @@ class ImageActionsTest(TestCase):
         self.working_directory = os.getcwd()
         os.chdir("vimiv/testimages/")
         shutil.copyfile("arch_001.jpg", "image_to_edit.jpg")
+        self.orig = os.path.abspath("arch_001.jpg")
         self.filename = os.path.abspath("image_to_edit.jpg")
         self.files = [self.filename]
         self.thumbdir = os.path.expanduser("~/.vimiv/Thumbnails")
@@ -31,10 +33,23 @@ class ImageActionsTest(TestCase):
 
     def test_flip(self):
         """Flipping of files."""
-        # Currently only runs through
-        # TODO find a way to check if the image was flipped
+        # Images equal before the flip
+        self.assertTrue(compare_images(self.orig, self.filename))
+        # Images differ after the flip
         imageactions.flip_file(self.files, False)
+        self.assertFalse(compare_images(self.orig, self.filename))
+        # Images equal after flipping again
+        imageactions.flip_file(self.files, False)
+        self.assertTrue(compare_images(self.orig, self.filename))
+        # Same for horizontal flip
+        # Images equal before the flip
+        self.assertTrue(compare_images(self.orig, self.filename))
+        # Images differ after the flip
         imageactions.flip_file(self.files, True)
+        self.assertFalse(compare_images(self.orig, self.filename))
+        # Images equal after flipping again
+        imageactions.flip_file(self.files, True)
+        self.assertTrue(compare_images(self.orig, self.filename))
 
     def test_thumbnails_create(self):
         """Creation of thumbnail files."""

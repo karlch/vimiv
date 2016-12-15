@@ -4,7 +4,9 @@
 
 import os
 import time
+# from math import sqrt
 from unittest import TestCase, main
+from PIL import Image
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gio, Gtk
@@ -21,6 +23,10 @@ def refresh_gui(delay=0):
     while Gtk.events_pending():
         Gtk.main_iteration_do(False)
 
+def compare_images(file1, file2):
+    image1 = Image.open(file1)
+    image2 = Image.open(file2)
+    return image1 == image2
 
 class VimivTestCase(TestCase):
     """Wrapper Class of TestCase."""
