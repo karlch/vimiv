@@ -2,6 +2,7 @@
 # encoding: utf-8
 """Completion tests for vimiv's test suite."""
 
+import os
 from unittest import main
 from vimiv_testcase import VimivTestCase
 
@@ -50,6 +51,19 @@ class CompletionsTest(VimivTestCase):
             self.assertIn(row[0], expected_completions)
         self.assertEqual(len(liststore), len(expected_completions))
 
+    def test_tag_completion(self):
+        """Completion of tags."""
+        tagfiles = os.listdir(self.vimiv["tags"].directory)
+        if not tagfiles:
+            self.fail("There are no tagfiles to test tag completion with.")
+        self.completions.entry.set_text(":tag_load ")
+        self.completions.complete()
+        liststore = self.completions.treeview.get_model()
+        expected_completions = ["tag_load " + tag for tag in tagfiles]
+        for row in liststore:
+            self.assertIn(row[0], expected_completions)
+        self.assertEqual(len(liststore), len(expected_completions))
+
     def test_tabbing(self):
         """Tabbing through completions."""
         # Complete to last matching character
@@ -80,6 +94,11 @@ class CompletionsTest(VimivTestCase):
         selected_index = selected_path.get_indices()[0]
         selected_text = liststore[selected_index][0]
         self.assertEqual(expected_text, selected_text)
+        # Now activate the completion
+        self.completions.activate(None, None, None)
+        entry_text = self.completions.entry.get_text()
+        expected_text = ":clear_thumbs"
+        self.assertEqual(expected_text, entry_text)
 
 
 if __name__ == '__main__':
