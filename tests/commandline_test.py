@@ -22,9 +22,12 @@ class CommandlineTest(VimivTestCase):
         # Focusing
         self.vimiv["commandline"].focus()
         self.assertEqual(self.vimiv["commandline"].entry.get_text(), ":")
+        self.assertTrue(self.vimiv["commandline"].entry.is_focus())
+        self.assertTrue(self.vimiv["commandline"].entry.is_visible())
         # Leaving by deleting the colon
         self.vimiv["commandline"].entry.set_text("")
-        self.assertFalse(self.vimiv["commandline"].grid.is_visible())
+        self.assertFalse(self.vimiv["commandline"].entry.is_visible())
+        self.assertFalse(self.vimiv["commandline"].entry.is_focus())
 
     def test_run_command(self):
         """Run an internal vimiv command."""

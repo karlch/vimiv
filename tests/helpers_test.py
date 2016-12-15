@@ -16,12 +16,6 @@ class HelpersTest(TestCase):
         open("tmp_testdir/foo", "a").close()
         open("tmp_testdir/.foo", "a").close()
 
-    def test_external_commands(self):
-        """Check if list of external commands was generated."""
-        external_commands = " ".join(list(helpers.external_commands))
-        self.assertIn(" !ls ", external_commands)
-        self.assertIn(" !pwd ", external_commands)
-
     def test_listdir_wrapper(self):
         """Check the listdir_wrapper (hidden/no_hidden)."""
         no_hidden_files = helpers.listdir_wrapper("tmp_testdir", False)
@@ -54,6 +48,28 @@ class HelpersTest(TestCase):
         # Not much can happen here, if all attributes are set correctly it will
         # also run
         helpers.error_message("Test error", True)
+
+    def test_read_info_from_man(self):
+        """Read command information from the vimiv manpage."""
+        infodict = helpers.read_info_from_man()
+        # Check if some keys exist
+        self.assertIn("set brightness", infodict)
+        self.assertIn("center", infodict)
+        # Check if the first sentence is added correctly
+        # Simple
+        center_info = infodict["center"]
+        self.assertEqual(center_info, "Scroll to the center of the image")
+        # On two lines
+        autorot_info = infodict["autorotate"]
+        self.assertEqual(
+            autorot_info,
+            "Rotate all images in the current filelist according to EXIF data")
+        # Containing extra periods
+        trash_info = infodict["clear_trash"]
+        self.assertEqual(trash_info, "Delete all files in ~/.vimiv/Trash")
+        # More than one sentence
+        flip_info = infodict["flip"]
+        self.assertEqual(flip_info, "Flip the image")
 
     def tearDown(self):
         shutil.rmtree("tmp_testdir")

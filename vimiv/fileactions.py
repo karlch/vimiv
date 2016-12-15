@@ -37,6 +37,8 @@ def populate_single(arg, recursive):
     if os.path.isfile(arg):
         # Use parent directory
         directory = os.path.dirname(arg)
+        if not directory:  # Default to current directory
+            directory = "./"
         basename = os.path.basename(arg)
         paths = listdir_wrapper(directory)
         # Set the argument to the beginning of the list

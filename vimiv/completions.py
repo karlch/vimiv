@@ -77,8 +77,11 @@ class Completion():
             inverse: If True, tabbing backwards.
         """
         maximum = len(self.treeview.get_model())
+        # If we have no entries, completing makes no sense
+        if not maximum:
+            return
         # Try to set best match first
-        if not self.tab_presses:
+        elif not self.tab_presses:
             best_match = ":"
             comp_type = self.get_comp_type()
             liststore = self.liststores[comp_type][1]

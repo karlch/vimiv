@@ -12,72 +12,74 @@ class CompletionsTest(VimivTestCase):
     @classmethod
     def setUpClass(cls):
         cls.init_test(cls)
+        cls.completions = cls.vimiv["completions"]
 
     def test_reset(self):
         """Reset the internal completion values."""
-        self.vimiv["commandline"].entry.set_text(":a")
-        self.vimiv["completions"].complete()
-        self.vimiv["completions"].reset()
-        self.assertEqual(self.vimiv["completions"].tab_presses, 0)
-        self.assertFalse(self.vimiv["completions"].cycling)
-        self.assertEqual(self.vimiv["completions"].completions, [])
-        self.assertEqual(self.vimiv["completions"].compstr, "")
+        self.completions.tab_presses = 42
+        self.completions.tab_position = 42
+        self.completions.reset()
+        self.assertEqual(self.completions.tab_presses, 0)
+        self.assertEqual(self.completions.tab_position, 0)
 
     def test_internal_completion(self):
         """Completion of internal commands."""
-        self.vimiv["commandline"].entry.set_text(":a")
-        self.vimiv["completions"].complete()
+        self.completions.entry.set_text(":a")
+        self.completions.complete()
         expected_completions = ["accept_changes", "alias", "autorotate"]
-        self.assertEqual(self.vimiv["completions"].completions,
-                         expected_completions)
+        liststore = self.completions.treeview.get_model()
+        for row in liststore:
+            self.assertIn(row[0], expected_completions)
+        self.assertEqual(len(liststore), len(expected_completions))
 
     def test_external_completion(self):
-        """Completion of external commands."""
-        self.vimiv["commandline"].entry.set_text(":!vimi")
-        self.vimiv["completions"].complete()
-        expected_completions = ["!vimiv"]
-        self.assertEqual(self.vimiv["completions"].completions,
-                         expected_completions)
-
-    def test_external_with_path_completion(self):
-        """Completion of external commands."""
-        self.vimiv["commandline"].entry.set_text(":!ls vimi")
-        self.vimiv["completions"].complete()
-        expected_completions = ["!ls vimiv/", "!ls vimiv_testcase.py"]
-        self.assertEqual(self.vimiv["completions"].completions,
-                         expected_completions)
+        """Completion of external commands. Currently none."""
+        self.completions.entry.set_text(":!vimi")
+        self.completions.complete()
+        liststore = self.completions.treeview.get_model()
+        self.assertFalse(len(liststore))
 
     def test_path_completion(self):
         """Completion of paths."""
-        self.vimiv["commandline"].entry.set_text(":./vimiv/testimages/ar")
-        self.vimiv["completions"].complete()
-        expected_completions = ["arch-logo.png", "arch_001.jpg"]
-        self.assertEqual(self.vimiv["completions"].completions,
-                         expected_completions)
+        self.completions.entry.set_text(":./vimiv/testimages/ar")
+        self.completions.complete()
+        expected_completions = ["./vimiv/testimages/arch-logo.png",
+                                "./vimiv/testimages/arch_001.jpg"]
+        liststore = self.completions.treeview.get_model()
+        for row in liststore:
+            self.assertIn(row[0], expected_completions)
+        self.assertEqual(len(liststore), len(expected_completions))
 
     def test_tabbing(self):
         """Tabbing through completions."""
         # Complete to last matching character
-        self.vimiv["commandline"].entry.set_text(":cl")
-        self.vimiv["completions"].complete()
+        self.completions.entry.set_text(":cl")
+        self.completions.complete()
         expected_text = ":clear_t"
-        received_text = self.vimiv["commandline"].entry.get_text()
+        received_text = self.completions.entry.get_text()
         self.assertEqual(expected_text, received_text)
         # First result
+        liststore = self.completions.treeview.get_model()
         self.vimiv["completions"].complete()
-        expected_text = ":clear_thumbs"
-        received_text = self.vimiv["commandline"].entry.get_text()
-        self.assertEqual(expected_text, received_text)
+        expected_text = "clear_thumbs"
+        selected_path = self.completions.treeview.get_cursor()[0]
+        selected_index = selected_path.get_indices()[0]
+        selected_text = liststore[selected_index][0]
+        self.assertEqual(expected_text, selected_text)
         # Second result
         self.vimiv["completions"].complete()
-        expected_text = ":clear_trash"
-        received_text = self.vimiv["commandline"].entry.get_text()
-        self.assertEqual(expected_text, received_text)
+        expected_text = "clear_trash"
+        selected_path = self.completions.treeview.get_cursor()[0]
+        selected_index = selected_path.get_indices()[0]
+        selected_text = liststore[selected_index][0]
+        self.assertEqual(expected_text, selected_text)
         # First again
         self.vimiv["completions"].complete(inverse=True)
-        expected_text = ":clear_thumbs"
-        received_text = self.vimiv["commandline"].entry.get_text()
-        self.assertEqual(expected_text, received_text)
+        expected_text = "clear_thumbs"
+        selected_path = self.completions.treeview.get_cursor()[0]
+        selected_index = selected_path.get_indices()[0]
+        selected_text = liststore[selected_index][0]
+        self.assertEqual(expected_text, selected_text)
 
 
 if __name__ == '__main__':
