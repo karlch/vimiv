@@ -36,17 +36,6 @@ class ParserTest(TestCase):
         self.assertTrue(general["display_bar"])
         self.assertEqual(library["file_check_amount"], 30)
 
-    def test_parse_args(self):
-        """Check if command line arguments are parsed correctly."""
-        # Set arguments to be different from default so they are run
-        # TODO do this with Gtk
-        pass
-        # args = ["--slideshow-delay", "5", "-B", "-l", "-r", "-g", "foo"]
-        # settings = parser.parse_args(self.parser, self.config_settings, args)
-        # general = settings["GENERAL"]
-        # self.assertFalse(general["display_bar"])
-        # self.assertEqual(general["slideshow_delay"], 5)
-
     def test_parse_keys(self):
         """Check if the keybindings are parsed correctly."""
         keybindings = parser.parse_keys()
