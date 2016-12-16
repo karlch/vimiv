@@ -70,7 +70,7 @@ class Completion():
     def complete(self, inverse=False):
         """Run completion.
 
-        Try to entter the best matching completion into the entry. On more than
+        Try to enter the best matching completion into the entry. On more than
         one tab start to run through the possible completions.
 
         Args:
@@ -260,6 +260,6 @@ class Completion():
         self.reset()
 
     def reset(self):
-        """Reset all inernal counts."""
+        """Reset all internal counts."""
         self.tab_position = 0
         self.tab_presses = 0

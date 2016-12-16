@@ -18,6 +18,7 @@ scrolltypes["J"] = (Gtk.ScrollType.END, False)
 scrolltypes["K"] = (Gtk.ScrollType.START, False)
 scrolltypes["L"] = (Gtk.ScrollType.END, True)
 
+
 def listdir_wrapper(path, show_hidden=False):
     """Reimplementation of os.listdir which mustn't show hidden files.
 
@@ -102,11 +103,12 @@ def error_message(message, running_tests=False):
         popup.run()
         popup.destroy()
 
+
 def read_info_from_man():
-    """Read information on commands from the vimivrc.5 manpage.
+    """Read information on commands from the vimivrc.5 man page.
 
     Return:
-        A dictionary containing commandnames and information on them.
+        A dictionary containing command-names and information on them.
     """
     infodict = {}
     with open("/usr/share/man/man5/vimivrc.5") as f:
@@ -115,7 +117,7 @@ def read_info_from_man():
     # Get section with command information
     for i, section in enumerate(sections):
         if ".SH COMMANDS" in section:
-            command_section = sections[i+1]
+            command_section = sections[i + 1]
             break
     # Loop over every command
     for command in command_section.split(".TP"):

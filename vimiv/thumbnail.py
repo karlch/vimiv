@@ -263,7 +263,7 @@ class Thumbnail(object):
         self.move_to_pos(new_pos)
 
     def move_to_pos(self, pos):
-        """Set focus on position in iconview and centre it.
+        """Set focus on position in iconview and center it.
 
         Args:
             pos: The position to focus.

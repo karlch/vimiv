@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
+"""Test image mode for vimiv's testsuite."""
 
 from unittest import main
 from vimiv_testcase import VimivTestCase
@@ -19,7 +20,7 @@ class ImageTest(VimivTestCase):
         width = 1920
         im_width = self.image.imsize[0]
         perc = self.image.get_zoom_percent_to_fit()
-        self.assertEqual(im_width/width, perc)
+        self.assertEqual(im_width / width, perc)
 
     def test_zooming(self):
         """Zooming of images."""
@@ -36,13 +37,13 @@ class ImageTest(VimivTestCase):
         # Zoom by keyhandler
         self.vimiv["keyhandler"].num_str = "03"
         self.image.zoom_to(0)
-        self.assertEqual(self.image.zoom_percent, 1/3)
+        self.assertEqual(self.image.zoom_percent, 1 / 3)
         pixbuf = self.image.image.get_pixbuf()
-        self.assertEqual(width * (1/3), pixbuf.get_width())
+        self.assertEqual(width * (1 / 3), pixbuf.get_width())
         # Zoom back to fit
         self.image.zoom_to(0)
         self.assertEqual(self.image.zoom_percent,
-                self.image.get_zoom_percent_to_fit())
+                         self.image.get_zoom_percent_to_fit())
         pixbuf = self.image.image.get_pixbuf()
         self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
@@ -53,7 +54,7 @@ class ImageTest(VimivTestCase):
         pixbuf = self.image.image.get_pixbuf()
         self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
-        # Non parseable percentage
+        # Percentage that cannot be parsed
         self.vimiv["keyhandler"].num_str = "vimiv"
         self.image.zoom_to(0)
         message = self.vimiv["statusbar"].left_label.get_text()
@@ -98,6 +99,7 @@ class ImageTest(VimivTestCase):
         self.assertEqual(0, self.image.check_for_edit(True))
         # Reset path
         self.vimiv.paths[self.vimiv.index] = path
+
 
 if __name__ == '__main__':
     main()

@@ -50,7 +50,7 @@ class HelpersTest(TestCase):
         helpers.error_message("Test error", True)
 
     def test_read_info_from_man(self):
-        """Read command information from the vimiv manpage."""
+        """Read command information from the vimiv man page."""
         infodict = helpers.read_info_from_man()
         # Check if some keys exist
         self.assertIn("set brightness", infodict)

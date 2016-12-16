@@ -89,3 +89,8 @@ mkdtemp
 abspath
 basename
 errorcode
+liststores
+treeiter
+hasattr
+tmp
+center

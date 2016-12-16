@@ -20,14 +20,18 @@ class AppTest(VimivTestCase):
 
     def test_handle_local_options(self):
         """Handle commandline arguments."""
-        # We need to catch information from stdout
-        if not hasattr(sys.stdout, "getvalue"):
-            self.fail("Need to run test in buffered mode.")
-        # Get version should return zero and print information to stdout
+        # We need to catch information from standard output
+
+        # Get version should print information to standard output and return 0
         option_version = GLib.VariantDict()
         bool_true = GLib.Variant("b", True)
         option_version.insert_value("version", bool_true)
         returncode = self.vimiv.do_handle_local_options(option_version)
+        if not hasattr(sys.stdout, "getvalue"):
+            self.fail("Need to run test in buffered mode.")
+        # In pylint we do not run in buffered mode but this is checked with
+        # hasattr just above.
+        # pylint:disable=no-member
         output = sys.stdout.getvalue().strip()
         self.assertIn("vimiv", output)
         self.assertEqual(returncode, 0)

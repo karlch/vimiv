@@ -234,8 +234,9 @@ class Image(object):
             self.app["keyhandler"].num_str = ""
         try:
             self.imsize = self.get_available_size()
-            self.zoom_percent = (percent if percent
-                                 else self.get_zoom_percent_to_fit(z_width, z_height))
+            self.zoom_percent = (
+                percent if percent
+                else self.get_zoom_percent_to_fit(z_width, z_height))
             # Catch some unreasonable zooms
             if (self.pixbuf_original.get_height() * self.zoom_percent < 5 or
                     self.pixbuf_original.get_height() * self.zoom_percent >
@@ -248,7 +249,7 @@ class Image(object):
                 "Warning: Object cannot be zoomed (further)")
 
     def center_window(self):
-        """Center the image in the current window."""
+        """Centre the image in the current window."""
         # Don't do anything if no images are open
         if not self.app.paths or self.app["thumbnail"].toggled:
             return
