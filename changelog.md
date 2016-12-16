@@ -11,6 +11,11 @@ The most important changes between the versions are listed here.
 * Default flip keybindings to | and _ because y and Y are used for the copy
   method
 * Implement --temp-basedir flag
+* Rewrite command line completion with a Gtk.TreeView
+  This allows the usage of native Gtk filtering and showing some information on
+  internal commands. Downside: no more completion for external commands as the
+  Gtk.ListStore model involved is not performant enough for large amounts of
+  data.
 
 #### v0.7.3
 * Bugfix release
