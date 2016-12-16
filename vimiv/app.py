@@ -129,9 +129,7 @@ class Vimiv(Gtk.Application):
             return 0
         # Temp basedir removes all current settings and sets them to default
         if options.contains("temp-basedir"):
-            print(self.settings["GENERAL"])
             self.settings = set_defaults()
-            print(self.settings["GENERAL"])
             self.directory = mkdtemp()
 
         # If we start from desktop, move to the wanted directory
