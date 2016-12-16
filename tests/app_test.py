@@ -2,11 +2,12 @@
 # encoding: utf-8
 """Tests for the main file app.py for vimiv's test suite."""
 
+import os
+import sys
 from unittest import main
-# from gi import require_version
-# require_version('GLib', '3.0')
 from gi.repository import GLib
 from vimiv_testcase import VimivTestCase
+from vimiv.configparser import parse_dirs
 
 
 class AppTest(VimivTestCase):
@@ -15,14 +16,20 @@ class AppTest(VimivTestCase):
     @classmethod
     def setUpClass(cls):
         cls.init_test(cls)
+        cls.tmpdir = ""
 
     def test_handle_local_options(self):
         """Handle commandline arguments."""
-        # Get version should return zero and do nothing else
+        # We need to catch information from stdout
+        if not hasattr(sys.stdout, "getvalue"):
+            self.fail("Need to run test in buffered mode.")
+        # Get version should return zero and print information to stdout
         option_version = GLib.VariantDict()
         bool_true = GLib.Variant("b", True)
         option_version.insert_value("version", bool_true)
         returncode = self.vimiv.do_handle_local_options(option_version)
+        output = sys.stdout.getvalue().strip()
+        self.assertIn("vimiv", output)
         self.assertEqual(returncode, 0)
         # Set some different options and test if they were handled correctly
         options = GLib.VariantDict()
@@ -38,6 +45,34 @@ class AppTest(VimivTestCase):
         self.assertEqual(self.vimiv.settings["GENERAL"]["slideshow_delay"], 2.2)
         self.assertEqual(self.vimiv.settings["GENERAL"]["geometry"], "400x400")
 
+    def test_temp_basedir(self):
+        """Using a temporary basedir."""
+        options = GLib.VariantDict()
+        bool_true = GLib.Variant("b", True)
+        options.insert_value("temp-basedir", bool_true)
+        self.vimiv.do_handle_local_options(options)
+        # Directory should be in tmp
+        self.assertIn("/tmp/", self.vimiv.directory)
+        self.tmpdir = self.vimiv.directory
+        # Reinitialize the widgets with the new base directory
+        parse_dirs(self.vimiv.directory)
+        self.vimiv.init_widgets()
+        # Thumbnail, Tag and Trash directory should contain tmp
+        self.assertIn("/tmp/", self.vimiv["thumbnail"].directory)
+        self.assertIn("/tmp/", self.vimiv["tags"].directory)
+        self.assertIn("/tmp/", self.vimiv["image"].trashdir)
+        # Create a tag in tmp as a simple test
+        self.vimiv["tags"].write(["image1.py", "image2.py"], "tmptag")
+        tagdir = os.path.join(self.vimiv.directory, "Tags")
+        self.assertIn("tmptag", os.listdir(tagdir))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.vimiv.quit_wrapper()
+        # Check if the temporary directory was deleted correctly
+        cls.assertFalse(cls, os.path.exists(cls.tmpdir))
+        os.chdir(cls.working_directory)
+
 
 if __name__ == "__main__":
-    main()
+    main(buffer=True)
