@@ -74,18 +74,15 @@ class Image(object):
         Return:
             0 if no edits were done or force, 1 else.
         """
-        if self.app.paths:
-            if "EDIT" in self.app.paths[self.app.index]:
-                if force:
-                    self.app["manipulate"].button_clicked(False)
-                    return 0
-                else:
-                    self.app["statusbar"].err_message(
-                        "Image has been edited, add ! to force")
-                    return 1
+        if self.app.paths and "EDIT" in self.app.paths[self.app.index] \
+                and not force:
+            self.app["statusbar"].err_message(
+                "Image has been edited, add ! to force")
+            return 1
+        return 0
 
-    def get_zoom_percent(self, z_width=False, z_height=False):
-        """Get the current zoom factor.
+    def get_zoom_percent_to_fit(self, z_width=False, z_height=False):
+        """Get the zoom factor perfectly fitting the image to the window.
 
         Args:
             z_width: If True zoom to width.
@@ -238,7 +235,7 @@ class Image(object):
         try:
             self.imsize = self.get_available_size()
             self.zoom_percent = (percent if percent
-                                 else self.get_zoom_percent(z_width, z_height))
+                                 else self.get_zoom_percent_to_fit(z_width, z_height))
             # Catch some unreasonable zooms
             if (self.pixbuf_original.get_height() * self.zoom_percent < 5 or
                     self.pixbuf_original.get_height() * self.zoom_percent >
@@ -255,34 +252,15 @@ class Image(object):
         # Don't do anything if no images are open
         if not self.app.paths or self.app["thumbnail"].toggled:
             return
-        # Vertical
-        pbo_height = self.pixbuf_original.get_height()
-        vadj = self.viewport.get_vadjustment().get_value()
-        vact = self.zoom_percent * pbo_height
-        diff = vact - self.imsize[1]
-        if diff > 0:
-            toscroll = (diff - 2 * vadj) / 2
-            Gtk.Adjustment.set_step_increment(
-                self.viewport.get_vadjustment(), toscroll)
-            self.scrolled_win.emit('scroll-child',
-                                   Gtk.ScrollType.STEP_FORWARD, False)
-            # Reset scrolling
-            Gtk.Adjustment.set_step_increment(self.viewport.get_vadjustment(),
-                                              100)
-        # Horizontal
-        pbo_width = self.pixbuf_original.get_width()
-        hadj = self.viewport.get_hadjustment().get_value()
-        hact = self.zoom_percent * pbo_width
-        if diff > 0:
-            diff = hact - self.imsize[0]
-            toscroll = (diff - 2 * hadj) / 2
-            Gtk.Adjustment.set_step_increment(
-                self.viewport.get_hadjustment(), toscroll)
-            self.scrolled_win.emit('scroll-child',
-                                   Gtk.ScrollType.STEP_FORWARD, True)
-            # Reset scrolling
-            Gtk.Adjustment.set_step_increment(self.viewport.get_hadjustment(),
-                                              100)
+        # Get center of adjustments and set them
+        h_adj = Gtk.Scrollable.get_hadjustment(self.viewport)
+        h_middle = (h_adj.get_upper() - h_adj.get_lower() - self.imsize[0]) / 2
+        h_adj.set_value(h_middle)
+        v_adj = Gtk.Scrollable.get_vadjustment(self.viewport)
+        v_middle = (v_adj.get_upper() - v_adj.get_lower() - self.imsize[1]) / 2
+        v_adj.set_value(v_middle)
+        Gtk.Scrollable.set_hadjustment(self.viewport, h_adj)
+        Gtk.Scrollable.set_vadjustment(self.viewport, v_adj)
 
     def move_index(self, forward=True, key=None, delta=1, force=False):
         """Move by delta in paths.
@@ -347,7 +325,7 @@ class Image(object):
             if self.pixbuf_original.is_static_image():
                 self.pixbuf_original = self.pixbuf_original.get_static_image()
                 self.imsize = self.get_available_size()
-                self.zoom_percent = self.get_zoom_percent()
+                self.zoom_percent = self.get_zoom_percent_to_fit()
             else:
                 self.pixbuf_iter = self.pixbuf_original.get_iter()
                 self.zoom_percent = 1

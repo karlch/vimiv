@@ -343,7 +343,8 @@ class Manipulate(object):
             self.app["image"].pixbuf_original.get_static_image()
         if not self.app["window"].is_fullscreen:
             self.app["image"].imsize = self.app["image"].get_available_size()
-        self.app["image"].zoom_percent = self.app["image"].get_zoom_percent()
+        self.app["image"].zoom_percent = \
+            self.app["image"].get_zoom_percent_to_fit()
         self.app["image"].update()
 
     def value_slider(self, slider, name):
@@ -434,7 +435,7 @@ class Manipulate(object):
                 self.app["image"].imsize = \
                     self.app["image"].get_available_size()
             self.app["image"].zoom_percent = \
-                self.app["image"].get_zoom_percent()
+                self.app["image"].get_zoom_percent_to_fit()
             self.app["image"].update()
         # Done
         self.toggle()
