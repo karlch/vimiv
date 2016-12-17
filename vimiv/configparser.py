@@ -43,7 +43,8 @@ def set_defaults():
                "overzoom": False,
                "cache_thumbnails": True,
                "copy_to_primary": False,
-               "commandline_padding": 6}
+               "commandline_padding": 6,
+               "completion_height": 200}
     library = {"show_library": False,
                "library_width": 300,
                "expand_lib": True,
@@ -86,7 +87,8 @@ def overwrite_section(key, config, settings):
                     raise ValueError
                 file_set = tuple(file_set)
             elif setting in ["library_width", "slideshow_delay",
-                             "file_check_amount", "commandline_padding"]:
+                             "file_check_amount", "commandline_padding",
+                             "completion_height"]:
                 # Must be an integer
                 file_set = int(section[setting])
             elif setting == "border_width":

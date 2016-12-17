@@ -61,7 +61,8 @@ class Completion():
         padding = self.app.settings["GENERAL"]["commandline_padding"]
         self.info.set_margin_left(padding)
         self.info.set_margin_right(padding)
-        self.info.set_size_request(10, 200)
+        self.info.set_size_request(
+            10, self.app.settings["GENERAL"]["completion_height"])
         self.info.add(self.treeview)
         # Defaults
         self.tab_position = 0

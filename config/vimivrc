@@ -18,6 +18,7 @@ incsearch: yes
 cache_thumbnails: yes
 copy_to_primary: no
 commandline_padding: 6
+completion_height: 200
 
 [LIBRARY] ######################################################################
 show_library: no
