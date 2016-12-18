@@ -100,6 +100,34 @@ class CompletionsTest(VimivTestCase):
         expected_text = ":clear_thumbs"
         self.assertEqual(expected_text, entry_text)
 
+    def test_selections(self):
+        """Initial selection when tabbing through completions."""
+        self.completions.entry.set_text(":")
+        # No cursor yet
+        cursor = self.completions.treeview.get_cursor()[0]
+        self.assertIsNone(cursor)
+        # Tab should start at index 0
+        self.completions.complete()
+        cursor = self.completions.treeview.get_cursor()[0]
+        self.assertIsNotNone(cursor)
+        index = cursor.get_indices()[0]
+        self.assertEqual(index, 0)
+        # Re-open the completion
+        self.completions.hide()
+        self.completions.reset()
+        self.completions.entry.set_text(":")
+        self.completions.show()
+        # No cursor again
+        cursor = self.completions.treeview.get_cursor()[0]
+        self.assertIsNone(cursor)
+        # Inverse Tab should start at index -1
+        self.completions.complete(True)
+        cursor = self.completions.treeview.get_cursor()[0]
+        self.assertIsNotNone(cursor)
+        index = cursor.get_indices()[0]
+        last = len(self.completions.treeview.get_model()) - 1
+        self.assertEqual(index, last)
+
 
 if __name__ == '__main__':
     main()
