@@ -60,8 +60,8 @@ class Statusbar(object):
         self.bar.attach(self.right_label, 2, 0, 1, 1)
         # Padding and separator
         padding = self.app.settings["GENERAL"]["commandline_padding"]
-        self.bar.set_margin_left(padding)
-        self.bar.set_margin_right(padding)
+        self.bar.set_margin_start(padding)
+        self.bar.set_margin_end(padding)
         self.bar.set_margin_top(padding)
         self.bar.set_margin_bottom(padding)
         self.separator = Gtk.Separator()

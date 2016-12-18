@@ -49,7 +49,9 @@ class Completion():
         self.treeview = Gtk.TreeView()
         self.treeview.set_enable_search(False)
         self.treeview.set_headers_visible(False)
+        padding = self.app.settings["GENERAL"]["commandline_padding"]
         renderer = Gtk.CellRendererText()
+        renderer.set_padding(padding, 0)
         command_column = Gtk.TreeViewColumn("Command", renderer, markup=0)
         command_column.set_expand(True)
         self.treeview.append_column(command_column)
@@ -58,9 +60,6 @@ class Completion():
         self.treeview.connect("row-activated", self.activate)
         # Scrolled window for the completion info
         self.info = Gtk.ScrolledWindow()
-        padding = self.app.settings["GENERAL"]["commandline_padding"]
-        self.info.set_margin_left(padding)
-        self.info.set_margin_right(padding)
         self.info.set_size_request(
             10, self.app.settings["GENERAL"]["completion_height"])
         self.info.add(self.treeview)
