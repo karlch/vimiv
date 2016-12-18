@@ -96,6 +96,9 @@ class Completion():
                 self.entry.set_text(best_match)
                 self.entry.set_position(-1)
                 return
+            # Start at the last element with Shift+Tab
+            elif inverse:
+                self.tab_position = -1
         # Set position according to direction and move
         elif inverse:
             self.tab_position -= 1
