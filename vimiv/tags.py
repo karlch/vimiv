@@ -84,7 +84,7 @@ class TagHandler(object):
         if self.app.paths:
             self.app["image"].scrolled_win.show()
             self.app["library"].scrollable_treeview.set_hexpand(False)
-            self.app["image"].move_index(False, False, 0)
+            self.app["image"].load_image()
             # Focus in library if it is open
             if self.app["library"].grid.is_visible():
                 self.app["library"].reload(self.directory)

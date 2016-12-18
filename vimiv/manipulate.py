@@ -127,7 +127,7 @@ class Manipulate(object):
         if self.app["image"].scrolled_win.is_focus():
             del self.app.paths[self.app.index]
             if self.app.paths:
-                self.app["image"].move_index(delta=0)
+                self.app["image"].load_image()
             else:
                 # No more images in this directory -> focus parent in library
                 self.app["library"].move_up()
@@ -266,7 +266,7 @@ class Manipulate(object):
         """Autorotate all pictures in the current pathlist."""
         amount, method = imageactions.autorotate(self.app.paths)
         if amount:
-            self.app["image"].move_index(True, False, 0)
+            self.app["image"].load_image()
             message = "Autorotated %d image(s) using %s." % (amount, method)
         else:
             message = "No image rotated. Tried using %s." % (method)

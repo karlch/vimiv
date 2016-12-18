@@ -184,7 +184,7 @@ class Vimiv(Gtk.Application):
             self.paths, self.index = populate([os.getcwd()], True, shuffle)
         # Show the image if an imagelist exists
         if self.paths:
-            self["image"].move_index(True, False, 0)
+            self["image"].load_image()
             # Show library at the beginning?
             if not self["library"].show_at_start:
                 self["library"].grid.hide()

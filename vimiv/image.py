@@ -62,8 +62,9 @@ class Image(object):
         self.shuffle = general["shuffle"]
         self.zoom_percent = 1
         self.imsize = [0, 0]
-        self.pixbuf_original = GdkPixbuf.PixbufAnimation
-        self.pixbuf_iter = GdkPixbuf.PixbufAnimationIter
+        self.is_anim = False
+        self.pixbuf_original = GdkPixbuf.Pixbuf()
+        self.pixbuf_iter = GdkPixbuf.PixbufAnimationIter()
         self.timer_id = 0
 
     def check_for_edit(self, force):
@@ -118,32 +119,30 @@ class Image(object):
         """
         if not self.app.paths:
             return
-        pbo_width = self.pixbuf_original.get_width()
-        pbo_height = self.pixbuf_original.get_height()
-
-        # pylint:disable=no-member
-        try:  # Try to scale the image
+        # Start playing an animation if it is one
+        if self.is_anim and update_gif:
+            if not self.animation_toggled:
+                delay = self.pixbuf_iter.get_delay_time()
+                self.timer_id = GLib.timeout_add(delay, self.play_gif)
+                self.play_gif()
+            else:
+                self.pause_gif()
+        # Otherwise scale the image
+        else:
+            pbo_width = self.pixbuf_original.get_width()
+            pbo_height = self.pixbuf_original.get_height()
             pbf_width = int(pbo_width * self.zoom_percent)
             pbf_height = int(pbo_height * self.zoom_percent)
             # Rescaling of svg
             name = self.app.paths[self.app.index]
             info = GdkPixbuf.Pixbuf.get_file_info(name)[0]
-            if "svg" in info.get_extensions():
+            if info and "svg" in info.get_extensions():
                 pixbuf_final = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                     self.app.paths[self.app.index], -1, pbf_height, True)
             else:
                 pixbuf_final = self.pixbuf_original.scale_simple(
                     pbf_width, pbf_height, GdkPixbuf.InterpType.BILINEAR)
             self.image.set_from_pixbuf(pixbuf_final)
-        except:  # If that does not work it must be an animation
-            self.zoom_percent = 1
-            if update_gif:
-                if not self.animation_toggled:
-                    delay = self.pixbuf_iter.get_delay_time()
-                    self.timer_id = GLib.timeout_add(delay, self.play_gif)
-                    self.play_gif()
-                else:
-                    self.pause_gif()
         # Update the statusbar if required
         if update_info:
             self.app["statusbar"].update_info()
@@ -191,19 +190,21 @@ class Image(object):
         """
         if self.app["thumbnail"].toggled:
             return
-        try:
+        elif self.is_anim:
+            message = "Warning: Animations cannot be zoomed"
+            self.app["statusbar"].err_message(message)
+        else:
             self.zoom_percent = self.zoom_percent * (1 + delta)
             # Catch some unreasonable zooms
             if (self.pixbuf_original.get_height() * self.zoom_percent < 50 or
                     self.pixbuf_original.get_height() * self.zoom_percent >
                     self.app["window"].get_size()[0] * 5):
-                raise ValueError
-            self.user_zoomed = True
-            self.update(update_gif=False)
-        except:
-            self.zoom_percent = self.zoom_percent / (1 + delta)
-            message = "Warning: Object cannot be zoomed (further)"
-            self.app["statusbar"].err_message(message)
+                message = "Warning: Image cannot be zoomed further"
+                self.app["statusbar"].err_message(message)
+                self.zoom_percent = self.zoom_percent / (1 + delta)
+            else:
+                self.user_zoomed = True
+                self.update(update_gif=False)
 
     def zoom_to(self, percent, z_width=False, z_height=False):
         """Zoom to a given percentage.
@@ -215,6 +216,9 @@ class Image(object):
         """
         if self.app["thumbnail"].toggled:
             return
+        elif self.is_anim:
+            message = "Warning: Animations cannot be zoomed"
+            self.app["statusbar"].err_message(message)
         before = self.zoom_percent
         self.user_zoomed = False
         # Catch user zooms
@@ -232,21 +236,19 @@ class Image(object):
                     "Error: Zoom percentage not parseable")
                 return
             self.app["keyhandler"].num_str = ""
-        try:
-            self.imsize = self.get_available_size()
-            self.zoom_percent = (
-                percent if percent
-                else self.get_zoom_percent_to_fit(z_width, z_height))
-            # Catch some unreasonable zooms
-            if (self.pixbuf_original.get_height() * self.zoom_percent < 5 or
-                    self.pixbuf_original.get_height() * self.zoom_percent >
-                    self.app["window"].get_size()[0] * 5):
-                self.zoom_percent = before
-                raise ValueError
+        self.imsize = self.get_available_size()
+        self.zoom_percent = (
+            percent if percent
+            else self.get_zoom_percent_to_fit(z_width, z_height))
+        # Catch some unreasonable zooms
+        if (self.pixbuf_original.get_height() * self.zoom_percent < 5 or
+                self.pixbuf_original.get_height() * self.zoom_percent >
+                self.app["window"].get_size()[0] * 5):
+            self.zoom_percent = before
+            message = "Warning: Image cannot be zoomed further"
+            self.app["statusbar"].err_message(message)
+        else:
             self.update(update_gif=False)
-        except:
-            self.app["statusbar"].err_message(
-                "Warning: Object cannot be zoomed (further)")
 
     def center_window(self):
         """Centre the image in the current window."""
@@ -279,6 +281,7 @@ class Image(object):
         # Check for prepended numbers and direction
         if key and self.app["keyhandler"].num_str:
             delta *= int(self.app["keyhandler"].num_str)
+            self.app["keyhandler"].num_clear()
         if not forward:
             delta *= -1
 
@@ -289,12 +292,11 @@ class Image(object):
         if self.shuffle and self.app.index is 0 and delta > 0:
             shuffle(self.app.paths)
 
-        path = self.app.paths[self.app.index]
-        # Show the image at path and receive possible errors
-        returncode = self.show_image(path, delta is not 0)
+        # Load the image at path into self.pixbuf_* and show it
+        self.load_image()
 
         # Info if slideshow returns to beginning
-        if self.app["slideshow"].running and not returncode:
+        if self.app["slideshow"].running:
             if self.app.index is self.app["slideshow"].start_index:
                 message = "Info: back at beginning of slideshow"
                 self.app["statusbar"].lock = True
@@ -302,46 +304,44 @@ class Image(object):
             else:
                 self.app["statusbar"].lock = False
 
-        self.app["keyhandler"].num_clear()
         return True  # for the slideshow
 
-    def show_image(self, path, update_image=True):
-        """Show the image at position path.
-
-        Check for inexistent and inaccessible files.
-
-        Args:
-            path: The path in self.app.paths to operate on.
-        Return:
-            errorcode: 1 if there are errors, 0 else.
-        """
-        errorcode = 0
+    def load_image(self):
+        """Load an image using GdkPixbufLoader."""
+        path = self.app.paths[self.app.index]
+        # Check if the image exists
+        if not os.path.exists(path):
+            self.app["manipulate"].delete()
+        # Remove old timers
+        if self.timer_id:
+            self.pause_gif()
+        # Prepare loader
+        loader = GdkPixbuf.PixbufLoader()
+        loader.connect("area-prepared", self.area_prep)
+        # Load file
         try:
-            if not os.path.exists(path):
-                self.app["manipulate"].delete()
-                errorcode = 1
-            else:
-                self.pixbuf_original = GdkPixbuf.PixbufAnimation.new_from_file(
-                    path)
-            if self.pixbuf_original.is_static_image():
-                self.pixbuf_original = self.pixbuf_original.get_static_image()
-                self.imsize = self.get_available_size()
-                self.zoom_percent = self.get_zoom_percent_to_fit()
-            else:
-                self.pixbuf_iter = self.pixbuf_original.get_iter()
-                self.zoom_percent = 1
-            # If there was a running gif, remove the timer
-            if self.timer_id:
-                self.pause_gif()
-            # If one simply reloads the file the info shouldn't be updated
-            self.update(update_image)
-        # File not accessible
-        except GLib.Error:
+            with open(path, "rb") as f:
+                image_bytes = f.read()
+                loader.write(image_bytes)
+        except:
             self.app.paths.remove(path)
             self.app["statusbar"].err_message("Error: file not accessible")
             self.move_pos(False)
-            errorcode = 1
-        return errorcode
+        loader.close()
+        # Show final image
+        self.update(update_info=True)
+
+    def area_prep(self, loader):
+        """Check for an animation and set the image attributes."""
+        info = loader.get_format()
+        if "gif" in info.get_extensions():
+            self.is_anim = True
+            self.pixbuf_iter = loader.get_animation().get_iter()
+        else:
+            self.is_anim = False
+            self.pixbuf_original = loader.get_pixbuf()
+            self.imsize = self.get_available_size()
+            self.zoom_percent = self.get_zoom_percent_to_fit()
 
     def move_pos(self, forward=True, force=False):
         """Move to specific position in paths.

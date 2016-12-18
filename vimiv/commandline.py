@@ -229,7 +229,7 @@ class CommandLine(object):
             self.app.paths, self.app.index = populate(pipe_input)
             if self.app.paths:  # Images were found
                 self.app["image"].scrolled_win.show()
-                self.app["image"].move_index(False, False, 0)
+                self.app["image"].load_image()
                 # Close library if necessary
                 if self.app["library"].grid.is_visible():
                     self.app["library"].toggle()
@@ -256,9 +256,8 @@ class CommandLine(object):
             else:
                 # If it is an image open it
                 self.app.paths = []
-                self.app.paths, index = populate([path])
-                self.app.index = 0
-                self.app["image"].move_index(True, False, index)
+                self.app.paths, self.app.index = populate([path])
+                self.app["image"].load_image()
                 #  Reload library in lib mode, do not open it in image mode
                 pathdir = os.path.dirname(path)
                 if self.app["window"].last_focused == "lib":

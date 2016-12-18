@@ -50,7 +50,7 @@ class ImageTest(VimivTestCase):
         # Unreasonable zoom
         self.image.zoom_to(1000)
         message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(message, "Warning: Object cannot be zoomed (further)")
+        self.assertEqual(message, "Warning: Image cannot be zoomed further")
         pixbuf = self.image.image.get_pixbuf()
         self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
