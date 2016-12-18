@@ -54,7 +54,6 @@ class Commands(object):
             "move_up": [self.app["library"].move_up],
             "next": [self.app["image"].move_index, True, True],
             "next!": [self.app["image"].move_index, True, True, 1, True],
-            "optimize": [self.app["manipulate"].cmd_edit, 'opt'],
             "prev": [self.app["image"].move_index, False, True],
             "prev!": [self.app["image"].move_index, False, True, 1, True],
             "q": [self.app.quit_wrapper],

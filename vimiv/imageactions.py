@@ -5,7 +5,7 @@ import os
 from shutil import copyfile
 from subprocess import Popen, PIPE
 from threading import Thread
-from PIL import Image, ImageEnhance
+from PIL import Image
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -199,33 +199,3 @@ class Thumbnails:
         self.thumblist.append(outfile)
         self.thumbdict[outfile] = infile
         self.threads.pop(0)
-
-
-def manipulate_all(image, outfile, manipulations):
-    """Apply all the manipulations to image.
-
-    Manipulations include brightness, contrast and sharpness.
-
-    Args:
-        image: Name of the image to manipulate.
-        outfile: File to save the manipulated image to.
-        Manipulations: Values of manipulations to apply.
-
-    Return:
-        1 for errors, 0 else.
-    """
-    if manipulations[3]:  # Optimize
-        try:
-            Popen(["mogrify", "-contrast", "-auto-gamma", "-auto-level",
-                   image], shell=False).communicate()
-        except:
-            return 1
-    # Enhance all three other values
-    with open(image, "rb") as image_file:
-        im = Image.open(image_file)
-        im = ImageEnhance.Brightness(im).enhance(manipulations[0])
-        im = ImageEnhance.Contrast(im).enhance(manipulations[1])
-        im = ImageEnhance.Sharpness(im).enhance(manipulations[2])
-        save_image(im, outfile)
-
-    return 0

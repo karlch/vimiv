@@ -4,10 +4,10 @@
 
 import os
 from threading import Thread
-from PIL import Image
+from PIL import Image, ImageEnhance
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import Gtk, GdkPixbuf, GLib
 from vimiv import imageactions
 from vimiv.fileactions import move_to_trash
 
@@ -20,8 +20,8 @@ class Manipulate(object):
 
     Attributes:
         app: The main vimiv application to interact with.
-        manipulations. List of possible manipulations. Includes brightness,
-            contrast, sharpness and optimize.
+        manipulations: Dictionary of possible manipulations. Includes
+            brightness, contrast and sharpness.
         scrolled_win: Gtk.ScrolledWindow for the widgets so they are accessible
             regardless of window size.
         scale_bri: Gtk.Scale for brightness.
@@ -40,7 +40,9 @@ class Manipulate(object):
         self.app = app
 
         # Settings
-        self.manipulations = [1, 1, 1, False]
+        self.manipulations = {"bri": 1, "con": 1, "sha": 1}
+        self.pil_image = Image
+        self.pil_thumb = Image
 
         # A scrollable window so all tools are always accessible
         self.scrolled_win = Gtk.ScrolledWindow()
@@ -51,9 +53,6 @@ class Manipulate(object):
         grid.connect("key_press_event", self.app["keyhandler"].run,
                      "MANIPULATE")
         self.scrolled_win.add(grid)
-
-        # A list to save the changes being done
-        self.manipulations = [1, 1, 1, False]
 
         # Sliders
         self.scale_bri = Gtk.Scale()
@@ -89,14 +88,11 @@ class Manipulate(object):
         button_no = Gtk.Button(label="Cancel")
         button_no.connect("clicked", self.button_clicked, False)
         button_no.set_size_request(80, 20)
-        button_opt = Gtk.Button(label="Optimize")
-        button_opt.connect("clicked", self.button_opt_clicked)
-        button_opt.set_size_request(80, 20)
 
         # Pack everything into the grid
         for item in [bri_label, self.scale_bri, con_label, self.scale_con,
-                     sha_label, self.scale_sha, separator, button_opt,
-                     button_yes, button_no]:
+                     sha_label, self.scale_sha, separator, button_yes,
+                     button_no]:
             grid.add(item)
 
         self.running_threads = []
@@ -284,14 +280,18 @@ class Manipulate(object):
                 self.app["statusbar"].err_message(
                     "Manipulating symbolik links is not supported")
                 return
-            try:
-                self.app["image"].pixbuf_original.is_static_image()
+            if self.app["image"].is_anim:
                 self.app["statusbar"].err_message(
                     "Manipulating Gifs is not supported")
-            except:
+            else:
                 self.scrolled_win.show()
                 self.scale_bri.grab_focus()
                 self.app["statusbar"].update_info()
+                # Create PIL image to work with
+                size = self.app["image"].imsize
+                self.pil_image = Image.open(self.app.paths[self.app.index])
+                self.pil_thumb = Image.open(self.app.paths[self.app.index])
+                self.pil_thumb.thumbnail(size, Image.ANTIALIAS)
         else:
             if self.app["thumbnail"].toggled:
                 self.app["statusbar"].err_message(
@@ -302,50 +302,40 @@ class Manipulate(object):
             else:
                 self.app["statusbar"].err_message("No image open to edit")
 
-    def manipulate_image(self, real=""):
+    def manipulate_image(self, apply_to_file=False):
         """Apply manipulations to image.
 
         Manipulations are the three sliders for brightness, contrast and
-        sharpness and optimize from ImageMagick. They are applied to a thumbnail
-        by default and can act on the real image.
+        sharpness. They are applied to a thumbnail by default and can act on the
+        real image.
 
         Args:
-            real: If set, apply manipulations to the real image.
+            real: If True, apply manipulations to the real image.
         """
-        if real:  # To the actual image?
-            orig, out = real, real
-        # A thumbnail for higher responsiveness
-        elif "-EDIT" not in self.app.paths[self.app.index]:
-            with open(self.app.paths[self.app.index], "rb") as image_file:
-                im = Image.open(image_file)
-                out = "-EDIT.".join(
-                    self.app.paths[self.app.index].rsplit(".", 1))
-                orig = out.replace("EDIT", "EDIT-ORIG")
-                im.thumbnail(self.app["image"].imsize, Image.ANTIALIAS)
-                imageactions.save_image(im, out)
-                self.app.paths[self.app.index] = out
-                # Save the original to work with
-                imageactions.save_image(im, orig)
+        if apply_to_file:
+            imfile = self.pil_image
         else:
-            out = self.app.paths[self.app.index]
-            orig = out.replace("EDIT", "EDIT-ORIG")
-        # Apply all manipulations
-        if imageactions.manipulate_all(orig, out, self.manipulations):
-            self.app["statusbar"].err_message(
-                "Optimize failed. Is imagemagick installed?")
-
-        # Show the edited image
-        self.app["image"].image.clear()
-        self.app["image"].pixbuf_original = \
-            GdkPixbuf.PixbufAnimation.new_from_file(
-                out)
-        self.app["image"].pixbuf_original = \
-            self.app["image"].pixbuf_original.get_static_image()
-        if not self.app["window"].is_fullscreen:
-            self.app["image"].imsize = self.app["image"].get_available_size()
-        self.app["image"].zoom_percent = \
-            self.app["image"].get_zoom_percent_to_fit()
+            imfile = self.pil_thumb
+        # Apply Brightness, Contrast and Sharpness
+        enhanced_im = ImageEnhance.Brightness(imfile).enhance(
+            self.manipulations["bri"])
+        enhanced_im = ImageEnhance.Contrast(enhanced_im).enhance(
+            self.manipulations["con"])
+        enhanced_im = ImageEnhance.Sharpness(enhanced_im).enhance(
+            self.manipulations["sha"])
+        # On real file save data to file
+        if apply_to_file:
+            imageactions.save_image(imfile, self.app.paths[self.app.index])
+        # Load Pixbuf from PIL data
+        data = enhanced_im.tobytes()
+        g_data = GLib.Bytes.new(data)
+        w, h = imfile.size
+        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
+            g_data, GdkPixbuf.Colorspace.RGB, False, 8, w, h, 3 * w)
+        # Show the edited pixbuf
+        self.app["image"].pixbuf_original = pixbuf
         self.app["image"].update()
+        self.app["image"].zoom_to(0)
 
     def value_slider(self, slider, name):
         """Set value of self.manipulations according to slider value.
@@ -357,12 +347,7 @@ class Manipulate(object):
         val = slider.get_value()
         val = (val + 127) / 127
         # Change brightness, contrast or sharpness
-        if name == "bri":
-            self.manipulations[0] = val
-        elif name == "con":
-            self.manipulations[1] = val
-        else:
-            self.manipulations[2] = val
+        self.manipulations[name] = val
         # Run the manipulation function
         self.manipulate_image()
 
@@ -409,50 +394,19 @@ class Manipulate(object):
             button: Gtk.Button that was clicked.
             accept: If True apply changes to image file. Else discard them.
         """
-        # Reload the real images if changes were made
-        if "EDIT" in self.app.paths[self.app.index]:
-            # manipulated thumbnail
-            out = self.app.paths[self.app.index]
-            orig = out.replace("EDIT", "EDIT-ORIG")  # original thumbnail
-            path = out.replace("-EDIT", "")          # real file
-            # Edit the actual file if yes
-            if accept:
-                self.manipulate_image(path)
-            # Reset all the manipulations
-            self.manipulations = [1, 1, 1, False]
-            for scale in [self.scale_bri, self.scale_con, self.scale_sha]:
-                scale.set_value(0)
-            # Remove the thumbnail files used
-            os.remove(out)
-            os.remove(orig)
-            # Show the original image
-            self.app["image"].pixbuf_original = \
-                GdkPixbuf.PixbufAnimation.new_from_file(path)
-            self.app["image"].pixbuf_original = \
-                self.app["image"].pixbuf_original.get_static_image()
-            self.app.paths[self.app.index] = path
-            if not self.app["window"].is_fullscreen:
-                self.app["image"].imsize = \
-                    self.app["image"].get_available_size()
-            self.app["image"].zoom_percent = \
-                self.app["image"].get_zoom_percent_to_fit()
-            self.app["image"].update()
+        # Apply changes
+        if accept:
+            self.manipulate_image(True)
+        # Reset all the manipulations
+        self.manipulations = {"bri": 1, "con": 1, "sha": 1}
+        for scale in [self.scale_bri, self.scale_con, self.scale_sha]:
+            scale.set_value(0)
+        # Show the original image
+        self.app["image"].user_zoomed = False
+        self.app["image"].load_image()
         # Done
         self.toggle()
         self.app["statusbar"].update_info()
-
-    def button_opt_clicked(self, button):
-        """Set optimize to True and run the manipulation.
-
-        Args:
-            button: Gtk.Button that was clicked.
-        """
-        # Do not repeat optimize
-        if self.manipulations[3]:
-            return
-        else:
-            self.manipulations[3] = True
-            self.manipulate_image()
 
     def cmd_edit(self, manipulation, num="0"):
         """Run the specified manipulation.
@@ -467,12 +421,9 @@ class Manipulate(object):
                 return
             else:
                 self.toggle()
-        if manipulation == "opt":
-            self.button_opt_clicked("button_widget")
-        else:
-            self.focus_slider(manipulation)
-            self.app["keyhandler"].num_str = num
-            execstr = "self.scale_" + manipulation + \
-                ".set_value(int(self.app['keyhandler'].num_str))"
-            exec(execstr)
+        self.focus_slider(manipulation)
+        self.app["keyhandler"].num_str = num
+        execstr = "self.scale_" + manipulation + \
+            ".set_value(int(self.app['keyhandler'].num_str))"
+        exec(execstr)
         self.app["keyhandler"].num_str = ""
