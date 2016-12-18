@@ -7,7 +7,8 @@ import shutil
 from unittest import main
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gtk, Gdk, GLib
+from vimiv.configparser import parse_dirs
 import vimiv.fileactions as fileactions
 from vimiv_testcase import VimivTestCase
 
@@ -20,7 +21,17 @@ class FileActionsTest(VimivTestCase):
         cls.compare_result = False  # Used for the clipboard comparison
         cls.test_directory = os.path.abspath("vimiv/")
         cls.init_test(cls, [cls.test_directory])
+        # Run in a temporary directory to leave alone the user's Trash and
+        # Thumbnails
+        options = GLib.VariantDict()
+        bool_true = GLib.Variant("b", True)
+        options.insert_value("temp-basedir", bool_true)
+        cls.vimiv.do_handle_local_options(options)
+        parse_dirs(cls.vimiv.directory)
+        cls.vimiv.init_widgets()
+        cls.vimiv.activate_vimiv(cls.vimiv)
         cls.trashdir = os.path.join(cls.vimiv.directory, "Trash")
+        cls.thumbdir = os.path.join(cls.vimiv.directory, "Thumbnails")
 
     def test_move_to_trash(self):
         """Move file to trash."""
@@ -52,24 +63,18 @@ class FileActionsTest(VimivTestCase):
 
     def test_clear(self):
         """Clear Trash/Thumbnails."""
-        thumbdir = os.path.expanduser("~/.vimiv/Thumbnails")
-        trashdir = os.path.expanduser("~/.vimiv/Trash")
-        if not os.path.isdir("Thumbnail_bak"):
-            shutil.copytree(thumbdir, "Thumbnail_bak")
-        if not os.path.isdir("Trash_bak"):
-            shutil.copytree(trashdir, "Trash_bak")
+        trashfile = os.path.join(self.trashdir, "foo")
+        thumbfile = os.path.join(self.thumbdir, "foo")
         # Make sure there are some files in the directories
-        os.system("touch ~/.vimiv/Trash/foo")
-        os.system("touch ~/.vimiv/Thumbnails/foo")
+        os.system("touch " + trashfile)
+        os.system("touch " + thumbfile)
+        self.assertEqual(os.listdir(self.thumbdir), ["foo"])
+        self.assertEqual(os.listdir(self.trashdir), ["foo"])
+        # Clear them
         self.vimiv["fileextras"].clear("Thumbnails")
         self.vimiv["fileextras"].clear("Trash")
-        self.assertEqual(os.listdir(thumbdir), [])
-        self.assertEqual(os.listdir(trashdir), [])
-        # Move backups back to directory
-        shutil.rmtree(thumbdir)
-        shutil.rmtree(trashdir)
-        shutil.move("Thumbnail_bak", thumbdir)
-        shutil.move("Trash_bak", trashdir)
+        self.assertEqual(os.listdir(self.thumbdir), [])
+        self.assertEqual(os.listdir(self.trashdir), [])
 
     def test_format_files(self):
         """Format files according to a formatstring."""
