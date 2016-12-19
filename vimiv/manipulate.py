@@ -330,8 +330,12 @@ class Manipulate(object):
         data = enhanced_im.tobytes()
         g_data = GLib.Bytes.new(data)
         w, h = imfile.size
-        pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
-            g_data, GdkPixbuf.Colorspace.RGB, False, 8, w, h, 3 * w)
+        if imfile.mode == 'RGBA':
+            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
+                g_data, GdkPixbuf.Colorspace.RGB, True, 8, w, h, 4 * w)
+        else:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
+                g_data, GdkPixbuf.Colorspace.RGB, False, 8, w, h, 3 * w)
         # Show the edited pixbuf
         self.app["image"].pixbuf_original = pixbuf
         self.app["image"].update()
