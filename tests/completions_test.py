@@ -109,7 +109,7 @@ class CompletionsTest(VimivTestCase):
         self.assertEqual(expected_text, entry_text)
 
     def test_best_match_with_prefix(self):
-        """Complete to best match with a prefixed number"""
+        """Complete to best match with a prefixed number."""
         # Complete to last matching character
         self.completions.entry.set_text(":2cl")
         self.completions.complete()

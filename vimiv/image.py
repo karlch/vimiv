@@ -202,7 +202,8 @@ class Image(object):
                 self.app["keyhandler"].num_str = ""
             if isinstance(step, str):
                 step, err = self.parse_user_zoom(step)
-                if err: return
+                if err:
+                    return
             fallback_zoom = self.zoom_percent
             if zoom_in:
                 self.zoom_percent = self.zoom_percent * (1 + delta * step)
@@ -229,7 +230,8 @@ class Image(object):
         # Either num_str or given from commandline
         if isinstance(percent, str):
             percent, err = self.parse_user_zoom(percent)
-            if err: return
+            if err:
+                return
         self.imsize = self.get_available_size()
         # 0 means zoom to fit
         if percent:

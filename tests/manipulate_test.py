@@ -82,7 +82,7 @@ class ManipulateTest(VimivTestCase):
         self.manipulate.button_clicked(None, True)
         # Different afterwards
         self.assertFalse(compare_images("../testimages/" + cur_image,
-                         cur_image))
+                                        cur_image))
 
     def test_manipulate_sliders(self):
         """Focusing and changing values of sliders."""

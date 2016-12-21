@@ -94,3 +94,4 @@ treeiter
 hasattr
 tmp
 center
+stdout

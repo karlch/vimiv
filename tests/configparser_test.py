@@ -46,7 +46,6 @@ class ConfigparserTest(TestCase):
         defaults = parser.set_defaults()
         self.assertEqual(settings, defaults)
 
-
     def test_parse_config_empty(self):
         """Parse an empty configfile."""
         # Should set default values
@@ -156,7 +155,7 @@ class ConfigparserTest(TestCase):
             configfile = self.create_configfile(settings=settings)
             parsed_settings = parser.parse_config(configfile,
                                                   running_tests=True)
-            #pylint:disable=no-member
+            # pylint:disable=no-member
             output = sys.stdout.getvalue().strip()
             self.assertIn(expected_output, output)
             self.check_defaults(parsed_settings)
@@ -196,14 +195,14 @@ class ConfigparserTest(TestCase):
         cls.configfile_counter += 1
         if settings:
             general = settings["GENERAL"] \
-                      if "GENERAL" in settings.keys() \
-                      else {}
+                if "GENERAL" in settings.keys() \
+                else {}
             library = settings["LIBRARY"] \
-                      if "LIBRARY" in settings.keys() \
-                      else {}
+                if "LIBRARY" in settings.keys() \
+                else {}
             aliases = settings["ALIASES"] \
-                      if "ALIASES" in settings.keys() \
-                      else {}
+                if "ALIASES" in settings.keys() \
+                else {}
             with open(configfile, "w") as f:
                 f.write("[GENERAL]\n")
                 for setting in general.keys():

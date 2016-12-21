@@ -75,10 +75,8 @@ def overwrite_section(key, config, settings):
                 file_set = tuple(file_set)
             elif setting in ["library_width", "slideshow_delay",
                              "file_check_amount", "commandline_padding",
-                             "completion_height"]:
+                             "completion_height", "border_width"]:
                 # Must be an integer
-                file_set = int(section[setting])
-            elif setting == "border_width":
                 file_set = int(section[setting])
             elif setting == "desktop_start_dir":
                 file_set = os.path.expanduser(section[setting])
