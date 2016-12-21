@@ -63,15 +63,6 @@ class ImageActionsTest(TestCase):
             self.assertEqual(thumbnail_size, 128)
         os.remove(thumbnail)
 
-    def test_manipulate(self):
-        """Manipulation of files."""
-        # Currently only runs through
-        # TODO find a way to check if the image was manipulated correctly
-        imageactions.manipulate_all(self.filename, self.filename,
-                                    [10, 10, 10, False])
-        imageactions.manipulate_all(self.filename, self.filename,
-                                    [0, 0, 0, True])
-
     def test_autorotate(self):
         """Autorotate files."""
         imageactions.autorotate(self.files)
