@@ -86,8 +86,6 @@ class Commands(object):
             "zoom_thumb_in": [self.app["thumbnail"].zoom, True],
             "zoom_thumb_out": [self.app["thumbnail"].zoom, False]}
 
-        self.app.aliases = self.settings["ALIASES"]
-
         self.app.functions = {
             "bri_focus": [self.app["manipulate"].focus_slider, "bri"],
             "con_focus": [self.app["manipulate"].focus_slider, "con"],
@@ -121,6 +119,16 @@ class Commands(object):
             "command": [self.app["commandline"].focus]}
 
         self.app.functions.update(self.app.commands)
+
+        # Add aliases catching
+        # 1) aliases that would overwrite an existing function
+        # 2) aliases that link to a non-existing command
+        self.app.aliases = \
+            {alias: self.settings["ALIASES"][alias]
+             for alias in self.settings["ALIASES"].keys()
+             if alias not in self.app.functions.keys()
+             and (self.settings["ALIASES"][alias] in self.app.functions.keys()
+                  or self.settings["ALIASES"][alias][0] in "~/.!")}
 
         # Generate completions as soon as commands exist
         self.app["completions"].generate_commandlist()
