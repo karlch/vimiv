@@ -75,12 +75,16 @@ class Image(object):
         Return:
             0 if no edits were done or force, 1 else.
         """
-        if self.app.paths and "EDIT" in self.app.paths[self.app.index] \
-                and not force:
+        if force:
+            self.app["manipulate"].button_clicked(None, accept=False)
+            return 0
+        elif self.app["manipulate"].manipulations != \
+                {"bri": 1, "con": 1, "sha": 1}:
             self.app["statusbar"].err_message(
                 "Image has been edited, add ! to force")
             return 1
-        return 0
+        else:
+            return 0
 
     def get_zoom_percent_to_fit(self, z_width=False, z_height=False):
         """Get the zoom factor perfectly fitting the image to the window.

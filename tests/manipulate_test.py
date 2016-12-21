@@ -5,7 +5,7 @@
 import os
 import shutil
 from unittest import main
-from vimiv_testcase import VimivTestCase
+from vimiv_testcase import VimivTestCase, compare_images
 
 
 class ManipulateTest(VimivTestCase):
@@ -51,11 +51,14 @@ class ManipulateTest(VimivTestCase):
 
     def test_flip(self):
         """Flip image."""
-        # simply run through the function, TODO find a way to test a flip
+        pixbuf_before = self.vimiv["image"].image.get_pixbuf()
         self.manipulate.flip(1, False)
+        pixbuf_after = self.vimiv["image"].image.get_pixbuf()
+        self.assertNotEqual(pixbuf_before, pixbuf_after)
 
     def test_toggle(self):
         """Toggle manipulate."""
+        # Via function
         self.manipulate.toggle()
         self.assertTrue(self.manipulate.scrolled_win.is_visible())
         self.assertTrue(self.manipulate.scale_bri.is_focus())
@@ -63,21 +66,23 @@ class ManipulateTest(VimivTestCase):
         self.assertFalse(self.manipulate.scrolled_win.is_visible())
         self.assertFalse(self.manipulate.scale_bri.is_focus())
         self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
+        # Close via button
+        self.manipulate.toggle()
+        self.manipulate.button_clicked(None, False)
+        self.assertFalse(self.manipulate.scale_bri.is_focus())
+        self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
 
     def test_manipulate_image(self):
         """Test manipulate image."""
+        # Manipulated image is equal to old file before manipulation
+        cur_image = os.path.basename(self.vimiv.paths[self.vimiv.index])
+        self.assertTrue(compare_images("../testimages/" + cur_image, cur_image))
         self.manipulate.toggle()
-        self.manipulate.manipulate_image()
-        # temporary thumbnails are created correctly
-        files = os.listdir(".")
-        self.assertTrue("arch_001-EDIT.jpg" in files)
-        self.assertTrue("arch_001-EDIT-ORIG.jpg" in files)
-        self.assertTrue(
-            "arch_001-EDIT.jpg" in self.vimiv.paths[self.vimiv.index])
-        self.manipulate.button_clicked(None, False)
-        self.manipulate.toggle()
-        self.manipulate.manipulations = [20, 20, 20, False]
+        self.manipulate.manipulations = {"bri": 20, "con": 20, "sha": 20}
         self.manipulate.button_clicked(None, True)
+        # Different afterwards
+        self.assertFalse(compare_images("../testimages/" + cur_image,
+                         cur_image))
 
     def test_manipulate_sliders(self):
         """Focusing and changing values of sliders."""
