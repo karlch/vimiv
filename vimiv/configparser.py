@@ -33,7 +33,7 @@ def set_defaults():
                "library_width": 300,
                "expand_lib": True,
                "border_width": 0,
-               "markup": '<span foreground="#00FF00">',
+               "markup": '<span foreground="#875FFF">',
                "show_hidden": False,
                "desktop_start_dir": os.path.expanduser("~"),
                "file_check_amount": 30}
@@ -86,6 +86,12 @@ def overwrite_section(key, config, settings):
                 if not os.path.isdir(file_set):
                     continue
             elif setting == "markup":
+                # Must be valid markup, not completely safe but better than
+                # nothing
+                markup_str = section[setting]
+                if not markup_str.startswith("<span ") \
+                        or not markup_str.endswith(">"):
+                    continue
                 file_set = section[setting]
             else:
                 file_set = section.getboolean(setting)
@@ -128,10 +134,14 @@ def add_aliases(config, settings):
 
 
 def parse_config(local_config="~/.vimiv/vimivrc",
-                 system_config="/etc/vimiv/vimivrc"):
+                 system_config="/etc/vimiv/vimivrc",
+                 running_tests=False):
     """Check each configfile for settings and apply them.
 
-    Return: Dictionary of modified settings.
+    Args:
+        running_tests: If True running from testsuite. Do not show error popup.
+    Return:
+        Dictionary of modified settings.
     """
     settings = set_defaults()
     possible_configfiles = [system_config, local_config]
@@ -166,14 +176,17 @@ def parse_config(local_config="~/.vimiv/vimivrc",
         message += partial_message
 
     if message:
-        error_message(message)
+        error_message(message, running_tests=running_tests)
     return settings
 
 
-def parse_keys():
+def parse_keys(running_tests=False):
     """Check for a keyfile and parse it.
 
-    Return: Dictionary of keybindings.
+    Args:
+        running_tests: If True running from testsuite. Do not show error popup.
+    Return:
+        Dictionary of keybindings.
     """
     # Check which keyfile should be used
     keys = configparser.ConfigParser()
@@ -201,7 +214,7 @@ def parse_keys():
     except KeyError as e:
         message = "Missing section " + str(e) + " in keys.conf.\n" \
                   + "Refer to vimivrc(5) to fix your config."
-        error_message(message)
+        error_message(message, running_tests=running_tests)
         sys.exit(1)
 
     # Update the dictionaries of every window with the keybindings that apply

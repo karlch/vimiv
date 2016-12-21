@@ -8,7 +8,7 @@ from unittest import TestCase, main
 from PIL import Image
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gio, Gtk
+from gi.repository import Gio, Gtk, GLib
 from vimiv.app import Vimiv
 
 
@@ -54,6 +54,7 @@ class VimivTestCase(TestCase):
         vimiv_id = "org.vimiv" + str(time.time()).replace(".", "")
         # Create vimiv class with settings, paths, ...
         self.vimiv = Vimiv(vimiv_id)
+        self.vimiv.do_handle_local_options(GLib.VariantDict())
         # Set the required settings
         if key1:
             for i, section in enumerate(key1):
