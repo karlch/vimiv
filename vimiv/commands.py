@@ -80,8 +80,8 @@ class Commands(object):
             "tag_write": [self.app["tags"].write, self.app["mark"].marked],
             "thumbnail": [self.app["thumbnail"].toggle],
             "version": [self.app["information"].show_version_info],
-            "zoom_in": [self.app["image"].zoom_delta, +.25],
-            "zoom_out": [self.app["image"].zoom_delta, -.25],
+            "zoom_in": [self.app["image"].zoom_delta, True],
+            "zoom_out": [self.app["image"].zoom_delta, False],
             "zoom_to": [self.app["image"].zoom_to],
             "zoom_thumb_in": [self.app["thumbnail"].zoom, True],
             "zoom_thumb_out": [self.app["thumbnail"].zoom, False]}

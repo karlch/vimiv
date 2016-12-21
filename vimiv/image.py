@@ -182,29 +182,30 @@ class Image(object):
                     - self.app["statusbar"].separator.get_margin_top() - 2)
         return size
 
-    def zoom_delta(self, delta):
+    def zoom_delta(self, zoom_in=True, step=1):
         """Zoom the image by delta percent.
 
         Args:
-            delta: Percentage to change zoom by.
+            zoom_in: If True zoom in, else zoom out.
         """
-        if self.app["thumbnail"].toggled:
+        delta = 0.25
+        if self.app["thumbnail"].toggled or self.is_anim:
             return
-        elif self.is_anim:
-            message = "Warning: Animations cannot be zoomed"
-            self.app["statusbar"].err_message(message)
         else:
-            self.zoom_percent = self.zoom_percent * (1 + delta)
-            # Catch some unreasonable zooms
-            if (self.pixbuf_original.get_height() * self.zoom_percent < 50 or
-                    self.pixbuf_original.get_height() * self.zoom_percent >
-                    self.app["window"].get_size()[0] * 5):
-                message = "Warning: Image cannot be zoomed further"
-                self.app["statusbar"].err_message(message)
-                self.zoom_percent = self.zoom_percent / (1 + delta)
+            # Allow user steps
+            if self.app["keyhandler"].num_str:
+                step = self.app["keyhandler"].num_str
+                self.app["keyhandler"].num_str = ""
+            if isinstance(step, str):
+                step, err = self.parse_user_zoom(step)
+                if err: return
+            fallback_zoom = self.zoom_percent
+            if zoom_in:
+                self.zoom_percent = self.zoom_percent * (1 + delta * step)
             else:
-                self.user_zoomed = True
-                self.update(update_gif=False)
+                self.zoom_percent = self.zoom_percent / (1 + delta * step)
+            self.catch_unreasonable_zoom_and_update(fallback_zoom)
+            self.user_zoomed = True
 
     def zoom_to(self, percent, z_width=False, z_height=False):
         """Zoom to a given percentage.
@@ -214,39 +215,67 @@ class Image(object):
             z_width: If True zoom to width.
             z_height: If True zoom to height.
         """
-        if self.app["thumbnail"].toggled:
+        if self.app["thumbnail"].toggled or self.is_anim:
             return
-        elif self.is_anim:
-            message = "Warning: Animations cannot be zoomed"
-            self.app["statusbar"].err_message(message)
-        before = self.zoom_percent
-        self.user_zoomed = False
+        fallback_zoom = self.zoom_percent
         # Catch user zooms
         if self.app["keyhandler"].num_str:
-            self.user_zoomed = True
             percent = self.app["keyhandler"].num_str
-            # If prefixed with a zero invert value
-            try:
-                if percent[0] == "0":
-                    percent = 1 / float(percent[1:])
-                else:
-                    percent = float(percent)
-            except:
-                self.app["statusbar"].err_message(
-                    "Error: Zoom percentage not parseable")
-                return
             self.app["keyhandler"].num_str = ""
+        # Either num_str or given from commandline
+        if isinstance(percent, str):
+            percent, err = self.parse_user_zoom(percent)
+            if err: return
         self.imsize = self.get_available_size()
-        self.zoom_percent = (
-            percent if percent
-            else self.get_zoom_percent_to_fit(z_width, z_height))
+        # 0 means zoom to fit
+        if percent:
+            self.zoom_percent = percent
+            self.user_zoomed = True
+        else:
+            self.zoom_percent = self.get_zoom_percent_to_fit(z_width, z_height)
+            self.user_zoomed = False
         # Catch some unreasonable zooms
-        if (self.pixbuf_original.get_height() * self.zoom_percent < 5 or
-                self.pixbuf_original.get_height() * self.zoom_percent >
-                self.app["window"].get_size()[0] * 5):
-            self.zoom_percent = before
+        self.catch_unreasonable_zoom_and_update(fallback_zoom)
+
+    def parse_user_zoom(self, user_zoom):
+        """Return a usable zoom from user input or raise an error.
+
+        args:
+            user_zoom: String given by the user to be parsed.
+        return:
+            The zoom to be used as float.
+            An errorcode: 1 for errors, 0 else.
+        """
+        # If prefixed with a zero convert to decimal
+        if user_zoom[0] == "0" and len(user_zoom) > 1 and user_zoom[1] != ".":
+            user_zoom = "0." + user_zoom[1:]
+        try:
+            user_zoom = float(user_zoom)
+            return user_zoom, 0
+        except ValueError:
+            self.app["statusbar"].err_message(
+                "Error: Zoom percentage not parseable.")
+            return None, 1
+
+    def catch_unreasonable_zoom_and_update(self, fallback_zoom):
+        """Catch zooms unreasonable zooms otherwise update.
+
+        Args:
+            fallback_zoom: Zoom percentage to fall back to if the zoom
+                percentage is unreasonable.
+        """
+        new_width = self.pixbuf_original.get_width() * self.zoom_percent
+        new_height = self.pixbuf_original.get_height() * self.zoom_percent
+        max_width = min(self.app["window"].get_size()[0] * 10,
+                        self.pixbuf_original.get_width() * 20)
+        max_height = min(self.app["window"].get_size()[1] * 10,
+                         self.pixbuf_original.get_height() * 20)
+        # Image too small or too large
+        if new_height < 50 or new_width < 50 \
+                or new_height > max_height or new_width > max_width:
             message = "Warning: Image cannot be zoomed further"
             self.app["statusbar"].err_message(message)
+            self.zoom_percent = fallback_zoom
         else:
             self.update(update_gif=False)
 
