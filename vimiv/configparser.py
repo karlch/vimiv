@@ -7,22 +7,6 @@ import sys
 from vimiv.helpers import error_message
 
 
-def check_configs(filelist):
-    """Return the existing configfiles in a list.
-
-    Args:
-        filelist: List of possible configfiles.
-
-    Return: List of existing configfiles.
-    """
-    configfiles = []
-    for fil in filelist:
-        if os.path.isfile(fil):
-            configfiles.append(fil)
-
-    return configfiles
-
-
 def set_defaults():
     """Return the default settings for vimiv.
 
@@ -73,6 +57,9 @@ def overwrite_section(key, config, settings):
     section = config[key]
     message = ""
     for setting in section.keys():
+        if setting not in settings[key]:
+            message += "Ignoring unknown setting %s." % (setting)
+            continue
         # Parse the setting so it gets the correct value
         try:
             if setting == "geometry":
@@ -140,14 +127,18 @@ def add_aliases(config, settings):
     return settings, message
 
 
-def parse_config():
+def parse_config(local_config="~/.vimiv/vimivrc",
+                 system_config="/etc/vimiv/vimivrc"):
     """Check each configfile for settings and apply them.
 
     Return: Dictionary of modified settings.
     """
     settings = set_defaults()
-    configfiles = check_configs(["/etc/vimiv/vimivrc",
-                                 os.path.expanduser("~/.vimiv/vimivrc")])
+    possible_configfiles = [system_config, local_config]
+    configfiles = [os.path.expanduser(configfile)
+                   for configfile in possible_configfiles
+                   if configfile
+                   and os.path.isfile(os.path.expanduser(configfile))]
     # Error message, gets filled with invalid sections in the user's configfile.
     # If any exist, a popup is displayed at startup.
     message = ""
@@ -155,7 +146,18 @@ def parse_config():
     # Iterate through the configfiles overwriting settings accordingly
     for configfile in configfiles:
         config = configparser.ConfigParser()
-        config.read(configfile)
+        try:
+            config.read(configfile)
+        except UnicodeDecodeError:
+            message += "Could not decode configfile " + configfile
+            continue
+        except configparser.MissingSectionHeaderError:
+            message += "Invalid configfile " + configfile
+            continue
+        except configparser.ParsingError as e:
+            message += str(e)
+            continue
+
         keys = [key for key in config.keys() if key in ["GENERAL", "LIBRARY"]]
         for key in keys:
             settings, partial_message = overwrite_section(key, config, settings)

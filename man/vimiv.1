@@ -11,7 +11,9 @@ vimiv \- an image viewer with vim-like keybindings
 .IR SLIDESHOW-DELAY ]
 .RB [ \-g,\ \--geometry
 .IR GEOMETRY ]
-.RB [ \--temp-basedir
+.RB [ \--temp-basedir ]
+.RB [ \--config
+.IR FILE ]
 .IR FILE[S]
 
 .SH DESCRIPTION
@@ -80,6 +82,9 @@ set the starting geometry
 .P
 .BI "\--temp-basedir"
 use a temporary basedir
+.P
+.BI "\--config " FILE
+use FILE as local configuration file instead of ~/.vimiv/vimivrc
 .P
 All capitals negate the setting, so e.g. -B means do not display the statusbar.
 For the long version prepend no-, e.g. --no-bar.

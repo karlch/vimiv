@@ -56,7 +56,7 @@ class Vimiv(Gtk.Application):
         Gtk.Application.__init__(self, application_id=application_id)
         self.set_flags(Gio.ApplicationFlags.HANDLES_OPEN)
         self.connect("activate", self.activate_vimiv)
-        self.settings = parse_config()
+        self.settings = {}
         self.paths = []
         self.index = 0
         self.widgets = {}
@@ -131,6 +131,13 @@ class Vimiv(Gtk.Application):
         if options.contains("temp-basedir"):
             self.settings = set_defaults()
             self.directory = mkdtemp()
+        # Create settings as soon as we know which config files to use
+        elif options.contains("config"):
+            local_config = options.lookup_value("config").unpack()
+            self.settings = parse_config(local_config=local_config,
+                                         system_config=None)
+        else:
+            self.settings = parse_config()
 
         # If we start from desktop, move to the wanted directory
         # Else if the input does not come from a tty, e.g. find "" | vimiv, set
@@ -156,6 +163,7 @@ class Vimiv(Gtk.Application):
         set_option("slideshow", "GENERAL", "start_slideshow", 1)
         set_option("slideshow-delay", "GENERAL", "slideshow_delay", 2)
         set_option("geometry", "GENERAL", "geometry", 2)
+
         return -1  # To continue
 
     def activate_vimiv(self, app):
@@ -358,6 +366,8 @@ class Vimiv(Gtk.Application):
         add_option("geometry", "g", "Set the starting geometry",
                    arg=GLib.OptionArg.STRING, value="GEOMETRY")
         add_option("temp-basedir", 0, "Use a temporary basedir")
+        add_option("config", 0, "Use FILE as local configuration file",
+                   arg=GLib.OptionArg.STRING, value="FILE")
 
     def __getitem__(self, name):
         """Convenience method to access widgets via self[name].
