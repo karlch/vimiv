@@ -325,7 +325,7 @@ class Manipulate(object):
             self.manipulations["sha"])
         # On real file save data to file
         if apply_to_file:
-            imageactions.save_image(imfile, self.app.paths[self.app.index])
+            imageactions.save_image(enhanced_im, self.app.paths[self.app.index])
         # Load Pixbuf from PIL data
         data = enhanced_im.tobytes()
         g_data = GLib.Bytes.new(data)
