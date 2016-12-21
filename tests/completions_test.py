@@ -32,6 +32,14 @@ class CompletionsTest(VimivTestCase):
         for row in liststore:
             self.assertIn(row[0], expected_completions)
         self.assertEqual(len(liststore), len(expected_completions))
+        # Internal completion with a prefixed digit
+        self.completions.entry.set_text(":5a")
+        self.completions.complete()
+        expected_completions = ["accept_changes", "alias", "autorotate"]
+        liststore = self.completions.treeview.get_model()
+        for row in liststore:
+            self.assertIn(row[0], expected_completions)
+        self.assertEqual(len(liststore), len(expected_completions))
 
     def test_external_completion(self):
         """Completion of external commands. Currently none."""
@@ -99,6 +107,15 @@ class CompletionsTest(VimivTestCase):
         entry_text = self.completions.entry.get_text()
         expected_text = ":clear_thumbs"
         self.assertEqual(expected_text, entry_text)
+
+    def test_best_match_with_prefix(self):
+        """Complete to best match with a prefixed number"""
+        # Complete to last matching character
+        self.completions.entry.set_text(":2cl")
+        self.completions.complete()
+        expected_text = ":2clear_t"
+        received_text = self.completions.entry.get_text()
+        self.assertEqual(expected_text, received_text)
 
     def test_selections(self):
         """Initial selection when tabbing through completions."""

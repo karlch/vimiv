@@ -4,6 +4,8 @@
 
 import os
 import re
+from itertools import takewhile
+from string import digits
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -23,6 +25,7 @@ class Completion():
         info: ScrolledWindow containing the completion information.
         tab_position: Position when tabbing through completion elements.
         tab_presses: Amount of tab presses.
+        prefixed_digits: User prefixed digits for internal command.
     """
 
     def __init__(self, app):
@@ -66,6 +69,7 @@ class Completion():
         # Defaults
         self.tab_position = 0
         self.tab_presses = 0
+        self.prefixed_digits = ""
 
     def complete(self, inverse=False):
         """Run completion.
@@ -82,7 +86,7 @@ class Completion():
             return
         # Try to set best match first
         elif not self.tab_presses:
-            best_match = ":"
+            best_match = ":" + self.prefixed_digits
             comp_type = self.get_comp_type()
             liststore = self.liststores[comp_type][1]
             first = str(liststore[0][0])
@@ -136,7 +140,7 @@ class Completion():
             count = self.tab_position
         comp_type = self.get_comp_type()
         row = self.liststores[comp_type][1][count]
-        self.entry.set_text(":" + row[0])
+        self.entry.set_text(":" + self.prefixed_digits + row[0])
         self.entry.set_position(-1)
 
     def get_comp_type(self, command=""):
@@ -241,6 +245,9 @@ class Completion():
             True for a match, False else.
         """
         command = self.entry.get_text().lstrip(":")
+        # Allow number prefixes
+        self.prefixed_digits = "".join(takewhile(str.isdigit, command))
+        command = command.lstrip(digits)
         return model[treeiter][0].startswith(command)
 
     def refilter(self, entry):
