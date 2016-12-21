@@ -258,7 +258,7 @@ class Image(object):
             return user_zoom, 0
         except ValueError:
             self.app["statusbar"].err_message(
-                "Error: Zoom percentage not parseable.")
+                "Error: Zoom percentage not parseable")
             return None, 1
 
     def catch_unreasonable_zoom_and_update(self, fallback_zoom):

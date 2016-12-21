@@ -25,10 +25,20 @@ class ImageTest(VimivTestCase):
     def test_zooming(self):
         """Zooming of images."""
         width = 1920
-        # Zoom in by 30 %
+        # Zoom in
         perc_before = self.image.zoom_percent
-        self.image.zoom_delta(0.3)
-        self.assertEqual(self.image.zoom_percent, perc_before * 1.3)
+        self.image.zoom_delta()
+        self.assertEqual(self.image.zoom_percent, perc_before * 1.25)
+        # Zoom out should go back to same level
+        self.image.zoom_delta(zoom_in=False)
+        self.assertEqual(self.image.zoom_percent, perc_before)
+        # Zoom in with a step
+        self.image.zoom_delta(step=2)
+        self.assertEqual(self.image.zoom_percent, perc_before * 1.5)
+        # zoom out by keyhandler to same level
+        self.vimiv["keyhandler"].num_str = "2"
+        self.image.zoom_delta(zoom_in=False)
+        self.assertEqual(self.image.zoom_percent, perc_before)
         # Zoom to a size representing half the image size
         self.image.zoom_to(0.5)
         self.assertEqual(self.image.zoom_percent, 0.5)
@@ -37,9 +47,9 @@ class ImageTest(VimivTestCase):
         # Zoom by keyhandler
         self.vimiv["keyhandler"].num_str = "03"
         self.image.zoom_to(0)
-        self.assertEqual(self.image.zoom_percent, 1 / 3)
+        self.assertEqual(self.image.zoom_percent, 0.3)
         pixbuf = self.image.image.get_pixbuf()
-        self.assertEqual(width * (1 / 3), pixbuf.get_width())
+        self.assertEqual(width * 0.3, pixbuf.get_width())
         # Zoom back to fit
         self.image.zoom_to(0)
         self.assertEqual(self.image.zoom_percent,
@@ -94,7 +104,7 @@ class ImageTest(VimivTestCase):
         """Check if an image was edited."""
         path = self.vimiv.paths[self.vimiv.index]
         self.assertEqual(0, self.image.check_for_edit(False))
-        self.vimiv.paths[self.vimiv.index] = "some-EDIT.jpg"
+        self.vimiv["manipulate"].manipulations = {"bri": 10, "con": 0, "sha": 0}
         self.assertEqual(1, self.image.check_for_edit(False))
         self.assertEqual(0, self.image.check_for_edit(True))
         # Reset path
