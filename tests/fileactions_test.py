@@ -90,7 +90,6 @@ class FileActionsTest(VimivTestCase):
                           "formatted_005.tiff", "formatted_006.png"]
         self.assertEqual(files, expected_files)
         os.chdir("..")
-        shutil.rmtree("testimages_to_format")
         # Should not work without a path
         self.vimiv.paths = []
         self.vimiv["fileextras"].format_files("formatted_")
@@ -106,43 +105,20 @@ class FileActionsTest(VimivTestCase):
 
     def test_format_files_with_exif(self):
         """Format files according to a formatstring with EXIF data."""
+        # File contains exif data
         shutil.copytree("testimages/", "testimages_to_format/")
         os.chdir("testimages_to_format")
         self.vimiv.quit()
         self.init_test(["arch_001.jpg"])
-        self.vimiv["fileextras"].format_files("formatted_")
-        files = [fil for fil in os.listdir() if "formatted_" in fil]
-        files = sorted(files)
-        expected_files = ["formatted_001.jpg", "formatted_002",
-                          "formatted_003.bmp", "formatted_004.svg",
-                          "formatted_005.tiff", "formatted_006.png"]
-        self.assertEqual(files, expected_files)
-        # These files have no exif info
-        self.vimiv["fileextras"].format_files("formatted_%y_")
-        err_message = self.vimiv["statusbar"].left_label.get_text()
-        expected_message = "No exif data for %s available" % \
-            (os.path.abspath("formatted_001.jpg"))
-        self.assertEqual(expected_message, err_message)
-        # Should not work without a path
-        self.vimiv.paths = []
-        self.vimiv["fileextras"].format_files("formatted_foo_")
-        err_message = self.vimiv["statusbar"].left_label.get_text()
-        expected_message = "No files in path"
-        self.assertEqual(expected_message, err_message)
-        # Should not work in library
-        self.vimiv["library"].focus(True)
-        self.vimiv["fileextras"].format_files("formatted_bar_")
-        err_message = self.vimiv["statusbar"].left_label.get_text()
-        expected_message = "Format only works on opened image files"
-        self.assertEqual(expected_message, err_message)
-        # Make sure nothing changed
-        files = [fil for fil in os.listdir() if "formatted_" in fil]
-        files = sorted(files)
-        self.assertEqual(files, expected_files)
-        # Clean up
-        os.chdir("..")
-        shutil.rmtree("testimages_to_format")
-        # TODO file with exif data
+        shutil.copyfile("arch_001.jpg", "/home/christian/weri.jpg")
+        self.vimiv.paths = [os.path.abspath("arch_001.jpg")]
+        self.vimiv["fileextras"].format_files("formatted_%Y_")
+        self.assertIn("formatted_2016_001.jpg", os.listdir())
+        # File does not contain exif data
+        self.vimiv.paths = [os.path.abspath("arch-logo.png")]
+        self.vimiv["fileextras"].format_files("formatted_%Y_")
+        message = self.vimiv["statusbar"].left_label.get_text()
+        self.assertIn("No exif data for", message)
 
     def test_clipboard(self):
         """Copy image name to clipboard."""
@@ -177,6 +153,8 @@ class FileActionsTest(VimivTestCase):
 
     def tearDown(self):
         os.chdir(self.test_directory)
+        if os.path.isdir("testimages_to_format"):
+            shutil.rmtree("testimages_to_format")
 
 
 if __name__ == '__main__':
