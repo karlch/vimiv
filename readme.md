@@ -29,11 +29,11 @@
 
 #### Open image and library
 
-![image + library](https://raw.githubusercontent.com/karlch/vimiv/gh-pages/vimiv-lib.png)
+![image + library](https://s24.postimg.org/socxleznp/vimiv_lib.png)
 
 #### Thumbnail mode
 
-![thumbnail mode](https://raw.githubusercontent.com/karlch/vimiv/gh-pages/vimiv-thumb.png)
+![thumbnail mode](https://s24.postimg.org/9kjm52mth/vimiv_thumb.png)
 
 ## Configuration
 Vimiv comes with two configuration files. The vimivrc for general settings and
@@ -45,7 +45,6 @@ the keys.conf for all keybindings. See vimivrc(5) for further information.
 * gtk3
 * python-pillow
 * python-setuptools (for installation)
-* imagemagick (optional for the optimization of images)
 * jhead (optional for much better autorotation depending on EXIF data)
 
 ## Installation
