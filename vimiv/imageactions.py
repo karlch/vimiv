@@ -2,7 +2,7 @@
 # encoding: utf-8
 """Actions which act on the actual image file."""
 import os
-from shutil import copyfile
+from shutil import copyfile, which
 from subprocess import Popen, PIPE
 from threading import Thread
 from PIL import Image
@@ -71,10 +71,11 @@ def autorotate(filelist, method="auto"):
         method: Method to use. Auto tries jhead and falls back to PIL.
     """
     rotated_images = 0
+    # Check for which method in auto
+    if method == "auto":
+        method = "jhead" if which("jhead") else "PIL"
     # jhead does this better
-    try:
-        if method == "PIL":
-            raise ValueError
+    if method == "jhead":
         cmd = ["jhead", "-autorot", "-ft"] + filelist
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         out, err = p.communicate()
@@ -86,8 +87,7 @@ def autorotate(filelist, method="auto"):
                 rotated_images += 1
         # Added to the message displayed when done
         method = "jhead"
-    # If it isn't there fall back to PIL
-    except:
+    elif method == "PIL":
         for path in filelist:
             with Image.open(path) as im:
                 exif = im._getexif()

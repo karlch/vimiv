@@ -104,8 +104,7 @@ class ImageActionsTest(TestCase):
     def test_autorotate(self):
         """Autorotate files."""
         # Method jhead
-        errorcode = os.system("jhead -V")
-        if errorcode:
+        if not shutil.which("jhead"):
             self.fail("jhead is not installed.")
         n_rotated, method = imageactions.autorotate(self.files)
         self.assertEqual(method, "jhead")
