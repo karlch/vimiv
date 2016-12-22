@@ -96,8 +96,7 @@ class Library(object):
         # Set the liststore model
         self.treeview.set_model(self.liststore_create())
         # Set the hexpand property if requested in the configfile
-        if (not self.app.paths or isinstance(self.app.paths, str)) \
-                and self.expand:
+        if not self.app.paths and self.expand:
             self.treeview.set_hexpand(True)
 
     def toggle(self, update_image=True):
