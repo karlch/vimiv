@@ -35,8 +35,7 @@ def rotate_file(filelist, cwise):
     # Always work on realpath, not on symlink
     filelist = [os.path.realpath(image) for image in filelist]
     for image in filelist:
-        with open(image, "rb") as image_file:
-            im = Image.open(image_file)
+        with Image.open(image) as im:
             if cwise == 1:
                 im = im.transpose(Image.ROTATE_90)
             elif cwise == 2:
@@ -56,8 +55,7 @@ def flip_file(filelist, horizontal):
     # Always work on realpath, not on symlink
     filelist = [os.path.realpath(image) for image in filelist]
     for image in filelist:
-        with open(image, "rb") as image_file:
-            im = Image.open(image_file)
+        with Image.open(image) as im:
             if horizontal:
                 im = im.transpose(Image.FLIP_LEFT_RIGHT)
             else:
@@ -91,8 +89,7 @@ def autorotate(filelist, method="auto"):
     # If it isn't there fall back to PIL
     except:
         for path in filelist:
-            with open(path, "rb") as image_file:
-                im = Image.open(image_file)
+            with Image.open(path) as im:
                 exif = im._getexif()
                 orientation_key = 274  # cf ExifTags
                 rotated = True
@@ -187,8 +184,7 @@ class Thumbnails:
             position: Integer position of this thumbnail in the filelist.
         """
         try:
-            with open(infile, "rb") as image_file:
-                im = Image.open(image_file)
+            with Image.open(infile) as im:
                 im.thumbnail(self.thumbsize, Image.ANTIALIAS)
                 save_image(im, outfile)
         except:

@@ -185,12 +185,11 @@ class FileExtras(object):
         if tofind:
             try:
                 for fil in self.app.paths:
-                    with open(fil) as image_file:
-                        im = Image.open(image_file)
+                    with Image.open(fil) as im:
                         exif = im._getexif()
                         if not (exif and 306 in exif):
                             raise AttributeError
-            except:
+            except AttributeError:
                 self.app["statusbar"].err_message(
                     "No exif data for %s available" % (fil))
                 return
@@ -200,8 +199,7 @@ class FileExtras(object):
             num = "%03d" % (i + 1)
             # Exif stuff
             if tofind:
-                with open(fil) as image_file:
-                    im = Image.open(image_file)
+                with Image.open(fil) as im:
                     exif = im._getexif()
                     date = exif[306]
                     time = date.split()[1].split(":")
