@@ -4,6 +4,7 @@
 
 import os
 import shutil
+from tempfile import mkdtemp
 from unittest import TestCase, main
 from PIL import Image
 import vimiv.imageactions as imageactions
@@ -16,20 +17,41 @@ class ImageActionsTest(TestCase):
     def setUp(self):
         self.working_directory = os.getcwd()
         os.chdir("vimiv/testimages/")
-        shutil.copyfile("arch_001.jpg", "image_to_edit.jpg")
         self.orig = os.path.abspath("arch_001.jpg")
         self.filename = os.path.abspath("image_to_edit.jpg")
+        self.filename_2 = os.path.abspath("image_to_edit_2.jpg")
+        shutil.copyfile(self.orig, self.filename)
+        shutil.copyfile(self.orig, self.filename_2)
         self.files = [self.filename]
-        self.thumbdir = os.path.expanduser("~/.vimiv/Thumbnails")
+        self.thumbdir = mkdtemp()
 
     def test_rotate(self):
         """Rotate image file."""
-        with Image.open(self.filename) as im:
-            orientation_before = im.size[0] < im.size[1]
-        imageactions.rotate_file(self.files, 1)
-        with Image.open(self.filename) as im:
-            orientation_after = im.size[0] < im.size[1]
-        self.assertNotEqual(orientation_before, orientation_after)
+        def do_rotate_test(rotate_int):
+            """Run the rotation test.
+
+            Args:
+                rotate_int: Number defining the rotation.
+            """
+            with Image.open(self.filename) as im:
+                orientation_before = im.size[0] < im.size[1]
+            imageactions.rotate_file(self.files, rotate_int)
+            with Image.open(self.filename) as im:
+                orientation_after = im.size[0] < im.size[1]
+            if rotate_int in [1, 3]:
+                self.assertNotEqual(orientation_before, orientation_after)
+            elif rotate_int == 2:
+                self.assertEqual(orientation_before, orientation_after)
+        # Rotate counterclockwise
+        do_rotate_test(1)
+        # Rotate clockwise
+        do_rotate_test(3)
+        # Images are now equal again
+        self.assertTrue(compare_images(self.orig, self.filename))
+        # Rotate 180
+        do_rotate_test(2)
+        # Images are not equal
+        self.assertFalse(compare_images(self.orig, self.filename))
 
     def test_flip(self):
         """Flipping of files."""
@@ -56,27 +78,48 @@ class ImageActionsTest(TestCase):
         thumbnails = imageactions.Thumbnails(self.files, (128, 128),
                                              self.thumbdir)
         thumbnails.thumbnails_create()
-        thumbnail = os.path.expanduser(
-            "~/.vimiv/Thumbnails/image_to_edit.thumbnail_128x128.png")
+        # Check if thumbnail exists
+        thumbnail = os.path.join(self.thumbdir,
+                                 "image_to_edit.thumbnail_128x128.png")
+        self.assertTrue(os.path.isfile(thumbnail))
+        # Check its size
         with Image.open(thumbnail) as im:
             thumbnail_size = max(im.size[0], im.size[1])
             self.assertEqual(thumbnail_size, 128)
-        os.remove(thumbnail)
+        # Try to create a svg thumbnail
+        thumbnails = imageactions.Thumbnails(["vimiv.svg"], (128, 128),
+                                             self.thumbdir)
+        thumbnails.thumbnails_create()
+        # Thumbnail should exist
+        thumbnail = os.path.join(self.thumbdir,
+                                 "vimiv.thumbnail_128x128.png")
+        self.assertTrue(os.path.isfile(thumbnail))
+        # Thumbnail should have size 256 despite starting with 128
+        # Rather hacky check but the default icon comes from the user icon theme
+        # and is therefore not always the same
+        with Image.open(thumbnail) as im:
+            thumbnail_size = max(im.size[0], im.size[1])
+            self.assertEqual(thumbnail_size, 256)
 
     def test_autorotate(self):
         """Autorotate files."""
-        imageactions.autorotate(self.files)
-        with Image.open(self.filename) as im:
-            orientation = im.size[0] < im.size[1]
-            self.assertFalse(orientation)
-        imageactions.autorotate(self.files, "PIL")
-        with Image.open(self.filename) as im:
-            orientation = im.size[0] < im.size[1]
-            self.assertFalse(orientation)
+        # Method jhead
+        errorcode = os.system("jhead -V")
+        if errorcode:
+            self.fail("jhead is not installed.")
+        n_rotated, method = imageactions.autorotate(self.files)
+        self.assertEqual(method, "jhead")
+        self.assertEqual(n_rotated, 1)
+        # Method PIL
+        n_rotated, method = imageactions.autorotate([self.filename_2], "PIL")
+        self.assertEqual(method, "PIL")
+        self.assertEqual(n_rotated, 1)
 
     def tearDown(self):
         os.chdir(self.working_directory)
         os.remove(self.filename)
+        os.remove(self.filename_2)
+        shutil.rmtree(self.thumbdir)
 
 
 if __name__ == '__main__':
