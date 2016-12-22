@@ -142,6 +142,17 @@ class LibraryTest(VimivTestCase):
         self.lib.scroll("k")
         self.assertEqual(self.vimiv.get_pos(True), "animation")
 
+    def test_broken_symlink(self):
+        """Reload library with broken symlink."""
+        tmpfile = "temporary.png"
+        sym = "broken_sym"
+        os.system("cp arch-logo.png " + tmpfile)
+        os.system("ln -s " + tmpfile + " " + sym)
+        os.remove(tmpfile)
+        self.lib.reload(".")
+        self.assertNotIn(sym, self.lib.files)
+        os.remove(sym)
+
 
 if __name__ == '__main__':
     main()
