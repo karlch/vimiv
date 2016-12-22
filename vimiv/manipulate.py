@@ -382,7 +382,7 @@ class Manipulate(object):
                 val = scale.get_value()
                 if self.app["keyhandler"].num_str:
                     step = int(self.app["keyhandler"].num_str)
-                    self.app["keyhandler"].num_str = ""
+                    self.app["keyhandler"].num_clear()
                 elif large:
                     step = 10
                 else:

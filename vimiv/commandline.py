@@ -104,7 +104,7 @@ class CommandLine(object):
             elif cmd[0] == "~" or cmd[0] == "." or cmd[0] == "/":
                 self.run_path(cmd)
             else:  # Default to internal cmd
-                self.app["keyhandler"].num_str = ""  # Used to repeat commands
+                self.app["keyhandler"].num_clear()
                 while cmd[0].isdigit():
                     self.app["keyhandler"].num_str += cmd[0]
                     cmd = cmd[1:]
@@ -481,7 +481,7 @@ class CommandLine(object):
         # Correct handling of index
         if self.app["keyhandler"].num_str:
             index = int(self.app["keyhandler"].num_str)
-            self.app["keyhandler"].num_str = ""
+            self.app["keyhandler"].num_clear()
         else:
             index = 1
         # If backwards act on inverted list

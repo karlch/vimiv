@@ -199,7 +199,7 @@ class Image(object):
             # Allow user steps
             if self.app["keyhandler"].num_str:
                 step = self.app["keyhandler"].num_str
-                self.app["keyhandler"].num_str = ""
+                self.app["keyhandler"].num_clear()
             if isinstance(step, str):
                 step, err = self.parse_user_zoom(step)
                 if err:
@@ -226,7 +226,7 @@ class Image(object):
         # Catch user zooms
         if self.app["keyhandler"].num_str:
             percent = self.app["keyhandler"].num_str
-            self.app["keyhandler"].num_str = ""
+            self.app["keyhandler"].num_clear()
         # Either num_str or given from commandline
         if isinstance(percent, str):
             percent, err = self.parse_user_zoom(percent)

@@ -75,7 +75,7 @@ class Slideshow(object):
             self.delay += 0.2
         elif val:
             self.delay = float(val)
-            self.app["keyhandler"].num_str = ""
+            self.app["keyhandler"].num_clear()
         # If slideshow was running reload it
         if self.running:
             GLib.source_remove(self.timer_id)

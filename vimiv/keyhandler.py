@@ -14,6 +14,7 @@ class KeyHandler(object):
     Attributes:
         app: The main vimiv application to interact with.
         num_str: String containing repetition number for commands.
+        timer_id: ID of the current timer running to clear num_str.
         keys: Keybindings from configfiles.
     """
 
@@ -28,6 +29,7 @@ class KeyHandler(object):
         self.app = app
         # Settings
         self.num_str = ""
+        self.timer_id = 0
         self.keys = parse_keys()
 
     def run(self, widget, event, window):
@@ -85,14 +87,26 @@ class KeyHandler(object):
         else:
             return False
 
-    def num_append(self, num):
-        """Add a new char to num_str."""
+    def num_append(self, num, remove_by_timeout=True):
+        """Add a new char to num_str.
+
+        Args:
+            num: The number to append to the string.
+            remove_by_timeout: If True, add a timeout to clear the num_str.
+        """
+        # Remove old timers if we have new numbers
+        if self.timer_id:
+            GLib.source_remove(self.timer_id)
+        self.timer_id = GLib.timeout_add_seconds(1, self.num_clear)
         self.num_str += num
-        # RISKY
-        GLib.timeout_add_seconds(1, self.num_clear)
         self.app["statusbar"].update_info()
 
     def num_clear(self):
         """Clear num_str."""
+        # Remove any timers as we are clearing now anyway
+        if self.timer_id:
+            GLib.source_remove(self.timer_id)
+        self.timer_id = 0
+        # Reset
         self.num_str = ""
         self.app["statusbar"].update_info()
