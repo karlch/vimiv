@@ -329,6 +329,17 @@ class Vimiv(Gtk.Application):
         else:
             return position
 
+    def zoom(self, zoom_in=True, step=1):
+        """Zoom image or thumbnails.
+
+        Args:
+            zoom_in: If True, zoom in.
+        """
+        if self["thumbnail"].toggled:
+            self["thumbnail"].zoom(zoom_in)
+        else:
+            self["image"].zoom_delta(zoom_in=zoom_in, step=step)
+
     def init_commandline_options(self):
         """Add all possible commandline options."""
         def add_option(name, short, help_str, flags=GLib.OptionFlags.NONE,

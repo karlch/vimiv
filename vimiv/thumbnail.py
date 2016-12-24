@@ -17,7 +17,7 @@ class Thumbnail(object):
 
     Attributes:
         app: The main vimiv application to interact with.
-        toggled: If True the library is visible.
+        toggled: If True thumbnail mode is open.
         size: Tuple containing the size of thumbnails.
         max_size: Tuple containing the maximum size of thumbnails.
         possible_sizes: List of tuples containing the possible thumbnail sizes.
