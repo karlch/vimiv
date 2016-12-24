@@ -86,30 +86,20 @@ class Commands(object):
 
         self.app.functions = {
             "bri_focus": [self.app["manipulate"].focus_slider, "bri"],
-            "con_focus": [self.app["manipulate"].focus_slider, "con"],
-            "sha_focus": [self.app["manipulate"].focus_slider, "sha"],
-            "slider": [self.app["manipulate"].change_slider],
-            "history_up": [self.app["commandline"].history_search, False],
-            "history_down": [self.app["commandline"].history_search, True],
-            "discard_command": [self.app["commandline"].leave],
+            "command": [self.app["commandline"].focus],
             "complete": [self.app["completions"].complete],
             "complete_inverse": [self.app["completions"].complete, True],
-            "down": [self.app["window"].scroll, "j"],
-            "down_lib": [self.app["library"].scroll, "j"],
-            "down_page": [self.app["window"].scroll, "J"],
-            "left": [self.app["window"].scroll, "h"],
-            "left_lib": [self.app["library"].scroll, "h"],
-            "left_page": [self.app["window"].scroll, "H"],
-            "right": [self.app["window"].scroll, "l"],
-            "right_lib": [self.app["library"].scroll, "l"],
-            "right_page": [self.app["window"].scroll, "L"],
-            "up": [self.app["window"].scroll, "k"],
-            "up_lib": [self.app["library"].scroll, "k"],
-            "up_page": [self.app["window"].scroll, "K"],
+            "con_focus": [self.app["manipulate"].focus_slider, "con"],
+            "discard_command": [self.app["commandline"].leave],
+            "history_down": [self.app["commandline"].history_search, True],
+            "history_up": [self.app["commandline"].history_search, False],
+            "scroll": [self.app["window"].scroll,],
+            "scroll_lib": [self.app["library"].scroll],
             "search": [self.app["commandline"].cmd_search],
             "search_next": [self.app["commandline"].search_move],
             "search_prev": [self.app["commandline"].search_move, False],
-            "command": [self.app["commandline"].focus]}
+            "sha_focus": [self.app["manipulate"].focus_slider, "sha"],
+            "slider": [self.app["manipulate"].change_slider]}
 
         self.app.functions.update(self.app.commands)
 
