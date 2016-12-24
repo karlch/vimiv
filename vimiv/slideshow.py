@@ -60,7 +60,7 @@ class Slideshow(object):
                 GLib.source_remove(self.timer_id)
         self.app["statusbar"].update_info()
 
-    def set_delay(self, val, key=""):
+    def set_delay(self, val=None, key=""):
         """Set slideshow delay.
 
         Args:
@@ -68,6 +68,7 @@ class Slideshow(object):
             key: One of "+" or "-" indicating if the delay should be increased
                 or decreased.
         """
+        val = val if val else self.app.settings["GENERAL"]["slideshow_delay"]
         if key == "-":
             if self.delay >= 0.8:
                 self.delay -= 0.2
