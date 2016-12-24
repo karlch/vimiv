@@ -370,27 +370,25 @@ class Manipulate(object):
         else:
             self.scale_sha.grab_focus()
 
-    def change_slider(self, dec, large):
+    def change_slider(self, step=1):
         """Change the value of the currently focused slider.
 
         Args:
             dec: If True decrease the value.
             large: If True use large step (10) instead of small one (1)
         """
+        try:
+            step = int(step)
+        except:
+            self.app["statusbar"].err_message("Error: Invalid step")
+            return
         for scale in [self.scale_bri, self.scale_con, self.scale_sha]:
             if scale.is_focus():
                 val = scale.get_value()
                 if self.app["keyhandler"].num_str:
                     step = int(self.app["keyhandler"].num_str)
                     self.app["keyhandler"].num_clear()
-                elif large:
-                    step = 10
-                else:
-                    step = 1
-                if dec:
-                    val -= step
-                else:
-                    val += step
+                val += step
                 scale.set_value(val)
 
     def button_clicked(self, button, accept=False):

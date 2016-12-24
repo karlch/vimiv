@@ -88,7 +88,7 @@ class ManipulateTest(VimivTestCase):
         """Focusing and changing values of sliders."""
         self.manipulate.toggle()
         self.manipulate.focus_slider("bri")
-        self.manipulate.change_slider(True, False)
+        self.manipulate.change_slider(-1)
         received_value = self.manipulate.scale_bri.get_value()
         self.assertEqual(received_value, -1)
         self.manipulate.focus_slider("con")
