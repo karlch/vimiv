@@ -85,12 +85,11 @@ class Commands(object):
             "zoom_to": [self.app["image"].zoom_to]}
 
         self.app.functions = {
-            "bri_focus": [self.app["manipulate"].focus_slider, "bri"],
             "command": [self.app["commandline"].focus],
             "complete": [self.app["completions"].complete],
             "complete_inverse": [self.app["completions"].complete, True],
-            "con_focus": [self.app["manipulate"].focus_slider, "con"],
             "discard_command": [self.app["commandline"].leave],
+            "focus_slider": [self.app["manipulate"].focus_slider,],
             "history_down": [self.app["commandline"].history_search, True],
             "history_up": [self.app["commandline"].history_search, False],
             "scroll": [self.app["window"].scroll,],
@@ -98,7 +97,6 @@ class Commands(object):
             "search": [self.app["commandline"].cmd_search],
             "search_next": [self.app["commandline"].search_move],
             "search_prev": [self.app["commandline"].search_move, False],
-            "sha_focus": [self.app["manipulate"].focus_slider, "sha"],
             "slider": [self.app["manipulate"].change_slider]}
 
         self.app.functions.update(self.app.commands)
