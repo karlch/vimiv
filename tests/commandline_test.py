@@ -50,7 +50,7 @@ class CommandlineTest(VimivTestCase):
         self.vimiv["commandline"].entry.set_text(":test_alias")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         error_message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(error_message, "No such command: useless_command")
+        self.assertEqual(error_message, "No command called useless_command")
 
     def test_run_external(self):
         """Run an external command and test failures."""

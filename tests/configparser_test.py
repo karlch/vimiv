@@ -179,7 +179,7 @@ class ConfigparserTest(TestCase):
         """Check if the keybindings are parsed correctly."""
         keybindings = parser.parse_keys()
         image_bindings = keybindings["IMAGE"]
-        self.assertEqual(image_bindings["j"], "down")
+        self.assertEqual(image_bindings["j"], "scroll j")
 
     @classmethod
     def create_configfile(cls, settings=None, text=None):

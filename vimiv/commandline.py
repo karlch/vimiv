@@ -276,40 +276,45 @@ class CommandLine(object):
         else:
             self.app["statusbar"].err_message("Warning: Not a valid path")
 
-    def run_command(self, cmd):
+    def run_command(self, cmd, keyname=None):
         """Run the correct internal command.
 
         Args:
             cmd: Internal command to run.
+            keyname: Key that called run_command. Passed when called from
+                keyhandler.
         """
-        parts = cmd.split()
-        if "set" in cmd:
-            given_args = parts[2:]
-            cmd = " ".join(parts[:2])
+        name_func_and_args = cmd.split()
+        if cmd.startswith("set "):
+            name_func = " ".join(name_func_and_args[0:2])
+            conf_args = name_func_and_args[2:]
         else:
-            given_args = parts[1:]
-            cmd = parts[0]
-        # Check if the command exists
-        if cmd in self.app.commands.keys():  # Run it
-            function = self.app.commands[cmd][0]
-            default_args = self.app.commands[cmd][1:]
-            args = default_args + given_args
-            # Check for wrong arguments
-            try:
-                function(*args)
-            except TypeError as e:
-                self.app["statusbar"].err_message(str(e))
-            except SyntaxError:
-                err = ("SyntaxError: are all strings closed " +
-                       "and special chars quoted?")
-                self.app["statusbar"].err_message(err)
-            except NameError as e:
-                argstr = "('" + args + "')"
-                args = "(" + args + ")"
-                function = function.replace(args, argstr)
-                exec(function)
-        else:  # Throw an error if the command does not exist
-            self.app["statusbar"].err_message("No such command: %s" % (cmd))
+            name_func = name_func_and_args[0]
+            conf_args = name_func_and_args[1:]
+        # From functions dictionary get the actual vimiv command
+        if name_func in self.app.functions.keys():
+            func_and_args = self.app.functions[name_func]
+            func = func_and_args[0]
+            default_args = list(func_and_args[1])
+            # Check if the amount of arguments
+            required_args = func_and_args[2]
+            optional_args = func_and_args[3]
+            args = default_args + conf_args
+            if len(conf_args) < len(required_args):
+                message = "Missing positional arguments for command " + \
+                    name_func + ": " + ", ".join(required_args)
+                self.app["statusbar"].err_message(message)
+            elif len(conf_args) > len(required_args) + len(optional_args):
+                message = "Too many arguments for command " + name_func
+                self.app["statusbar"].err_message(message)
+            else:
+                func(*args)
+        # If the command name is not in the dictionary throw an error
+        else:
+            message = "No command called " + name_func
+            if keyname:
+                message += " bound to " + keyname
+            self.app["statusbar"].err_message(message)
 
     def history_search(self, down):
         """Search through history with substring match.

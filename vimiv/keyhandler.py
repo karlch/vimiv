@@ -64,24 +64,8 @@ class KeyHandler(object):
         keys = self.keys[window]
         # Get the command to which the pressed key is bound and run it
         if keyname in keys.keys():
-            func = keys[keyname]
-            if "set " in func:
-                conf_args = []
-            else:
-                func = func.split()
-                conf_args = func[1:]
-                func = func[0]
-            # From functions dictionary get the actual vimiv command
-            try:
-                func = self.app.functions[func]
-                args = func[1:]
-                args.extend(conf_args)
-                func = func[0]
-                func(*args)
-            except KeyError as e:
-                message = "Invalid command " + str(e) + " bound to '" \
-                    + keyname + "'"
-                self.app["statusbar"].err_message(message)
+            keybinding = keys[keyname]
+            self.app["commandline"].run_command(keybinding, keyname)
             return True  # Deactivates default bindings
         # Activate default keybindings
         else:
