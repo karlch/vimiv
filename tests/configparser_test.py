@@ -41,7 +41,7 @@ class ConfigparserTest(TestCase):
         amount_library_settings = len(library.keys())
         amount_aliases = len(aliases.keys())
         self.assertEqual(amount_general_settings, 17)
-        self.assertEqual(amount_library_settings, 8)
+        self.assertEqual(amount_library_settings, 9)
         self.assertEqual(amount_aliases, 0)
         defaults = parser.set_defaults()
         self.assertEqual(settings, defaults)
@@ -83,7 +83,8 @@ class ConfigparserTest(TestCase):
                                 "markup": "<span foreground=\"#FF0000\">",
                                 "show_hidden": "no",
                                 "desktop_start_dir": "~/.vimiv",
-                                "file_check_amount": "10"},
+                                "file_check_amount": "10",
+                                "tilde_in_statusbar": "no"},
                     "ALIASES": {"testalias": "zoom_in"}}
         configfile = self.create_configfile(settings=settings)
         parsed_settings = parser.parse_config(configfile)
@@ -115,6 +116,7 @@ class ConfigparserTest(TestCase):
         self.assertEqual(library["desktop_start_dir"],
                          os.path.expanduser("~/.vimiv"))
         self.assertEqual(library["file_check_amount"], 10)
+        self.assertEqual(library["tilde_in_statusbar"], False)
         self.assertIn("testalias", aliases.keys())
         self.assertEqual(aliases["testalias"], "zoom_in")
 

@@ -122,10 +122,22 @@ class Statusbar(object):
             self.error_false()
         # Get mode first
         mode = self.get_mode()
-        # Left side
+        # Update all relevant widgets
+        self.set_left_status(mode)
+        self.set_center_status(mode)
+        self.set_right_status(mode)
+        self.set_window_title()
+        # Size of statusbar for resizing image
+        self.size = self.app["statusbar"].bar.get_allocated_height()
+
+    def set_left_status(self, mode):
+        """Set the left side of the statusbar depending on mode."""
         # Directory if library is focused
         if "LIBRARY" in mode:
-            self.left_label.set_text(os.getcwd())
+            cur_dir = os.getcwd()
+            if self.app["library"].tilde_in_statusbar:
+                cur_dir = cur_dir.replace(os.environ["HOME"], "~")
+            self.left_label.set_text(cur_dir)
         # Position, name and thumbnail size in thumb mode
         elif "THUMBNAIL" in mode:
             pos = self.app.get_pos()
@@ -135,7 +147,7 @@ class Statusbar(object):
                                                  name,
                                                  self.app["thumbnail"].size)
             self.left_label.set_text(message)
-        # in commandline
+        # In commandline
         elif "COMMAND" in mode:
             # TODO useful information in the commandline
             self.left_label.set_text("")
@@ -147,7 +159,9 @@ class Statusbar(object):
             self.left_label.set_text(message)
         else:
             self.left_label.set_text("No open images")
-        # Center
+
+    def set_center_status(self, mode):
+        """Set the centre of the statusbar depending on mode."""
         mark = "[*]" \
             if ("IMAGE" in mode or "MANIPULATE" in mode) \
             and self.app.paths \
@@ -158,17 +172,19 @@ class Statusbar(object):
             if self.app["slideshow"].running else ""
         message = "{0}  {1}".format(mark, slideshow)
         self.center_label.set_text(message)
-        # Right side
+
+    def set_right_status(self, mode):
+        """Set the right side of the statusbar to mode and num_str."""
         message = "{0:15}  {1:4}".format(mode, self.app["keyhandler"].num_str)
         self.right_label.set_markup(message)
-        # Window title
+
+    def set_window_title(self):
+        """Set window title depending on whether there are valid paths."""
         try:
             name = os.path.basename(self.app.paths[self.app.index])
             self.app["window"].set_title("vimiv - " + name)
         except:
             self.app["window"].set_title("vimiv")
-        # Size of statusbar for resizing image
-        self.size = self.app["statusbar"].bar.get_allocated_height()
 
     def get_mode(self):
         """Return which widget is currently focused."""

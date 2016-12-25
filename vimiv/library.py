@@ -28,6 +28,7 @@ class Library(object):
         file_check_amount: Amount of files checked in a directory to display
             amount of images in it.
         desktop_start_dir: Directory to start in if launched from desktop.
+        tilde_in_statusbar: If True, collapse $HOME to ~ in statusbar.
         files: Files in the library.
         filesize: Dictionary storing the size of files.
         grid: Gtk.Grid containing the TreeView and the border.
@@ -58,6 +59,7 @@ class Library(object):
         self.show_hidden = library["show_hidden"]
         self.file_check_amount = library["file_check_amount"]
         self.desktop_start_dir = library["desktop_start_dir"]
+        self.tilde_in_statusbar = library["tilde_in_statusbar"]
 
         # Defaults
         self.files = []

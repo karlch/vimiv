@@ -36,7 +36,8 @@ def set_defaults():
                "markup": '<span foreground="#875FFF">',
                "show_hidden": False,
                "desktop_start_dir": os.path.expanduser("~"),
-               "file_check_amount": 30}
+               "file_check_amount": 30,
+               "tilde_in_statusbar": True}
     aliases = {}
     settings = {"GENERAL": general, "LIBRARY": library, "ALIASES": aliases}
     return settings
