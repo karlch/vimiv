@@ -110,7 +110,7 @@ class Manipulate(object):
             elif os.path.isdir(im):
                 message = "Deleting directories is not supported"
             if message:
-                self.app["statusbar"].err_message(message)
+                self.app["statusbar"].message(message, "warning")
                 images.remove(i)
         move_to_trash(images, self.app["image"].trashdir)
 
@@ -128,15 +128,15 @@ class Manipulate(object):
                 # No more images in this directory -> focus parent in library
                 self.app["library"].move_up()
                 self.app["library"].focus(True)
-                self.app["statusbar"].err_message("No more images")
+                self.app["statusbar"].message("No more images", "info")
 
-    def get_manipulated_images(self, message):
+    def get_manipulated_images(self, info):
         """Return the images which should be manipulated.
 
         Either the currently focused image or all marked images.
 
         Args:
-            message: Message to display when acting on marked images.
+            info: Info to display when acting on marked images.
         """
         images = []
         # Add the image shown
@@ -149,12 +149,11 @@ class Manipulate(object):
         # Add all marked images
         else:
             images = self.app["mark"].marked
-            # Abuse err_message to simply display information about what is done
             if len(images) == 1:
-                err = "%s %d marked image" % (message, len(images))
+                message = "%s %d marked image" % (info, len(images))
             else:
-                err = "%s %d marked images" % (message, len(images))
-            self.app["statusbar"].err_message(err)
+                message = "%s %d marked images" % (info, len(images))
+            self.app["statusbar"].message(message, "info")
         # Delete all thumbnails of manipulated images
         thumbnails = os.listdir(self.app["thumbnail"].directory)
         for im in images:
@@ -190,8 +189,7 @@ class Manipulate(object):
                 self.running_threads.append(rotate_thread)
                 rotate_thread.start()
         except:
-            self.app["statusbar"].err_message(
-                "Warning: Object cannot be rotated")
+            self.app["statusbar"].message("Object cannot be rotated", "warning")
 
     def thread_for_rotate(self, images, cwise):
         """Rotate all image files in an extra thread.
@@ -210,7 +208,7 @@ class Manipulate(object):
                     self.app["thumbnail"].reload(
                         image, self.app.paths.index(image))
         except:
-            self.app["statusbar"].err_message("Error: Rotation of file failed")
+            self.app["statusbar"].message("Rotation of file failed", "error")
         self.running_threads.pop(0)
 
     def flip(self, horizontal, flip_file=True):
@@ -235,8 +233,7 @@ class Manipulate(object):
                 self.running_threads.append(flip_thread)
                 flip_thread.start()
         except:
-            self.app["statusbar"].err_message(
-                "Warning: Object cannot be flipped")
+            self.app["statusbar"].message("Object cannot be flipped", "warning")
 
     def thread_for_flip(self, images, horizontal):
         """Flip all image files in an extra thread.
@@ -255,7 +252,7 @@ class Manipulate(object):
                     self.app["thumbnail"].reload(
                         image, self.app.paths.index(image))
         except:
-            self.app["statusbar"].err_message("Error: Flipping of file failed")
+            self.app["statusbar"].message("Flipping of file failed", "error")
         self.running_threads.pop(0)
 
     def rotate_auto(self):
@@ -266,7 +263,7 @@ class Manipulate(object):
             message = "Autorotated %d image(s) using %s." % (amount, method)
         else:
             message = "No image rotated. Tried using %s." % (method)
-        self.app["statusbar"].err_message(message)
+        self.app["statusbar"].message(message, "info")
 
     def toggle(self):
         """Toggle the manipulation bar."""
@@ -277,12 +274,12 @@ class Manipulate(object):
         elif self.app.paths and not(self.app["thumbnail"].toggled or
                                     self.app["library"].treeview.is_focus()):
             if os.path.islink(self.app.paths[self.app.index]):
-                self.app["statusbar"].err_message(
-                    "Manipulating symbolik links is not supported")
+                self.app["statusbar"].message(
+                    "Manipulating symbolik links is not supported", "warning")
                 return
             if self.app["image"].is_anim:
-                self.app["statusbar"].err_message(
-                    "Manipulating Gifs is not supported")
+                self.app["statusbar"].message(
+                    "Manipulating Gifs is not supported", "warning")
             else:
                 self.scrolled_win.show()
                 self.scale_bri.grab_focus()
@@ -295,13 +292,14 @@ class Manipulate(object):
                 self.pil_thumb.thumbnail(size, Image.ANTIALIAS)
         else:
             if self.app["thumbnail"].toggled:
-                self.app["statusbar"].err_message(
-                    "Manipulate not supported in thumbnail mode")
+                self.app["statusbar"].message(
+                    "Manipulate not supported in thumbnail mode", "warning")
             elif self.app["library"].treeview.is_focus():
-                self.app["statusbar"].err_message(
-                    "Manipulate not supported in library")
+                self.app["statusbar"].message(
+                    "Manipulate not supported in library", "warning")
             else:
-                self.app["statusbar"].err_message("No image open to edit")
+                self.app["statusbar"].message("No image open to edit",
+                                              "warning")
 
     def manipulate_image(self, apply_to_file=False):
         """Apply manipulations to image.
@@ -380,7 +378,7 @@ class Manipulate(object):
         try:
             step = int(step)
         except:
-            self.app["statusbar"].err_message("Error: Invalid step")
+            self.app["statusbar"].message("Invalid step", "error")
             return
         for scale in [self.scale_bri, self.scale_con, self.scale_sha]:
             if scale.is_focus():
@@ -421,7 +419,7 @@ class Manipulate(object):
         """
         if not self.scrolled_win.is_visible():
             if not self.app.paths:
-                self.app["statusbar"].err_message("No image to manipulate")
+                self.app["statusbar"].message("No image to manipulate", "error")
                 return
             else:
                 self.toggle()

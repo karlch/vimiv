@@ -64,6 +64,7 @@ class Vimiv(Gtk.Application):
         self.commands = {}
         self.aliases = {}
         self.functions = {}
+        # Get window background
         # Set up all commandline options
         self.init_commandline_options()
 
@@ -206,8 +207,8 @@ class Vimiv(Gtk.Application):
             self["library"].reload(os.getcwd())
             if self["library"].expand:
                 self["image"].scrolled_win.hide()
-            self["statusbar"].err_message(
-                "No valid paths, opening library viewer")
+            self["statusbar"].message(
+                "No valid paths, opening library viewer", "info")
 
     def init_widgets(self):
         """Create all the other widgets and add them to the class."""
@@ -246,11 +247,10 @@ class Vimiv(Gtk.Application):
         overlay_grid.set_valign(Gtk.Align.END)
 
         # Make it nice using CSS
-        overlay_grid.set_name("CommandLine")
+        overlay_grid.set_name("OverLay")
         style = Gtk.Window().get_style_context()
-        color = style.get_background_color(Gtk.StateType.NORMAL)
-        color_str = "#CommandLine { background-color: " + color.to_string() \
-            + "; }"
+        bg = style.get_background_color(Gtk.StateType.NORMAL)
+        color_str = "#OverLay { background: " + bg.to_string() + "; }"
         command_provider = Gtk.CssProvider()
         command_css = color_str.encode()
         command_provider.load_from_data(command_css)

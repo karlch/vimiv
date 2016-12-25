@@ -148,7 +148,7 @@ class CommandLine(object):
         out, err = p.communicate()
         if p.returncode:
             err = err.decode('utf-8').split("\n")[0]
-            self.app["statusbar"].err_message(err)
+            self.app["statusbar"].message(err, "error")
         else:
             # Reload everything after an external command if we haven't
             # moved, you never know what happened ... Must be in a timer
@@ -208,7 +208,7 @@ class CommandLine(object):
         """
         # Leave if no pipe_input came
         if not pipe_input:
-            self.app["statusbar"].err_message("No input from pipe")
+            self.app["statusbar"].message("No input from pipe", "info")
             return
         # Make the pipe_input a file
         pipe_input = pipe_input.decode('utf-8')
@@ -235,7 +235,7 @@ class CommandLine(object):
                     self.app["library"].toggle()
             elif old_pos:  # Nothing found, go back
                 self.app.paths, self.app.index = populate(old_pos)
-                self.app["statusbar"].err_message("No image found")
+                self.app["statusbar"].message("No image found", "info")
         else:  # Run every line as an internal command
             for cmd in pipe_input:
                 self.run_command(cmd)
@@ -274,7 +274,7 @@ class CommandLine(object):
                 else:
                     self.app["library"].move_up(pathdir, True)
         else:
-            self.app["statusbar"].err_message("Warning: Not a valid path")
+            self.app["statusbar"].message("Not a valid path", "error")
 
     def run_command(self, cmd, keyname=None):
         """Run the correct internal command.
@@ -303,10 +303,10 @@ class CommandLine(object):
             if len(conf_args) < len(required_args):
                 message = "Missing positional arguments for command " + \
                     name_func + ": " + ", ".join(required_args)
-                self.app["statusbar"].err_message(message)
+                self.app["statusbar"].message(message, "error")
             elif len(conf_args) > len(required_args) + len(optional_args):
                 message = "Too many arguments for command " + name_func
-                self.app["statusbar"].err_message(message)
+                self.app["statusbar"].message(message, "error")
             else:
                 func(*args)
         # If the command name is not in the dictionary throw an error
@@ -314,7 +314,7 @@ class CommandLine(object):
             message = "No command called " + name_func
             if keyname:
                 message += " bound to " + keyname
-            self.app["statusbar"].err_message(message)
+            self.app["statusbar"].message(message, "error")
 
     def history_search(self, down):
         """Search through history with substring match.
@@ -472,7 +472,7 @@ class CommandLine(object):
             self.entry.grab_focus()
             self.entry.set_position(-1)
         else:
-            self.app["statusbar"].err_message("No matching file")
+            self.app["statusbar"].message("No matching file", "info")
 
     def search_move(self, forward=True, incsearch=False):
         """Move to the next or previous search.

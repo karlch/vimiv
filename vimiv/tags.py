@@ -67,7 +67,7 @@ class TagHandler(object):
             os.remove(tagfile_name)
         else:
             err = "Tagfile '%s' does not exist" % (tagname)
-            self.app["statusbar"].err_message(err)
+            self.app["statusbar"].message(err, "error")
 
     def load(self, tagname):
         """Load all images in a tag as current filelist.
@@ -95,5 +95,5 @@ class TagHandler(object):
             self.last = tagname
         else:
             message = "Tagfile '%s' has no valid images" % (tagname)
-            self.app["statusbar"].err_message(message)
+            self.app["statusbar"].message(message, "error")
             self.last = ""

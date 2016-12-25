@@ -130,7 +130,7 @@ class Thumbnail(object):
                 self.app["image"].scrolled_win.show()
             self.show()
         else:
-            self.app["statusbar"].err_message("No open image")
+            self.app["statusbar"].message("No open image", "error")
             return
         # Manipulate bar is useless in thumbnail mode
         if self.app["manipulate"].scrolled_win.is_visible():
@@ -226,7 +226,7 @@ class Thumbnail(object):
             self.iconview.set_cursor(old_path, cell_renderer, False)
         except:
             message = "Reload of manipulated thumbnails failed"
-            self.app["statusbar"].err_message(message)
+            self.app["statusbar"].message(message, "error")
 
     def move_direction(self, direction):
         """Scroll with "hjkl".

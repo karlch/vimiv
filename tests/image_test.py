@@ -60,7 +60,7 @@ class ImageTest(VimivTestCase):
         # Unreasonable zoom
         self.image.zoom_to(1000)
         message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(message, "Warning: Image cannot be zoomed further")
+        self.assertEqual(message, "WARNING: Image cannot be zoomed further")
         pixbuf = self.image.image.get_pixbuf()
         self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
@@ -68,7 +68,7 @@ class ImageTest(VimivTestCase):
         self.vimiv["keyhandler"].num_str = "vimiv"
         self.image.zoom_to(0)
         message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(message, "Zoom percentage cannot be parsed")
+        self.assertEqual(message, "ERROR: Zoom percentage cannot be parsed")
 
     def test_move(self):
         """Move from image to image."""

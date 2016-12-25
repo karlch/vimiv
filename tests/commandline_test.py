@@ -59,7 +59,8 @@ class CommandlineTest(VimivTestCase):
         self.vimiv["commandline"].entry.set_text(":test_alias")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         error_message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(error_message, "No command called useless_command")
+        self.assertEqual(error_message,
+                         "ERROR: No command called useless_command")
 
     def test_run_external(self):
         """Run an external command and test failures."""
@@ -76,7 +77,7 @@ class CommandlineTest(VimivTestCase):
         self.vimiv["commandline"].running_threads[0].join()
         statusbar_text = self.vimiv["statusbar"].left_label.get_text()
         self.assertEqual(statusbar_text,
-                         "/bin/sh: foo_bar_baz: command not found")
+                         "ERROR: /bin/sh: foo_bar_baz: command not found")
 
     def test_pipe(self):
         """Pipe a command to vimiv."""

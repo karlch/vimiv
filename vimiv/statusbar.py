@@ -5,7 +5,7 @@
 import os
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import GLib, Gtk
+from gi.repository import GLib, Gtk, Gdk
 
 
 class Statusbar(object):
@@ -14,7 +14,7 @@ class Statusbar(object):
     Attributes:
         app: The main vimiv application to interact with.
         hidden: If True the statusbar is not visible.
-        errors: List of errors.
+        errors: True if there are errors.
         search_names: List of names of the search results.
         search_positions: List of positions of the search results.
         timer_id: ID of the currently running GLib.Timeout.
@@ -35,16 +35,17 @@ class Statusbar(object):
 
         # Default values
         self.hidden = not general["display_bar"]
-        self.errors = []
+        self.errors = True
         self.search_names = []
         self.search_positions = []
-        self.timer_id = GLib.Timeout
+        self.timer_id = 0
         self.size = 0
         self.lock = False
         self.was_hidden = False
 
         # Statusbar on the bottom
         self.bar = Gtk.Grid()
+        self.bar.set_name("StatusBar")  # Name for css
         # Two labels for two sides of statusbar and one in the middle for
         # additional info
         self.left_label = Gtk.Label()
@@ -66,26 +67,46 @@ class Statusbar(object):
         self.bar.set_margin_bottom(padding)
         self.separator = Gtk.Separator()
 
-    def err_message(self, message):
-        """Push an error message to the statusbar.
+    def message(self, message, style="error"):
+        """Push a message to the statusbar.
 
         Args:
             message: Message to push.
+            style: One of error, warning and info.
         """
-        self.errors.append(1)
-        message = "<b>" + message + "</b>"
-        self.timer_id = GLib.timeout_add_seconds(5, self.error_false)
+        self.errors = True
+        styles = {"error": "#CC0000", "warning": "#FA9E21", "info": "#6699FF"}
+        message = "<b><span foreground='" + styles[style] + "'>" + \
+            style.upper() + ": </span></b>" + message
+        self.timer_id = GLib.timeout_add_seconds(5, self.update_info)
         # Show if is was hidden
         if self.hidden:
             self.toggle()
             self.was_hidden = True
         self.left_label.set_markup(message)
+        # CSS to style bar according to message
+        css_provider = Gtk.CssProvider()
+        css_str = "#OverLay { border-top: solid 2px " + styles[style] + ";}"
+        css_provider.load_from_data(css_str.encode())
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def error_false(self):
         """Strip one error and update the statusbar if no more errors remain."""
-        self.errors = self.errors[0:-1]
-        if not self.errors:
-            self.update_info()
+        # Remove any timers that remove the error message
+        if self.timer_id:
+            GLib.source_remove(self.timer_id)
+            self.timer_id = 0
+        # Strip one error
+        self.errors = False
+        # Reset css from error_message
+        css_provider = Gtk.CssProvider()
+        css_str = "#OverLay { border-top: solid 0px; }"
+        css_provider.load_from_data(css_str.encode())
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), css_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
     def update_info(self):
         """Update the statusbar and the window title."""
@@ -96,6 +117,9 @@ class Statusbar(object):
         if self.was_hidden:
             self.was_hidden = False
             self.toggle()
+        # Strip error messages if any
+        if self.errors:
+            self.error_false()
         # Get mode first
         mode = self.get_mode()
         # Left side

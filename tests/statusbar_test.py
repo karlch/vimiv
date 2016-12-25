@@ -29,28 +29,37 @@ class StatusbarTest(VimivTestCase):
         self.assertTrue(self.statusbar.bar.is_visible())
         self.assertFalse(self.statusbar.hidden)
 
-    def test_err_message(self):
-        """Show an error message."""
-        self.statusbar.err_message("Test error")
-        self.assertEqual(self.statusbar.left_label.get_text(), "Test error")
+    def test_message(self):
+        """Show a message."""
+        self.statusbar.message("Test error", "error")
+        self.assertEqual(self.statusbar.left_label.get_text(),
+                         "ERROR: Test error")
+        self.statusbar.message("Test warning", "warning")
+        self.assertEqual(self.statusbar.left_label.get_text(),
+                         "WARNING: Test warning")
+        self.statusbar.message("Test info", "info")
+        self.assertEqual(self.statusbar.left_label.get_text(),
+                         "INFO: Test info")
         # Timer is running
         self.assertGreater(self.statusbar.timer_id, 0)
         # Remove error message by hand
         self.statusbar.error_false()
         self.assertNotEqual(self.statusbar.left_label.get_text(), "Test error")
 
-    def test_hidden_err_message(self):
+    def test_hidden_message(self):
         """Show an error message with an initially hidden statusbar."""
         # Hide
         self.statusbar.toggle()
         self.assertFalse(self.statusbar.bar.is_visible())
         # Send an error message
-        self.statusbar.err_message("Test error")
-        self.assertEqual(self.statusbar.left_label.get_text(), "Test error")
+        self.statusbar.message("Test error")
+        self.assertEqual(self.statusbar.left_label.get_text(),
+                         "ERROR: Test error")
         self.assertTrue(self.statusbar.bar.is_visible())
         # Remove error message
-        self.statusbar.error_false()
-        self.assertNotEqual(self.statusbar.left_label.get_text(), "Test error")
+        self.statusbar.update_info()
+        self.assertNotEqual(self.statusbar.left_label.get_text(),
+                            "ERROR: Test error")
         self.assertFalse(self.statusbar.bar.is_visible())
         # Show again
         self.statusbar.toggle()

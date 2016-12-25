@@ -94,13 +94,13 @@ class FileActionsTest(VimivTestCase):
         self.vimiv.paths = []
         self.vimiv["fileextras"].format_files("formatted_")
         err_message = self.vimiv["statusbar"].left_label.get_text()
-        expected_message = "No files in path"
+        expected_message = "INFO: No files in path"
         self.assertEqual(expected_message, err_message)
         # Should not work in library
         self.vimiv["library"].focus(True)
         self.vimiv["fileextras"].format_files("formatted_")
         err_message = self.vimiv["statusbar"].left_label.get_text()
-        expected_message = "Format only works on opened image files"
+        expected_message = "INFO: Format only works on opened image files"
         self.assertEqual(expected_message, err_message)
 
     def test_format_files_with_exif(self):

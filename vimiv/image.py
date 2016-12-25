@@ -81,8 +81,8 @@ class Image(object):
             return 0
         elif self.app["manipulate"].manipulations != \
                 {"bri": 1, "con": 1, "sha": 1}:
-            self.app["statusbar"].err_message(
-                "Image has been edited, add ! to force")
+            self.app["statusbar"].message(
+                "Image has been edited, add ! to force", "warning")
             return 1
         else:
             return 0
@@ -204,8 +204,8 @@ class Image(object):
             if isinstance(step, str):
                 step, err = get_float_from_str(step)
                 if err:
-                    self.app["statusbar"].err_message(
-                        "Zoom percentage cannot be parsed")
+                    self.app["statusbar"].message(
+                        "Zoom percentage cannot be parsed", "error")
                     return
             fallback_zoom = self.zoom_percent
             if zoom_in:
@@ -234,8 +234,8 @@ class Image(object):
         if isinstance(percent, str):
             percent, err = get_float_from_str(percent)
             if err:
-                self.app["statusbar"].err_message(
-                    "Zoom percentage cannot be parsed")
+                self.app["statusbar"].message(
+                    "Zoom percentage cannot be parsed", "error")
                 return
         self.imsize = self.get_available_size()
         # 0 means zoom to fit
@@ -264,8 +264,8 @@ class Image(object):
         # Image too small or too large
         if new_height < 50 or new_width < 50 \
                 or new_height > max_height or new_width > max_width:
-            message = "Warning: Image cannot be zoomed further"
-            self.app["statusbar"].err_message(message)
+            message = "Image cannot be zoomed further"
+            self.app["statusbar"].message(message, "warning")
             self.zoom_percent = fallback_zoom
         else:
             self.update(update_gif=False)
@@ -318,9 +318,9 @@ class Image(object):
         # Info if slideshow returns to beginning
         if self.app["slideshow"].running:
             if self.app.index is self.app["slideshow"].start_index:
-                message = "Info: back at beginning of slideshow"
+                message = "Back at beginning of slideshow"
                 self.app["statusbar"].lock = True
-                self.app["statusbar"].err_message(message)
+                self.app["statusbar"].message(message, "info")
             else:
                 self.app["statusbar"].lock = False
 
@@ -345,7 +345,7 @@ class Image(object):
                 loader.write(image_bytes)
         except:
             self.app.paths.remove(path)
-            self.app["statusbar"].err_message("Error: file not accessible")
+            self.app["statusbar"].message("File not accessible", "error")
             self.move_pos(False)
         loader.close()
         # Show final image
@@ -392,7 +392,7 @@ class Image(object):
             if pos < 0 or pos > max_pos:
                 raise ValueError
         except:
-            self.app["statusbar"].err_message("Warning: Unsupported index")
+            self.app["statusbar"].message("Unsupported index", "warning")
             return False
         # Do the maths and move
         dif = pos - current - 1

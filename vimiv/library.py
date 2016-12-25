@@ -248,7 +248,7 @@ class Library(object):
             if not start:
                 self.reload(os.getcwd(), curdir)
         except:
-            self.app["statusbar"].err_message("Error: directory not accessible")
+            self.app["statusbar"].message("Directory not accessible", "error")
 
     def remember_pos(self, directory, position):
         """Write the current position in directory to the dir_pos dictionary.
@@ -292,7 +292,7 @@ class Library(object):
             defined_pos: If not empty defines the position to move to.
         """
         if not self.files:
-            self.app["statusbar"].err_message("Warning: Directory is empty")
+            self.app["statusbar"].message("Directory is empty", "warning")
             return
         max_pos = len(self.files) - 1
         # Direct call from scroll
@@ -303,7 +303,7 @@ class Library(object):
             new_pos = int(self.app["keyhandler"].num_str) - 1
             self.app["keyhandler"].num_clear()
             if new_pos < 0 or new_pos > max_pos:
-                self.app["statusbar"].err_message("Warning: Unsupported index")
+                self.app["statusbar"].message("Unsupported index", "warning")
                 return
         elif forward:
             new_pos = max_pos
@@ -330,7 +330,7 @@ class Library(object):
                 val = int(val)
             except:
                 message = "Library width must be an integer"
-                self.app["statusbar"].err_message(message)
+                self.app["statusbar"].message(message, "error")
                 return
             self.width = val
         else:  # Grow/shrink by value
@@ -340,7 +340,7 @@ class Library(object):
                 val = int(val)
             except:
                 message = "Library width must be an integer"
-                self.app["statusbar"].err_message(message)
+                self.app["statusbar"].message(message, "error")
                 return
             if inc:
                 self.width += val

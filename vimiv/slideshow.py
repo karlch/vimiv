@@ -41,11 +41,11 @@ class Slideshow(object):
         """Toggle the slideshow or update the delay."""
         if not self.app.paths:
             message = "No valid paths, starting slideshow failed"
-            self.app["statusbar"].err_message(message)
+            self.app["statusbar"].message(message, "error")
             return
         if self.app["thumbnail"].toggled:
             message = "Slideshow makes no sense in thumbnail mode"
-            self.app["statusbar"].err_message(message)
+            self.app["statusbar"].message(message, "warning")
             return
         # Delay changed via vimiv["keyhandler"].num_str?
         if self.app["keyhandler"].num_str:
@@ -75,23 +75,23 @@ class Slideshow(object):
         if step:
             step, errorcode = get_float_from_str(step)
             if errorcode:
-                self.app["statusbar"].err_message(
-                    "Delay could not be parsed.")
+                self.app["statusbar"].message(
+                    "Delay could not be parsed", "error")
                 return
             self.delay += step
         elif val:
             val, errorcode = get_float_from_str(val)
             if errorcode:
-                self.app["statusbar"].err_message(
-                    "Delay could not be parsed.")
+                self.app["statusbar"].message(
+                    "Delay could not be parsed", "error")
                 return
             self.delay = val
             self.app["keyhandler"].num_clear()
         # Set a minimum
         if self.delay < 0.5:
             self.delay = 0.5
-            self.app["statusbar"].err_message(
-                "Delays shorter than 0.5 s are not allowed")
+            self.app["statusbar"].message(
+                "Delays shorter than 0.5 s are not allowed", "warning")
         # If slideshow was running reload it
         if self.running:
             GLib.source_remove(self.timer_id)

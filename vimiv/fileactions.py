@@ -174,10 +174,10 @@ class FileExtras(object):
         # Catch problems
         if self.app["library"].treeview.is_focus():
             message = "Format only works on opened image files"
-            self.app["statusbar"].err_message(message)
+            self.app["statusbar"].message(message, "info")
             return
         if not self.app.paths:
-            self.app["statusbar"].err_message("No files in path")
+            self.app["statusbar"].message("No files in path", "info")
             return
 
         # Check if exifdata is available and needed
@@ -190,8 +190,8 @@ class FileExtras(object):
                         if not (exif and 306 in exif):
                             raise AttributeError
             except AttributeError:
-                self.app["statusbar"].err_message(
-                    "No exif data for %s available" % (fil))
+                self.app["statusbar"].message(
+                    "No exif data for %s available" % (fil), "error")
                 return
 
         for i, fil in enumerate(self.app.paths):

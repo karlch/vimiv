@@ -55,12 +55,12 @@ class TagsTest(VimivTestCase):
         if os.path.exists(unavailable_file):
             os.remove(unavailable_file)
         self.vimiv["tags"].load("foo_is_real")
-        expected_text = "Tagfile 'foo_is_real' has no valid images"
+        expected_text = "ERROR: Tagfile 'foo_is_real' has no valid images"
         received_text = self.vimiv["statusbar"].left_label.get_text()
         self.assertEqual(expected_text, received_text)
         os.remove(unavailable_file)
         self.vimiv["tags"].remove("foo_is_real")  # Error message
-        expected_text = "Tagfile 'foo_is_real' does not exist"
+        expected_text = "ERROR: Tagfile 'foo_is_real' does not exist"
         received_text = self.vimiv["statusbar"].left_label.get_text()
         self.assertEqual(expected_text, received_text)
 

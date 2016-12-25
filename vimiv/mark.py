@@ -37,8 +37,8 @@ class Mark(object):
                 self.marked.append(current)
             self.mark_reload(False, [current])
         else:
-            self.app["statusbar"].err_message(
-                "Marking directories is not supported")
+            self.app["statusbar"].message(
+                "Marking directories is not supported", "warning")
 
     def toggle_mark(self):
         """Toggle mark status.
@@ -64,7 +64,7 @@ class Mark(object):
         elif self.app.paths:
             files = self.app.paths
         else:
-            self.app["statusbar"].err_message("No image to mark")
+            self.app["statusbar"].message("No image to mark", "error")
         # Add all to the marks
         for fil in files:
             if os.path.isfile(fil) and fil not in self.marked:
@@ -75,7 +75,7 @@ class Mark(object):
         """Mark all images between the two last marks."""
         # Check if there are enough marks
         if len(self.marked) < 2:
-            self.app["statusbar"].err_message("Not enough marks")
+            self.app["statusbar"].message("Not enough marks", "error")
             return
         start = self.marked[-2]
         end = self.marked[-1]
@@ -88,7 +88,7 @@ class Mark(object):
         elif self.app.paths:
             files = self.app.paths
         else:
-            self.app["statusbar"].err_message("No image to mark")
+            self.app["statusbar"].message("No image to mark", "error")
         # Find the images to mark
         for i, image in enumerate(files):
             if image == start:

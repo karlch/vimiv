@@ -78,7 +78,7 @@ class LibraryTest(VimivTestCase):
         self.vimiv["keyhandler"].num_str = "300"
         self.lib.move_pos()
         self.assertEqual(self.vimiv.get_pos(True), "animation")
-        expected_message = "Warning: Unsupported index"
+        expected_message = "WARNING: Unsupported index"
         received_message = self.vimiv["statusbar"].left_label.get_text()
         self.assertEqual(expected_message, received_message)
 
@@ -105,7 +105,7 @@ class LibraryTest(VimivTestCase):
                          self.lib.scrollable_treeview.get_size_request()[0])
         # Throw errors
         self.lib.resize(False, False, "hi")
-        expected_message = "Library width must be an integer"
+        expected_message = "ERROR: Library width must be an integer"
         received_message = self.vimiv["statusbar"].left_label.get_text()
         self.assertEqual(expected_message, received_message)
         self.lib.resize(False, True, "hi")
