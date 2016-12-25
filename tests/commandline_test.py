@@ -28,6 +28,15 @@ class CommandlineTest(VimivTestCase):
         self.vimiv["commandline"].entry.set_text("")
         self.assertFalse(self.vimiv["commandline"].entry.is_visible())
         self.assertFalse(self.vimiv["commandline"].entry.is_focus())
+        # Focusing with text
+        self.vimiv["commandline"].focus("test")
+        self.assertEqual(self.vimiv["commandline"].entry.get_text(), ":test")
+        self.assertTrue(self.vimiv["commandline"].entry.is_focus())
+        self.assertTrue(self.vimiv["commandline"].entry.is_visible())
+        # Leaving normally
+        self.vimiv["commandline"].leave()
+        self.assertFalse(self.vimiv["commandline"].entry.is_visible())
+        self.assertFalse(self.vimiv["commandline"].entry.is_focus())
 
     def test_run_command(self):
         """Run an internal vimiv command."""

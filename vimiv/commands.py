@@ -105,7 +105,7 @@ class Commands(object):
             "zoom_to": [self.app["image"].zoom_to, [], ["percent"], []]}
 
         self.app.functions = {
-            "command": [self.app["commandline"].focus, [], [], []],
+            "command": [self.app["commandline"].focus, [], [], ["text"]],
             "complete": [self.app["completions"].complete, [False], [], []],
             "complete_inverse": [self.app["completions"].complete,
                                  [True], [], []],

@@ -345,10 +345,10 @@ class CommandLine(object):
         # Reconnect when done
         self.entry.connect("changed", self.check_close)
 
-    def focus(self):
+    def focus(self, text=""):
         """Open and focus the command line."""
         # Colon for text
-        self.entry.set_text(":")
+        self.entry.set_text(":" + text)
         # Show/hide the relevant stuff
         self.entry.show()
         self.app["completions"].show()

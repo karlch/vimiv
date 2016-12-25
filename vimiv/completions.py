@@ -119,7 +119,7 @@ class Completion():
         """Show the completion information."""
         # Hacky way to not show the last selected item
         self.treeview.set_model(Gtk.ListStore(str, str))
-        self.treeview.set_model(self.liststores["internal"][0])
+        self.treeview.set_model(self.liststores["internal"][1])
         self.info.show()
 
     def hide(self):
