@@ -199,6 +199,10 @@ class Library(object):
             column: Column that was activated.
             close: If True close the library when finished.
         """
+        # Empty directory
+        if not path:
+            self.app["statusbar"].message("No file to select", "error")
+            return
         count = path.get_indices()[0]
         fil = self.files[count]
         self.remember_pos(os.getcwd(), count)
@@ -275,6 +279,10 @@ class Library(object):
         # Create model in new directory
         self.treeview.set_model(self.liststore_create())
         self.focus(True)
+        # Warn if there are no files in the directory
+        if not self.files:
+            self.app["statusbar"].message("Directory is empty", "warning")
+            return
         # Check if there is a saved position
         if directory in self.dir_pos.keys():
             self.move_pos(True, self.dir_pos[directory])
@@ -294,7 +302,7 @@ class Library(object):
             defined_pos: If not empty defines the position to move to.
         """
         if not self.files:
-            self.app["statusbar"].message("Directory is empty", "warning")
+            self.app["statusbar"].message("No position to go to", "error")
             return
         max_pos = len(self.files) - 1
         # Direct call from scroll
