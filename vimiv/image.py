@@ -7,6 +7,7 @@ from random import shuffle
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib
+from vimiv.helpers import get_float_from_str
 
 
 class Image(object):
@@ -201,8 +202,10 @@ class Image(object):
                 step = self.app["keyhandler"].num_str
                 self.app["keyhandler"].num_clear()
             if isinstance(step, str):
-                step, err = self.parse_user_zoom(step)
+                step, err = get_float_from_str(step)
                 if err:
+                    self.app["statusbar"].err_message(
+                        "Zoom percentage cannot be parsed")
                     return
             fallback_zoom = self.zoom_percent
             if zoom_in:
@@ -229,8 +232,10 @@ class Image(object):
             self.app["keyhandler"].num_clear()
         # Either num_str or given from commandline
         if isinstance(percent, str):
-            percent, err = self.parse_user_zoom(percent)
+            percent, err = get_float_from_str(percent)
             if err:
+                self.app["statusbar"].err_message(
+                    "Zoom percentage cannot be parsed")
                 return
         self.imsize = self.get_available_size()
         # 0 means zoom to fit
@@ -242,26 +247,6 @@ class Image(object):
             self.user_zoomed = False
         # Catch some unreasonable zooms
         self.catch_unreasonable_zoom_and_update(fallback_zoom)
-
-    def parse_user_zoom(self, user_zoom):
-        """Return a usable zoom from user input or raise an error.
-
-        args:
-            user_zoom: String given by the user to be parsed.
-        return:
-            The zoom to be used as float.
-            An errorcode: 1 for errors, 0 else.
-        """
-        # If prefixed with a zero convert to decimal
-        if user_zoom[0] == "0" and len(user_zoom) > 1 and user_zoom[1] != ".":
-            user_zoom = "0." + user_zoom[1:]
-        try:
-            user_zoom = float(user_zoom)
-            return user_zoom, 0
-        except ValueError:
-            self.app["statusbar"].err_message(
-                "Error: Zoom percentage not parseable")
-            return None, 1
 
     def catch_unreasonable_zoom_and_update(self, fallback_zoom):
         """Catch zooms unreasonable zooms otherwise update.

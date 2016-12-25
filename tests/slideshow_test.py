@@ -49,29 +49,31 @@ class SlideshowTest(VimivTestCase):
     def test_set_delay(self):
         """Set slideshow delay."""
         self.assertEqual(self.slideshow.delay, 2.0)
-        self.slideshow.set_delay(3.0)
+        self.slideshow.set_delay("3.0")
         self.assertEqual(self.slideshow.delay, 3.0)
-        self.slideshow.set_delay(None, "-")
+        self.slideshow.set_delay(None, "-0.2")
         self.assertEqual(self.slideshow.delay, 2.8)
-        self.slideshow.set_delay(None, "+")
-        self.assertEqual(self.slideshow.delay, 3.0)
+        self.slideshow.set_delay(None, "+0.4")
+        self.assertAlmostEqual(self.slideshow.delay, 3.2)
         # Set via toggle
         self.vimiv["keyhandler"].num_str = "2"
         self.slideshow.toggle()
         self.assertEqual(self.slideshow.delay, 2.0)
+        # Set to a too small value
+        self.slideshow.set_delay("0.1")
+        self.assertEqual(self.slideshow.delay, 0.5)
 
     def test_running(self):
         """Check if slideshow runs correctly."""
         self.assertEqual(self.vimiv.index, 0)
         self.slideshow.toggle()
         # Set delay when running
-        self.slideshow.set_delay(0.001)
-        self.assertEqual(self.slideshow.delay, 0.001)
-        for i in range(1, 6):
+        self.slideshow.set_delay("0.5")
+        self.assertEqual(self.slideshow.delay, 0.5)
+        for i in range(1, 3):
             refresh_gui(self.vimiv)
             self.assertEqual(self.vimiv.index, i)
         refresh_gui(self.vimiv)
-        self.assertEqual(self.vimiv.index, 0)
 
     def tearDown(self):
         if self.slideshow.running:

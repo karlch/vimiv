@@ -68,7 +68,7 @@ class ImageTest(VimivTestCase):
         self.vimiv["keyhandler"].num_str = "vimiv"
         self.image.zoom_to(0)
         message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(message, "Error: Zoom percentage not parseable")
+        self.assertEqual(message, "Zoom percentage cannot be parsed")
 
     def test_move(self):
         """Move from image to image."""

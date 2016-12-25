@@ -3,6 +3,7 @@
 """Slideshow for vimiv."""
 
 from gi.repository import GLib
+from vimiv.helpers import get_float_from_str
 
 
 class Slideshow(object):
@@ -11,6 +12,7 @@ class Slideshow(object):
     Attributes:
         app: The main application class to interact with.
         at_start: If True start the slideshow after startup.
+        default_delay: Slideshow delay set in the default settings.
         delay: Slideshow delay between images.
         timer_id: ID of the currently running GLib.Timeout.
         start_index: Index of the image when slideshow was started. Saved to
@@ -29,6 +31,7 @@ class Slideshow(object):
         general = settings["GENERAL"]
 
         self.at_start = general["start_slideshow"]
+        self.default_delay = general["slideshow_delay"]
         self.delay = general["slideshow_delay"]
         self.timer_id = GLib.Timeout
         self.start_index = 0
@@ -46,7 +49,7 @@ class Slideshow(object):
             return
         # Delay changed via vimiv["keyhandler"].num_str?
         if self.app["keyhandler"].num_str:
-            self.set_delay(float(self.app["keyhandler"].num_str))
+            self.set_delay(fixed_val=self.app["keyhandler"].num_str)
         # If the delay wasn't changed in any way just toggle the slideshow
         else:
             self.running = not self.running
@@ -60,23 +63,35 @@ class Slideshow(object):
                 GLib.source_remove(self.timer_id)
         self.app["statusbar"].update_info()
 
-    def set_delay(self, val=None, key=""):
+    def set_delay(self, fixed_val=None, step=None):
         """Set slideshow delay.
 
         Args:
-            val: Value to which the delay is set.
-            key: One of "+" or "-" indicating if the delay should be increased
-                or decreased.
+            fixed_val: Value to which the delay is set.
+            step: Add step to the current delay.
         """
-        val = val if val else self.app.settings["GENERAL"]["slideshow_delay"]
-        if key == "-":
-            if self.delay >= 0.8:
-                self.delay -= 0.2
-        elif key == "+":
-            self.delay += 0.2
+        val = fixed_val if fixed_val else self.default_delay
+        # Parse step and fixed_val
+        if step:
+            step, errorcode = get_float_from_str(step)
+            if errorcode:
+                self.app["statusbar"].err_message(
+                    "Delay could not be parsed.")
+                return
+            self.delay += step
         elif val:
-            self.delay = float(val)
+            val, errorcode = get_float_from_str(val)
+            if errorcode:
+                self.app["statusbar"].err_message(
+                    "Delay could not be parsed.")
+                return
+            self.delay = val
             self.app["keyhandler"].num_clear()
+        # Set a minimum
+        if self.delay < 0.5:
+            self.delay = 0.5
+            self.app["statusbar"].err_message(
+                "Delays shorter than 0.5 s are not allowed")
         # If slideshow was running reload it
         if self.running:
             GLib.source_remove(self.timer_id)
