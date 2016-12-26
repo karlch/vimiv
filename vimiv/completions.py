@@ -109,9 +109,9 @@ class Completion():
         else:
             self.tab_position += 1
         self.tab_presses += 1
-        new_position = self.tab_position % maximum
-        self.treeview.set_cursor(Gtk.TreePath(new_position), None, False)
-        self.treeview.scroll_to_cell(Gtk.TreePath(new_position),
+        self.tab_position %= maximum
+        self.treeview.set_cursor(Gtk.TreePath(self.tab_position), None, False)
+        self.treeview.scroll_to_cell(Gtk.TreePath(self.tab_position),
                                      None, True, 0.5, 0)
         return True  # Deactivate default keybinding (here for Tab)
 
