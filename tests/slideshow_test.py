@@ -13,7 +13,7 @@ def refresh_gui(vimiv=None):
     """Refresh the GUI as the Gtk.main() loop is not running when testing.
 
     Args:
-        delay: Time to wait before refreshing.
+        vimiv: Vimiv class to receive slideshow index.
     """
     current_pos = vimiv.index
     while current_pos == vimiv.index:
