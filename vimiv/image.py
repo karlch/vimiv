@@ -194,8 +194,9 @@ class Image(object):
             zoom_in: If True zoom in, else zoom out.
         """
         delta = 0.25
-        if self.app["thumbnail"].toggled or self.is_anim:
-            return
+        if self.is_anim:
+            self.app["statusbar"].message("Zoom not supported for animations",
+                                          "warning")
         else:
             # Allow user steps
             if self.app["keyhandler"].num_str:
@@ -223,7 +224,9 @@ class Image(object):
             z_width: If True zoom to width.
             z_height: If True zoom to height.
         """
-        if self.app["thumbnail"].toggled or self.is_anim:
+        if self.is_anim:
+            self.app["statusbar"].message("Zoom not supported for animations",
+                                          "warning")
             return
         fallback_zoom = self.zoom_percent
         # Catch user zooms

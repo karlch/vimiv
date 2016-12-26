@@ -173,6 +173,9 @@ class Manipulate(object):
             rotate_file: If True call thread to rotate files.
         """
         try:
+            # Do not rotate animations
+            if self.app["image"].is_anim:
+                raise ValueError
             cwise = int(cwise)
             images = self.get_manipulated_images("Rotated")
             cwise = cwise % 4
@@ -219,6 +222,9 @@ class Manipulate(object):
             rotate_file: If True call thread to rotate files.
         """
         try:
+            # Do not flip animations
+            if self.app["image"].is_anim:
+                raise ValueError
             horizontal = int(horizontal)
             images = self.get_manipulated_images("Flipped")
             # Flip the image shown
