@@ -64,11 +64,48 @@ class ImageTest(VimivTestCase):
         pixbuf = self.image.image.get_pixbuf()
         self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
-        # Percentage that cannot be parsed
-        self.vimiv["keyhandler"].num_str = "vimiv"
-        self.image.zoom_to(0)
-        message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(message, "ERROR: Zoom percentage cannot be parsed")
+        ##################
+        #  Command line  #
+        ##################
+        # Zoom in
+        expected_zoom = self.image.zoom_percent * 1.25
+        self.vimiv["commandline"].focus("zoom_in")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(expected_zoom, self.image.zoom_percent)
+        # Zoom out with step
+        expected_zoom = self.image.zoom_percent / 1.5
+        self.vimiv["commandline"].focus("zoom_out 2")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(expected_zoom, self.image.zoom_percent)
+        # Zoom with invalid argument
+        self.vimiv["commandline"].focus("zoom_out value")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "ERROR: Zoom percentage cannot be parsed")
+        # Zoom to fit
+        self.vimiv["commandline"].focus("fit")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.image.zoom_percent,
+                         self.image.get_zoom_percent_to_fit())
+        # Fit horizontally
+        self.vimiv["commandline"].focus("fit_horiz")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.image.zoom_percent,
+                         self.image.get_zoom_percent_to_fit())
+        # Fit vertically
+        self.vimiv["commandline"].focus("fit_vert")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.image.zoom_percent,
+                         self.image.get_zoom_percent_to_fit(False, True))
+        # Zoom_to 0.5
+        self.vimiv["commandline"].focus("zoom_to 05")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.image.zoom_percent, 0.5)
+        # Zoom_to with invalid argument
+        self.vimiv["commandline"].focus("zoom_to value")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "ERROR: Zoom percentage cannot be parsed")
 
     def test_move(self):
         """Move from image to image."""

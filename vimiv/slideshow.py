@@ -80,7 +80,7 @@ class Slideshow(object):
                 return
             self.delay += step
         elif val:
-            val, errorcode = get_float_from_str(val)
+            val, errorcode = get_float_from_str(str(val))
             if errorcode:
                 self.app["statusbar"].message(
                     "Delay could not be parsed", "error")

@@ -4,7 +4,9 @@
 
 import os
 import shutil
+from threading import Thread
 from unittest import main
+from PIL import Image
 from vimiv_testcase import VimivTestCase, compare_images
 
 
@@ -42,19 +44,79 @@ class ManipulateTest(VimivTestCase):
 
     def test_rotate(self):
         """Rotate image."""
+        # Before
         pixbuf = self.vimiv["image"].image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
+        self.assertFalse(is_portrait)
+        # Rotate
         self.manipulate.rotate(1, False)
         pixbuf = self.vimiv["image"].image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertTrue(is_portrait)
+        # Rotate back
+        self.manipulate.rotate(1, False)
+        pixbuf = self.vimiv["image"].image.get_pixbuf()
+        is_portrait = pixbuf.get_width() < pixbuf.get_height()
+        self.assertFalse(is_portrait)
+        ##################
+        #  Command line  #
+        ##################
+        # Rotate
+        self.vimiv["commandline"].focus("rotate 1")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        Thread.join(self.vimiv["manipulate"].running_threads[0])
+        pixbuf = self.vimiv["image"].image.get_pixbuf()
+        is_portrait = pixbuf.get_width() < pixbuf.get_height()
+        self.assertTrue(is_portrait)
+        with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
+            self.assertTrue(im.width < im.height)
+        # Rotate back
+        self.vimiv["commandline"].focus("rotate -1")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        Thread.join(self.vimiv["manipulate"].running_threads[0])
+        pixbuf = self.vimiv["image"].image.get_pixbuf()
+        is_portrait = pixbuf.get_width() < pixbuf.get_height()
+        self.assertFalse(is_portrait)
+        with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
+            self.assertFalse(im.width < im.height)
+        # Fail because of invalid argument
+        self.vimiv["commandline"].focus("rotate value")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "WARNING: Object cannot be rotated")
+
 
     def test_flip(self):
         """Flip image."""
+        # Flip
         pixbuf_before = self.vimiv["image"].image.get_pixbuf()
         self.manipulate.flip(1, False)
         pixbuf_after = self.vimiv["image"].image.get_pixbuf()
         self.assertNotEqual(pixbuf_before, pixbuf_after)
+        # Flip back
+        self.manipulate.flip(1, False)
+        pixbuf_after_2 = self.vimiv["image"].image.get_pixbuf()
+        self.assertNotEqual(pixbuf_after, pixbuf_after_2)
+        ##################
+        #  Command line  #
+        ##################
+        # Flip
+        self.vimiv["commandline"].focus("flip 1")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        Thread.join(self.vimiv["manipulate"].running_threads[0])
+        pixbuf_after_3 = self.vimiv["image"].image.get_pixbuf()
+        self.assertNotEqual(pixbuf_after_2, pixbuf_after_3)
+        # Flip back
+        self.vimiv["commandline"].focus("flip 1")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        Thread.join(self.vimiv["manipulate"].running_threads[0])
+        pixbuf_after_4 = self.vimiv["image"].image.get_pixbuf()
+        self.assertNotEqual(pixbuf_after_3, pixbuf_after_4)
+        # Fail because of invalid argument
+        self.vimiv["commandline"].focus("flip value")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "WARNING: Object cannot be flipped")
 
     def test_toggle(self):
         """Toggle manipulate."""

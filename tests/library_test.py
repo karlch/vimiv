@@ -111,6 +111,36 @@ class LibraryTest(VimivTestCase):
         self.lib.resize(False, True, "hi")
         received_message = self.vimiv["statusbar"].left_label.get_text()
         self.assertEqual(expected_message, received_message)
+        ##################
+        #  Command line  #
+        ##################
+        # Default 20
+        self.vimiv["commandline"].focus(":grow_lib")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(120,
+                         self.lib.scrollable_treeview.get_size_request()[0])
+        # Value passed
+        self.vimiv["commandline"].focus(":grow_lib 30")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(150,
+                         self.lib.scrollable_treeview.get_size_request()[0])
+        # Fail by passing an invalid value
+        self.vimiv["commandline"].focus(":grow_lib value")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        expected_message = "ERROR: Library width must be an integer"
+        received_message = self.vimiv["statusbar"].left_label.get_text()
+        self.assertEqual(expected_message, received_message)
+        # Set width to default
+        self.vimiv["commandline"].focus(":set library_width")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.lib.default_width,
+                         self.lib.scrollable_treeview.get_size_request()[0])
+        # Fail by passing an invalid value
+        self.vimiv["commandline"].focus(":set library_width value")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        expected_message = "ERROR: Library width must be an integer"
+        received_message = self.vimiv["statusbar"].left_label.get_text()
+        self.assertEqual(expected_message, received_message)
 
     def test_scroll(self):
         """Scroll library."""

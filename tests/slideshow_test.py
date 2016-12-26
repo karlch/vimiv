@@ -62,6 +62,27 @@ class SlideshowTest(VimivTestCase):
         # Set to a too small value
         self.slideshow.set_delay("0.1")
         self.assertEqual(self.slideshow.delay, 0.5)
+        ##################
+        #  Command line  #
+        ##################
+        # Increase by value
+        self.vimiv["commandline"].focus("slideshow_delay 03")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.slideshow.delay, 0.8)
+        # Fail because of invalid argument
+        self.vimiv["commandline"].focus("slideshow_delay value")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "ERROR: Delay could not be parsed")
+        # Set to default
+        self.vimiv["commandline"].focus("set slideshow_delay")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.slideshow.delay, self.slideshow.default_delay)
+        # Fail because of invalid argument
+        self.vimiv["commandline"].focus("set slideshow_delay value")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "ERROR: Delay could not be parsed")
 
     def test_running(self):
         """Check if slideshow runs correctly."""

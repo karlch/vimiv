@@ -64,6 +64,30 @@ class TagsTest(VimivTestCase):
         received_text = self.vimiv["statusbar"].left_label.get_text()
         self.assertEqual(expected_text, received_text)
 
+    def test_tag_commandline(self):
+        """Tag commands from command line."""
+        # Set some marked images
+        taglist = ["vimiv/testimages/arch-logo.png",
+                   "vimiv/testimages/arch_001.jpg"]
+        taglist = [os.path.abspath(image) for image in taglist]
+        self.vimiv["mark"].marked = list(taglist)
+        for fil in self.vimiv["mark"].marked:
+            print("In mark there is:", fil)
+        # Write a tag
+        self.vimiv["commandline"].focus("tag_write new_test_tag")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        created_file = os.path.expanduser("~/.vimiv/Tags/new_test_tag")
+        file_content = read_file(created_file)
+        self.assertEqual(taglist, file_content)
+        # Load a tag
+        self.vimiv["commandline"].focus("tag_load new_test_tag")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.vimiv.paths, taglist)
+        # Delete a tag
+        self.vimiv["commandline"].focus("tag_remove new_test_tag")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertFalse(os.path.isfile(created_file))
+
     def tearDown(self):
         os.chdir(self.working_directory)
 
