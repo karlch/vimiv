@@ -77,7 +77,8 @@ class Image(object):
             0 if no edits were done or force, 1 else.
         """
         if force:
-            self.app["manipulate"].button_clicked(None, accept=False)
+            self.app["manipulate"].manipulations = \
+                {"bri": 1, "con": 1, "sha": 1}
             return 0
         elif self.app["manipulate"].manipulations != \
                 {"bri": 1, "con": 1, "sha": 1}:

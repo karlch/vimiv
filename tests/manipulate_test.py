@@ -173,6 +173,11 @@ class ManipulateTest(VimivTestCase):
         self.assertTrue(self.manipulate.sliders["sha"].is_focus())
         self.manipulate.focus_slider("bri")
         self.assertTrue(self.manipulate.sliders["bri"].is_focus())
+        # Slider does not exist
+        self.manipulate.focus_slider("val")
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "ERROR: No slider called val")
+        # Leave
         self.manipulate.button_clicked(None, False)
 
     def test_cmd_edit(self):

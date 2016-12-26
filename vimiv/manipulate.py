@@ -379,7 +379,15 @@ class Manipulate(object):
         Args:
             name: Name of slider to focus.
         """
-        self.sliders[name].grab_focus()
+        # If manipulate is not toggled, this makes no sense
+        if not self.scrolled_win.is_visible():
+            self.app["statusbar"].message(
+                "Focusing a slider only makes sense in manipulate", "error")
+        elif name not in self.sliders.keys():
+            self.app["statusbar"].message(
+                "No slider called " + name, "error")
+        else:
+            self.sliders[name].grab_focus()
 
     def change_slider(self, step=1):
         """Change the value of the currently focused slider.
@@ -410,6 +418,11 @@ class Manipulate(object):
             button: Gtk.Button that was clicked.
             accept: If True apply changes to image file. Else discard them.
         """
+        # If manipulate is not toggled, this makes no sense
+        if not self.scrolled_win.is_visible():
+            self.app["statusbar"].message(
+                "Finishing manipulate only makes sense in manipulate", "error")
+            return
         # Apply changes
         if accept:
             self.manipulate_image(True)
