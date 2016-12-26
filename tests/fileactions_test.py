@@ -123,6 +123,7 @@ class FileActionsTest(VimivTestCase):
     def test_clipboard(self):
         """Copy image name to clipboard."""
         def compare_text(clipboard, text, expected_text):
+            self.compare_result = False
             self.compare_result = text == expected_text
         name = self.vimiv.get_pos(True)
         basename = os.path.basename(name)
@@ -131,25 +132,24 @@ class FileActionsTest(VimivTestCase):
         primary = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
         # Copy basename and abspath to clipboard
         self.vimiv["fileextras"].copy_name(False)
+        # Check if the info message is displayed correctly
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "INFO: Copied " + basename + " to clipboard")
         clipboard.request_text(compare_text, basename)
         self.assertTrue(self.compare_result)
-        self.compare_result = False
         self.vimiv["fileextras"].copy_name(True)
         clipboard.request_text(compare_text, abspath)
         self.assertTrue(self.compare_result)
-        self.compare_result = False
         # Toggle to primary and copy basename
         self.vimiv["fileextras"].toggle_clipboard()
         self.vimiv["fileextras"].copy_name(False)
         primary.request_text(compare_text, basename)
         self.assertTrue(self.compare_result)
-        self.compare_result = False
         # Toggle back to clipboard and copy basename
         self.vimiv["fileextras"].toggle_clipboard()
         self.vimiv["fileextras"].copy_name(False)
         clipboard.request_text(compare_text, basename)
         self.assertTrue(self.compare_result)
-        self.compare_result = False
 
     def tearDown(self):
         os.chdir(self.test_directory)

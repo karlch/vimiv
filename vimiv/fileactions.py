@@ -142,11 +142,7 @@ class FileExtras(object):
             clipboard: Gtk Clipboard depending on config.
         """
         self.app = app
-        use_primary = self.app.settings["GENERAL"]["copy_to_primary"]
-        if use_primary:
-            self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
-        else:
-            self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        self.use_primary = self.app.settings["GENERAL"]["copy_to_primary"]
 
     def clear(self, directory_name):
         """Remove all files in directory (Trash or Thumbnails).
@@ -277,17 +273,23 @@ class FileExtras(object):
         Args:
             abspath: Use absolute path or only the basename.
         """
+        # Get name to copy
         name = self.app.get_pos(True)
         if abspath:
             name = os.path.abspath(name)
         else:
             name = os.path.basename(name)
-        self.clipboard.set_text(name, -1)
+        # Set clipboard
+        clipboard = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY) \
+            if self.use_primary \
+            else Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
+        # Text to clipboard
+        clipboard.set_text(name, -1)
+        # Info message
+        message = "Copied <b>" + name + "</b> to %s" % \
+            ("primary" if self.use_primary else "clipboard")
+        self.app["statusbar"].message(message, "info")
 
     def toggle_clipboard(self):
         """Toggle between primary and clipboard selection."""
-        primary = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
-        if self.clipboard == primary:
-            self.clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
-        else:
-            self.clipboard = primary
+        self.use_primary = not self.use_primary
