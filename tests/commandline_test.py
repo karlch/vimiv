@@ -203,6 +203,13 @@ class CommandlineTest(VimivTestCase):
         self.assertEqual(self.vimiv["commandline"].entry.get_text(),
                          ":!echo baz")
 
+    def test_fail_hidden_command(self):
+        """Fail running a hidden command."""
+        self.vimiv["commandline"].entry.set_text(":command")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "ERROR: No command called command")
+
     def tearDown(self):
         os.chdir(self.working_directory)
         self.vimiv["library"].reload(os.getcwd())
