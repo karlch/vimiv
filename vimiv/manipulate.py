@@ -176,6 +176,10 @@ class Manipulate(object):
             self.app["statusbar"].message(
                 "Animations cannot be rotated", "warning")
             return
+        elif not self.app.paths:
+            self.app["statusbar"].message(
+                "No image to rotate", "error")
+            return
         try:
             cwise = int(cwise)
             images = self.get_manipulated_images("Rotated")
@@ -227,6 +231,10 @@ class Manipulate(object):
         if self.app["image"].is_anim:
             self.app["statusbar"].message(
                 "Animations cannot be flipped", "warning")
+            return
+        elif not self.app.paths:
+            self.app["statusbar"].message(
+                "No image to flip", "error")
             return
         try:
             horizontal = int(horizontal)

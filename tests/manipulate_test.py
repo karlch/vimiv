@@ -58,6 +58,13 @@ class ManipulateTest(VimivTestCase):
         pixbuf = self.vimiv["image"].image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertFalse(is_portrait)
+        # Fail because of no paths
+        backup = list(self.vimiv.paths)
+        self.vimiv.paths = []
+        self.manipulate.rotate(1, False)
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                "ERROR: No image to rotate")
+        self.vimiv.paths = backup
         ##################
         #  Command line  #
         ##################
@@ -97,6 +104,13 @@ class ManipulateTest(VimivTestCase):
         self.manipulate.flip(1, False)
         pixbuf_after_2 = self.vimiv["image"].image.get_pixbuf()
         self.assertNotEqual(pixbuf_after, pixbuf_after_2)
+        # Fail because of no paths
+        backup = list(self.vimiv.paths)
+        self.vimiv.paths = []
+        self.manipulate.flip(1, False)
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                "ERROR: No image to flip")
+        self.vimiv.paths = backup
         ##################
         #  Command line  #
         ##################
