@@ -206,7 +206,7 @@ class Image(object):
                 step, err = get_float_from_str(step)
                 if err:
                     self.app["statusbar"].message(
-                        "Zoom percentage cannot be parsed", "error")
+                        "Argument for zoom must be of type float", "error")
                     return
             fallback_zoom = self.zoom_percent
             if zoom_in:
@@ -238,7 +238,7 @@ class Image(object):
             percent, err = get_float_from_str(percent)
             if err:
                 self.app["statusbar"].message(
-                    "Zoom percentage cannot be parsed", "error")
+                    "Argument for zoom must be of type float", "error")
                 return
         self.imsize = self.get_available_size()
         # 0 means zoom to fit

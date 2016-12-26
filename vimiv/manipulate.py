@@ -171,10 +171,12 @@ class Manipulate(object):
             cwise: Rotate image 90 * cwise degrees.
             rotate_file: If True call thread to rotate files.
         """
+        # Do not rotate animations
+        if self.app["image"].is_anim:
+            self.app["statusbar"].message(
+                "Animations cannot be rotated", "warning")
+            return
         try:
-            # Do not rotate animations
-            if self.app["image"].is_anim:
-                raise ValueError
             cwise = int(cwise)
             images = self.get_manipulated_images("Rotated")
             cwise = cwise % 4
@@ -187,11 +189,12 @@ class Manipulate(object):
             if rotate_file:
                 # Rotate all files in external thread
                 rotate_thread = Thread(target=self.thread_for_rotate,
-                                       args=(images, cwise))
+                                        args=(images, cwise))
                 self.running_threads.append(rotate_thread)
                 rotate_thread.start()
-        except:
-            self.app["statusbar"].message("Object cannot be rotated", "warning")
+        except ValueError:
+            self.app["statusbar"].message(
+                "Argument for rotate must be of type integer", "error")
 
     def thread_for_rotate(self, images, cwise):
         """Rotate all image files in an extra thread.
@@ -220,10 +223,12 @@ class Manipulate(object):
             horizontal: If 1 flip horizontally. Else vertically.
             rotate_file: If True call thread to rotate files.
         """
+        # Do not flip animations
+        if self.app["image"].is_anim:
+            self.app["statusbar"].message(
+                "Animations cannot be flipped", "warning")
+            return
         try:
-            # Do not flip animations
-            if self.app["image"].is_anim:
-                raise ValueError
             horizontal = int(horizontal)
             images = self.get_manipulated_images("Flipped")
             # Flip the image shown
@@ -237,8 +242,9 @@ class Manipulate(object):
                                      args=(images, horizontal))
                 self.running_threads.append(flip_thread)
                 flip_thread.start()
-        except:
-            self.app["statusbar"].message("Object cannot be flipped", "warning")
+        except ValueError:
+            self.app["statusbar"].message(
+                "Argument for flip must be of type integer", "error")
 
     def thread_for_flip(self, images, horizontal):
         """Flip all image files in an extra thread.
@@ -377,7 +383,8 @@ class Manipulate(object):
         try:
             step = int(step)
         except:
-            self.app["statusbar"].message("Invalid step", "error")
+            self.app["statusbar"].message(
+                "Argument for slider must be of type integer", "error")
             return
         for slider in self.sliders.values():
             if slider.is_focus():
@@ -418,7 +425,8 @@ class Manipulate(object):
         """
         # Catch buggy numbers
         if not num.isdigit():
-            self.app["statusbar"].message("Failed to parse number", "error")
+            self.app["statusbar"].message(
+                "Argument must be of type integer", "error")
             return
         if not self.scrolled_win.is_visible():
             if not self.app.paths:

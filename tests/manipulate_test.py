@@ -83,7 +83,7 @@ class ManipulateTest(VimivTestCase):
         self.vimiv["commandline"].focus("rotate value")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "WARNING: Object cannot be rotated")
+                "ERROR: Argument for rotate must be of type integer")
 
 
     def test_flip(self):
@@ -116,7 +116,7 @@ class ManipulateTest(VimivTestCase):
         self.vimiv["commandline"].focus("flip value")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "WARNING: Object cannot be flipped")
+                "ERROR: Argument for flip must be of type integer")
 
     def test_toggle(self):
         """Toggle manipulate."""
@@ -185,7 +185,7 @@ class ManipulateTest(VimivTestCase):
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.assertFalse(self.manipulate.sliders["bri"].is_focus())
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Failed to parse number")
+                         "ERROR: Argument must be of type integer")
 
     @classmethod
     def tearDownClass(cls):

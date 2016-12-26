@@ -73,7 +73,7 @@ class SlideshowTest(VimivTestCase):
         self.vimiv["commandline"].focus("slideshow_delay value")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Delay could not be parsed")
+                         "ERROR: Argument for delay must be of type float")
         # Set to default
         self.vimiv["commandline"].focus("set slideshow_delay")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
@@ -82,7 +82,7 @@ class SlideshowTest(VimivTestCase):
         self.vimiv["commandline"].focus("set slideshow_delay value")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Delay could not be parsed")
+                         "ERROR: Argument for delay must be of type float")
 
     def test_running(self):
         """Check if slideshow runs correctly."""

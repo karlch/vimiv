@@ -76,14 +76,14 @@ class Slideshow(object):
             step, errorcode = get_float_from_str(step)
             if errorcode:
                 self.app["statusbar"].message(
-                    "Delay could not be parsed", "error")
+                    "Argument for delay must be of type float", "error")
                 return
             self.delay += step
         elif val:
             val, errorcode = get_float_from_str(str(val))
             if errorcode:
                 self.app["statusbar"].message(
-                    "Delay could not be parsed", "error")
+                    "Argument for delay must be of type float", "error")
                 return
             self.delay = val
             self.app["keyhandler"].num_clear()

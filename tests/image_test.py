@@ -81,7 +81,7 @@ class ImageTest(VimivTestCase):
         self.vimiv["commandline"].focus("zoom_out value")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Zoom percentage cannot be parsed")
+                         "ERROR: Argument for zoom must be of type float")
         # Zoom to fit
         self.vimiv["commandline"].focus("fit")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
@@ -105,7 +105,7 @@ class ImageTest(VimivTestCase):
         self.vimiv["commandline"].focus("zoom_to value")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Zoom percentage cannot be parsed")
+                         "ERROR: Argument for zoom must be of type float")
 
     def test_move(self):
         """Move from image to image."""
