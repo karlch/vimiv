@@ -291,9 +291,11 @@ class CommandLine(object):
         else:
             name_func = name_func_and_args[0]
             conf_args = name_func_and_args[1:]
-        # From functions dictionary get the actual vimiv command
-        if name_func in self.app.functions.keys():
-            func_and_args = self.app.functions[name_func]
+        # Get the actual dictionary from command or function dictionary
+        # depending on whether called from command line or keyhandler
+        func_dict = self.app.functions if keyname else self.app.commands
+        if name_func in func_dict.keys():
+            func_and_args = func_dict[name_func]
             func = func_and_args[0]
             default_args = list(func_and_args[1])
             # Check if the amount of arguments
