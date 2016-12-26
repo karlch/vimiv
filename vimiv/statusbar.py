@@ -219,3 +219,8 @@ class Statusbar(object):
         padding = self.app.settings["GENERAL"]["commandline_padding"]
         separator_height = bar_height + 2 * padding
         self.separator.set_margin_top(separator_height)
+
+    def clear_status(self):
+        """Clear num_str and error messages from the statusbar."""
+        self.app["keyhandler"].num_clear()
+        self.update_info()
