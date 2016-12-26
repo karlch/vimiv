@@ -406,7 +406,7 @@ class CommandLine(object):
         if self.app["window"].last_focused == "lib":
             self.app["library"].focus(True)
         elif self.app["window"].last_focused == "man":
-            self.app["manipulate"].scale_bri.grab_focus()
+            self.app["manipulate"].sliders["bri"].grab_focus()
         elif self.app["window"].last_focused == "thu":
             self.app["thumbnail"].iconview.grab_focus()
         else:

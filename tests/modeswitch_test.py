@@ -63,7 +63,7 @@ class ModeSwitchTestImage(VimivTestCase):
 
         self.vimiv["manipulate"].toggle()
         self.assertTrue(self.vimiv["manipulate"].scrolled_win.is_visible())
-        self.assertTrue(self.vimiv["manipulate"].scale_bri.is_focus())
+        self.assertTrue(self.vimiv["manipulate"].sliders["bri"].is_focus())
 
         self.vimiv["manipulate"].toggle()
         self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())

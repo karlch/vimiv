@@ -65,9 +65,9 @@ class Window(Gtk.ApplicationWindow):
         # Focus changes with mouse
         for widget in [self.app["library"].treeview,
                        self.app["thumbnail"].iconview,
-                       self.app["manipulate"].scale_bri,
-                       self.app["manipulate"].scale_con,
-                       self.app["manipulate"].scale_sha,
+                       self.app["manipulate"].sliders["bri"],
+                       self.app["manipulate"].sliders["con"],
+                       self.app["manipulate"].sliders["sha"],
                        self.app["image"].image]:
             widget.connect("button-release-event", self.focus_on_mouse_click)
 

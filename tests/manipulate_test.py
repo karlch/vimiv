@@ -61,15 +61,15 @@ class ManipulateTest(VimivTestCase):
         # Via function
         self.manipulate.toggle()
         self.assertTrue(self.manipulate.scrolled_win.is_visible())
-        self.assertTrue(self.manipulate.scale_bri.is_focus())
+        self.assertTrue(self.manipulate.sliders["bri"].is_focus())
         self.manipulate.toggle()
         self.assertFalse(self.manipulate.scrolled_win.is_visible())
-        self.assertFalse(self.manipulate.scale_bri.is_focus())
+        self.assertFalse(self.manipulate.sliders["bri"].is_focus())
         self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
         # Close via button
         self.manipulate.toggle()
         self.manipulate.button_clicked(None, False)
-        self.assertFalse(self.manipulate.scale_bri.is_focus())
+        self.assertFalse(self.manipulate.sliders["bri"].is_focus())
         self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
 
     def test_manipulate_image(self):
@@ -89,22 +89,41 @@ class ManipulateTest(VimivTestCase):
         self.manipulate.toggle()
         self.manipulate.focus_slider("bri")
         self.manipulate.change_slider(-1)
-        received_value = self.manipulate.scale_bri.get_value()
+        received_value = self.manipulate.sliders["bri"].get_value()
         self.assertEqual(received_value, -1)
         self.manipulate.focus_slider("con")
-        self.assertTrue(self.manipulate.scale_con.is_focus())
+        self.assertTrue(self.manipulate.sliders["con"].is_focus())
         self.manipulate.focus_slider("sha")
-        self.assertTrue(self.manipulate.scale_sha.is_focus())
+        self.assertTrue(self.manipulate.sliders["sha"].is_focus())
         self.manipulate.focus_slider("bri")
-        self.assertTrue(self.manipulate.scale_bri.is_focus())
+        self.assertTrue(self.manipulate.sliders["bri"].is_focus())
         self.manipulate.button_clicked(None, False)
 
     def test_cmd_edit(self):
         """Test manipulating from command line commands."""
-        self.manipulate.cmd_edit("sha", 20)
-        self.assertEqual(self.manipulate.scale_sha.get_value(), 20)
-        self.assertTrue(self.manipulate.scale_sha.is_focus())
-        self.manipulate.button_clicked(None, False)
+        # Just call the function
+        self.manipulate.cmd_edit("sha", "20")
+        self.assertEqual(self.manipulate.sliders["sha"].get_value(), 20)
+        self.assertTrue(self.manipulate.sliders["sha"].is_focus())
+        # Set contrast via command line
+        self.vimiv["commandline"].entry.set_text(":set contrast 35")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.manipulate.sliders["con"].get_value(), 35)
+        self.assertTrue(self.manipulate.sliders["con"].is_focus())
+        # No argument means 0
+        self.vimiv["commandline"].entry.set_text(":set contrast")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertEqual(self.manipulate.sliders["con"].get_value(), 0)
+        # Close via command line
+        self.vimiv["commandline"].entry.set_text(":discard_changes")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertFalse(self.manipulate.sliders["sha"].is_focus())
+        # Error: not a valid integer for manipulation
+        self.vimiv["commandline"].entry.set_text(":set brightness value")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertFalse(self.manipulate.sliders["bri"].is_focus())
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "ERROR: Failed to parse number")
 
     @classmethod
     def tearDownClass(cls):

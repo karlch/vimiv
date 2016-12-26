@@ -24,9 +24,7 @@ class Manipulate(object):
             brightness, contrast and sharpness.
         scrolled_win: Gtk.ScrolledWindow for the widgets so they are accessible
             regardless of window size.
-        scale_bri: Gtk.Scale for brightness.
-        scale_con: Gtk.Scale for contrast.
-        scale_sha: Gtk.Scale for sharpness.
+        sliders: Dictionary containing bri, con and sha sliders.
         running_threads: List of running threads.
     """
 
@@ -54,20 +52,21 @@ class Manipulate(object):
                      "MANIPULATE")
         self.scrolled_win.add(grid)
 
-        # Sliders
-        self.scale_bri = Gtk.Scale()
-        self.scale_bri.connect("value-changed", self.value_slider, "bri")
-        self.scale_con = Gtk.Scale()
-        self.scale_con.connect("value-changed", self.value_slider, "con")
-        self.scale_sha = Gtk.Scale()
-        self.scale_sha.connect("value-changed", self.value_slider, "sha")
+        # sliders
+        bri_slider = Gtk.Scale()
+        bri_slider.connect("value-changed", self.value_slider, "bri")
+        con_slider = Gtk.Scale()
+        con_slider.connect("value-changed", self.value_slider, "con")
+        sha_slider = Gtk.Scale()
+        sha_slider.connect("value-changed", self.value_slider, "sha")
+        self.sliders = {"bri": bri_slider, "con": con_slider, "sha": sha_slider}
 
         # Set some properties
-        for scale in [self.scale_bri, self.scale_con, self.scale_sha]:
-            scale.set_range(-127, 127)
-            scale.set_size_request(120, 20)
-            scale.set_value(0)
-            scale.set_digits(0)
+        for slider in self.sliders.values():
+            slider.set_range(-127, 127)
+            slider.set_size_request(120, 20)
+            slider.set_value(0)
+            slider.set_digits(0)
 
         # Labels
         bri_label = Gtk.Label()
@@ -90,8 +89,8 @@ class Manipulate(object):
         button_no.set_size_request(80, 20)
 
         # Pack everything into the grid
-        for item in [bri_label, self.scale_bri, con_label, self.scale_con,
-                     sha_label, self.scale_sha, separator, button_yes,
+        for item in [bri_label, bri_slider, con_label, con_slider,
+                     sha_label, sha_slider, separator, button_yes,
                      button_no]:
             grid.add(item)
 
@@ -281,14 +280,13 @@ class Manipulate(object):
                                     self.app["library"].treeview.is_focus()):
             if os.path.islink(self.app.paths[self.app.index]):
                 self.app["statusbar"].message(
-                    "Manipulating symbolik links is not supported", "warning")
-                return
-            if self.app["image"].is_anim:
+                    "Manipulating symbolic links is not supported", "warning")
+            elif self.app["image"].is_anim:
                 self.app["statusbar"].message(
                     "Manipulating Gifs is not supported", "warning")
             else:
                 self.scrolled_win.show()
-                self.scale_bri.grab_focus()
+                self.sliders["bri"].grab_focus()
                 self.app["statusbar"].update_info()
                 # Create PIL image to work with
                 size = self.app["image"].imsize
@@ -367,12 +365,7 @@ class Manipulate(object):
         Args:
             name: Name of slider to focus.
         """
-        if name == "bri":
-            self.scale_bri.grab_focus()
-        elif name == "con":
-            self.scale_con.grab_focus()
-        else:
-            self.scale_sha.grab_focus()
+        self.sliders[name].grab_focus()
 
     def change_slider(self, step=1):
         """Change the value of the currently focused slider.
@@ -386,14 +379,14 @@ class Manipulate(object):
         except:
             self.app["statusbar"].message("Invalid step", "error")
             return
-        for scale in [self.scale_bri, self.scale_con, self.scale_sha]:
-            if scale.is_focus():
-                val = scale.get_value()
+        for slider in self.sliders.values():
+            if slider.is_focus():
+                val = slider.get_value()
                 if self.app["keyhandler"].num_str:
                     step = int(self.app["keyhandler"].num_str)
                     self.app["keyhandler"].num_clear()
                 val += step
-                scale.set_value(val)
+                slider.set_value(val)
 
     def button_clicked(self, button, accept=False):
         """Finish manipulate mode.
@@ -407,8 +400,8 @@ class Manipulate(object):
             self.manipulate_image(True)
         # Reset all the manipulations
         self.manipulations = {"bri": 1, "con": 1, "sha": 1}
-        for scale in [self.scale_bri, self.scale_con, self.scale_sha]:
-            scale.set_value(0)
+        for slider in self.sliders.values():
+            slider.set_value(0)
         # Show the original image
         self.app["image"].user_zoomed = False
         self.app["image"].load_image()
@@ -423,6 +416,10 @@ class Manipulate(object):
             manipulation: Name of manipulation to run.
             num: Value for setting the slider.
         """
+        # Catch buggy numbers
+        if not num.isdigit():
+            self.app["statusbar"].message("Failed to parse number", "error")
+            return
         if not self.scrolled_win.is_visible():
             if not self.app.paths:
                 self.app["statusbar"].message("No image to manipulate", "error")
@@ -430,8 +427,4 @@ class Manipulate(object):
             else:
                 self.toggle()
         self.focus_slider(manipulation)
-        self.app["keyhandler"].num_str = num
-        execstr = "self.scale_" + manipulation + \
-            ".set_value(int(self.app['keyhandler'].num_str))"
-        exec(execstr)
-        self.app["keyhandler"].num_str = ""
+        self.sliders[manipulation].set_value(int(num))
