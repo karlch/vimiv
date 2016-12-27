@@ -55,7 +55,7 @@ class FailingArgTest(VimivTestCase):
             too_many: If True, n_args are too many for command. Otherwise too
                 few.
         """
-        text = ":" + command + " arg" *  n_args
+        text = ":" + command + " arg" * n_args
         self.entry.set_text(text)
         self.cmdline.handler(self.entry)
         expected = "ERROR: Too many arguments for command" \

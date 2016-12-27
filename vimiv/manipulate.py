@@ -193,7 +193,7 @@ class Manipulate(object):
             if rotate_file:
                 # Rotate all files in external thread
                 rotate_thread = Thread(target=self.thread_for_rotate,
-                                        args=(images, cwise))
+                                       args=(images, cwise))
                 self.running_threads.append(rotate_thread)
                 rotate_thread.start()
         except ValueError:

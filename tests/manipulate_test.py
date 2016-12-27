@@ -63,7 +63,7 @@ class ManipulateTest(VimivTestCase):
         self.vimiv.paths = []
         self.manipulate.rotate(1, False)
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                "ERROR: No image to rotate")
+                         "ERROR: No image to rotate")
         self.vimiv.paths = backup
         ##################
         #  Command line  #
@@ -90,8 +90,7 @@ class ManipulateTest(VimivTestCase):
         self.vimiv["commandline"].focus("rotate value")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                "ERROR: Argument for rotate must be of type integer")
-
+                         "ERROR: Argument for rotate must be of type integer")
 
     def test_flip(self):
         """Flip image."""
@@ -109,7 +108,7 @@ class ManipulateTest(VimivTestCase):
         self.vimiv.paths = []
         self.manipulate.flip(1, False)
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                "ERROR: No image to flip")
+                         "ERROR: No image to flip")
         self.vimiv.paths = backup
         ##################
         #  Command line  #
@@ -130,7 +129,7 @@ class ManipulateTest(VimivTestCase):
         self.vimiv["commandline"].focus("flip value")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                "ERROR: Argument for flip must be of type integer")
+                         "ERROR: Argument for flip must be of type integer")
 
     def test_toggle(self):
         """Toggle manipulate."""

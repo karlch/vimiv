@@ -64,9 +64,9 @@ class ImageTest(VimivTestCase):
         pixbuf = self.image.image.get_pixbuf()
         self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
-        ##################
-        #  Command line  #
-        ##################
+
+    def test_zoom_from_commandline(self):
+        """Test zooming from command line."""
         # Zoom in
         expected_zoom = self.image.zoom_percent * 1.25
         self.vimiv["commandline"].focus("zoom_in")
