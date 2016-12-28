@@ -251,9 +251,6 @@ class Thumbnail(object):
             new_pos += step
         elif direction == "j":
             new_pos += self.columns * step
-        # Allow numbers to be passed directly
-        else:
-            new_pos = direction
         # Do not scroll to paths that don't exist
         if new_pos < 0:
             new_pos = 0
