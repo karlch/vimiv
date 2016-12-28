@@ -8,7 +8,7 @@ possibility to display the licence.
 
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 
 class Information():
@@ -55,8 +55,13 @@ class Information():
                                  'title="GitHub site">vimiv on GitHub</a>')
 
         icon_theme = Gtk.IconTheme.get_default()
-        vimiv_pixbuf = icon_theme.load_icon("vimiv", 128, 0)
-        vimiv_image = Gtk.Image.new_from_pixbuf(vimiv_pixbuf)
+        # Icon not available in theme when icon cache was not updated
+        try:
+            vimiv_pixbuf = icon_theme.load_icon("vimiv", 128, 0)
+            vimiv_image = Gtk.Image.new_from_pixbuf(vimiv_pixbuf)
+            load_image = 1
+        except GLib.Error:
+            load_image = 0
 
         # Layout
         box = popup.get_child()
@@ -65,7 +70,8 @@ class Information():
         grid.set_column_spacing(12)
         grid.set_row_spacing(12)
         box.pack_start(grid, False, False, 12)
-        grid.attach(vimiv_image, 0, 0, 1, 1)
+        if load_image:
+            grid.attach(vimiv_image, 0, 0, 1, 1)
         grid.attach(version_label, 0, 1, 1, 1)
         grid.attach(info_label, 0, 2, 1, 1)
         grid.attach(website_label, 0, 4, 1, 1)
