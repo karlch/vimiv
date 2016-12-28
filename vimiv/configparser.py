@@ -19,7 +19,7 @@ def set_defaults():
                "display_bar": True,
                "thumbsize": (128, 128),
                "thumb_maxsize": (256, 256),
-               "geometry": (800, 600),
+               "geometry": "800x600",
                "search_case_sensitive": True,
                "incsearch": True,
                "recursive": False,
@@ -64,8 +64,7 @@ def overwrite_section(key, config, settings):
         # Parse the setting so it gets the correct value
         try:
             if setting == "geometry":
-                file_set = (int(section[setting].split("x")[0]),
-                            int(section[setting].split("x")[1]))
+                file_set = section[setting]
             elif setting in ["thumbsize", "thumb_maxsize"]:
                 file_set = section[setting].lstrip("(").rstrip(")")
                 file_set = file_set.split(",")

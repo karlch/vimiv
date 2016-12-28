@@ -45,10 +45,9 @@ class Window(Gtk.ApplicationWindow):
         try:
             winsize = general["geometry"].split("x")
             self.winsize = (int(winsize[0]), int(winsize[1]))
-            self.resize(self.winsize[0], self.winsize[1])
         except:
             self.winsize = (800, 600)
-            self.resize(self.winsize[0], self.winsize[1])
+        self.resize(self.winsize[0], self.winsize[1])
 
         # Fullscreen
         if Gtk.get_minor_version() > 10:

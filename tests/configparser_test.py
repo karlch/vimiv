@@ -97,7 +97,7 @@ class ConfigparserTest(TestCase):
         self.assertEqual(general["display_bar"], False)
         self.assertEqual(general["thumbsize"], (100, 100))
         self.assertEqual(general["thumb_maxsize"], (200, 200))
-        self.assertEqual(general["geometry"], (400, 400))
+        self.assertEqual(general["geometry"], "400x400")
         self.assertEqual(general["recursive"], True)
         self.assertEqual(general["rescale_svg"], True)
         self.assertEqual(general["overzoom"], True)
