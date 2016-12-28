@@ -171,6 +171,10 @@ class LibraryTest(VimivTestCase):
         self.vimiv["keyhandler"].num_str = "3"
         self.lib.scroll("k")
         self.assertEqual(self.vimiv.get_pos(True), "animation")
+        # Fail because of invalid argument
+        self.lib.scroll("o")
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "ERROR: Invalid scroll direction o")
 
     def test_broken_symlink(self):
         """Reload library with broken symlink."""

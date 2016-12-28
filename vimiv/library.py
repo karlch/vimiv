@@ -424,12 +424,11 @@ class Library(object):
         elif direction == "l":
             self.file_select(self.treeview, self.treeview.get_cursor()[0],
                              None, False)
-        else:
+        elif direction in ["j", "k"]:
             # Scroll the tree checking for a user step
-            if self.app["keyhandler"].num_str:
-                step = int(self.app["keyhandler"].num_str)
-            else:
-                step = 1
+            step = int(self.app["keyhandler"].num_str) \
+                if self.app["keyhandler"].num_str \
+                else 1
             if direction == "j":
                 new_pos = self.app.get_pos(force_widget="lib") + step
                 if new_pos >= len(self.treeview.get_model()):
@@ -439,4 +438,7 @@ class Library(object):
                 if new_pos < 0:
                     new_pos = 0
             self.move_pos(True, new_pos)
+        else:
+            self.app["statusbar"].message(
+                "Invalid scroll direction " + direction, "error")
         return True  # Deactivates default bindings (here for Arrows)
