@@ -9,35 +9,49 @@
 
 [Releases](https://github.com/karlch/vimiv/releases "releases")
 |
-[Changelog](https://github.com/karlch/vimiv/blob/master/changelog.md "changelog")
+[Website](http://karlch.github.io/vimiv/ "website")
+|
+[Documentation](http://karlch.github.io/vimiv/documentation/ "website")
+|
+[Changelog](http://karlch.github.io/vimiv/changelog/ "changelog")
 
-## Features
-* vim-like keybindings
-* thumbnail mode (supports caching of thumbnails)
-* simple library browser (browse through folders and open images)
-* basic image editing (rotate, flip, brightness, contrast and optimize)
-* search directory recursively for images
-* slideshow mode
-* marking of images
-* simple tag system
-* searching with search highlight
-* command line with tab-completion
-* run external commands
-* pipe external commands to vimiv
+Vimiv is an image viewer with vim-like keybindings. It is written in python3
+using the Gtk3 toolkit. Some of the features are:
+* Thumbnail mode
+* Simple library browser
+* Basic image editing
+* Command line with tab completion
+
+For much more information please check out the
+[documentation](http://karlch.github.io/vimiv/documentation/ "documentation").
+If you are new to vimiv, this is a good place to
+[get started](http://karlch.github.io/vimiv/documentation/usage/ "usage")
+.
 
 ## Screenshots
 
 #### Open image and library
 
-![image + library](https://s24.postimg.org/socxleznp/vimiv_lib.png)
+<img src="http://karlch.github.io/vimiv/images/screenshots/library.png" alt="Library" width="700">
 
 #### Thumbnail mode
 
-![thumbnail mode](https://s24.postimg.org/9kjm52mth/vimiv_thumb.png)
+<img src="http://karlch.github.io/vimiv/images/screenshots/thumbnail.png" alt="Thumbnail" width="700">
 
-## Configuration
-Vimiv comes with two configuration files. The vimivrc for general settings and
-the keys.conf for all keybindings. See vimivrc(5) for further information.
+## Installation
+Install the dependencies listed below first. To use the
+development version clone this repository,
+for the latest stable check out the 
+<a href="https://github.com/karlch/vimiv/releases">releases</a>
+page. To install a simple `# make install` should suffice. To remove vimiv the
+standard `# make uninstall` works.  You may need to update your icon cache after
+installation.
+
+For Arch Linux users there are two packages in the AUR.
+<a href="https://aur.archlinux.org/packages/vimiv/">vimiv</a> for the
+stable version and
+<a href="https://aur.archlinux.org/packages/vimiv-git/">vimiv-git</a>
+for the development branch.
 
 ## Dependencies
 * python3
@@ -47,21 +61,9 @@ the keys.conf for all keybindings. See vimivrc(5) for further information.
 * python-setuptools (for installation)
 * jhead (optional for much better autorotation depending on EXIF data)
 
-## Installation
-Be sure to install the dependencies first. A simple `sudo make install` should
-then suffice. For arch-users there is an AUR package called vimiv for the latest
-stable version and vimiv-git for the developing branch. If you do not use the
-AUR package, you may need to update your icon cache after installation.
-
-To remove vimiv the standard `sudo make uninstall` works.
-
-## Documentation
-Vimiv comes with two man-pages for further documentation: vimiv(1) for general
-information and vimivrc(5) for the configuration files.
-
 ## Thanks to
-James Campos, author of Pim https://github.com/Narrat/Pim upon which vimiv is
-built.
-
-Bert Muennich, author of sxiv https://github.com/muennich/sxiv which inspired
-many of the features of vimiv.
+* James Campos, author of [Pim](https://github.com/Narrat/Pim) which was the
+  starting point for vimiv
+* Bert Muennich, author of [sxiv](https://github.com/muennich/sxiv) which
+  inspired many of the features of vimiv.
+* Anyone who has contributed or reported bugs
