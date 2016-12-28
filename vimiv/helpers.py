@@ -2,6 +2,7 @@
 # encoding: utf-8
 """Wrappers around standard library functions used in vimiv."""
 
+import gzip
 import os
 from gi import require_version
 require_version('Gtk', '3.0')
@@ -111,8 +112,15 @@ def read_info_from_man():
         A dictionary containing command-names and information on them.
     """
     infodict = {}
-    with open("/usr/share/man/man5/vimivrc.5") as f:
-        man_text = f.read()
+    # Man page might have been installed as .5.gz by a package manager
+    if os.path.isfile("/usr/share/man/man5/vimivrc.5"):
+        with open("/usr/share/man/man5/vimivrc.5") as f:
+            man_text = f.read()
+    elif os.path.isfile("/usr/share/man/man5/vimivrc.5.gz"):
+        with gzip.open("/usr/share/man/man5/vimivrc.5.gz") as f:
+            man_text = f.read().decode()
+    else:
+        return {}
     sections = man_text.split("\n\n")
     # Get section with command information
     for i, section in enumerate(sections):
