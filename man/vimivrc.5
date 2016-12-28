@@ -6,213 +6,262 @@ vimivrc \- configuration files for the vimiv image viewer
 /etc/vimiv/vimivrc, ~/.vimiv/vimivrc, /etc/vimiv/keys.conf, ~/.vimiv/keys.conf
 
 .SH DESCRIPTION
-The vimivrc is the configuration file for the vimiv image viewer, the keys.conf
-the file to configure all the keybindings. If the files exist in
-~/.vimiv/, they are read. Otherwise vimiv falls back to the system-wide files in
-/etc/vimiv/.  It is considered best-practice to keep the default files and to
-configure the files in ~/.vimiv to ones liking.
+Vimiv is configured via two files: basedir/vimivrc and basedir/keys.conf where
+basedir is one of /etc/vimiv/ and ~/.vimiv/. The default configuration files are
+installed to /etc/vimiv/. It is considered best-practice to copy them to
+~/.vimiv/ and configure the copied files.
+.TP
+More information in a nicer format is available at:
+.TP
+http://karlch.github.io/vimiv/documentation/configuration/
 
-.SH VIMIVRC
-The vimivrc file is split into three sections with various settings. What each
-setting means is explained below:
-
+.SH SETTINGS
+Settings are configured in the vimivrc file. This file is separated into three
+sections:
+.TP
+- GENERAL
+.TP
+- LIBRARY
+.TP
+- ALIASES
+.TP
+The first two sections configure settings, the third is used to define aliases.
+.TP
+What each setting means and what values are possible is explained below:
+.TP
+.B GENERAL
+.TP
 .TP
 .BR start_fullscreen\ (Bool)
-If yes start in fullscreen mode.
+If yes, start in fullscreen mode.
+.TP
 .TP
 .BR start_slideshow\ (Bool)
-If yes start in slideshow mode.
+If yes, start in slideshow mode.
+.TP
 .TP
 .BR slideshow_delay\ (Float)
-Specify the delay in slideshow mode.
+Specify the delay for the slideshow.
+.TP
 .TP
 .BR shuffle\ (Bool)
-If yes shuffle the images in filelist.
+If yes, shuffle the images in the filelist randomly.
+.TP
 .TP
 .BR display_bar\ (Bool)
-If yes show the statusbar.
+If yes, show the statusbar at the bottom.
 .TP
-.BR thumbsize\ (tuple)
-Size for the thumbnails.
 .TP
-.BR thumb_maxsize\ (tuple)
+.BR thumbsize\ (Tuple)
+Size for the thumbnails in the form of (x, y).
+.TP
+.TP
+.BR thumb_maxsize\ (Tuple)
 Maximum size for the thumbnails. This is the upper limit for zooming in on
-thumbnails. Anything larger than (512, 512) will be ignored.
+thumbnails. Anything larger than (512, 512) is ignored.
+.TP
 .TP
 .BR geometry\ (string)
-A string of the form "WIDTHxHEIGHT" which sets the default size for the image.
+A string of the form "WIDTHxHEIGHT" which sets the default size for the window.
+Note that not all window managers respect this setting.
+.TP
 .TP
 .BR recursive\ (Bool)
-If yes search the given directory recursively for images.
+If yes,  search the given directory recursively for images at startup.
+.TP
 .TP
 .BR rescale_svg\ (Bool)
-If yes rescale vector graphics automatically by reloading the image. Otherwise
+If yes, rescale vector graphics automatically by reloading the image. Otherwise
 simply zoom as if it were a normal image.
 .TP
+.TP
 .BR overzoom\ (Bool)
-If yes scale images smaller than the current window size up to fit the screen.
+If yes, scale images smaller than the current window size up to fit. Useful for
+UHD displays, not good when viewing icons or other small images.
+.TP
 .TP
 .BR search_case_sensitive\ (Bool)
-If yes search case sensitively, ignore case if no.
+If yes, search case sensitively, ignore case otherwise.
+.TP
 .TP
 .BR incsearch\ (Bool)
-If yes search incrementally when typing.
+If yes, search incrementally when typing.
+.TP
 .TP
 .BR cache_thumbnails\ (Bool)
-If yes cache thumbnails.
+If yes, cache thumbnails saving them to ~/.vimiv/Thumbnails/.
+.TP
 .TP
 .BR copy_to_primary\ (Bool)
-If yes copy to primary selection instead of to clipboard.
+If yes, copy to primary selection instead of clipboard.
+.TP
 .TP
 .BR commandline_padding\ (Int)
 Padding to use in the commandline and statusbar.
 .TP
+.TP
 .BR completion_height\ (Int)
-The height of the completion popup when showing commandline compeltions.
+Height of the completion menu when showing command line completions.
+.TP
+.TP
+.BR LIBRARY
+.TP
 .TP
 .BR show_library\ (Bool)
-If yes show the library at startup.
+If yes, always show library at start-up.
+.TP
 .TP
 .BR library_width\ (Int)
-The default width of the library.
+Default width of the library when an image is open.
+.TP
 .TP
 .BR expand_lib\ (Bool)
-If yes automatically expand the library to full window size if no image is open.
+If yes, automatically expand the library to full window size if no image is open.
+.TP
 .TP
 .BR border_width\ (Int)
 Width of the border separating library and image.
 .TP
+.TP
 .BR markup\ (String)
-Markup to be used to highlight search results. This must be a correct markup and
-only consist of one <span ...> element, otherwise the library will break down
-when searching. See e.g. http://www.gtk.org/api/2.6/pango/PangoMarkupFormat.html
-for further information.
+Markup used to highlight search results. This must be a correct markup opening
+in the form of one <span ...> element as it gets closed with </span/>
+.TP
 .TP
 .BR show_hidden\ (Bool)
-If yes show hidden files.
+If yes, show hidden files in the library and open hidden images.
+.TP
 .TP
 .BR desktop_start_dir\ (String)
-The directory in which vimiv should start if invoked via the desktop file.
+The directory in which vimiv should start if opened via the .desktop file.
+.TP
 .TP
 .BR file_check_amount\ (Int)
 The amount of files vimiv should check in a directory for whether they are
-images or not. This affects the size column of directories in the library. A
-higher number will increase precision at the cost of speed.
+images or not. This affects the size column of directories in the library. As
+soon as this number is reached, checks are stopped and a + is appended, e.g.
+30+. A higher number increases precision and information at the cost of speed.
+.TP
+.TP
+.BR ALIASES
+.TP
+It is possible to configure aliases for the command line in this section.
+.TP
+An alias is defined in the form of: aliasname: command.
 
-.SH ALIASES
-It is possible to configure aliases for the commandline in the ALIASES section
-of the vimivrc. An alias is defined as following:
-
-"alias":        "commandname"
-
-where "commandname" must be a command that can be run from the commandline. See
-COMMANDS below.
-
-.SH KEYS.CONF
-The keys.conf file is split into sections with each section standing for a
-widget/mode that can be active. The specified keybindings in each section will
-apply only in that widget/mode and are written in the form:
-
-"keyname":      "commandname"
-
-The keynames can be prepended by the modifiers Control (via ^"keyname"),
-Alt (via Alt+"keyname") and Shift (via Shift+"keyname").
-
-All commands can be bound to keys.
-The following commands can additionally be run from the command line.
+.SH KEYBINDINGS
+Keybindings are configured in the keys.conf file. Similar to the vimivrc this
+file is split up into sections:
+.TP
+.BR GENERAL:
+keybindings defined here apply in image and thumbnail mode as well as the library.
+.TP
+.BR IM_THUMB:
+keybindings defined here apply in image and thumbnail mode.
+.TP
+.BR IM_LIB:
+keybindings defined here apply in image mode and in the library.
+.TP
+.BR IMAGE:
+keybindings defined here only apply in image mode.
+.TP
+.BR THUMBNAIL:
+keybindings defined here only apply in thumbnail mode. Note: empty by default.
+.TP
+.BR LIBRARY:
+keybindings defined here only apply in the library.
+.TP
+.BR MANIPULATE:
+keybindings defined here only apply in manipulate mode.
+.TP
+.BR COMMAND:
+keybindings defined here only apply in the command line.
+.TP
+Keybindings are defined in the form of keyname: command [arguments]
+.TP
+Supported\ modifiers:
+Shift via Shift+keyname, Control via ^keyname, Alt via Alt+keyname.
+.TP
+command [arguments] has to be a valid vimiv command with correct arguments.
 
 .SH COMMANDS
 
 .TP
-.BR accept_changes
-Accept changes made in the manipulation bar and close it.
 .TP
-.BR alias\ "alias"\ "commandname"
-Add an alias called "alias" for "commandname".
+.BR accept_changes
+Accept changes made in manipulate.
+.TP
+.BR alias
+Add an alias for a command.
 .TP
 .BR autorotate
-Rotate all images in the current filelist according to EXIF data.
+Rotate all images in the current filelist according to exif data.
 .TP
-.BR center\ 
+.BR center
 Scroll to the center of the image.
 .TP
-.BR clear_trash
-Delete all files in ~/.vimiv/Trash.
-.TP
 .BR clear_thumbs
-Delete all files in ~/.vimiv/Thumbnails.
+Delete all files in the thumbnail directory.
 .TP
-.BR copy_basename
-Copy the basename of the currently selected image to clipboard. The selection is
-either clipboard or primary depending on the setting copy_to_primary.
+.BR clear_trash
+Delete all files in the trash directory.
 .TP
 .BR copy_abspath
-Copy the abspath of the currently selected image to clipboard. The selection is
-either clipboard or primary depending on the setting copy_to_primary.
+Copy the absolute path of the currently selected file to the clipboard.
 .TP
-.BR delete\ 
-Delete the current image
+.BR copy_basename
+Copy the base name of the currently selected file to the clipboard.
+.TP
+.BR delete
+Delete the current image.
 .TP
 .BR discard_changes
-Discard changes made in the manipulation bar and close it.
+Discard any changes made in manipulate mode and leave it.
 .TP
-.BR first\ \ 
-Move to the first image in filelist of Image/Thumbnail mode.
+.BR first
+Move to the first image of the filelist in image/thumbnail mode.
 .TP
 .BR first_lib
-Move to the first file in the library.
+Move to the first file of the filelist in the library.
 .TP
-.BR fit\ \ \ \ 
-Fit the image into the window. If the image is smaller than the window it will
-not increase size to fit by default. Change the overzoom setting to adjust this
-behavior.
+.BR fit
+Fit the image to the current window size..
 .TP
 .BR fit_horiz
-Fit the image horizontally into the window.
+Fit the image horizontally to the current window size.
 .TP
 .BR fit_vert
-Fit the image vertically into the window.
+Fit the image vertically to the current window size.
 .TP
-.BR flip\ (1/0)
-Flip the image. If 1 is appended, flip horizontally. If 0 is appended, flip
-vertically.
+.BR flip
+Flip the current image.
 .TP
 .BR focus_library
 Focus the library.
 .TP
-.BR format\ "formatstring"
-Format all currently open filenames. This will rename all currently open images 
-in the form of "formatstring001.ending", "formatstring002.ending" and so on. If 
-all currently open images support exif data the formatstring can include "%Y", 
-"%m", "%d", "%H", "%M", and "%S". See date(1) if you aren't sure what these 
-mean.
+.BR format
+Format all currently open filenames.
 .TP
 .BR fullscreen
-Toggle fullscreen.
+Toggle fullscreen mode.
 .TP
-.BR grow_lib\ value
-Increase the library width by value. Defaults to 20.
+.BR grow_lib
+Increase the library width.
 .TP
-.BR last\ \ \ 
-Move to the last image in filelist of Image/Thumbnail mode.
+.BR last
+Move to the last image of the filelist in image/thumbnail mode.
 .TP
 .BR last_lib
-Move to the last file in the library.
+Move to the last file of the filelist in the library.
 .TP
 .BR library
-Toggle the visibility of the library.
-.TP
-.BR library_focus
-Focus the library. This will open the library if it isn't visible.
-.TP
-.BR library_unfocus
-Unfocus the library without closing it.
+Toggle the library.
 .TP
 .BR manipulate
-Open the manipulation toolbar and focus it.
+Enter manipulate mode.
 .TP
-.BR mark\ \ \ 
-Mark the current image.
+.BR mark
+Mark the currently selected image.
 .TP
 .BR mark_all
 Mark all images in the current filelist.
@@ -221,107 +270,94 @@ Mark all images in the current filelist.
 Mark all images between the last two marked images.
 .TP
 .BR mark_toggle
-Toggle the current mark status. If images are marked, all images are unmarked.
-Otherwise the last list of marked images is remarked
+Toggle the current
 .TP
 .BR move_up
-Move up one directory in the library. The library is opened if it is not
-visible.
+Move up one directory in the library.
 .TP
-.BR [COUNT]next
-Focus the [COUNT] next image.
+.BR next
+Move to the next image in the filelist of image mode.
 .TP
-.BR [COUNT]next!
-Focus the [COUNT] next image discarding any changes made in the manipulation
-bar.
+.BR next!
+Force moving to the next image in the filelist of image mode.
 .TP
-.BR optimize
-Run imagemagick optimization on the current image. This needs imagemagick to be
-installed.
+.BR prev
+Move to the previous image in the filelist of image mode.
 .TP
-.BR [COUNT]prev
-Focus the [COUNT] previous image.
+.BR prev!
+Force moving to the previous image in the filelist of image mode.
 .TP
-.BR [COUNT]prev!
-Focus the [COUNT] previous image discarding any changes made in the manipulation
-bar.
-.TP
-.BR q\ \ \ \ \ \ 
+.BR q
 Quit vimiv.
 .TP
-.BR q!\ \ \ \ \ 
-Quit vimiv discarding any changes made in the manipulation bar.
+.BR q!
+Force quitting vimiv.
 .TP
 .BR reload_lib
-Reload the current library.
+Reload the library.
 .TP
-.BR rotate Int
-Rotate the image (Int % 4)-times counter-clockwise.
+.BR rotate
+Rotate the image counter-clockwise.
 .TP
 .BR set\ animation!
 Toggle the animation status of animated Gifs.
 .TP
-.BR set\ brightness\ Int
-Set the brightness of the current image to Int. Defaults to 0.
+.BR set\ brightness
+Set the brightness of the current image.
 .TP
 .BR set\ clipboard!
 Toggle the copy_to_primary setting.
 .TP
-.BR set\ contrast\ Int
-Set the contrast of the current image to Int. Defaults to 0.
+.BR set\ contrast
+Set the contrast of the current image.
 .TP
-.BR set\ library_width\ Int
-Set the library width to Int.
+.BR set\ library_width
+Set the library width.
 .TP
 .BR set\ overzoom!
 Toggle the overzoom setting.
 .TP
 .BR set\ rescale_svg!
-Toggle the rescaling of vector graphics.
+Toggle the rescale_svg setting.
 .TP
 .BR set\ sharpness
-Set the sharpness of the current image to Int. Defaults to 0.
+Set the sharpness of the current image.
 .TP
 .BR set\ show_hidden!
-Toggle showing and hiding of hidden files.
+Toggle the show_hidden setting.
 .TP
-.BR set\ slideshow_delay\ Float.
-Set the slideshow_delay to Float.
+.BR set\ slideshow_delay
+Set the slideshow delay.
 .TP
 .BR set\ statusbar!
 Toggle the statusbar.
 .TP
-.BR shrink_lib\ value
-Shrink the library width by value. Defaults to 20.
+.BR shrink_lib
+Decrease the library width.
 .TP
-.BR [COUNT]slideshow
-Toggle the slideshow. If prefixed by [COUNT] set the slideshow delay to [COUNT]
+.BR slideshow
+Toggle the slideshow.
 .TP
-.BR slideshow_inc
-Increase the slideshow delay by 0.2.
+.BR slideshow_delay
+Change the value of the slideshow delay.
 .TP
-.BR slideshow_dec
-Decrease the slideshow delay by 0.2.
+.BR tag_write
+Write the names of all currently marked images to a tagfile.
 .TP
-.BR tag_write\ tagname
-Write the names of all currently marked images to the tagfile "tagname". If the
-file doesn't exist, it will be created. If it does, the names will be appended
-if they aren't in the tagfile already.
+.BR tag_load
+Load all images in a tagfile into image mode.
 .TP
-.BR tag_load\ tagname
-Load all images in the tagfile "tagname" into image mode.
-.TP
-.BR tag_remove\ tagname
-Delete the tagfile "tagname".
+.BR tag_remove
+Delete a tagfile.
 .TP
 .BR thumbnail
 Toggle thumbnail mode.
 .TP
 .BR unfocus_library
-Focus widget last focused before the library.
+Focus the widget last focused before the library.
 .TP
 .BR version
-Show pop-up with version information.
+Display pop-up with version information.
 .TP
 .BR zoom_in
 Zoom in.
@@ -329,78 +365,55 @@ Zoom in.
 .BR zoom_out
 Zoom out.
 .TP
-.BR zoom_thumb_in
-Increase thumbnail size.
-.TP
-.BR zoom_thumb_out
-Decrease thumbnail size.
-.TP
-.BR zoom_to\ Float.
-Zoom to Float.
+.BR zoom_to
+Zoom image to a given percentage.
 
 .SH KEY-COMMANDS
-The following commands can only be bound to keys. These commands either only
-make sense in one section or are typical keybindings.
+The following commands can only be bound to keys and are not accessible from the
+command line.
 .TP
-.BR bri_focus
-Focus the brightness slider. Only makes sense in MANIPULATION section.
 .TP
-.BR con_focus
-Focus the contrast slider. Only makes sense in MANIPULATION section.
-.TP
-.BR sha_focus
-Focus the sharpness slider. Only makes sense in MANIPULATION section.
-.TP
-.BR slider_dec
-Decrease the currently focused slider by 1 or by [COUNT]. Only makes sense in
-MANIPULATION section.
-.TP
-.BR slider_inc
-Increase the currently focused slider by 1 or by [COUNT]. Only makes sense in
-MANIPULATION section.
-.TP
-.BR slider_dec_large
-Decrease the currently focused slider by 10 or by [COUNT]. Only makes sense in
-MANIPULATION section.
-.TP
-.BR slider_inc_large
-Increase the currently focused slider by 10 or by [COUNT]. Only makes sense in
-MANIPULATION section.
-.TP
-.BR cmd_history_up
-Go up by one in command history. Only makes sense in COMMAND section.
-.TP
-.BR cmd_history_down
-Go down by one in command history. Only makes sense in COMMAND section.
-.TP
-.BR discard_command
-Leave the command line discarding currently entered text. Only makes sense in
-COMMAND section.
-.TP
-.BR complete
-Start command line completion. Only makes sense in COMMAND section.
-.TP
-.BR complete_inverse
-Start inverse command line completion. Only makes sense in COMMAND section.
-.TP
-.BR search_next
-Navigate to [COUNT] next search result.
-.TP
-.BR search_prev
-Navigate to [COUNT] previous search result.
+.BR clear_status
+Clear any numbers or messages from the statusbar.
 .TP
 .BR command
 Enter the command line.
 .TP
-.BR $direction
-$direction is one of left, down, up or right.
-Scroll image or thumbnail $direction.
+.BR scroll
+Scroll image or thumbnail.
 .TP
-.BR $direction_page
-Scroll image or thumbnail to the far $direction end.
+.BR scroll_lib
+Scroll the library.
 .TP
-.BR $direction_lib
-Move $direction in the library.
+.BR search
+Search for text in the current filelist.
+.TP
+.BR search_next
+Navigate to the next search result.
+.TP
+.BR search_next
+Navigate to the previous search result.
+.TP
+.BR history_down
+Go down by one in command history.
+.TP
+.BR history_up
+Go up by one in command history.
+.TP
+.BR discard_command
+Leave the command line discarding currently entered text.
+.TP
+.BR complete
+Start command line completion.
+.TP
+.BR complete_inverse
+Start command line completion selecting items inversely.
+.TP
+.BR slider
+Change the value of the currently focused slider.
+.TP
+.BR focus_slider
+Focus one of the manipulate sliders.
 
 .SH SEE ALSO
 vimiv(1), date(1)

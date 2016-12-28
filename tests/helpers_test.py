@@ -63,13 +63,13 @@ class HelpersTest(TestCase):
         autorot_info = infodict["autorotate"]
         self.assertEqual(
             autorot_info,
-            "Rotate all images in the current filelist according to EXIF data")
+            "Rotate all images in the current filelist according to exif data")
         # Containing extra periods
         trash_info = infodict["clear_trash"]
-        self.assertEqual(trash_info, "Delete all files in ~/.vimiv/Trash")
+        self.assertEqual(trash_info, "Delete all files in the trash directory")
         # More than one sentence
         flip_info = infodict["flip"]
-        self.assertEqual(flip_info, "Flip the image")
+        self.assertEqual(flip_info, "Flip the current image")
 
     def tearDown(self):
         shutil.rmtree("tmp_testdir")

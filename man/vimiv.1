@@ -18,32 +18,19 @@ vimiv \- an image viewer with vim-like keybindings
 
 .SH DESCRIPTION
 Vimiv is an image viewer with vim-like keybindings. It is written in
-python and the Gtk3 toolkit and works well with tiling window managers.
+python3 using the Gtk3 toolkit. Some of the features are:
 .P
-Vimiv features two different modes of operation: image and thumbnail mode.
-Additionally one can open a library and a manipulation toolbar. If a file is
-passed to vimiv it starts in image mode, otherwise a quick error is displayed
-and the library appears.
+- Thumbnail mode
 .P
-In image mode the current image and possibly a statusbar is shown. One can
-navigate through the images and apply basic actions.
+- Simple library browser
 .P
-In thumbnail mode a grid of small previews and the name of each image is
-displayed. It is useful for getting an overview of the open images and for
-selecting a specific one.
+- Basic image editing
 .P
-The library can be displayed at the left of the window. Basically it is a list
-of the current images. One can select any image or navigate the directory tree
-to load new images.
+- Command line with tab completion
 .P
-The manipulate toolbar can be displayed just above the statusbar and adds a few
-more editing options. These feature the change of brightness, contrast and
-sharpness of the image and a button called "optimize". This button uses
-imagemagick to optimize contrast, gamma and level of the image. This tends to
-work well with photographs.
+The complete documentation is not included in this manpage but is available at:
 .P
-Additionally vimiv features a command line. All actions can be accessed via
-commands as well. A full list of commands is included in vimivrc(5).
+https://github.com/karlch/vimiv/documentation/
 
 .SH OPTIONS
 
@@ -89,96 +76,9 @@ use FILE as local configuration file instead of ~/.vimiv/vimivrc
 All capitals negate the setting, so e.g. -B means do not display the statusbar.
 For the long version prepend no-, e.g. --no-bar.
 
-.SH CONFIGURATION
-All keyboard commands can be configured in the file keys.conf. Default settings
-are configured in the vimivrc. See vimivrc(5) for more information.
-
-.SH THUMBNAIL CACHING
-Thumbnails are cached under "~/.vimiv/Thumbnails" so they can be loaded a lot
-faster.
-
-.SH IMAGE MANIPULATION
-The basic manipulations (rotate, flip, ...) are automatically also applied to
-the file. The file is overwritten. The more advanced manipulations which can be
-accessed in the manipulation toolbar are only written to the actual file if one
-selects "Accept", otherwise they are ignored. For the "optimize" button
-imagemagick must be installed.
-
-.SH LIBRARY VIEWER
-Users of "ranger" should be familiar with the concept. This library viewer will
-only show files which it recognizes as images and directories as vimiv can and
-should not access other files. If an image is selected vimiv will populate a new
-filelist with all images in the same directory, close the library viewer  and
-focus the selected image. If a directory is selected, all accessible files in
-that directory will be shown in the library.
-
-.SH COMMAND LINE
-Similar to many keyboard centered programs vimiv has the possibility to run
-commands in a command line. If an absolute or relative path of an 
-image/directory is entered this path will be focused. These are recognized if 
-the users prepends the input with "./", "/", or "~".
-.TP
-Example:\ ~/Images
-Open the folder ~/Images in the library.
-.PP
-If the input is prepended with "!" the following string will be sent to the
-shell and executed. Here "%" is substituted with the currently selected file and
-"*" is substituted with all files in the current filelist or all marked images
-if any.
-.TP
-Example:\ !gimp %
-Open the currently selected image in gimp.
-.PP
-It is also possible to "pipe commands to vimiv" by appending "|" to an external
-command. The output will then be sent to vimiv line by line. If the first line
-is a file vimiv will open all images in the output. If the first line is a
-directory that directory will be opened in the library.
-.TP
-Example: !find ~/Images -ctime -5 -type f |
-Open all files in ~/Images younger than five days.
-.PP
-
-Note: Files and directories have to be proper paths from the current working
-directory of vimiv. So if you are in ~/Images/2016 and run "!ls ~ |" the output
-will not be recognized as proper files or directories whereas "!realpath ~/\\* |"
-will. Also note the escaping of the "*" character as it would be interpreted as
-all the files in the vimiv filelist otherwise.
-
-In all other cases the input will be handled as internal command. See vimivrc(5)
-for a complete list of internal commands.
-
-.SH SEARCHING
-Search for "string" in either all currently open images or all files in the
-library, depending on which is focused. If "string" is substring of any file
-this file is part of search results. If there is only one result, that file will
-be focused. Otherwise it is possible to navigate the search results and select
-files.
-
-.SH MARKING
-If images are marked, the simple manipulations (rotating, flipping and deleting)
-are executed for all marked images and not for the current image. In thumbnail
-mode those actions will always work on marked images. If there are none, no
-manipulation will be done.
-
-.SH TAGGING
-Vimiv has a simple built-in tag system which is controlled by three commands.
-All tagfiles are saved under "~/.vimiv/Tags".
-.TP
-.B tag_write\ tagname
-Write the names of all currently marked images to the tagfile "tagname". If the
-file doesn't exist, it will be created. If it does, the names will be appended,
-if they aren't in the tagfile already.
-.TP
-.B tag_load\ tagname
-Load all images in the tagfile "tagname" into the current filelist in image
-mode.
-.TP
-.B tag_remove\ tagname
-Delete the tagfile "tagname".
-
 .SH BUGS
-Probably. Please contact me under <christian dot karl at protonmail dot com> or
-open an issue on the github homepage.
+Probably. Please contact me under <karlch at protonmail dot com> or, even
+better, open an issue on the github homepage.
 
 .SH SEE ALSO
 vimivrc(5)
@@ -190,5 +90,11 @@ built.
 Bert Muennich, author of sxiv https://github.com/muennich/sxiv which inspired
 many of the features of vimiv.
 
-.SH HOMEPAGE
-https://github.com/karlch/vimiv
+Anyone who has contributed or reported bugs.
+
+.SH RESOURCES
+.B Website
+https://karlch.github.io/vimiv/
+.TP
+.B Github
+https://github.com/karlch/vimiv/
