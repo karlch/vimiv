@@ -28,6 +28,13 @@ class WindowTest(VimivTestCase):
         # self.assertFalse(self.vimiv["window"].is_fullscreen)
         self.vimiv["window"].fullscreen()
 
+    def test_scroll(self):
+        """Scroll image or thumbnail."""
+        # Error message
+        self.vimiv["window"].scroll("m")
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "ERROR: Invalid scroll direction m")
+
 
 if __name__ == '__main__':
     main()
