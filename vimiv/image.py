@@ -261,14 +261,18 @@ class Image(object):
             fallback_zoom: Zoom percentage to fall back to if the zoom
                 percentage is unreasonable.
         """
-        new_width = self.pixbuf_original.get_width() * self.zoom_percent
-        new_height = self.pixbuf_original.get_height() * self.zoom_percent
+        orig_width = self.pixbuf_original.get_width()
+        orig_height = self.pixbuf_original.get_height()
+        new_width = orig_width * self.zoom_percent
+        new_height = orig_height * self.zoom_percent
+        min_width = max(16, orig_width * 0.05)
+        min_height = max(16, orig_height * 0.05)
         max_width = min(self.app["window"].get_size()[0] * 10,
                         self.pixbuf_original.get_width() * 20)
         max_height = min(self.app["window"].get_size()[1] * 10,
                          self.pixbuf_original.get_height() * 20)
         # Image too small or too large
-        if new_height < 50 or new_width < 50 \
+        if new_height < min_height or new_width < min_width \
                 or new_height > max_height or new_width > max_width:
             message = "Image cannot be zoomed further"
             self.app["statusbar"].message(message, "warning")
