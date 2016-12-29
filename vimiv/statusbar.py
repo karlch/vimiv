@@ -180,10 +180,10 @@ class Statusbar(object):
 
     def set_window_title(self):
         """Set window title depending on whether there are valid paths."""
-        try:
+        if self.app.paths:
             name = os.path.basename(self.app.paths[self.app.index])
             self.app["window"].set_title("vimiv - " + name)
-        except:
+        else:
             self.app["window"].set_title("vimiv")
 
     def get_mode(self):

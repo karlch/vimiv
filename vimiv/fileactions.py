@@ -125,10 +125,7 @@ def is_image(filename):
         filename: Name of file to check.
     """
     complete_name = os.path.abspath(os.path.expanduser(filename))
-    try:
-        return bool(GdkPixbuf.Pixbuf.get_file_info(complete_name)[0])
-    except:
-        return False
+    return bool(GdkPixbuf.Pixbuf.get_file_info(complete_name)[0])
 
 
 class FileExtras(object):

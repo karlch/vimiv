@@ -253,7 +253,7 @@ class Library(object):
             os.chdir(directory)
             if not start:
                 self.reload(os.getcwd(), curdir)
-        except:
+        except (FileNotFoundError, PermissionError):
             self.app["statusbar"].message("Directory not accessible", "error")
 
     def remember_pos(self, directory, position):
@@ -333,25 +333,16 @@ class Library(object):
             require_val: If True require a specific value val for the size.
             val: Specific value for the new size.
         """
-        if require_val:  # Set to value
-            if not val:
-                val = self.default_width
-            try:
-                val = int(val)
-            except:
-                message = "Library width must be an integer"
-                self.app["statusbar"].message(message, "error")
-                return
+        # Check if val is an acceptable integer
+        if val and not val.isdigit():
+            message = "Library width must be an integer"
+            self.app["statusbar"].message(message, "error")
+            return
+        if require_val:
+            val = int(val) if val else self.default_width
             self.width = val
         else:  # Grow/shrink by value
-            if not val:
-                val = 20
-            try:
-                val = int(val)
-            except:
-                message = "Library width must be an integer"
-                self.app["statusbar"].message(message, "error")
-                return
+            val = int(val) if val else 20
             if inc:
                 self.width += val
             else:
@@ -400,7 +391,7 @@ class Library(object):
                     if subfiles and many:
                         amount += "+"
                     self.filesize[fil] = amount
-                except:
+                except PermissionError:
                     self.filesize[fil] = "N/A"
             else:
                 self.filesize[fil] = sizeof_fmt(os.path.getsize(fil))

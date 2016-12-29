@@ -398,7 +398,7 @@ class Manipulate(object):
         """
         try:
             step = int(step)
-        except:
+        except ValueError:
             self.app["statusbar"].message(
                 "Argument for slider must be of type integer", "error")
             return

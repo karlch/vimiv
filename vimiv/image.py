@@ -333,27 +333,24 @@ class Image(object):
     def load_image(self):
         """Load an image using GdkPixbufLoader."""
         path = self.app.paths[self.app.index]
-        # Check if the image exists
-        if not os.path.exists(path):
-            self.app["manipulate"].delete()
         # Remove old timers
         if self.timer_id:
             self.pause_gif()
-        # Prepare loader
-        loader = GdkPixbuf.PixbufLoader()
-        loader.connect("area-prepared", self.area_prep)
         # Load file
         try:
             with open(path, "rb") as f:
+                # Prepare loader
+                loader = GdkPixbuf.PixbufLoader()
+                loader.connect("area-prepared", self.area_prep)
                 image_bytes = f.read()
                 loader.write(image_bytes)
-        except:
+                # Show final image
+                self.update(update_info=True)
+                loader.close()
+        except (PermissionError, FileNotFoundError):
             self.app.paths.remove(path)
-            self.app["statusbar"].message("File not accessible", "error")
             self.move_pos(False)
-        loader.close()
-        # Show final image
-        self.update(update_info=True)
+            self.app["statusbar"].message("File not accessible", "error")
 
     def area_prep(self, loader):
         """Check for an animation and set the image attributes."""
@@ -374,28 +371,21 @@ class Image(object):
             forward: If True move forwards. Else move backwards.
             force: If True, move regardless of editing image.
         """
-        # Check if image has been edited (might be gone by now -> try)
-        try:
-            if self.check_for_edit(force):
-                raise ValueError
-        except:
+        # Check if image has been edited
+        if self.check_for_edit(force):
             return
         max_pos = len(self.app.paths)
         current = self.app.get_pos(force_widget="im")
         # Move to definition by keys or end/beg
         if self.app["keyhandler"].num_str:
             pos = int(self.app["keyhandler"].num_str)
+            self.app["keyhandler"].num_clear()
         elif forward:
             pos = max_pos
         else:
             pos = 1
-        # Catch exceptions
-        try:
-            current = int(current)
-            max_pos = int(max_pos)
-            if pos < 0 or pos > max_pos:
-                raise ValueError
-        except:
+        # Catch range
+        if pos < 0 or pos > max_pos:
             self.app["statusbar"].message("Unsupported index", "warning")
             return False
         # Do the maths and move
@@ -406,8 +396,6 @@ class Image(object):
         else:
             self.move_index(True, False, dif)
             self.user_zoomed = False
-
-        self.app["keyhandler"].num_clear()
         return True
 
     def toggle_rescale_svg(self):

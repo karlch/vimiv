@@ -315,9 +315,9 @@ class Vimiv(Gtk.Application):
             elif focused_widget == "thu":
                 path = self["thumbnail"].iconview.get_cursor()[1]
                 filelist = self.paths
-            try:
+            if path:
                 position = path.get_indices()[0]
-            except:
+            else:
                 position = 0
                 filelist = [""]
         else:
@@ -325,7 +325,7 @@ class Vimiv(Gtk.Application):
             position = self.index
 
         if get_filename:
-            return filelist[position]
+            return filelist[position] if filelist else ""
         else:
             return position
 

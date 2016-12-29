@@ -171,11 +171,7 @@ class CommandLine(object):
         Args:
             cmd: The command to run.
         """
-        # TODO make this cleaner
-        try:
-            fil = self.app.get_pos(True)
-        except:
-            return cmd
+        fil = self.app.get_pos(True)
         # Check on which file(s) % and * should operate
         if self.app["mark"].marked:  # Always use marked files if they exist
             filelist = list(self.app["mark"].marked)
@@ -358,12 +354,11 @@ class CommandLine(object):
         if self.app["library"].treeview.is_focus():
             # In the library remember current file to refocus if incsearch was
             # not applied
-            try:
+            if self.app["library"].files:
                 last_path = self.app["library"].treeview.get_cursor()[0]
                 last_index = last_path.get_indices()[0]
                 self.last_filename = self.app["library"].files[last_index]
-            # Only works if there is a filelist
-            except:
+            else:
                 self.last_filename = ""
             self.app["window"].last_focused = "lib"
         elif self.app["manipulate"].scrolled_win.is_visible():

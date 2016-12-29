@@ -187,7 +187,9 @@ class Thumbnails:
             with Image.open(infile) as im:
                 im.thumbnail(self.thumbsize, Image.ANTIALIAS)
                 save_image(im, outfile)
-        except:
+        # OSError for svg as it is not supported by PIL
+        # SyntaxError has only happened with one .png and I have no idea why
+        except (OSError, SyntaxError):
             icon_theme = Gtk.IconTheme.get_default()
             icon_info = icon_theme.lookup_icon("dialog-error", 256, 0)
             default_infile = icon_info.get_filename()

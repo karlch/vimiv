@@ -46,13 +46,12 @@ def read_file(filename):
     """
     content = []
     try:
-        fil = open(filename, "r")
-        for line in fil:
-            content.append(line.rstrip("\n"))
-    except:
-        fil = open(filename, "w")
-        fil.write("")
-    fil.close()
+        with open(filename, "r") as f:
+            for line in f:
+                content.append(line.rstrip("\n"))
+    except FileNotFoundError:
+        with open(filename, "w") as f:
+            f.write("")
     return content
 
 

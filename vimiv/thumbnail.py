@@ -108,13 +108,10 @@ class Thumbnail(object):
                 self.app["library"].focus()
                 # Re-expand the library if there is no image and the setting
                 # applies
-                if self.app["library"].expand:
-                    try:
-                        self.app["image"].pixbuf_original.get_height()
-                    except:
-                        self.app["image"].scrolled_win.hide()
-                        self.app["library"].scrollable_treeview.set_hexpand(
-                            True)
+                if self.app["library"].expand and \
+                        self.app["image"].pixbuf_original.get_height() == 1:
+                    self.app["image"].scrolled_win.hide()
+                    self.app["library"].scrollable_treeview.set_hexpand(True)
             self.toggled = False
         # Open thumbnail mode differently depending on where we come from
         elif self.app.paths and self.app["image"].scrolled_win.is_focus():
@@ -205,28 +202,24 @@ class Thumbnail(object):
         old_path = self.iconview.get_cursor()[1]
         liststore_iter = self.liststore.get_iter(index)
         self.liststore.remove(liststore_iter)
-        try:
-            if reload_image:
-                thumbnails = Thumbnails([thumb], self.sizes[-1], self.directory)
-                new_thumb = thumbnails.thumbnails_create()[0]
-                self.elements[index] = new_thumb
-            pixbuf_max = self.pixbuf_max[index]
-            pixbuf = self.scale_thumb(pixbuf_max)
+        if reload_image:
+            thumbnails = Thumbnails([thumb], self.sizes[-1], self.directory)
+            new_thumb = thumbnails.thumbnails_create()[0]
+            self.elements[index] = new_thumb
+        pixbuf_max = self.pixbuf_max[index]
+        pixbuf = self.scale_thumb(pixbuf_max)
 
-            name = os.path.basename(self.elements[index])
-            name = name.split(".")[0]
+        name = os.path.basename(self.elements[index])
+        name = name.split(".")[0]
 
-            if thumb in self.app["mark"].marked:
-                name = name + " [*]"
-            elif index in self.app["commandline"].search_positions:
-                name = self.markup + '<b>' + name + '</b></span>'
-            self.liststore.insert(index, [pixbuf, name])
-            self.iconview.select_path(old_path)
-            cell_renderer = self.iconview.get_cells()[0]
-            self.iconview.set_cursor(old_path, cell_renderer, False)
-        except:
-            message = "Reload of manipulated thumbnails failed"
-            self.app["statusbar"].message(message, "error")
+        if thumb in self.app["mark"].marked:
+            name = name + " [*]"
+        elif index in self.app["commandline"].search_positions:
+            name = self.markup + '<b>' + name + '</b></span>'
+        self.liststore.insert(index, [pixbuf, name])
+        self.iconview.select_path(old_path)
+        cell_renderer = self.iconview.get_cells()[0]
+        self.iconview.set_cursor(old_path, cell_renderer, False)
 
     def move_direction(self, direction):
         """Scroll with "hjkl".
