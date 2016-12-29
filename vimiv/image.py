@@ -342,31 +342,21 @@ class Image(object):
             self.pause_gif()
         # Load file
         try:
-            with open(path, "rb") as f:
-                # Prepare loader
-                loader = GdkPixbuf.PixbufLoader()
-                loader.connect("area-prepared", self.area_prep)
-                image_bytes = f.read()
-                loader.write(image_bytes)
-                # Show final image
-                self.update(update_info=True)
-                loader.close()
+            info = GdkPixbuf.Pixbuf.get_file_info(path)[0]
+            if "gif" in info.get_extensions():
+                self.is_anim = True
+                anim = GdkPixbuf.PixbufAnimation.new_from_file(path)
+                self.pixbuf_iter = anim.get_iter()
+            else:
+                self.is_anim = False
+                self.pixbuf_original = GdkPixbuf.Pixbuf.new_from_file(path)
+                self.imsize = self.get_available_size()
+                self.zoom_percent = self.get_zoom_percent_to_fit()
+            self.update(update_info=True)
         except (PermissionError, FileNotFoundError):
             self.app.paths.remove(path)
             self.move_pos(False)
             self.app["statusbar"].message("File not accessible", "error")
-
-    def area_prep(self, loader):
-        """Check for an animation and set the image attributes."""
-        info = loader.get_format()
-        if "gif" in info.get_extensions():
-            self.is_anim = True
-            self.pixbuf_iter = loader.get_animation().get_iter()
-        else:
-            self.is_anim = False
-            self.pixbuf_original = loader.get_pixbuf()
-            self.imsize = self.get_available_size()
-            self.zoom_percent = self.get_zoom_percent_to_fit()
 
     def move_pos(self, forward=True, force=False):
         """Move to specific position in paths.
