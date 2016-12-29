@@ -37,7 +37,7 @@ class VimivTestCase(TestCase):
     def setUpClass(cls):
         # Get set in init_test as setUpClass will be overridden
         cls.working_directory = ""
-        cls.vimiv = Vimiv("org.vimiv")
+        cls.vimiv = Vimiv()
         cls.init_test(cls)
 
     def init_test(self, paths=None, key1=None, key2=None, val=None):
@@ -50,10 +50,8 @@ class VimivTestCase(TestCase):
             val: List of values for settings to be set.
         """
         self.working_directory = os.getcwd()
-        # A new ID for every generated vimiv class
-        vimiv_id = "org.vimiv" + str(time.time()).replace(".", "")
         # Create vimiv class with settings, paths, ...
-        self.vimiv = Vimiv(vimiv_id)
+        self.vimiv = Vimiv()
         self.vimiv.do_handle_local_options(GLib.VariantDict())
         # Set the required settings
         if key1:

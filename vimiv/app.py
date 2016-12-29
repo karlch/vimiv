@@ -6,6 +6,7 @@ import os
 import sys
 from shutil import rmtree
 from tempfile import mkdtemp
+from time import time
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, Gio, GLib
@@ -46,14 +47,11 @@ class Vimiv(Gtk.Application):
         screensize: Available screensize.
     """
 
-    def __init__(self, application_id="org.vimiv"):
-        """Create the Gtk.Application and connect the activate signal.
-
-        Args:
-            application_id: The ID used to register vimiv. Default: org.vimiv.
-        """
+    def __init__(self):
+        """Create the Gtk.Application and connect the activate signal."""
         # Init application and set default values
-        Gtk.Application.__init__(self, application_id=application_id)
+        app_id = "org.vimiv" + str(time()).replace(".", "")
+        Gtk.Application.__init__(self, application_id=app_id)
         self.set_flags(Gio.ApplicationFlags.HANDLES_OPEN)
         self.connect("activate", self.activate_vimiv)
         self.settings = {}
@@ -64,7 +62,6 @@ class Vimiv(Gtk.Application):
         self.commands = {}
         self.aliases = {}
         self.functions = {}
-        # Get window background
         # Set up all commandline options
         self.init_commandline_options()
 
