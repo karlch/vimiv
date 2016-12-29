@@ -278,8 +278,7 @@ class Thumbnail(object):
             for i in range(len(self.liststore)):
                 pixbuf_max = self.pixbuf_max[i]
                 pixbuf = self.scale_thumb(pixbuf_max)
-                liststore_list = list(self.liststore)
-                liststore_list[i][0] = pixbuf
+                self.liststore[i][0] = pixbuf
 
         # Set columns and refocus current image
         self.calculate_columns()

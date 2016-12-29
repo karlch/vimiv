@@ -293,7 +293,7 @@ class CommandLine(object):
         if name_func in func_dict.keys():
             func_and_args = func_dict[name_func]
             func = func_and_args[0]
-            default_args = list(func_and_args[1])
+            default_args = func_and_args[1]
             # Check if the amount of arguments
             required_args = func_and_args[2]
             optional_args = func_and_args[3]
