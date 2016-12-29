@@ -172,7 +172,7 @@ class Thumbnail(object):
             pixbuf_max = GdkPixbuf.Pixbuf.new_from_file(thumb)
             self.pixbuf_max.append(pixbuf_max)
             pixbuf = self.scale_thumb(pixbuf_max)
-            name = os.path.basename(thumb)
+            name = thumb.split("___")[-1]
             name = name.split(".")[0]
             if self.app.paths[i] in self.app["mark"].marked:
                 name = name + " [*]"
@@ -206,7 +206,7 @@ class Thumbnail(object):
         pixbuf_max = self.pixbuf_max[index]
         pixbuf = self.scale_thumb(pixbuf_max)
 
-        name = os.path.basename(self.elements[index])
+        name = self.elements[index].split("___")[-1]
         name = name.split(".")[0]
 
         if filename in self.app["mark"].marked:
