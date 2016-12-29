@@ -120,12 +120,14 @@ class Thumbnail(object):
         elif self.app["library"].files \
                 and self.app["library"].treeview.is_focus():
             self.app["window"].last_focused = "lib"
-            self.app.paths, self.app.index = \
-                populate(self.app["library"].files)
-            self.app["library"].scrollable_treeview.set_hexpand(False)
+            self.app.paths, self.app.index = populate(self.app["library"].files)
             if self.app.paths:
+                self.app["library"].scrollable_treeview.set_hexpand(False)
                 self.app["image"].scrolled_win.show()
-            self.show()
+                self.show()
+            else:
+                self.app["statusbar"].message("No images in directory", "error")
+                return
         else:
             self.app["statusbar"].message("No open image", "error")
             return
