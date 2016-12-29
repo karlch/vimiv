@@ -121,7 +121,7 @@ class Window(Gtk.ApplicationWindow):
         Args:
             direction: Scroll direction to emit.
         """
-        if direction not in scrolltypes.keys():
+        if direction not in scrolltypes:
             self.app["statusbar"].message(
                 "Invalid scroll direction " + direction, "error")
         elif self.app["thumbnail"].toggled:

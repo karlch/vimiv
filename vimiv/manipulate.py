@@ -197,7 +197,7 @@ class Manipulate(object):
                 self.app["image"].update(False, False)
             if rotate_file:
                 for fil in images:
-                    if fil in self.simple_manipulations.keys():
+                    if fil in self.simple_manipulations:
                         self.simple_manipulations[fil][0] = \
                             (self.simple_manipulations[fil][0] + cwise) % 4
                     else:
@@ -217,7 +217,7 @@ class Manipulate(object):
     def thread_for_simple_manipulations(self):
         """Rotate and flip image file in an extra thread."""
         to_remove = list(self.simple_manipulations.keys())
-        for f in self.simple_manipulations.keys():
+        for f in self.simple_manipulations:
             if self.simple_manipulations[f][0]:
                 imageactions.rotate_file([f],
                                          self.simple_manipulations[f][0])
@@ -256,7 +256,7 @@ class Manipulate(object):
                 self.app["image"].update(False)
             if flip_file:
                 for fil in images:
-                    if fil not in self.simple_manipulations.keys():
+                    if fil not in self.simple_manipulations:
                         self.simple_manipulations[fil] = [0, 0, 0]
                     if horizontal:
                         self.simple_manipulations[fil][1] = \
@@ -380,7 +380,7 @@ class Manipulate(object):
         if not self.scrolled_win.is_visible():
             self.app["statusbar"].message(
                 "Focusing a slider only makes sense in manipulate", "error")
-        elif name not in self.sliders.keys():
+        elif name not in self.sliders:
             self.app["statusbar"].message(
                 "No slider called " + name, "error")
         else:

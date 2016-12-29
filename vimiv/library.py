@@ -284,7 +284,7 @@ class Library(object):
             self.app["statusbar"].message("Directory is empty", "warning")
             return
         # Check if there is a saved position
-        if directory in self.dir_pos.keys():
+        if directory in self.dir_pos:
             self.move_pos(True, self.dir_pos[directory])
         # Check if the last directory is in the current one
         elif os.path.basename(last_directory) in self.files:

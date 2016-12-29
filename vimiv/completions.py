@@ -225,7 +225,7 @@ class Completion():
         all_commands = sorted(commands + aliases)
         infodict = read_info_from_man()
         for command in all_commands:
-            if command in infodict.keys():
+            if command in infodict:
                 info = infodict[command]
             elif command in self.app.aliases:
                 info = "Alias to " + self.app.aliases[command]

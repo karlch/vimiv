@@ -132,9 +132,9 @@ class Commands(object):
         # 2) aliases that link to a non-existing command
         self.app.aliases = \
             {alias: self.settings["ALIASES"][alias]
-             for alias in self.settings["ALIASES"].keys()
-             if alias not in self.app.functions.keys()
-             and (self.settings["ALIASES"][alias] in self.app.functions.keys()
+             for alias in self.settings["ALIASES"]
+             if alias not in self.app.functions
+             and (self.settings["ALIASES"][alias] in self.app.functions
                   or self.settings["ALIASES"][alias][0] in "~/.!")}
 
         # Generate completions as soon as commands exist

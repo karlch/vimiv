@@ -19,7 +19,7 @@ def save_image(im, filename):
         filename: Name of the image to save.
     """
     argstr = "filename"
-    for key in im.info.keys():
+    for key in im.info:
         argstr += ", " + key + "=" + str(im.info[key])
     func = "im.save(" + argstr + ")"
     exec(func)

@@ -57,7 +57,7 @@ def overwrite_section(key, config, settings):
     """
     section = config[key]
     message = ""
-    for setting in section.keys():
+    for setting in section:
         if setting not in settings[key]:
             message += "Ignoring unknown setting %s." % (setting)
             continue
@@ -121,7 +121,7 @@ def add_aliases(config, settings):
         # Default to no aliases if the section does not exist in the configfile
         alias_section = dict()
 
-    for alias in alias_section.keys():
+    for alias in alias_section:
         try:
             settings["ALIASES"][alias] = alias_section[alias]
         except configparser.InterpolationError as e:
@@ -166,7 +166,7 @@ def parse_config(local_config="~/.vimiv/vimivrc",
             message += str(e)
             continue
 
-        keys = [key for key in config.keys() if key in ["GENERAL", "LIBRARY"]]
+        keys = [key for key in config if key in ["GENERAL", "LIBRARY"]]
         for key in keys:
             settings, partial_message = overwrite_section(key, config, settings)
             message += partial_message

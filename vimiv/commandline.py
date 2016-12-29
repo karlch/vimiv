@@ -77,7 +77,7 @@ class CommandLine(object):
         # cmd from input
         command = entry.get_text()
         # Check for alias and update command
-        if command[1:] in self.app.aliases.keys():
+        if command[1:] in self.app.aliases:
             command = ":" + self.app.aliases[command[1:]]
         # And close the cmd line
         self.reset_text()
@@ -290,7 +290,7 @@ class CommandLine(object):
         # Get the actual dictionary from command or function dictionary
         # depending on whether called from command line or keyhandler
         func_dict = self.app.functions if keyname else self.app.commands
-        if name_func in func_dict.keys():
+        if name_func in func_dict:
             func_and_args = func_dict[name_func]
             func = func_and_args[0]
             default_args = func_and_args[1]

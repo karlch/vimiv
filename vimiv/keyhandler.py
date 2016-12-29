@@ -63,7 +63,7 @@ class KeyHandler(object):
         # sections in the keys.conf file
         keys = self.keys[window]
         # Get the command to which the pressed key is bound and run it
-        if keyname in keys.keys():
+        if keyname in keys:
             keybinding = keys[keyname]
             self.app["commandline"].run_command(keybinding, keyname)
             return True  # Deactivates default bindings
