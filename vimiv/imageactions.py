@@ -8,7 +8,7 @@ from threading import Thread
 from PIL import Image
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GdkPixbuf
 
 
 def save_image(im, filename):
@@ -188,17 +188,15 @@ class Thumbnails:
             outfile: Name of thumbnail file to write to.
             position: Integer position of this thumbnail in the filelist.
         """
-        try:
-            with Image.open(infile) as im:
-                im.thumbnail(self.thumbsize, Image.ANTIALIAS)
-                save_image(im, outfile)
-        # OSError for svg as it is not supported by PIL
-        # SyntaxError has only happened with one .png and I have no idea why
-        except (OSError, SyntaxError):
+        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            infile, self.thumbsize[0], self.thumbsize[1], True)
+        if not pixbuf:
             icon_theme = Gtk.IconTheme.get_default()
             icon_info = icon_theme.lookup_icon("dialog-error", 256, 0)
             default_infile = icon_info.get_filename()
             copyfile(default_infile, outfile)
+        else:
+            pixbuf.savev(outfile, "png", ["compression"], ["0"])
         self.thumblist.append(outfile)
         self.thumbdict[outfile] = infile
         self.threads.pop(0)
