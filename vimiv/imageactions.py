@@ -154,7 +154,7 @@ class Thumbnails:
             # Correct name
             outfile = self.create_thumbnail_name(infile)
             # Only if they aren't cached already
-            if outfile not in self.thumbnails:
+            if os.path.basename(outfile) not in self.thumbnails:
                 thread_for_thumbnail = Thread(target=self.thread_for_thumbnails,
                                               args=(infile, outfile, i))
                 self.threads.append(thread_for_thumbnail)
