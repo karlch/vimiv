@@ -11,6 +11,7 @@ from gi.repository import Gtk, GdkPixbuf, GLib
 from vimiv import imageactions
 from vimiv.fileactions import move_to_trash
 
+
 class Manipulate(object):
     """Manipulate class for vimiv.
 

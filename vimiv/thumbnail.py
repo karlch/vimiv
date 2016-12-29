@@ -213,6 +213,8 @@ class Thumbnail(object):
             name = name + " [*]"
         elif index in self.app["commandline"].search_positions:
             name = self.markup + '<b>' + name + '</b></span>'
+        # Subsctipting the liststore directly works fine
+        # pylint: disable=unsubscriptable-object
         self.liststore[index] = [pixbuf, name]
 
     def move_direction(self, direction):
@@ -278,6 +280,8 @@ class Thumbnail(object):
             for i in range(len(self.liststore)):
                 pixbuf_max = self.pixbuf_max[i]
                 pixbuf = self.scale_thumb(pixbuf_max)
+                # Subsctipting the liststore directly works fine
+                # pylint: disable=unsubscriptable-object
                 self.liststore[i][0] = pixbuf
 
         # Set columns and refocus current image

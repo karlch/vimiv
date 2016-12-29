@@ -43,8 +43,8 @@ class Information():
         licence_button.set_always_show_image(True)
 
         version_label = Gtk.Label()
-        version_size = '<span size="xx-large">'
-        version_label.set_markup(version_size + self.version + '</span>')
+        version_label.set_markup(
+            '<span size="xx-large">' + self.version + '</span>')
 
         info_label = Gtk.Label()
         info_label.set_text("vimiv - an image viewer with vim-like keybindings")
