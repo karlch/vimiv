@@ -191,6 +191,9 @@ class Manipulate(object):
                 self.app["image"].pixbuf_original = \
                     self.app["image"].pixbuf_original.rotate_simple(
                         (90 * cwise))
+                if not self.app["image"].user_zoomed:
+                    self.app["image"].zoom_percent = \
+                        self.app["image"].get_zoom_percent_to_fit()
                 self.app["image"].update(False, False)
             if rotate_file:
                 for fil in images:
