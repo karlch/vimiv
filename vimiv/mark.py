@@ -106,8 +106,8 @@ class Mark(object):
             self.app["library"].remember_pos(os.getcwd(), self.app.get_pos())
             self.app["library"].reload(os.getcwd())
         if self.app["thumbnail"].toggled:
-            for i, image in enumerate(self.app.paths):
+            for image in self.app.paths:
                 if reload_all or image in current:
-                    self.app["thumbnail"].reload(image, i, False)
+                    self.app["thumbnail"].reload(image)
 
         self.app["statusbar"].update_info()

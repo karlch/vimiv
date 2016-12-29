@@ -272,6 +272,8 @@ class Vimiv(Gtk.Application):
         """
         for image in self["mark"].marked:
             print(image)
+        # Run remaining rotate and flip threads
+        self["manipulate"].thread_for_simple_manipulations()
         # Check if image has been edited
         if self["image"].check_for_edit(force):
             return

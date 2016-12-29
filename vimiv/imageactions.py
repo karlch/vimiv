@@ -152,13 +152,9 @@ class Thumbnails:
         # Loop over all files
         for i, infile in enumerate(self.filelist):
             # Correct name
-            thumb_ext = ".thumbnail_%dx%d" % (self.thumbsize[0],
-                                              self.thumbsize[1])
-            infile_base = os.path.basename(infile)
-            outfile_base = infile_base.split(".")[0] + thumb_ext + ".png"
-            outfile = os.path.join(self.directory, outfile_base)
+            outfile = self.create_thumbnail_name(infile)
             # Only if they aren't cached already
-            if outfile_base not in self.thumbnails:
+            if os.path.basename(outfile) not in self.thumbnails:
                 thread_for_thumbnail = Thread(target=self.thread_for_thumbnails,
                                               args=(infile, outfile, i))
                 self.threads.append(thread_for_thumbnail)
@@ -172,6 +168,15 @@ class Thumbnails:
         self.thumblist.sort(
             key=lambda x: self.filelist.index(self.thumbdict[x]))
         return self.thumblist
+
+    def create_thumbnail_name(self, infile):
+        """Create thumbnail name for infile respecting size."""
+        thumb_ext = ".thumbnail_%dx%d" % (self.thumbsize[0],
+                                        self.thumbsize[1])
+        infile_base = os.path.basename(infile)
+        outfile_base = infile_base.split(".")[0] + thumb_ext + ".png"
+        outfile = os.path.join(self.directory, outfile_base)
+        return outfile
 
     def thread_for_thumbnails(self, infile, outfile, position):
         """Create thumbnail in an extra thread.

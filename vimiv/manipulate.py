@@ -11,7 +11,6 @@ from gi.repository import Gtk, GdkPixbuf, GLib
 from vimiv import imageactions
 from vimiv.fileactions import move_to_trash
 
-
 class Manipulate(object):
     """Manipulate class for vimiv.
 
@@ -38,6 +37,7 @@ class Manipulate(object):
         self.app = app
 
         # Settings
+        self.simple_manipulations = {}
         self.manipulations = {"bri": 1, "con": 1, "sha": 1}
         self.pil_image = Image
         self.pil_thumb = Image
@@ -93,8 +93,6 @@ class Manipulate(object):
                      sha_label, sha_slider, separator, button_yes,
                      button_no]:
             grid.add(item)
-
-        self.running_threads = []
 
     def delete(self):
         """Delete all marked images or the current one."""
@@ -155,8 +153,11 @@ class Manipulate(object):
             self.app["statusbar"].message(message, "info")
         # Delete all thumbnails of manipulated images
         thumbnails = os.listdir(self.app["thumbnail"].directory)
+        thumbnail_class = imageactions.Thumbnails(
+            images, self.app["thumbnail"].sizes[-1],
+            self.app["thumbnail"].directory)
         for im in images:
-            thumb = ".".join(im.split(".")[:-1]) + ".thumbnail" + ".png"
+            thumb = thumbnail_class.create_thumbnail_name(im)
             thumb = os.path.basename(thumb)
             if thumb in thumbnails:
                 thumb = os.path.join(self.app["thumbnail"].directory, thumb)
@@ -189,36 +190,41 @@ class Manipulate(object):
                 self.app["image"].pixbuf_original = \
                     self.app["image"].pixbuf_original.rotate_simple(
                         (90 * cwise))
-                self.app["image"].update(False)
+                self.app["image"].update(False, False)
             if rotate_file:
-                # Rotate all files in external thread
-                rotate_thread = Thread(target=self.thread_for_rotate,
-                                       args=(images, cwise))
-                self.running_threads.append(rotate_thread)
-                rotate_thread.start()
+                for fil in images:
+                    if fil in self.simple_manipulations.keys():
+                        self.simple_manipulations[fil][0] = \
+                            (self.simple_manipulations[fil][0] + cwise) % 4
+                    else:
+                        self.simple_manipulations[fil] = [cwise, 0, 0]
+                # Reload thumbnails of rotated images immediately
+                if self.app["thumbnail"].toggled:
+                    self.run_simple_manipulations()
         except ValueError:
             self.app["statusbar"].message(
                 "Argument for rotate must be of type integer", "error")
 
-    def thread_for_rotate(self, images, cwise):
-        """Rotate all image files in an extra thread.
+    def run_simple_manipulations(self):
+        """Start thread for rotate and flip."""
+        t = Thread(target=self.thread_for_simple_manipulations)
+        t.start()
 
-        Args:
-            images: List of images to rotate.
-            cwise: Rotate image 90 * cwise degrees.
-        """
-        try:
-            # Finish older manipulate threads first
-            while len(self.running_threads) > 1:
-                self.running_threads[0].join()
-            imageactions.rotate_file(images, cwise)
+    def thread_for_simple_manipulations(self):
+        """Rotate and flip image file in an extra thread."""
+        to_remove = list(self.simple_manipulations.keys())
+        for f in self.simple_manipulations.keys():
+            if self.simple_manipulations[f][0]:
+                imageactions.rotate_file([f],
+                                         self.simple_manipulations[f][0])
+            if self.simple_manipulations[f][1]:
+                imageactions.flip_file([f], True)
+            if self.simple_manipulations[f][2]:
+                imageactions.flip_file([f], False)
             if self.app["thumbnail"].toggled:
-                for image in images:
-                    self.app["thumbnail"].reload(
-                        image, self.app.paths.index(image))
-        except:
-            self.app["statusbar"].message("Rotation of file failed", "error")
-        self.running_threads.pop(0)
+                self.app["thumbnail"].reload(f)
+        for key in to_remove:
+            del self.simple_manipulations[key]
 
     def flip(self, horizontal, flip_file=True):
         """Flip the displayed image and call thread to flip files.
@@ -245,34 +251,21 @@ class Manipulate(object):
                     self.app["image"].pixbuf_original.flip(horizontal)
                 self.app["image"].update(False)
             if flip_file:
-                # Flip all files in an extra thread
-                flip_thread = Thread(target=self.thread_for_flip,
-                                     args=(images, horizontal))
-                self.running_threads.append(flip_thread)
-                flip_thread.start()
+                for fil in images:
+                    if fil not in self.simple_manipulations.keys():
+                        self.simple_manipulations[fil] = [0, 0, 0]
+                    if horizontal:
+                        self.simple_manipulations[fil][1] = \
+                            (self.simple_manipulations[fil][1] + 1) % 2
+                    else:
+                        self.simple_manipulations[fil][2] = \
+                            (self.simple_manipulations[fil][2] + 1) % 2
+                # Reload thumbnails of flipped images immediately
+                if self.app["thumbnail"].toggled:
+                    self.run_simple_manipulations()
         except ValueError:
             self.app["statusbar"].message(
                 "Argument for flip must be of type integer", "error")
-
-    def thread_for_flip(self, images, horizontal):
-        """Flip all image files in an extra thread.
-
-        Args:
-            images: List of images to rotate.
-            horizontal: If 1 flip horizontally. Else vertically.
-        """
-        try:
-            # Finish older manipulate threads first
-            while len(self.running_threads) > 1:
-                self.running_threads[0].join()
-            imageactions.flip_file(images, horizontal)
-            if self.app["thumbnail"].toggled:
-                for image in images:
-                    self.app["thumbnail"].reload(
-                        image, self.app.paths.index(image))
-        except:
-            self.app["statusbar"].message("Flipping of file failed", "error")
-        self.running_threads.pop(0)
 
     def rotate_auto(self):
         """Autorotate all pictures in the current pathlist."""

@@ -191,37 +191,29 @@ class Thumbnail(object):
             for thumb in self.elements:
                 os.remove(thumb)
 
-    def reload(self, thumb, index, reload_image=True):
+    def reload(self, filename):
         """Reload the thumbnails of manipulated images.
 
         Args:
-            thumb: Thumbnail to reload.
-            index: Position of the thumbnail to be reloaded.
+            filename: Name of the file to reload thumbnail of.
             reload_image: If True reload the image of the thumbnail. Else only
                 the name (useful for marking).
         """
-        # Remember position
-        old_path = self.iconview.get_cursor()[1]
-        liststore_iter = self.liststore.get_iter(index)
-        self.liststore.remove(liststore_iter)
-        if reload_image:
-            thumbnails = Thumbnails([thumb], self.sizes[-1], self.directory)
-            new_thumb = thumbnails.thumbnails_create()[0]
-            self.elements[index] = new_thumb
+        thumbnails = Thumbnails([filename], self.sizes[-1], self.directory)
+        thumb_name = thumbnails.thumbnails_create()[0]
+        index = self.elements.index(thumb_name)
+        self.pixbuf_max[index] = GdkPixbuf.Pixbuf.new_from_file(thumb_name)
         pixbuf_max = self.pixbuf_max[index]
         pixbuf = self.scale_thumb(pixbuf_max)
 
         name = os.path.basename(self.elements[index])
         name = name.split(".")[0]
 
-        if thumb in self.app["mark"].marked:
+        if filename in self.app["mark"].marked:
             name = name + " [*]"
         elif index in self.app["commandline"].search_positions:
             name = self.markup + '<b>' + name + '</b></span>'
-        self.liststore.insert(index, [pixbuf, name])
-        self.iconview.select_path(old_path)
-        cell_renderer = self.iconview.get_cells()[0]
-        self.iconview.set_cursor(old_path, cell_renderer, False)
+        self.liststore[index] = [pixbuf, name]
 
     def move_direction(self, direction):
         """Scroll with "hjkl".

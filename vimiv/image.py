@@ -302,6 +302,8 @@ class Image(object):
         if not self.app.paths or self.app["thumbnail"].toggled or \
                 self.check_for_edit(force):
             return
+        # Run the simple manipulations
+        self.app["manipulate"].run_simple_manipulations()
         # Check for prepended numbers and direction
         if key and self.app["keyhandler"].num_str:
             delta *= int(self.app["keyhandler"].num_str)
