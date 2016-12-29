@@ -75,31 +75,19 @@ class ImageActionsTest(TestCase):
 
     def test_thumbnails_create(self):
         """Creation of thumbnail files."""
+        expected_name = \
+            self.files[0].replace("/", "___").lstrip("___") + \
+            ".thumbnail_128x128.png"
         thumbnails = imageactions.Thumbnails(self.files, (128, 128),
                                              self.thumbdir)
         thumbnails.thumbnails_create()
         # Check if thumbnail exists
-        thumbnail = os.path.join(self.thumbdir,
-                                 "image_to_edit.thumbnail_128x128.png")
+        thumbnail = os.path.join(self.thumbdir, expected_name)
         self.assertTrue(os.path.isfile(thumbnail))
         # Check its size
         with Image.open(thumbnail) as im:
             thumbnail_size = max(im.size[0], im.size[1])
             self.assertEqual(thumbnail_size, 128)
-        # Try to create a svg thumbnail
-        thumbnails = imageactions.Thumbnails(["vimiv.svg"], (128, 128),
-                                             self.thumbdir)
-        thumbnails.thumbnails_create()
-        # Thumbnail should exist
-        thumbnail = os.path.join(self.thumbdir,
-                                 "vimiv.thumbnail_128x128.png")
-        self.assertTrue(os.path.isfile(thumbnail))
-        # Thumbnail should have size 256 despite starting with 128
-        # Rather hacky check but the default icon comes from the user icon theme
-        # and is therefore not always the same
-        with Image.open(thumbnail) as im:
-            thumbnail_size = max(im.size[0], im.size[1])
-            self.assertEqual(thumbnail_size, 256)
 
     def test_autorotate(self):
         """Autorotate files."""

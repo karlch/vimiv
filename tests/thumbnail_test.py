@@ -71,7 +71,7 @@ class ThumbnailTest(VimivTestCase):
         name = self.thumb.liststore.get_value(liststore_iter, 1)
         self.assertEqual(name, "arch-logo")
         self.vimiv["mark"].mark()
-        self.thumb.reload(self.vimiv.paths[0], 0)
+        self.thumb.reload(self.vimiv.paths[0])
         new_liststore_iter = self.thumb.liststore.get_iter(0)
         name = self.thumb.liststore.get_value(new_liststore_iter, 1)
         self.assertEqual(name, "arch-logo [*]")

@@ -4,7 +4,7 @@
 
 import os
 import shutil
-from threading import Thread
+from time import sleep
 from unittest import main
 from PIL import Image
 from vimiv_testcase import VimivTestCase, compare_images
@@ -15,6 +15,8 @@ class ManipulateTest(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
+        if os.path.isdir("vimiv/testimages_man"):
+            shutil.rmtree("vimiv/testimages_man")
         shutil.copytree("vimiv/testimages", "vimiv/testimages_man")
         cls.init_test(cls, ["vimiv/testimages_man/arch-logo.png"])
         cls.manipulate = cls.vimiv["manipulate"]
@@ -49,15 +51,33 @@ class ManipulateTest(VimivTestCase):
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertFalse(is_portrait)
         # Rotate
-        self.manipulate.rotate(1, False)
+        self.manipulate.rotate(1, True)
         pixbuf = self.vimiv["image"].image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertTrue(is_portrait)
+        # Rotate the file
+        with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
+            self.assertFalse(im.width < im.height)
+        self.assertIn(self.vimiv.paths[self.vimiv.index],
+                      self.manipulate.simple_manipulations.keys())
+        self.manipulate.thread_for_simple_manipulations()
+        while self.manipulate.simple_manipulations.keys():
+            sleep(0.05)
+        with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
+            self.assertTrue(im.width < im.height)
         # Rotate back
-        self.manipulate.rotate(1, False)
+        self.manipulate.rotate(1, True)
         pixbuf = self.vimiv["image"].image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertFalse(is_portrait)
+        # Rotate the file
+        self.assertIn(self.vimiv.paths[self.vimiv.index],
+                      self.manipulate.simple_manipulations.keys())
+        self.manipulate.thread_for_simple_manipulations()
+        while self.manipulate.simple_manipulations.keys():
+            sleep(0.05)
+        with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
+            self.assertFalse(im.width < im.height)
         # Fail because of no paths
         backup = list(self.vimiv.paths)
         self.vimiv.paths = []
@@ -71,21 +91,15 @@ class ManipulateTest(VimivTestCase):
         # Rotate
         self.vimiv["commandline"].focus("rotate 1")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        Thread.join(self.vimiv["manipulate"].running_threads[0])
         pixbuf = self.vimiv["image"].image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertTrue(is_portrait)
-        with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
-            self.assertTrue(im.width < im.height)
         # Rotate back
         self.vimiv["commandline"].focus("rotate -1")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        Thread.join(self.vimiv["manipulate"].running_threads[0])
         pixbuf = self.vimiv["image"].image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertFalse(is_portrait)
-        with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
-            self.assertFalse(im.width < im.height)
         # Fail because of invalid argument
         self.vimiv["commandline"].focus("rotate value")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
@@ -116,13 +130,11 @@ class ManipulateTest(VimivTestCase):
         # Flip
         self.vimiv["commandline"].focus("flip 1")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        Thread.join(self.vimiv["manipulate"].running_threads[0])
         pixbuf_after_3 = self.vimiv["image"].image.get_pixbuf()
         self.assertNotEqual(pixbuf_after_2, pixbuf_after_3)
         # Flip back
         self.vimiv["commandline"].focus("flip 1")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        Thread.join(self.vimiv["manipulate"].running_threads[0])
         pixbuf_after_4 = self.vimiv["image"].image.get_pixbuf()
         self.assertNotEqual(pixbuf_after_3, pixbuf_after_4)
         # Fail because of invalid argument
