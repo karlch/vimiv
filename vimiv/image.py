@@ -160,7 +160,9 @@ class Image(object):
         if self.pixbuf_iter.advance():
             GLib.source_remove(self.timer_id)
             delay = self.pixbuf_iter.get_delay_time()
-            self.timer_id = GLib.timeout_add(delay, self.play_gif)
+            # Do not animate static gifs
+            self.timer_id = GLib.timeout_add(delay, self.play_gif) \
+                if delay >= 0 else 0
 
     def pause_gif(self):
         """Pause a gif or show initial image."""
@@ -196,7 +198,7 @@ class Image(object):
         """
         delta = 0.25
         if self.is_anim:
-            self.app["statusbar"].message("Zoom not supported for animations",
+            self.app["statusbar"].message("Zoom not supported for gif files",
                                           "warning")
         else:
             # Allow user steps
@@ -226,7 +228,7 @@ class Image(object):
             z_height: If True zoom to height.
         """
         if self.is_anim:
-            self.app["statusbar"].message("Zoom not supported for animations",
+            self.app["statusbar"].message("Zoom not supported for gif files",
                                           "warning")
             return
         fallback_zoom = self.zoom_percent
