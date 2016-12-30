@@ -25,8 +25,9 @@ using the Gtk3 toolkit. Some of the features are:
 For much more information please check out the
 [documentation](http://karlch.github.io/vimiv/documentation/ "documentation").
 If you are new to vimiv, this is a good place to
-[get started](http://karlch.github.io/vimiv/documentation/usage/ "usage")
-.
+[get started](http://karlch.github.io/vimiv/documentation/usage/ "usage").
+For a quick overview check out the
+[keybinding cheatsheet](http://karlch.github.io/vimiv/documentation/commands/#cheatsheet).
 
 ## Screenshots
 
