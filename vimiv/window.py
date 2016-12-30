@@ -103,7 +103,8 @@ class Window(Gtk.ApplicationWindow):
             if self.app.paths:
                 if self.app["thumbnail"].toggled:
                     self.app["thumbnail"].calculate_columns()
-                if not self.app["image"].user_zoomed:
+                if not self.app["image"].user_zoomed and \
+                        not self.app["image"].is_anim:
                     self.app["image"].zoom_to(0)
 
     def focus_on_mouse_click(self, widget, event_button):

@@ -137,7 +137,8 @@ class Library(object):
         if self.app.paths and update_image:
             if self.app["thumbnail"].toggled:
                 self.app["thumbnail"].calculate_columns()
-            elif not self.app["image"].user_zoomed:
+            elif not self.app["image"].user_zoomed and \
+                    not self.app["image"].is_anim:
                 self.app["image"].zoom_to(0)
             else:
                 #  Change the toggle state of animation
