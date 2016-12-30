@@ -3,6 +3,7 @@
 """Thumbnail part of vimiv."""
 
 import os
+from math import floor
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib
@@ -50,6 +51,7 @@ class Thumbnail(object):
         self.size = general["thumbsize"]
         self.max_size = general["thumb_maxsize"]
         self.possible_sizes = [(64, 64), (128, 128), (256, 256), (512, 512)]
+        self.padding = general["thumb_padding"]
         self.current_size = 0
         self.cache = general["cache_thumbnails"]
         self.directory = os.path.join(self.app.directory, "Thumbnails")
@@ -70,13 +72,12 @@ class Thumbnail(object):
         self.iconview.connect("key_press_event", self.app["keyhandler"].run,
                               "THUMBNAIL")
         self.iconview.set_model(self.liststore)
-        self.columns = 0
-        self.iconview.set_spacing(0)
-        self.iconview.set_item_width(5)
-        self.iconview.set_item_padding(10)
         self.iconview.set_pixbuf_column(0)
-        self.iconview.set_border_width(1)
         self.iconview.set_markup_column(1)
+
+        self.columns = 0
+        self.iconview.set_item_width(0)
+        self.iconview.set_item_padding(self.padding)
 
     def iconview_clicked(self, iconview, path):
         """Select and show image when thumbnail was activated.
@@ -144,7 +145,10 @@ class Thumbnail(object):
             width = window_width - self.app["library"].width
         else:
             width = window_width
-        self.columns = int(width / (self.size[0] + 30))
+        self.columns = floor((width - 12) / (self.size[0] + 2 * self.padding))
+        free_space = (width - 12) % (self.size[0] + 2 * self.padding)
+        padding = floor(free_space / (self.columns))
+        self.iconview.set_column_spacing(padding)
         self.iconview.set_columns(self.columns)
 
     def show(self, toggled=False):

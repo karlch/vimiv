@@ -40,7 +40,7 @@ class ConfigparserTest(TestCase):
         amount_general_settings = len(general.keys())
         amount_library_settings = len(library.keys())
         amount_aliases = len(aliases.keys())
-        self.assertEqual(amount_general_settings, 17)
+        self.assertEqual(amount_general_settings, 18)
         self.assertEqual(amount_library_settings, 9)
         self.assertEqual(amount_aliases, 0)
         defaults = parser.set_defaults()
