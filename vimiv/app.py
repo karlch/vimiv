@@ -299,7 +299,8 @@ class Vimiv(Gtk.Application):
         # Find widget to work on
         if force_widget:
             focused_widget = force_widget
-        elif self["image"].scrolled_win.is_focus():
+        elif self["image"].scrolled_win.is_focus() or \
+                self["manipulate"].scrolled_win.is_visible():
             focused_widget = "im"
         elif self["library"].treeview.is_focus():
             focused_widget = "lib"
@@ -327,17 +328,6 @@ class Vimiv(Gtk.Application):
             return filelist[position] if filelist else ""
         else:
             return position
-
-    def zoom(self, zoom_in=True, step=1):
-        """Zoom image or thumbnails.
-
-        Args:
-            zoom_in: If True, zoom in.
-        """
-        if self["thumbnail"].toggled:
-            self["thumbnail"].zoom(zoom_in)
-        else:
-            self["image"].zoom_delta(zoom_in=zoom_in, step=step)
 
     def init_commandline_options(self):
         """Add all possible commandline options."""

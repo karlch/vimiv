@@ -131,3 +131,14 @@ class Window(Gtk.ApplicationWindow):
                                                 scrolltypes[direction][0],
                                                 scrolltypes[direction][1])
         return True  # Deactivates default bindings (here for Arrows)
+
+    def zoom(self, zoom_in=True, step=1):
+        """Zoom image or thumbnails.
+
+        Args:
+            zoom_in: If True, zoom in.
+        """
+        if self.app["thumbnail"].toggled:
+            self.app["thumbnail"].zoom(zoom_in)
+        else:
+            self.app["image"].zoom_delta(zoom_in=zoom_in, step=step)

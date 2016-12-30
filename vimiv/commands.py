@@ -100,8 +100,8 @@ class Commands(object):
                           [self.app["mark"].marked], ["tagname"], []],
             "thumbnail": [self.app["thumbnail"].toggle, [], [], []],
             "version": [self.app["information"].show_version_info, [], [], []],
-            "zoom_in": [self.app.zoom, [True], [], ["steps"]],
-            "zoom_out": [self.app.zoom, [False], [], ["steps"]],
+            "zoom_in": [self.app["window"].zoom, [True], [], ["steps"]],
+            "zoom_out": [self.app["window"].zoom, [False], [], ["steps"]],
             "zoom_to": [self.app["image"].zoom_to, [], ["percent"], []]}
 
         self.app.functions = {
