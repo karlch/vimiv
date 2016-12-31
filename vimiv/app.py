@@ -26,12 +26,14 @@ from vimiv.tags import TagHandler
 from vimiv.mark import Mark
 from vimiv.information import Information
 from vimiv.window import Window
+from vimiv.helpers import StderrHandler
 
 
 class Vimiv(Gtk.Application):
     """Main vimiv application class inheriting from Gtk.Application.
 
     Attributes:
+        stderr_handler: Handler to redirect stderr from Gtk itself.
         settings: Settings from configfiles to use.
         paths: List of paths for images.
         index: Current position in paths.
@@ -49,6 +51,9 @@ class Vimiv(Gtk.Application):
 
     def __init__(self):
         """Create the Gtk.Application and connect the activate signal."""
+        # Hide Gtk warnings at startup
+        self.stderr_handler = StderrHandler()
+        self.stderr_handler.hide()
         # Init application and set default values
         app_id = "org.vimiv" + str(time()).replace(".", "")
         Gtk.Application.__init__(self, application_id=app_id)
@@ -120,6 +125,9 @@ class Vimiv(Gtk.Application):
                     valuedict[2] = options.lookup_value(name).unpack()
                 self.settings[section][setting] = valuedict[value]
 
+        # Show Gtk warnings if the debug option is given
+        if options.contains("debug"):
+            self.stderr_handler.show()
         # If the version option is given, print version and exit 0
         if options.contains("version"):
             information = Information()
@@ -170,6 +178,7 @@ class Vimiv(Gtk.Application):
         Args:
             app: The application itself.
         """
+        self.stderr_handler.show()
         parse_dirs(self.directory)
         self.init_widgets()
         self.create_window_structure()
@@ -368,6 +377,7 @@ class Vimiv(Gtk.Application):
         add_option("temp-basedir", 0, "Use a temporary basedir")
         add_option("config", 0, "Use FILE as local configuration file",
                    arg=GLib.OptionArg.STRING, value="FILE")
+        add_option("debug", 0, "Show GTK warnings at startup.")
 
     def __getitem__(self, name):
         """Convenience method to access widgets via self[name].

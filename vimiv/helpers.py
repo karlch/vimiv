@@ -4,6 +4,7 @@
 
 import gzip
 import os
+import sys
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -159,3 +160,35 @@ def get_float_from_str(float_str):
         return num, 0
     except ValueError:
         return None, 1
+
+
+class StderrHandler():
+    """Handler to hide and show stderr for C libraries.
+
+    Use case: Hide warnings from Gtk like 'Failed to get the GNOME session
+        proxy' at startup.
+
+    Attributes:
+        _origstderr: Original stderr before manipulating it.
+        _oldstderr_fno: File node of stderr before manipulating it.
+    """
+
+    def __init__(self, *args, **kw):
+        """Flush stderr and save original values."""
+        sys.stderr.flush()
+        self._origstderr = sys.stderr
+        self._oldstderr_fno = os.dup(sys.stderr.fileno())
+
+    def hide(self):
+        """Hide stderr of C libraries."""
+        stderr = os.dup(2)
+        with os.open(os.devnull, os.O_WRONLY) as devnull:
+            os.dup2(devnull, 2)
+            os.close(devnull)
+        sys.stderr = os.fdopen(stderr, 'w')
+
+    def show(self):
+        """Show stderr of C libraries again."""
+        sys.stderr = self._origstderr
+        sys.stderr.flush()
+        os.dup2(self._oldstderr_fno, 2)

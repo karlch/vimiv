@@ -14,6 +14,7 @@ vimiv \- an image viewer with vim-like keybindings
 .RB [ \--temp-basedir ]
 .RB [ \--config
 .IR FILE ]
+.RB [ \--debug ]
 .IR FILE[S]
 
 .SH DESCRIPTION
@@ -72,6 +73,9 @@ use a temporary basedir
 .P
 .BI "\--config " FILE
 use FILE as local configuration file instead of ~/.vimiv/vimivrc
+.P
+.BI "\--debug "
+show GTK warnings at startup.
 .P
 All capitals negate the setting, so e.g. -B means do not display the statusbar.
 For the long version prepend no-, e.g. --no-bar.
