@@ -18,11 +18,8 @@ def save_image(im, filename):
         im: PIL image to act on.
         filename: Name of the image to save.
     """
-    argstr = "filename"
-    for key in im.info:
-        argstr += ", " + key + "=" + str(im.info[key])
-    func = "im.save(" + argstr + ")"
-    exec(func)
+    kwargs = im.info
+    im.save(filename, **kwargs)
 
 
 def rotate_file(filelist, cwise):
