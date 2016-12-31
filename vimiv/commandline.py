@@ -185,8 +185,7 @@ class CommandLine(object):
         if filelist:
             # Escape spaces for the shell
             fil = fil.replace(" ", "\\\\\\\\ ")
-            for i, f in enumerate(filelist):
-                filelist[i] = f.replace(" ", "\\\\\\\\ ")
+            filelist = [f.replace(" ", "\\\\\\\\ ") for f in filelist]
             cmd = cmd[1:]
             # Substitute % and * with escaping
             cmd = re.sub(r'(?<!\\)(%)', fil, cmd)
@@ -259,11 +258,10 @@ class CommandLine(object):
                 if self.app["window"].last_focused == "lib":
                     self.app["library"].move_up(pathdir)
                     # Focus it in the treeview so it can be accessed via "l"
-                    for i, fil in enumerate(self.app["library"].files):
-                        if fil in path:
-                            self.app["library"].treeview.set_cursor(
-                                Gtk.TreePath(i), None, False)
-                            break
+                    index = \
+                        self.app["library"].files.index(os.path.basename(path))
+                    self.app["library"].treeview.set_cursor(
+                        Gtk.TreePath(index), None, False)
                     # Show the image
                     self.app["library"].scrollable_treeview.set_hexpand(False)
                     self.app["image"].scrolled_win.show()
@@ -455,12 +453,12 @@ class CommandLine(object):
             # Reload all thumbnails in incsearch, only some otherwise
             if incsearch:
                 self.app["thumbnail"].iconview.grab_focus()
-                for index, thumb in enumerate(self.app["thumbnail"].elements):
-                    self.app["thumbnail"].reload(thumb, index, False)
+                for thumb in self.app["thumbnail"].elements:
+                    self.app["thumbnail"].reload(thumb)
             else:
                 for index in self.search_positions:
                     self.app["thumbnail"].reload(
-                        self.app["thumbnail"].elements[index], index, False)
+                        self.app["thumbnail"].elements[index])
 
         # Move to first result or throw an error
         if self.search_positions:

@@ -101,15 +101,15 @@ class Manipulate(object):
         images = self.get_manipulated_images("Deleted")
         self.app["mark"].marked = []
         # Delete all images
-        for i, im in enumerate(images):
+        for im in images:
             message = ""
             if not os.path.exists(im):
                 message = "Image %s does not exist" % (im)
             elif os.path.isdir(im):
                 message = "Deleting directories is not supported"
             if message:
-                self.app["statusbar"].message(message, "warning")
-                images.remove(i)
+                self.app["statusbar"].message(message, "error")
+                return
         move_to_trash(images, self.app["image"].trashdir)
 
         # Reload stuff if needed

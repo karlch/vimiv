@@ -243,9 +243,8 @@ class FileExtras(object):
             old_pos_im = self.app.get_pos(False, "im")
             # Get all files in directory again
             pathdir = os.path.dirname(self.app.paths[old_pos_im])
-            files = sorted(os.listdir(pathdir))
-            for i, fil in enumerate(files):
-                files[i] = os.path.join(pathdir, fil)
+            files = [os.path.join(pathdir, fil)
+                     for fil in sorted(os.listdir(pathdir))]
             self.app.paths, self.app.index = populate(files)
             # Expand library if set by user and all paths were removed
             if self.app["library"].expand and not self.app.paths:
@@ -253,8 +252,8 @@ class FileExtras(object):
             # Refocus the current position
             if self.app["thumbnail"].toggled:
                 old_pos_thu = self.app.get_pos(False, "thu")
-                for i, image in enumerate(self.app.paths):
-                    self.app["thumbnail"].reload(image, i, False)
+                for image in self.app.paths:
+                    self.app["thumbnail"].reload(image)
                 self.app["thumbnail"].move_to_pos(old_pos_thu)
             else:
                 self.app["keyhandler"].num_str = str(old_pos_im + 1)
