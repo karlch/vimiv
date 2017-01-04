@@ -453,12 +453,11 @@ class CommandLine(object):
             # Reload all thumbnails in incsearch, only some otherwise
             if incsearch:
                 self.app["thumbnail"].iconview.grab_focus()
-                for thumb in self.app["thumbnail"].elements:
-                    self.app["thumbnail"].reload(thumb)
+                for image in self.app.paths:
+                    self.app["thumbnail"].reload(image)
             else:
                 for index in self.search_positions:
-                    self.app["thumbnail"].reload(
-                        self.app["thumbnail"].elements[index])
+                    self.app["thumbnail"].reload(self.app.paths[index])
 
         # Move to first result or throw an error
         if self.search_positions:
