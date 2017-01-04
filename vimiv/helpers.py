@@ -182,9 +182,9 @@ class StderrHandler():
     def hide(self):
         """Hide stderr of C libraries."""
         stderr = os.dup(2)
-        with os.open(os.devnull, os.O_WRONLY) as devnull:
-            os.dup2(devnull, 2)
-            os.close(devnull)
+        devnull =  os.open(os.devnull, os.O_WRONLY)
+        os.dup2(devnull, 2)
+        os.close(devnull)
         sys.stderr = os.fdopen(stderr, 'w')
 
     def show(self):
