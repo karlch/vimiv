@@ -79,12 +79,23 @@ class ThumbnailTest(VimivTestCase):
     def test_move(self):
         """Move in thumbnail mode."""
         self.thumb.toggle()
-        for move_combo in [("l", "arch_001.jpg"), ("h", "arch-logo.png"),
-                           ("j", "vimiv.tiff"), ("k", "arch-logo.png")]:
-            self.thumb.move_direction(move_combo[0])
-            expected_file = os.path.abspath(move_combo[1])
-            received_file = self.vimiv.paths[self.vimiv.get_pos()]
-            self.assertEqual(expected_file, received_file)
+        # All items are in the same row
+        # l moves 1 to the right
+        self.thumb.move_direction("l")
+        self.assertEqual(self.vimiv.paths[1], self.vimiv.get_pos(True))
+        # h moves 1 to the left
+        self.thumb.move_direction("h")
+        self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
+        # j/k/J/K do not do anything as there is only 1 row
+        for direction in "jkJK":
+            self.thumb.move_direction(direction)
+            self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
+        # L moves to the last element
+        self.thumb.move_direction("L")
+        self.assertEqual(self.vimiv.paths[-1], self.vimiv.get_pos(True))
+        # H moves back to the first element
+        self.thumb.move_direction("H")
+        self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
 
     def test_zoom(self):
         """Zoom in thumbnail mode."""

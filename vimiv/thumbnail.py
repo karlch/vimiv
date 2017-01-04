@@ -227,28 +227,50 @@ class Thumbnail(object):
         Args:
             direction: Direction to scroll in. One of "hjkl".
         """
+        # Start at current position
         new_pos = self.app.get_pos(force_widget="thu")
-        # Get last element
-        last = len(self.app.paths) - 1
         # Check for a user prefixed step
-        if self.app["keyhandler"].num_str:
-            step = int(self.app["keyhandler"].num_str)
-        else:
-            step = 1
-        # Check for the specified thumbnail and handle exceptions
+        step = int(self.app["keyhandler"].num_str) \
+            if self.app["keyhandler"].num_str else 1
+        # Get variables used for calculation of limits
+        last = len(self.app.paths)
+        rows = self.iconview.get_item_row(Gtk.TreePath(last - 1))
+        elem_last_row = last - rows * self.columns
+        elem_per_row = floor((last - elem_last_row) / rows) if rows else last
+        column = self.iconview.get_item_column(Gtk.TreePath(new_pos))
+        row = self.iconview.get_item_row(Gtk.TreePath(new_pos))
+        min_pos = 0
+        max_pos = last - 1
+        # Simple scrolls
         if direction == "h":
             new_pos -= step
         elif direction == "k":
+            min_pos = column
             new_pos -= self.columns * step
         elif direction == "l":
             new_pos += step
         elif direction == "j":
+            max_pos = (rows - 1) * elem_per_row + column \
+                if column >= elem_last_row else rows * elem_per_row + column
             new_pos += self.columns * step
-        # Do not scroll to paths that don't exist
-        if new_pos < 0:
-            new_pos = 0
-        elif new_pos > last:
-            new_pos = last
+        # First element in row
+        elif direction == "H":
+            new_pos = row * elem_per_row
+        # Last element in column
+        elif direction == "J":
+            new_pos = (rows - 1) * elem_per_row + column \
+                if column >= elem_last_row else rows * elem_per_row + column
+        # First element in column
+        elif direction == "K":
+            new_pos = new_pos % elem_per_row
+        # Last element in row
+        elif direction == "L":
+            new_pos = (row + 1) * elem_per_row - 1
+        # Do not scroll to paths that are over the limits
+        if new_pos < min_pos:
+            new_pos = min_pos
+        elif new_pos > max_pos:
+            new_pos = max_pos
         # Move
         self.move_to_pos(new_pos)
 
