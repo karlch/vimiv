@@ -34,21 +34,18 @@ class ThumbnailTest(VimivTestCase):
         cls.thumb.sizes = [(64, 64), (128, 128), (256, 256)]
 
     def setUp(self):
-        if self.thumb.toggled:
-            self.thumb.toggle()
-        self.vimiv.index = 0
+        self.thumb.toggle()
 
     def test_toggle(self):
         """Toggle thumbnail mode."""
-        self.assertFalse(self.thumb.toggled)
-        self.assertFalse(self.thumb.iconview.is_focus())
-        self.thumb.toggle()
         self.assertTrue(self.thumb.toggled)
         self.assertTrue(self.thumb.iconview.is_focus())
+        self.thumb.toggle()
+        self.assertFalse(self.thumb.toggled)
+        self.assertFalse(self.thumb.iconview.is_focus())
 
     def test_iconview_clicked(self):
         """Select thumbnail."""
-        self.thumb.toggle()
         path = Gtk.TreePath([1])
         self.thumb.iconview_clicked(None, path)
         self.assertFalse(self.thumb.toggled)
@@ -59,14 +56,12 @@ class ThumbnailTest(VimivTestCase):
 
     def test_calculate_columns(self):
         """Calculate thumbnail columns."""
-        self.thumb.toggle()
         expected_columns = int(800 / (self.thumb.size[0] + 30))
         received_columns = self.thumb.iconview.get_columns()
         self.assertEqual(expected_columns, received_columns)
 
     def test_reload(self):
         """Reload and name thumbnails."""
-        self.thumb.toggle()
         liststore_iter = self.thumb.liststore.get_iter(0)
         name = self.thumb.liststore.get_value(liststore_iter, 1)
         self.assertEqual(name, "arch-logo")
@@ -78,7 +73,6 @@ class ThumbnailTest(VimivTestCase):
 
     def test_move(self):
         """Move in thumbnail mode."""
-        self.thumb.toggle()
         # All items are in the same row
         # l moves 1 to the right
         self.thumb.move_direction("l")
@@ -97,9 +91,23 @@ class ThumbnailTest(VimivTestCase):
         self.thumb.move_direction("H")
         self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
 
+    def test_search(self):
+        """Search in thumbnail mode."""
+        # Incsearch
+        self.vimiv["commandline"].incsearch = True
+        self.vimiv["commandline"].cmd_search()
+        self.vimiv["commandline"].entry.set_text("/symlink")
+        self.assertIn("symlink_to_image", self.vimiv.get_pos(True, "thu"))
+        self.vimiv["commandline"].leave()
+        # Normal search
+        self.vimiv["commandline"].incsearch = False
+        self.vimiv["commandline"].cmd_search()
+        self.vimiv["commandline"].entry.set_text("/logo")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.assertIn("arch-logo", self.vimiv.get_pos(True))
+
     def test_zoom(self):
         """Zoom in thumbnail mode."""
-        self.thumb.toggle()
         self.assertEqual(self.thumb.size, (128, 128))
         self.thumb.zoom(True)
         self.assertEqual(self.thumb.size, (256, 256))
@@ -142,6 +150,11 @@ class ThumbnailTest(VimivTestCase):
         self.thumb.size = (128, 128)
         self.thumb.max_size = (256, 256)
         self.thumb.set_sizes()
+
+    def tearDown(self):
+        if self.thumb.toggled:
+            self.thumb.toggle()
+        self.vimiv.index = 0
 
 
 if __name__ == '__main__':
