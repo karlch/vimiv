@@ -233,10 +233,10 @@ class FileExtras(object):
                     old_pos_lib <= len(self.app["library"].files):
                 self.app["library"].remember_pos(directory, old_pos_lib)
             self.app["library"].reload(directory)
-            # Refocus other widgets is necessary
-            if self.app["window"].last_focused == "im":
+            # Refocus other widgets if necessary
+            if self.app["commandline"].last_focused == "im":
                 self.app["image"].scrolled_win.grab_focus()
-            elif self.app["window"].last_focused == "thu":
+            elif self.app["commandline"].last_focused == "thu":
                 self.app["thumbnail"].iconview.grab_focus()
         # Reload image/thumbnail
         if self.app.paths and reload_path:

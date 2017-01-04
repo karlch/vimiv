@@ -18,7 +18,7 @@ class ExpansionTest(VimivTestCase):
     def test_expansion(self):
         """Expanding % and * in different modes."""
         # Image
-        self.vimiv["window"].last_focused = "im"
+        self.vimiv["commandline"].last_focused = "im"
         expected_cmd = "!echo " + self.vimiv.get_pos(True)
         received_cmd = self.vimiv["commandline"].expand_filenames(":!echo %")
         self.assertEqual(expected_cmd, received_cmd)
@@ -27,7 +27,7 @@ class ExpansionTest(VimivTestCase):
         self.assertEqual(expected_cmd, received_cmd)
 
         # Library
-        self.vimiv["window"].last_focused = "lib"
+        self.vimiv["commandline"].last_focused = "lib"
         self.vimiv["library"].focus()
         self.vimiv["library"].scroll("j")
         expected_cmd = "!echo " + self.vimiv.get_pos(True)
@@ -40,7 +40,7 @@ class ExpansionTest(VimivTestCase):
         # Thumbnail
         self.vimiv["thumbnail"].toggle()
         self.vimiv["thumbnail"].move_direction("l")
-        self.vimiv["window"].last_focused = "thu"
+        self.vimiv["commandline"].last_focused = "thu"
         expected_cmd = "!echo " + self.vimiv.get_pos(True)
         received_cmd = self.vimiv["commandline"].expand_filenames(":!echo %")
         self.assertEqual(expected_cmd, received_cmd)

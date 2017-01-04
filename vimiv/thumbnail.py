@@ -34,6 +34,7 @@ class Thumbnail(object):
         liststore: Gtk.ListStore containing thumbnail pixbufs and names.
         iconview: Gtk.IconView to display thumbnails.
         columns: Amount of columns that fit into the window.
+        last_focused: Widget that was focused before thumbnail.
     """
 
     def __init__(self, app, settings):
@@ -78,6 +79,7 @@ class Thumbnail(object):
         self.columns = 0
         self.iconview.set_item_width(0)
         self.iconview.set_item_padding(self.padding)
+        self.last_focused = ""
 
     def iconview_clicked(self, iconview, path):
         """Select and show image when thumbnail was activated.
@@ -103,9 +105,9 @@ class Thumbnail(object):
         if self.toggled:
             self.app["image"].scrolled_win.remove(self.iconview)
             self.app["image"].scrolled_win.add(self.app["image"].viewport)
-            if self.app["window"].last_focused == "im" or select_image:
+            if self.last_focused == "im" or select_image:
                 self.app["image"].scrolled_win.grab_focus()
-            elif self.app["window"].last_focused == "lib":
+            elif self.last_focused == "lib":
                 self.app["library"].focus()
                 # Re-expand the library if there is no image and the setting
                 # applies
@@ -116,11 +118,11 @@ class Thumbnail(object):
             self.toggled = False
         # Open thumbnail mode differently depending on where we come from
         elif self.app.paths and self.app["image"].scrolled_win.is_focus():
-            self.app["window"].last_focused = "im"
+            self.last_focused = "im"
             self.show()
         elif self.app["library"].files \
                 and self.app["library"].treeview.is_focus():
-            self.app["window"].last_focused = "lib"
+            self.last_focused = "lib"
             self.app.paths, self.app.index = populate(self.app["library"].files)
             if self.app.paths:
                 self.app["library"].scrollable_treeview.set_hexpand(False)

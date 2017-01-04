@@ -48,7 +48,7 @@ class ModeSwitchTestImage(VimivTestCase):
         self.assertTrue(self.vimiv["thumbnail"].iconview.is_focus())
         self.assertEqual(self.vimiv["image"].scrolled_win.get_child(),
                          self.vimiv["thumbnail"].iconview)
-        self.assertEqual(self.vimiv["window"].last_focused, "im")
+        self.assertEqual(self.vimiv["thumbnail"].last_focused, "im")
 
         self.vimiv["thumbnail"].toggle()
         self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
@@ -106,7 +106,7 @@ class ModeSwitchTestLibrary(VimivTestCase):
         self.assertTrue(self.vimiv["image"].scrolled_win.is_visible())
         self.assertEqual(self.vimiv["image"].scrolled_win.get_child(),
                          self.vimiv["thumbnail"].iconview)
-        self.assertEqual(self.vimiv["window"].last_focused, "lib")
+        self.assertEqual(self.vimiv["thumbnail"].last_focused, "lib")
 
         self.vimiv["thumbnail"].toggle()
         self.assertTrue(self.vimiv["library"].treeview.is_focus())

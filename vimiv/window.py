@@ -16,7 +16,6 @@ class Window(Gtk.ApplicationWindow):
     Attributes:
         app: The main vimiv application to interact with.
         fullscreen: If True, the window is displayed fullscreen.
-        last_focused: The last widget that was focused.
         winsize: The windowsize as tuple.
     """
 
@@ -31,7 +30,6 @@ class Window(Gtk.ApplicationWindow):
 
         self.app = app
         self.is_fullscreen = False
-        self.last_focused = ""
 
         # Configurations from vimivrc
         general = settings["GENERAL"]

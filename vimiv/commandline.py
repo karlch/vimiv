@@ -26,6 +26,7 @@ class CommandLine(object):
         incsearch: If True, enable incremental search in the library.
         last_filename: File that was last selected in the library, if any.
         running_threads: List of all running threads.
+        last_focused: Widget that was focused before the command line.
     """
 
     def __init__(self, app, settings):
@@ -59,6 +60,7 @@ class CommandLine(object):
             self.entry.connect("changed", self.incremental_search)
         self.last_filename = ""
         self.running_threads = []
+        self.last_focused = ""
 
     def handler(self, entry):
         """Handle input from the entry.
@@ -175,9 +177,9 @@ class CommandLine(object):
         # Check on which file(s) % and * should operate
         if self.app["mark"].marked:  # Always use marked files if they exist
             filelist = list(self.app["mark"].marked)
-        elif self.app["window"].last_focused == "lib":
+        elif self.last_focused == "lib":
             filelist = list(self.app["library"].files)
-        elif self.app["window"].last_focused in ["thu", "im"]:
+        elif self.last_focused in ["thu", "im"]:
             filelist = list(self.app.paths)
         else:  # Empty filelist as a fallback
             filelist = []
@@ -247,7 +249,7 @@ class CommandLine(object):
             if os.path.isdir(path):
                 # Focus directory in the library
                 self.app["library"].move_up(path)
-                self.app["window"].last_focused = "lib"
+                self.last_focused = "lib"
             else:
                 # If it is an image open it
                 self.app.paths = []
@@ -255,7 +257,7 @@ class CommandLine(object):
                 self.app["image"].load_image()
                 #  Reload library in lib mode, do not open it in image mode
                 pathdir = os.path.dirname(path)
-                if self.app["window"].last_focused == "lib":
+                if self.last_focused == "lib":
                     self.app["library"].move_up(pathdir)
                     # Focus it in the treeview so it can be accessed via "l"
                     index = \
@@ -358,13 +360,13 @@ class CommandLine(object):
                 self.last_filename = self.app["library"].files[last_index]
             else:
                 self.last_filename = ""
-            self.app["window"].last_focused = "lib"
+            self.last_focused = "lib"
         elif self.app["manipulate"].scrolled_win.is_visible():
-            self.app["window"].last_focused = "man"
+            self.last_focused = "man"
         elif self.app["thumbnail"].toggled:
-            self.app["window"].last_focused = "thu"
+            self.last_focused = "thu"
         else:
-            self.app["window"].last_focused = "im"
+            self.last_focused = "im"
         self.entry.grab_focus()
         self.entry.set_position(-1)
         # Update info for command mode
@@ -396,11 +398,11 @@ class CommandLine(object):
         self.app["completions"].hide()
         self.app["completions"].reset()
         # Refocus the remembered widget
-        if self.app["window"].last_focused == "lib":
+        if self.last_focused == "lib":
             self.app["library"].focus(True)
-        elif self.app["window"].last_focused == "man":
+        elif self.last_focused == "man":
             self.app["manipulate"].sliders["bri"].grab_focus()
-        elif self.app["window"].last_focused == "thu":
+        elif self.last_focused == "thu":
             self.app["thumbnail"].iconview.grab_focus()
         else:
             self.app["image"].scrolled_win.grab_focus()
@@ -414,8 +416,8 @@ class CommandLine(object):
             entry: The Gtk.Entry to check.
         """
         text = entry.get_text()
-        if (not self.app["window"].last_focused == "lib"
-                and not self.app["window"].last_focused == "thu") \
+        if (not self.last_focused == "lib"
+                and not self.last_focused == "thu") \
                 or len(text) < 2:
             return
         elif text[0] == "/":
@@ -434,7 +436,7 @@ class CommandLine(object):
             searchstr: The search string to parse.
             incsearch: Do incremental search or not.
         """
-        if self.app["window"].last_focused == "lib":
+        if self.last_focused == "lib":
             paths = self.app["library"].files
         else:
             paths = [os.path.basename(path) for path in self.app.paths]
@@ -446,10 +448,10 @@ class CommandLine(object):
              or not self.search_case and searchstr.lower() in fil.lower()]
 
         # Reload library and thumbnails to show search results
-        if self.app["window"].last_focused == "lib":
+        if self.last_focused == "lib":
             self.app["library"].reload(os.getcwd(), self.last_filename,
                                        search=True)
-        elif self.app["window"].last_focused == "thu":
+        elif self.last_focused == "thu":
             # Reload all thumbnails in incsearch, only some otherwise
             if incsearch:
                 self.app["thumbnail"].iconview.grab_focus()
@@ -500,7 +502,7 @@ class CommandLine(object):
                 next_pos = search_list[0]
 
         # Select new file in library, image or thumbnail
-        last_focused = self.app["window"].last_focused
+        last_focused = self.last_focused
         if last_focused == "lib":
             self.app["library"].treeview.set_cursor(Gtk.TreePath(next_pos),
                                                     None, False)
@@ -514,10 +516,10 @@ class CommandLine(object):
         elif last_focused == "im":
             self.app["keyhandler"].num_str = str(next_pos + 1)
             self.app["image"].move_pos()
-        elif self.app["window"].last_focused == "thu":
+        elif self.last_focused == "thu":
             self.app["thumbnail"].move_to_pos(next_pos)
         # Refocus entry if incsearch is appropriate
-        if incsearch and not self.app["window"].last_focused == "im":
+        if incsearch and not self.last_focused == "im":
             self.entry.grab_focus()
             self.entry.set_position(-1)
 
