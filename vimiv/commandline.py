@@ -3,6 +3,7 @@
 """Contains the commandline class for vimiv."""
 import re
 import os
+from bisect import bisect_left, bisect_right
 from threading import Thread
 from subprocess import Popen, PIPE
 from gi import require_version
@@ -345,6 +346,8 @@ class CommandLine(object):
 
     def focus(self, text=""):
         """Open and focus the command line."""
+        # Reset search information
+        self.reset_search()
         # Colon for text
         self.entry.set_text(":" + text)
         # Show/hide the relevant stuff
@@ -358,6 +361,7 @@ class CommandLine(object):
                 last_path = self.app["library"].treeview.get_cursor()[0]
                 last_index = last_path.get_indices()[0]
                 self.last_filename = self.app["library"].files[last_index]
+                self.app["library"].reload(".", self.last_filename, search=True)
             else:
                 self.last_filename = ""
             self.last_focused = "lib"
@@ -391,7 +395,7 @@ class CommandLine(object):
         if not text or text[0] not in ":/":
             self.leave()
 
-    def leave(self):
+    def leave(self, reset_search=False):
         """Apply actions to close the commandline."""
         self.app["completions"].treeview.scroll_to_point(0, 0)
         self.entry.hide()
@@ -400,6 +404,8 @@ class CommandLine(object):
         # Refocus the remembered widget
         if self.last_focused == "lib":
             self.app["library"].focus(True)
+            if reset_search:
+                self.app["library"].reload(".", self.last_filename)
         elif self.last_focused == "man":
             self.app["manipulate"].sliders["bri"].grab_focus()
         elif self.last_focused == "thu":
@@ -463,61 +469,68 @@ class CommandLine(object):
 
         # Move to first result or throw an error
         if self.search_positions:
-            self.search_move(incsearch=incsearch)
+            self.search_move_internal(incsearch)
         elif incsearch:
             self.entry.grab_focus()
             self.entry.set_position(-1)
         else:
             self.app["statusbar"].message("No matching file", "info")
 
-    def search_move(self, forward=True, incsearch=False):
+    def search_move(self, forward=True):
         """Move to the next or previous search.
 
         Args:
             forward: If true, move forwards. Else move backwards.
-            incsearch: If true, running from incsearch.
         """
-        pos = self.app.get_pos()
-        next_pos = 0
-        # Correct handling of index
+        # Correct handling of prefixed numbers
         if self.app["keyhandler"].num_str:
-            index = int(self.app["keyhandler"].num_str)
+            add_on = int(self.app["keyhandler"].num_str) - 1
             self.app["keyhandler"].num_clear()
         else:
-            index = 1
-        # If backwards act on inverted list
-        search_list = list(self.search_positions)
-        if not forward:
-            search_list.reverse()
-        # Find next match depending on current position
-        for i, search_pos in enumerate(search_list):
-            if search_pos > pos and forward or search_pos < pos and not forward:
-                next_pos = search_list[(i + index - 1) % len(search_list)]
-                break
-            elif search_pos == pos:
-                next_pos = search_list[(i + index) % len(search_list)]
-                break
-            # Correctly wrap when on last element
-            if search_pos == search_list[-1]:
-                next_pos = search_list[0]
+            add_on = 0
+        # Next position depending on current position and direction
+        pos = self.app.get_pos()
+        if forward:
+            index = bisect_right(self.search_positions, pos) + add_on
+        else:
+            index = bisect_left(self.search_positions, pos) - 1 - add_on
+        next_pos = self.search_positions[index % len(self.search_positions)]
+        self.file_select(next_pos, incsearch=False)
 
+    def search_move_internal(self, incsearch=False):
+        """Select the first search match when called from search internally.
+
+        Args:
+            incsearch: Do incremental search or not.
+        """
+        pos = self.app.get_pos()
+        index = bisect_left(self.search_positions, pos)
+        next_pos = self.search_positions[index % len(self.search_positions)]
+        self.file_select(next_pos, incsearch)
+
+    def file_select(self, position, incsearch):
+        """Select next file from search in library, image or thumbnail.
+
+        Args:
+            position: Position of the file to select.
+            incsearch: Do incremental search or not.
+        """
         # Select new file in library, image or thumbnail
-        last_focused = self.last_focused
-        if last_focused == "lib":
-            self.app["library"].treeview.set_cursor(Gtk.TreePath(next_pos),
+        if self.last_focused == "lib":
+            self.app["library"].treeview.set_cursor(Gtk.TreePath(position),
                                                     None, False)
-            self.app["library"].treeview.scroll_to_cell(Gtk.TreePath(next_pos),
+            self.app["library"].treeview.scroll_to_cell(Gtk.TreePath(position),
                                                         None, True, 0.5, 0)
             # Auto select single file
             if len(self.search_positions) == 1 and not self.incsearch:
                 self.app["library"].file_select(
-                    self.app["library"].treeview, Gtk.TreePath(next_pos), None,
+                    self.app["library"].treeview, Gtk.TreePath(position), None,
                     False)
-        elif last_focused == "im":
-            self.app["keyhandler"].num_str = str(next_pos + 1)
+        elif self.last_focused == "im":
+            self.app["keyhandler"].num_str = str(position + 1)
             self.app["image"].move_pos()
         elif self.last_focused == "thu":
-            self.app["thumbnail"].move_to_pos(next_pos)
+            self.app["thumbnail"].move_to_pos(position)
         # Refocus entry if incsearch is appropriate
         if incsearch and not self.last_focused == "im":
             self.entry.grab_focus()

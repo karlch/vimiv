@@ -110,7 +110,7 @@ class Commands(object):
             "complete": [self.app["completions"].complete, [False], [], []],
             "complete_inverse": [self.app["completions"].complete,
                                  [True], [], []],
-            "discard_command": [self.app["commandline"].leave, [], [], []],
+            "discard_command": [self.app["commandline"].leave, [True], [], []],
             "focus_slider": [self.app["manipulate"].focus_slider,
                              [], ["name"], []],
             "history_down": [self.app["commandline"].history_search,
