@@ -25,7 +25,7 @@ class CommandLine(object):
         search_positions: Search results as positions.
         search_case: If True, search case sensitively.
         incsearch: If True, enable incremental search in the library.
-        last_filename: File that was last selected in the library, if any.
+        last_index: Index that was last selected in the library, if any.
         running_threads: List of all running threads.
         last_focused: Widget that was focused before the command line.
     """
@@ -59,7 +59,7 @@ class CommandLine(object):
         self.incsearch = general["incsearch"]
         if self.incsearch:
             self.entry.connect("changed", self.incremental_search)
-        self.last_filename = ""
+        self.last_index = 0
         self.running_threads = []
         self.last_focused = ""
 
@@ -346,8 +346,6 @@ class CommandLine(object):
 
     def focus(self, text=""):
         """Open and focus the command line."""
-        # Reset search information
-        self.reset_search()
         # Colon for text
         self.entry.set_text(":" + text)
         # Show/hide the relevant stuff
@@ -357,13 +355,6 @@ class CommandLine(object):
         if self.app["library"].treeview.is_focus():
             # In the library remember current file to refocus if incsearch was
             # not applied
-            if self.app["library"].files:
-                last_path = self.app["library"].treeview.get_cursor()[0]
-                last_index = last_path.get_indices()[0]
-                self.last_filename = self.app["library"].files[last_index]
-                self.app["library"].reload(".", self.last_filename, search=True)
-            else:
-                self.last_filename = ""
             self.last_focused = "lib"
         elif self.app["manipulate"].scrolled_win.is_visible():
             self.last_focused = "man"
@@ -371,6 +362,7 @@ class CommandLine(object):
             self.last_focused = "thu"
         else:
             self.last_focused = "im"
+        self.reset_search(leaving=False)
         self.entry.grab_focus()
         self.entry.set_position(-1)
         # Update info for command mode
@@ -404,15 +396,15 @@ class CommandLine(object):
         # Refocus the remembered widget
         if self.last_focused == "lib":
             self.app["library"].focus(True)
-            if reset_search:
-                self.app["library"].reload(".", self.last_filename)
         elif self.last_focused == "man":
             self.app["manipulate"].sliders["bri"].grab_focus()
         elif self.last_focused == "thu":
             self.app["thumbnail"].iconview.grab_focus()
         else:
             self.app["image"].scrolled_win.grab_focus()
-        self.last_filename = ""
+        if reset_search:
+            self.reset_search(leaving=True)
+        self.last_index = 0
         self.app["statusbar"].update_info()
 
     def incremental_search(self, entry):
@@ -455,17 +447,17 @@ class CommandLine(object):
 
         # Reload library and thumbnails to show search results
         if self.last_focused == "lib":
-            self.app["library"].reload(os.getcwd(), self.last_filename,
-                                       search=True)
+            self.app["library"].focus(True)
+            self.app["library"].reload_names()
         elif self.last_focused == "thu":
             # Reload all thumbnails in incsearch, only some otherwise
             if incsearch:
                 self.app["thumbnail"].iconview.grab_focus()
                 for image in self.app.paths:
-                    self.app["thumbnail"].reload(image)
+                    self.app["thumbnail"].reload(image, False)
             else:
                 for index in self.search_positions:
-                    self.app["thumbnail"].reload(self.app.paths[index])
+                    self.app["thumbnail"].reload(self.app.paths[index], False)
 
         # Move to first result or throw an error
         if self.search_positions:
@@ -536,9 +528,29 @@ class CommandLine(object):
             self.entry.grab_focus()
             self.entry.set_position(-1)
 
-    def reset_search(self):
-        """Reset all search parameters to null."""
+    def reset_search(self, leaving):
+        """Reset all search parameters to null.
+
+        Args:
+            leaving: If True, leaving the commandline. Else entering.
+        """
         self.search_positions = []
+        # Remember position when entering
+        if not leaving:
+            self.last_index = self.app.get_pos()
+        # Reload library or thumbnail
+        if self.last_focused == "lib":
+            self.app["library"].reload_names()
+            if leaving:
+                self.app["library"].treeview.set_cursor(
+                    Gtk.TreePath(self.last_index), None, False)
+                self.app["library"].treeview.scroll_to_cell(
+                    Gtk.TreePath(self.last_index), None, True, 0.5, 0)
+        elif self.last_focused == "thu":
+            for image in self.app.paths:
+                self.app["thumbnail"].reload(image, False)
+            if leaving:
+                self.app["thumbnail"].move_to_pos(self.last_index)
 
     def alias(self, alias, *command):
         """Add an alias.

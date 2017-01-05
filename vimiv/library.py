@@ -292,6 +292,17 @@ class Library(object):
             self.move_pos(True,
                           self.files.index(os.path.basename(last_directory)))
 
+    def reload_names(self):
+        """Only reload names of the treeview."""
+        model = self.treeview.get_model()
+        for i, name in enumerate(self.files):
+            markup_string = "<b>" + name + "</b>" \
+                if os.path.isdir(name) \
+                else name
+            if i in self.app["commandline"].search_positions:
+                markup_string = self.markup + markup_string + "</span>"
+            model[i][1] = markup_string
+
     def move_pos(self, forward=True, defined_pos=None):
         """Move to a specific position in the library.
 

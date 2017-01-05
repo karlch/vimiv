@@ -197,7 +197,7 @@ class Thumbnail(object):
             for thumb in self.elements:
                 os.remove(thumb)
 
-    def reload(self, filename):
+    def reload(self, filename, reload_image=True):
         """Reload the thumbnails of manipulated images.
 
         Args:
@@ -205,23 +205,23 @@ class Thumbnail(object):
             reload_image: If True reload the image of the thumbnail. Else only
                 the name (useful for marking).
         """
-        thumbnails = Thumbnails([filename], self.sizes[-1], self.directory)
-        thumb_name = thumbnails.thumbnails_create()[0]
-        index = self.elements.index(thumb_name)
-        self.pixbuf_max[index] = GdkPixbuf.Pixbuf.new_from_file(thumb_name)
-        pixbuf_max = self.pixbuf_max[index]
-        pixbuf = self.scale_thumb(pixbuf_max)
-
+        index = self.app.paths.index(filename)
         name = self.elements[index].split("___")[-1]
         name = name.split(".")[0]
-
         if filename in self.app["mark"].marked:
             name = name + " [*]"
         elif index in self.app["commandline"].search_positions:
             name = self.markup + '<b>' + name + '</b></span>'
         # Subsctipting the liststore directly works fine
         # pylint: disable=unsubscriptable-object
-        self.liststore[index] = [pixbuf, name]
+        if reload_image:
+            thumbnails = Thumbnails([filename], self.sizes[-1], self.directory)
+            thumb_name = thumbnails.create_thumbnail_name(filename)
+            self.pixbuf_max[index] = GdkPixbuf.Pixbuf.new_from_file(thumb_name)
+            pixbuf = self.scale_thumb(self.pixbuf_max[index])
+            self.liststore[index] = [pixbuf, name]
+        else:
+            self.liststore[index][1] = name
 
     def move_direction(self, direction):
         """Scroll with "hjkl".

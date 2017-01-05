@@ -22,13 +22,7 @@ class Mark(object):
     def mark(self):
         """Mark the current image."""
         # Check which image
-        if self.app["library"].treeview.is_focus():
-            current = os.path.abspath(self.app.get_pos(True))
-        elif self.app["thumbnail"].toggled:
-            index = self.app.get_pos()
-            current = self.app.paths[index]
-        else:
-            current = self.app.paths[self.app.index]
+        current = os.path.abspath(os.path.basename(self.app.get_pos(True)))
         # Toggle the mark
         if os.path.isfile(current):
             if current in self.marked:
@@ -103,11 +97,15 @@ class Mark(object):
         """Reload all information which contains marks."""
         # Update lib
         if self.app["library"].grid.is_visible():
-            self.app["library"].remember_pos(os.getcwd(), self.app.get_pos())
-            self.app["library"].reload(os.getcwd())
+            model = self.app["library"].treeview.get_model()
+            for i, name in enumerate(self.app["library"].files):
+                model[i][3] = "[*]" \
+                    if os.path.abspath(name) in self.marked \
+                    else ""
+        # Reload thumb names
         if self.app["thumbnail"].toggled:
-            for image in self.app.paths:
-                if reload_all or image in current:
-                    self.app["thumbnail"].reload(image)
+            reload_list = self.app.paths if reload_all else current
+            for image in reload_list:
+                self.app["thumbnail"].reload(image, False)
 
         self.app["statusbar"].update_info()

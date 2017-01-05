@@ -179,7 +179,6 @@ class CommandlineTest(VimivTestCase):
         dir_before = os.getcwd()
         file_before = self.vimiv.get_pos(True)
         self.vimiv["commandline"].cmd_search()
-        self.assertEqual(self.vimiv["commandline"].entry.get_text(), "/")
         # Search should be done automatically
         self.vimiv["commandline"].entry.set_text("/vi")
         expected_pos = self.vimiv["library"].files.index("vimiv")
@@ -193,6 +192,7 @@ class CommandlineTest(VimivTestCase):
         self.vimiv["commandline"].leave(True)
         self.assertEqual(os.getcwd(), dir_before)
         self.assertEqual(self.vimiv.get_pos(True), file_before)
+        self.assertFalse(self.vimiv["commandline"].search_positions)
         # Move into a more interesting directory
         self.vimiv["library"].move_up("vimiv/testimages")
         # First search should stay at animation
