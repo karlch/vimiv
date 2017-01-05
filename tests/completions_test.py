@@ -119,7 +119,7 @@ class CompletionsTest(VimivTestCase):
 
     def test_selections(self):
         """Initial selection when tabbing through completions."""
-        self.completions.entry.set_text(":")
+        self.vimiv["commandline"].focus()
         # No cursor yet
         cursor = self.completions.treeview.get_cursor()[0]
         self.assertIsNone(cursor)

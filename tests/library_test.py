@@ -56,9 +56,6 @@ class LibraryTest(VimivTestCase):
         self.assertFalse(self.lib.treeview.is_focus())
         self.assertFalse(self.lib.grid.is_focus())
         self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
-        # Reopen and back to beginning
-        self.lib.toggle()
-        self.lib.treeview.set_cursor([Gtk.TreePath(0)], None, False)
 
     def test_move_pos(self):
         """Move position in library."""
@@ -186,6 +183,12 @@ class LibraryTest(VimivTestCase):
         self.lib.reload(".")
         self.assertNotIn(sym, self.lib.files)
         os.remove(sym)
+
+    def tearDown(self):
+        # Reopen and back to beginning
+        if not self.lib.treeview.is_visible():
+            self.lib.toggle()
+        self.lib.treeview.set_cursor([Gtk.TreePath(0)], None, False)
 
 
 if __name__ == '__main__':

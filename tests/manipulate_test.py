@@ -161,15 +161,23 @@ class ManipulateTest(VimivTestCase):
 
     def test_manipulate_image(self):
         """Test manipulate image."""
-        # Manipulated image is equal to old file before manipulation
-        cur_image = os.path.basename(self.vimiv.paths[self.vimiv.index])
-        self.assertTrue(compare_images("../testimages/" + cur_image, cur_image))
+        # Copy image before manipulation
+        tmpfile = "tmp.jpg"
+        if os.path.exists(tmpfile):
+            os.remove(tmpfile)
+        shutil.copyfile(self.vimiv.paths[self.vimiv.index], tmpfile)
+        # Leaving with False should not change the image
+        self.manipulate.toggle()
+        self.manipulate.manipulations = {"bri": 20, "con": 20, "sha": 20}
+        self.manipulate.button_clicked(None, False)
+        self.assertTrue(compare_images(tmpfile,
+                                       self.vimiv.paths[self.vimiv.index]))
+        # Image is different to copied backup after manipulations
         self.manipulate.toggle()
         self.manipulate.manipulations = {"bri": 20, "con": 20, "sha": 20}
         self.manipulate.button_clicked(None, True)
-        # Different afterwards
-        self.assertFalse(compare_images("../testimages/" + cur_image,
-                                        cur_image))
+        self.assertFalse(compare_images(tmpfile,
+                                        self.vimiv.paths[self.vimiv.index]))
 
     def test_manipulate_sliders(self):
         """Focusing and changing values of sliders."""

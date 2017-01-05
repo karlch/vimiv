@@ -68,8 +68,8 @@ class FileActionsTest(VimivTestCase):
         # Make sure there are some files in the directories
         os.system("touch " + trashfile)
         os.system("touch " + thumbfile)
-        self.assertEqual(os.listdir(self.thumbdir), ["foo"])
-        self.assertEqual(os.listdir(self.trashdir), ["foo"])
+        self.assertIn("foo", os.listdir(self.thumbdir))
+        self.assertIn("foo", os.listdir(self.trashdir))
         # Clear them
         self.vimiv["fileextras"].clear("Thumbnails")
         self.vimiv["fileextras"].clear("Trash")
