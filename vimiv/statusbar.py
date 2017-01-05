@@ -222,6 +222,6 @@ class Statusbar(object):
         self.separator.set_margin_top(separator_height)
 
     def clear_status(self):
-        """Clear num_str and error messages from the statusbar."""
+        """Clear num_str, search and error messages from the statusbar."""
+        self.app["commandline"].reset_search(leaving=False)
         self.app["keyhandler"].num_clear()
-        self.update_info()

@@ -66,13 +66,15 @@ class StatusbarTest(VimivTestCase):
         self.assertTrue(self.statusbar.bar.is_visible())
 
     def test_clear_status(self):
-        """Clear num_str and error message."""
+        """Clear num_str, search and error message."""
         self.vimiv["keyhandler"].num_str = "42"
+        self.vimiv["commandline"].search_positions = [1, 2, 3]
         self.statusbar.message("Catastrophe", "error")
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
                          "ERROR: Catastrophe")
         self.statusbar.clear_status()
         self.assertEqual(self.vimiv["keyhandler"].num_str, "")
+        self.assertFalse(self.vimiv["commandline"].search_positions)
         self.assertNotEqual(self.vimiv["statusbar"].left_label.get_text(),
                             "Error: Catastrophe")
 
