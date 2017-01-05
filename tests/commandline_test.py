@@ -172,6 +172,10 @@ class CommandlineTest(VimivTestCase):
         self.vimiv["commandline"].entry.set_text("/Ar")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.assertFalse(self.vimiv["commandline"].search_positions)
+        # Search move should give an error message without any results
+        self.vimiv["commandline"].search_move()
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "WARNING: No search results")
 
     def test_incsearch(self):
         """Incsearch."""

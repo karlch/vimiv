@@ -474,6 +474,9 @@ class CommandLine(object):
         Args:
             forward: If true, move forwards. Else move backwards.
         """
+        if not self.search_positions:
+            self.app["statusbar"].message("No search results", "warning")
+            return
         # Correct handling of prefixed numbers
         if self.app["keyhandler"].num_str:
             add_on = int(self.app["keyhandler"].num_str) - 1
