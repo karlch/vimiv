@@ -30,7 +30,8 @@ class ConfigparserTest(TestCase):
         tagdir = os.path.join(vimivdir, "Tags")
         thumbdir = os.path.join(vimivdir, "Thumbnails")
         for directory in [vimivdir, trashdir, tagdir, thumbdir]:
-            self.assertTrue(os.path.isdir(directory))
+            with self.subTest(directory=directory):
+                self.assertTrue(os.path.isdir(directory))
 
     def check_defaults(self, settings):
         """Check is settings contain default values."""
