@@ -179,13 +179,10 @@ class ManipulateTest(VimivTestCase):
         self.assertFalse(compare_images(tmpfile,
                                         self.vimiv.paths[self.vimiv.index]))
 
-    def test_manipulate_sliders(self):
-        """Focusing and changing values of sliders."""
+    def test_focus_sliders(self):
+        """Focusing sliders in manipulate."""
         self.manipulate.toggle()
-        self.manipulate.focus_slider("bri")
-        self.manipulate.change_slider(-1)
-        received_value = self.manipulate.sliders["bri"].get_value()
-        self.assertEqual(received_value, -1)
+        self.assertTrue(self.manipulate.sliders["bri"].is_focus())
         self.manipulate.focus_slider("con")
         self.assertTrue(self.manipulate.sliders["con"].is_focus())
         self.manipulate.focus_slider("sha")
@@ -198,6 +195,26 @@ class ManipulateTest(VimivTestCase):
                          "ERROR: No slider called val")
         # Leave
         self.manipulate.button_clicked(None, False)
+
+    def test_change_slider_value(self):
+        """Change slider value in manipulate."""
+        # Change value
+        self.manipulate.toggle()
+        self.manipulate.focus_slider("bri")
+        self.manipulate.change_slider(-1)
+        received_value = self.manipulate.sliders["bri"].get_value()
+        self.assertEqual(received_value, -1)
+        # Change value with a numstr
+        self.vimiv["keyhandler"].num_str = "5"
+        self.manipulate.change_slider(2)
+        received_value = self.manipulate.sliders["bri"].get_value()
+        self.assertEqual(received_value, -1 + 2 * 5)
+        # Not a parseable integer
+        self.manipulate.change_slider("hi")
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "ERROR: Argument for slider must be of type integer")
+        received_value = self.manipulate.sliders["bri"].get_value()
+        self.assertEqual(received_value, -1 + 2 * 5)
 
     def test_cmd_edit(self):
         """Test manipulating from command line commands."""
