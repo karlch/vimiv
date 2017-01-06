@@ -30,16 +30,32 @@ class KeyHandlerTest(VimivTestCase):
         self.assertTrue(self.vimiv["library"].treeview.is_focus())
 
     def test_add_number(self):
+        """Add number to the numstr and clear it."""
+        self.assertFalse(self.vimiv["keyhandler"].num_str)
+        # Add a number
+        self.vimiv["keyhandler"].num_append("2")
+        self.assertEqual(self.vimiv["keyhandler"].num_str, "2")
+        # Add another number, should change the timer_id
+        id_before = self.vimiv["keyhandler"].timer_id
+        self.vimiv["keyhandler"].num_append("3")
+        id_after = self.vimiv["keyhandler"].timer_id
+        self.assertNotEqual(id_before, id_after)
+        self.assertEqual(self.vimiv["keyhandler"].num_str, "23")
+        # Clear manually, GLib timeout should definitely work as well if the
+        # code runs without errors
+        self.vimiv["keyhandler"].num_clear()
+        self.assertFalse(self.vimiv["keyhandler"].num_str)
+        self.assertFalse(self.vimiv["keyhandler"].timer_id)
+
+    def test_add_number_via_keypress(self):
         """Add a number to the numstr by keypress."""
         self.assertFalse(self.vimiv["keyhandler"].num_str)
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("2")
         self.vimiv["library"].treeview.emit("key_press_event", event)
         self.assertEqual(self.vimiv["keyhandler"].num_str, "2")
-        # Clear manually, GLib timeout should definitely work as well if the
-        # code runs without errors
+        # Clear as it might interfere
         self.vimiv["keyhandler"].num_clear()
-        self.assertFalse(self.vimiv["keyhandler"].num_str)
 
     def test_key_press_modifier(self):
         """Press key with modifier."""
