@@ -110,7 +110,6 @@ class FileActionsTest(VimivTestCase):
         os.chdir("testimages_to_format")
         self.vimiv.quit()
         self.init_test(["arch_001.jpg"])
-        shutil.copyfile("arch_001.jpg", "/home/christian/weri.jpg")
         self.vimiv.paths = [os.path.abspath("arch_001.jpg")]
         self.vimiv["fileextras"].format_files("formatted_%Y_")
         self.assertIn("formatted_2016_001.jpg", os.listdir())
