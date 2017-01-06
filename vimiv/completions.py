@@ -52,6 +52,7 @@ class Completion():
         self.treeview = Gtk.TreeView()
         self.treeview.set_enable_search(False)
         self.treeview.set_headers_visible(False)
+        self.treeview.set_activate_on_single_click(True)
         padding = self.app.settings["GENERAL"]["commandline_padding"]
         renderer = Gtk.CellRendererText()
         renderer.set_padding(padding, 0)
@@ -136,6 +137,7 @@ class Completion():
         """
         if treeview:
             count = path.get_indices()[0]
+            self.entry.grab_focus()
         else:
             count = self.tab_position
         comp_type = self.get_comp_type()
