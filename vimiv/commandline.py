@@ -84,6 +84,9 @@ class CommandLine(object):
             command = ":" + self.app.aliases[command[1:]]
         # And close the cmd line
         self.reset_text()
+        # Write command to log in debug mode
+        if self.app.debug:
+            self.app["log"].write_message("commandline", command)
         if command[0] == "/":  # Search
             # Do not search again if incsearch was running
             if not (self.app["library"].treeview.is_focus() or

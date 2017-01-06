@@ -74,6 +74,8 @@ class Statusbar(object):
             message: Message to push.
             style: One of error, warning and info.
         """
+        if self.app.debug:
+            self.app["log"].write_message(style, message)
         self.errors = True
         styles = {"error": "#CC0000", "warning": "#FA9E21", "info": "#6699FF"}
         message = "<b><span foreground='" + styles[style] + "'>" + \

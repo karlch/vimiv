@@ -26,6 +26,7 @@ from vimiv.tags import TagHandler
 from vimiv.mark import Mark
 from vimiv.information import Information
 from vimiv.window import Window
+from vimiv.log import Log
 from vimiv.helpers import StderrHandler
 
 
@@ -39,6 +40,7 @@ class Vimiv(Gtk.Application):
         index: Current position in paths.
         widgets: Dictionary of vimiv widgets.
             widgets[widget-name] = Gtk.Widget
+        debug: If True, write all messages and commands to log.
         directory: Directory in which configfiles and data are stored.
         commands: Dictionary of commands.
             commands[command-name] = [function, *args]
@@ -63,6 +65,7 @@ class Vimiv(Gtk.Application):
         self.paths = []
         self.index = 0
         self.widgets = {}
+        self.debug = False
         self.directory = os.path.expanduser("~/.vimiv")
         self.commands = {}
         self.aliases = {}
@@ -128,6 +131,7 @@ class Vimiv(Gtk.Application):
         # Show Gtk warnings if the debug option is given
         if options.contains("debug"):
             self.stderr_handler.show()
+            self.debug = True
         # If the version option is given, print version and exit 0
         if options.contains("version"):
             information = Information()
@@ -233,6 +237,7 @@ class Vimiv(Gtk.Application):
         self["information"] = Information()
         self["window"] = Window(self, self.settings)
         Commands(self, self.settings)
+        self["log"] = Log(self)
 
     def create_window_structure(self):
         """Generate the structure of all the widgets and add it to the window.
@@ -290,6 +295,8 @@ class Vimiv(Gtk.Application):
             cmd += "\n"
             histfile.write(cmd)
         histfile.close()
+        # Write to log
+        self["log"].write_message("Exited", "time")
         # Remove temporary directory
         if "/tmp/" in self.directory:
             rmtree(self.directory)

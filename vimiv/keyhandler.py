@@ -65,6 +65,10 @@ class KeyHandler(object):
         # Get the command to which the pressed key is bound and run it
         if keyname in keys:
             keybinding = keys[keyname]
+            # Write keybinding and key to log in debug mode
+            if self.app.debug:
+                self.app["log"].write_message("key",
+                                              keyname + ": " + keybinding)
             self.app["commandline"].run_command(keybinding, keyname)
             return True  # Deactivates default bindings
         # Activate default keybindings
@@ -83,6 +87,9 @@ class KeyHandler(object):
             GLib.source_remove(self.timer_id)
         self.timer_id = GLib.timeout_add_seconds(1, self.num_clear)
         self.num_str += num
+        # Write number to log file in debug mode
+        if self.app.debug:
+            self.app["log"].write_message("number", num + "->" + self.num_str)
         self.app["statusbar"].update_info()
 
     def num_clear(self):
@@ -90,6 +97,9 @@ class KeyHandler(object):
         # Remove any timers as we are clearing now anyway
         if self.timer_id:
             GLib.source_remove(self.timer_id)
+        # Write number cleared to log file in debug mode
+        if self.app.debug and self.num_str:
+            self.app["log"].write_message("number", "cleared")
         self.timer_id = 0
         # Reset
         self.num_str = ""
