@@ -144,6 +144,34 @@ class ImageTest(VimivTestCase):
         self.assertEqual(1, self.image.check_for_edit(False))
         self.assertEqual(0, self.image.check_for_edit(True))
 
+    def test_auto_rezoom_on_changes(self):
+        """Automatically rezoom the image when different widgets are shown."""
+        # Definitely show statusbar
+        if self.vimiv["statusbar"].hidden:
+            self.vimiv["statusbar"].toggle()
+        # Zoom to fit vertically so something happens
+        self.image.zoom_to(0, 3)
+        before = self.image.zoom_percent
+        # Hide statusbar -> larger image
+        self.vimiv["statusbar"].toggle()
+        after = self.image.zoom_percent
+        self.assertGreater(after, before)
+        # Show statusbar -> image back to size before
+        self.vimiv["statusbar"].toggle()
+        after = self.image.zoom_percent
+        self.assertEqual(after, before)
+        # Zoom to fit horizontally so something happens
+        self.image.zoom_to(0, 2)
+        before = self.image.zoom_percent
+        # Show library -> smaller image
+        self.vimiv["library"].toggle()
+        after = self.image.zoom_percent
+        self.assertLess(after, before)
+        # Hide library again -> image back to size before
+        self.vimiv["library"].toggle()
+        after = self.image.zoom_percent
+        self.assertEqual(after, before)
+
 
 if __name__ == '__main__':
     main()
