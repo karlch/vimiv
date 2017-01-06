@@ -48,6 +48,28 @@ class CompletionsTest(VimivTestCase):
         liststore = self.completions.treeview.get_model()
         self.assertFalse(len(liststore))
 
+    def test_external_path_completion(self):
+        """Completion of paths for external commands."""
+        # One path
+        self.completions.entry.set_text(":!mv vi")
+        expected_completions = ["!mv vimiv/"]
+        liststore = self.completions.treeview.get_model()
+        for row in liststore:
+            self.assertIn(row[0], expected_completions)
+        self.assertEqual(len(liststore), len(expected_completions))
+        # Two paths
+        self.completions.entry.set_text(":!mv % vi")
+        expected_completions = ["!mv % vimiv/"]
+        liststore = self.completions.treeview.get_model()
+        for row in liststore:
+            self.assertIn(row[0], expected_completions)
+        self.assertEqual(len(liststore), len(expected_completions))
+        # Do not complete arguments
+        self.completions.entry.set_text(":!mv -")
+        self.completions.complete()
+        liststore = self.completions.treeview.get_model()
+        self.assertFalse(len(liststore))
+
     def test_path_completion(self):
         """Completion of paths."""
         self.completions.entry.set_text(":./vimiv/testimages/ar")

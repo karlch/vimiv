@@ -208,15 +208,43 @@ class Completion():
             self.liststores["tag"][0].append([command.split()[0] + " " + tag,
                                               ""])
 
-    #  The two functions currently only hide the commandline but are implemented
+    #  The function currently only hides the commandline but is implemented
     #  for possible future usage.
     def complete_search(self):
         """Hide the info as it has no use in search."""
         self.info.hide()
 
-    def complete_external(self):
-        """Hide the info as it has no use in external."""
-        self.info.hide()
+    def complete_external(self, command):
+        """If there is more than one word in command, do path completion.
+
+        Args:
+            command: The internal command to complete.
+        """
+        self.liststores["external"][0].clear()
+        command = command.lstrip("!").lstrip(" ")
+        spaces = command.count(" ")
+        # If there are spaces, path completion for external commands makes sense
+        if spaces:
+            args = command.split()
+            # Last argument is the path to complete
+            if len(args) > spaces:
+                path = args[-1]
+                # Do not try path completion for arguments
+                if path.startswith("-"):
+                    self.info.hide()
+                    return
+                command = " ".join(args[:-1]) + " "
+            else:
+                path = "./"
+            self.complete_path(path)
+            # Prepend command to path completion
+            # Gtk ListStores are iterable
+            # pylint:disable=not-an-iterable
+            for row in self.liststores["path"][0]:
+                match = "!" + command + re.sub(r'^\./', '', row[0])
+                self.liststores["external"][0].append([match, ""])
+        else:
+            self.info.hide()
 
     def generate_commandlist(self):
         """Generate a list of internal vimiv commands and store it."""
@@ -252,6 +280,8 @@ class Completion():
 
     def refilter(self, entry):
         """Refilter the completion list according to the text in entry."""
+        # Replace multiple spaces with single space
+        entry.set_text(re.sub(r' +', ' ', entry.get_text()))
         comp_type = self.get_comp_type()
         command = entry.get_text().lstrip(":")
         if command:
@@ -263,7 +293,7 @@ class Completion():
         elif comp_type == "search":
             self.complete_search()
         elif comp_type == "external":
-            self.complete_external()
+            self.complete_external(command)
         self.treeview.set_model(self.liststores[comp_type][1])
         self.liststores[comp_type][1].refilter()
         self.reset()
