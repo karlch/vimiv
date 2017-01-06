@@ -2,7 +2,8 @@
 # encoding: utf-8
 """Tests window.py for vimiv's test suite."""
 
-from unittest import main
+import os
+from unittest import main, skipUnless
 from vimiv_testcase import VimivTestCase, refresh_gui
 
 
@@ -34,6 +35,14 @@ class WindowTest(VimivTestCase):
         self.vimiv["window"].scroll("m")
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
                          "ERROR: Invalid scroll direction m")
+
+    @skipUnless(os.environ["DISPLAY"] == ":42", "Must run in Xvfb")
+    def test_check_resize(self):
+        """Resize window and check winsize."""
+        self.assertEqual(self.vimiv["window"].winsize, (800, 600))
+        self.vimiv["window"].resize(400, 300)
+        refresh_gui()
+        self.assertEqual(self.vimiv["window"].winsize, (400, 300))
 
 
 if __name__ == '__main__':
