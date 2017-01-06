@@ -139,13 +139,10 @@ class ImageTest(VimivTestCase):
 
     def test_check_for_edit(self):
         """Check if an image was edited."""
-        path = self.vimiv.paths[self.vimiv.index]
         self.assertEqual(0, self.image.check_for_edit(False))
         self.vimiv["manipulate"].manipulations = {"bri": 10, "con": 0, "sha": 0}
         self.assertEqual(1, self.image.check_for_edit(False))
         self.assertEqual(0, self.image.check_for_edit(True))
-        # Reset path
-        self.vimiv.paths[self.vimiv.index] = path
 
 
 if __name__ == '__main__':
