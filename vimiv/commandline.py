@@ -87,6 +87,23 @@ class CommandLine(object):
         # Write command to log in debug mode
         if self.app.debug:
             self.app["log"].write_message("commandline", command)
+        # Save the cmd to the history list avoiding duplicates
+        if command in self.history:
+            self.history.remove(command)
+        self.history.insert(0, command)
+        # Reset history position
+        self.pos = 0
+        # Run the correct command
+        self.run(command)
+
+    def run(self, command):
+        """Run correct function for command.
+
+        Calls one of search, run_external_command, run_path and run_command.
+
+        Args:
+            command: The command to operate on.
+        """
         if command[0] == "/":  # Search
             # Do not search again if incsearch was running
             if not (self.app["library"].treeview.is_focus() or
@@ -115,11 +132,6 @@ class CommandLine(object):
                     self.app["keyhandler"].num_str += cmd[0]
                     cmd = cmd[1:]
                 self.run_command(cmd)
-        # Save the cmd to the history list avoiding duplicates
-        if command in self.history:
-            self.history.remove(command)
-        self.history.insert(0, command)
-        self.pos = 0
 
     def run_external_command(self, cmd):
         """Run the entered command in the terminal.
