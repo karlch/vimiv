@@ -90,6 +90,11 @@ class ThumbnailTest(VimivTestCase):
         # H moves back to the first element
         self.thumb.move_direction("H")
         self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
+        # L and H directly from the window implementation of scroll
+        self.vimiv["window"].scroll("L")
+        self.assertEqual(self.vimiv.paths[-1], self.vimiv.get_pos(True))
+        self.vimiv["window"].scroll("H")
+        self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
 
     def test_search(self):
         """Search in thumbnail mode."""
@@ -117,9 +122,15 @@ class ThumbnailTest(VimivTestCase):
         scale = max(width, height)
         self.assertEqual(scale, 256)
         self.thumb.zoom(True)
-        self.assertEqual(self.thumb.size, (256, 256))
         # This is the max size, one more zoom shouldn't change anything
+        self.assertEqual(self.thumb.size, (256, 256))
+        # Zoom out
         self.thumb.zoom(False)
+        self.assertEqual(self.thumb.size, (128, 128))
+        # Zoom directly with the window implementation of zoom
+        self.vimiv["window"].zoom(True)
+        self.assertEqual(self.thumb.size, (256, 256))
+        self.vimiv["window"].zoom(False)
         self.assertEqual(self.thumb.size, (128, 128))
 
     def test_thumb_sizes(self):
