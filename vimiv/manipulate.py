@@ -191,9 +191,10 @@ class Manipulate(object):
                 self.app["image"].pixbuf_original = \
                     self.app["image"].pixbuf_original.rotate_simple(
                         (90 * cwise))
-                if not self.app["image"].user_zoomed:
+                if self.app["image"].fit_image:
                     self.app["image"].zoom_percent = \
-                        self.app["image"].get_zoom_percent_to_fit()
+                        self.app["image"].get_zoom_percent_to_fit(
+                            self.app["image"].fit_image)
                 self.app["image"].update(False, False)
             if rotate_file:
                 for fil in images:
@@ -428,7 +429,7 @@ class Manipulate(object):
         for slider in self.sliders.values():
             slider.set_value(0)
         # Show the original image
-        self.app["image"].user_zoomed = False
+        self.app["image"].fit_image = 1
         self.app["image"].load_image()
         # Done
         self.toggle()

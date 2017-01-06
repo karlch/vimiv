@@ -209,10 +209,10 @@ class Statusbar(object):
             self.separator.show()
         self.hidden = not self.hidden
         # Resize the image if necessary
-        if not self.app["image"].user_zoomed and self.app.paths and \
+        if self.app["image"].fit_image and self.app.paths and \
                 not self.app["thumbnail"].toggled and \
                 not self.app["image"].is_anim:
-            self.app["image"].zoom_to(0)
+            self.app["image"].zoom_to(0, self.app["image"].fit_image)
 
     def set_separator_height(self):
         """Set height of the separator used as background of the statusbar."""

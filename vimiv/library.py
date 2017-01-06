@@ -137,9 +137,9 @@ class Library(object):
         if self.app.paths and update_image:
             if self.app["thumbnail"].toggled:
                 self.app["thumbnail"].calculate_columns()
-            elif not self.app["image"].user_zoomed and \
+            elif self.app["image"].fit_image and \
                     not self.app["image"].is_anim:
-                self.app["image"].zoom_to(0)
+                self.app["image"].zoom_to(0, self.app["image"].fit_image)
             else:
                 #  Change the toggle state of animation
                 self.app["image"].update()
@@ -366,8 +366,9 @@ class Library(object):
             self.width = 100
         self.scrollable_treeview.set_size_request(self.width, 10)
         # Rezoom image
-        if not self.app["image"].user_zoomed and self.app.paths:
-            self.app["image"].zoom_to(0)
+        if self.app["image"].fit_image and self.app.paths and\
+                    not self.app["image"].is_anim:
+            self.app["image"].zoom_to(0, self.app["image"].fit_image)
 
     def toggle_hidden(self):
         """Toggle showing of hidden files."""

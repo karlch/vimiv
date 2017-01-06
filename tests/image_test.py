@@ -96,7 +96,7 @@ class ImageTest(VimivTestCase):
         self.vimiv["commandline"].focus("fit_vert")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         self.assertEqual(self.image.zoom_percent,
-                         self.image.get_zoom_percent_to_fit(False, True))
+                         self.image.get_zoom_percent_to_fit(3))
         # Zoom_to 0.5
         self.vimiv["commandline"].focus("zoom_to 05")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)

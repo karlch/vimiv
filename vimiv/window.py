@@ -101,9 +101,9 @@ class Window(Gtk.ApplicationWindow):
             if self.app.paths:
                 if self.app["thumbnail"].toggled:
                     self.app["thumbnail"].calculate_columns()
-                if not self.app["image"].user_zoomed and \
+                if self.app["image"].fit_image and \
                         not self.app["image"].is_anim:
-                    self.app["image"].zoom_to(0)
+                    self.app["image"].zoom_to(0, self.app["image"].fit_image)
 
     def focus_on_mouse_click(self, widget, event_button):
         """Update statusbar with the currently focused widget after mouse click.

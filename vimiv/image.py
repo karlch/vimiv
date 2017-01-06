@@ -22,7 +22,11 @@ class Image(object):
         viewport: Gtk.Viewport to be able to scroll the image.
         image: Gtk.Image containing the actual image Pixbuf.
         animation_toggled: If True play animations.
-        user_zoomed: If True do not rezoom automatically.
+        fit_image:
+            0: Image is user zoomed.
+            1: Image is zoomed to fit.
+            2: Image is zoomed to fit horizontally.
+            3: Image is zoomed to fit vertically.
         trashdir: Directory for all the deleted files.
         overzoom: If True, increase image size up to window size even if images
             are smaller than window.
@@ -56,7 +60,7 @@ class Image(object):
 
         # Settings
         self.animation_toggled = False
-        self.user_zoomed = False  # checks if the user manually zoomed the image
+        self.fit_image = 1  # Checks if the image fits the window somehow
         self.trashdir = os.path.join(self.app.directory, "Trash")
         self.overzoom = general["overzoom"]
         self.rescale_svg = general["rescale_svg"]
@@ -88,12 +92,11 @@ class Image(object):
         else:
             return 0
 
-    def get_zoom_percent_to_fit(self, z_width=False, z_height=False):
+    def get_zoom_percent_to_fit(self, fit=1):
         """Get the zoom factor perfectly fitting the image to the window.
 
         Args:
-            z_width: If True zoom to width.
-            z_height: If True zoom to height.
+            fit: See self.fit_image attribute.
         Return:
             Zoom percentage.
         """
@@ -103,14 +106,14 @@ class Image(object):
         pbo_scale = pbo_width / pbo_height
         # Size of the image to be shown
         w_scale = self.imsize[0] / self.imsize[1]
-        stickout = z_width | z_height
+        stickout = fit > 1
 
         # Image is completely shown and user doesn't want overzoom
         if (pbo_width < self.imsize[0] and pbo_height < self.imsize[1] and
                 not (stickout or self.overzoom)):
             return 1
         # "Portrait" image
-        elif (pbo_scale < w_scale and not stickout) or z_height:
+        elif (pbo_scale < w_scale and not stickout) or fit == 3:
             return self.imsize[1] / pbo_height
         # "Panorama/landscape" image
         else:
@@ -217,15 +220,14 @@ class Image(object):
             else:
                 self.zoom_percent = self.zoom_percent / (1 + delta * step)
             self.catch_unreasonable_zoom_and_update(fallback_zoom)
-            self.user_zoomed = True
+            self.fit_image = 0
 
-    def zoom_to(self, percent, z_width=False, z_height=False):
+    def zoom_to(self, percent, fit=1):
         """Zoom to a given percentage.
 
         Args:
             percent: Percentage to zoom to.
-            z_width: If True zoom to width.
-            z_height: If True zoom to height.
+            fit: See self.fit_image attribute.
         """
         if self.is_anim:
             self.app["statusbar"].message("Zoom not supported for gif files",
@@ -247,10 +249,10 @@ class Image(object):
         # 0 means zoom to fit
         if percent:
             self.zoom_percent = percent
-            self.user_zoomed = True
+            self.fit_image = 0
         else:
-            self.zoom_percent = self.get_zoom_percent_to_fit(z_width, z_height)
-            self.user_zoomed = False
+            self.zoom_percent = self.get_zoom_percent_to_fit(fit)
+            self.fit_image = fit
         # Catch some unreasonable zooms
         self.catch_unreasonable_zoom_and_update(fallback_zoom)
 
@@ -318,7 +320,7 @@ class Image(object):
             delta *= -1
 
         self.app.index = (self.app.index + delta) % len(self.app.paths)
-        self.user_zoomed = False
+        self.fit_image = 1
 
         # Reshuffle on wrap-around
         if self.shuffle and self.app.index is 0 and delta > 0:
@@ -393,7 +395,6 @@ class Image(object):
             self.app["thumbnail"].move_to_pos(pos)
         else:
             self.move_index(True, False, dif)
-            self.user_zoomed = False
         return True
 
     def toggle_rescale_svg(self):
