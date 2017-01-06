@@ -49,6 +49,13 @@ class ModeSwitchTestImage(VimivTestCase):
         self.assertEqual(self.vimiv["image"].scrolled_win.get_child(),
                          self.vimiv["thumbnail"].iconview)
         self.assertEqual(self.vimiv["thumbnail"].last_focused, "im")
+        # Quick insert of thumbnail <-> manipulate as it would be to expensive
+        # to write an extra thumbnail class for this
+        self.vimiv["manipulate"].toggle()
+        self.assertTrue(self.vimiv["thumbnail"].iconview.is_focus())
+        self.assertFalse(self.vimiv["manipulate"].scrolled_win.is_visible())
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "WARNING: Manipulate not supported in thumbnail mode")
 
         self.vimiv["thumbnail"].toggle()
         self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
@@ -112,6 +119,15 @@ class ModeSwitchTestLibrary(VimivTestCase):
         self.assertTrue(self.vimiv["library"].treeview.is_focus())
         self.assertNotEqual(self.vimiv["image"].scrolled_win.get_child(),
                             self.vimiv["thumbnail"].iconview)
+
+    def test_library_manipulate(self):
+        """Switch between library and manipulate mode should fail."""
+        self.assertTrue(self.vimiv["library"].treeview.is_focus())
+        self.vimiv["manipulate"].toggle()
+        self.assertTrue(self.vimiv["library"].treeview.is_focus())
+        self.assertFalse(self.vimiv["manipulate"].scrolled_win.is_visible())
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "WARNING: Manipulate not supported in library")
 
     def tearDown(self):
         os.chdir(self.test_directory)
