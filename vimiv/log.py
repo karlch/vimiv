@@ -25,7 +25,9 @@ class Log():
         """
         self.filename = os.path.join(app.directory, "vimiv.log")
         self.terminal = sys.stderr
-        sys.stderr = self
+        # Redirect stderr in debug mode so it is written to the log file as well
+        if app.debug:
+            sys.stderr = self
         # Create a new log file at startup
         with open(self.filename, "w") as f:
             f.write("Vimiv log written to "
@@ -45,7 +47,7 @@ class Log():
 
     def write(self, message):
         """Write stderr message to log file and terminal."""
-        self.terminal.write(message)
+        print(message, end="")
         if "Traceback" in message:
             self.write_message("stderr", "")
         with open(self.filename, "a") as f:
