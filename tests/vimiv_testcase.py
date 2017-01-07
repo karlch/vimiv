@@ -40,7 +40,8 @@ class VimivTestCase(TestCase):
         cls.vimiv = Vimiv()
         cls.init_test(cls)
 
-    def init_test(self, paths=None, key1=None, key2=None, val=None):
+    def init_test(self, paths=None, key1=None, key2=None, val=None,
+                  debug=False):
         """Initialize a testable vimiv object saved as self.vimiv.
 
         Args:
@@ -52,6 +53,7 @@ class VimivTestCase(TestCase):
         self.working_directory = os.getcwd()
         # Create vimiv class with settings, paths, ...
         self.vimiv = Vimiv()
+        self.vimiv.debug = debug
         self.vimiv.do_handle_local_options(GLib.VariantDict())
         # Set the required settings
         if key1:

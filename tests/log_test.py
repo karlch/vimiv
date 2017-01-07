@@ -16,7 +16,7 @@ class LogTest(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.init_test(cls)
+        cls.init_test(cls, debug=True)
         cls.logfile = os.path.join(cls.vimiv.directory, "vimiv.log")
 
     def test_creation(self):
@@ -54,30 +54,24 @@ class LogTest(VimivTestCase):
 
     def test_debug_mode_command(self):
         """Run a command in debug mode and therefore log it."""
-        self.vimiv.debug = True
         self.vimiv["commandline"].focus("!:")
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
         last_line = self.read_log(string=False)[-1]
         self.assertEqual(last_line, "%-15s %s\n" % ("[commandline]", ":!:"))
-        self.vimiv.debug = False
 
     def test_debug_mode_statusbar(self):
         """Statusbar message in debug mode and therefore log it."""
-        self.vimiv.debug = True
         self.vimiv["statusbar"].message("Useful", "info")
         last_line = self.read_log(string=False)[-1]
         self.assertEqual(last_line, "%-15s %s\n" % ("[info]", "Useful"))
-        self.vimiv.debug = False
 
     def test_debug_mode_keyhandler(self):
         """Run a keybinding in debug mode and therefore log it."""
-        self.vimiv.debug = True
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("j")
         self.vimiv["library"].treeview.emit("key_press_event", event)
         last_line = self.read_log(string=False)[-1]
         self.assertEqual(last_line, "%-15s %s\n" % ("[key]", "j: scroll_lib j"))
-        self.vimiv.debug = False
 
     def test_debug_mode_numstr(self):
         """Add and clear num_str in debug mode and therefore log it."""
@@ -88,7 +82,6 @@ class LogTest(VimivTestCase):
         self.vimiv["keyhandler"].num_clear()
         last_line = self.read_log(string=False)[-1]
         self.assertEqual(last_line, "%-15s %s\n" % ("[number]", "cleared"))
-        self.vimiv.debug = False
 
     def read_log(self, string=True):
         """Read log to string and return the string.
