@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Statusbar tests for vimiv's test suite."""
 

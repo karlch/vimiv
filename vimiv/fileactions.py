@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Different actions applying directly to files."""
 
