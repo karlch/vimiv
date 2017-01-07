@@ -1,8 +1,5 @@
 # vim: ft=dosini fileencoding=utf-8:
 
-[MASTER]
-reports=n
-
 [MESSAGES CONTROL]
 enable=all
 disable=no-self-use,
@@ -14,12 +11,10 @@ disable=no-self-use,
         too-many-public-methods,
         too-many-instance-attributes,
         blacklisted-name,
-        logging-format-interpolation,
         catching-non-exception,
         file-ignored,
         wrong-import-position,
         ungrouped-imports,
-        redefined-variable-type,
         suppressed-message,
         too-many-return-statements,
         unused-argument,

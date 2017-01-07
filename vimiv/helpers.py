@@ -3,7 +3,6 @@
 
 import gzip
 import os
-import sys
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -32,8 +31,7 @@ def listdir_wrapper(path, show_hidden=False):
     all_files = sorted(os.listdir(os.path.expanduser(path)))
     if show_hidden:
         return all_files
-    else:
-        return [fil for fil in all_files if not fil.startswith(".")]
+    return [fil for fil in all_files if not fil.startswith(".")]
 
 
 def read_file(filename):
@@ -68,8 +66,7 @@ def sizeof_fmt(num):
         if abs(num) < 1024.0:
             if abs(num) < 100:
                 return "%3.1f%s" % (num, unit)
-            else:
-                return "%3.0f%s" % (num, unit)
+            return "%3.0f%s" % (num, unit)
         num /= 1024.0
     return "%.1f%s" % (num, 'Y')
 

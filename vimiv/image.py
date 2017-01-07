@@ -88,8 +88,7 @@ class Image(object):
             self.app["statusbar"].message(
                 "Image has been edited, add ! to force", "warning")
             return 1
-        else:
-            return 0
+        return 0
 
     def get_zoom_percent_to_fit(self, fit=1):
         """Get the zoom factor perfectly fitting the image to the window.
@@ -115,8 +114,7 @@ class Image(object):
         elif (pbo_scale < w_scale and not stickout) or fit == 3:
             return self.imsize[1] / pbo_height
         # "Panorama/landscape" image
-        else:
-            return self.imsize[0] / pbo_width
+        return self.imsize[0] / pbo_width
 
     def update(self, update_info=True, update_gif=True):
         """Show the final image.

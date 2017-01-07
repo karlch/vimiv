@@ -334,8 +334,7 @@ class Vimiv(Gtk.Application):
 
         if get_filename:
             return filelist[position] if filelist else ""
-        else:
-            return position
+        return position
 
     def init_commandline_options(self):
         """Add all possible commandline options."""
@@ -388,8 +387,7 @@ class Vimiv(Gtk.Application):
         """
         if name in self.widgets:
             return self.widgets[name]
-        else:
-            return None
+        return None
 
     def __setitem__(self, name, widget):
         """Convenience method to access widgets via self[name].

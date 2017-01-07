@@ -213,6 +213,7 @@ class Thumbnail(object):
             name = self.markup + '<b>' + name + '</b></span>'
         # Subsctipting the liststore directly works fine
         # pylint: disable=unsubscriptable-object
+        # pylint: disable=unsupported-assignment-operation
         if reload_image:
             thumbnails = Thumbnails([filename], self.sizes[-1], self.directory)
             thumb_name = thumbnails.create_thumbnail_name(filename)
@@ -305,10 +306,10 @@ class Thumbnail(object):
         # Rescale all images in liststore
         if self.toggled:
             for i in range(len(self.liststore)):
-                pixbuf_max = self.pixbuf_max[i]
-                pixbuf = self.scale_thumb(pixbuf_max)
                 # Subsctipting the liststore directly works fine
                 # pylint: disable=unsubscriptable-object
+                pixbuf_max = self.pixbuf_max[i]
+                pixbuf = self.scale_thumb(pixbuf_max)
                 self.liststore[i][0] = pixbuf
 
         # Set columns and refocus current image

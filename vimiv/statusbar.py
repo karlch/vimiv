@@ -197,8 +197,7 @@ class Statusbar(object):
             return "<b>-- MANIPULATE --</b>"
         elif self.app["thumbnail"].toggled:
             return "<b>-- THUMBNAIL --</b>"
-        else:
-            return "<b>-- IMAGE --</b>"
+        return "<b>-- IMAGE --</b>"
 
     def toggle(self):
         """Toggle statusbar and resize image if necessary."""

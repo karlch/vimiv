@@ -17,8 +17,7 @@ def recursive_search(directory):
     Return:
         List of images in directory.
     """
-    # pylint: disable=unused-variable
-    for root, dirs, files in os.walk(directory):
+    for root, _, files in os.walk(directory):
         for fil in files:
             yield os.path.join(root, fil)
 
