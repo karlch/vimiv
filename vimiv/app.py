@@ -377,7 +377,7 @@ class Vimiv(Gtk.Application):
         add_option("temp-basedir", 0, "Use a temporary basedir")
         add_option("config", 0, "Use FILE as local configuration file",
                    arg=GLib.OptionArg.STRING, value="FILE")
-        add_option("debug", 0, "Show GTK warnings at startup.")
+        add_option("debug", 0, "Run in debug mode")
 
     def __getitem__(self, name):
         """Convenience method to access widgets via self[name].
