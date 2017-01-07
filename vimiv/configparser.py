@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# encoding: utf-8
+# vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """All parsers for vimiv."""
 import configparser
 import os

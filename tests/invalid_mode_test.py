@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Fail functions because called from wrong mode test for vimiv's test suite."""
 
 from unittest import main

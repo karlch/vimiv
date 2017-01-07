@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Test the Information class for vimiv's test suite."""
 
 from unittest import TestCase, main

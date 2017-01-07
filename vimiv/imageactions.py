@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# encoding: utf-8
+# vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Actions which act on the actual image file."""
 import os
 from shutil import copyfile, which

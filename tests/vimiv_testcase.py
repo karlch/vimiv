@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
+# vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Wrapper of TestCase which sets up the vimiv class and quits it when done."""
 
 import os
