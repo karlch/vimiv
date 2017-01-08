@@ -200,6 +200,9 @@ class CommandlineTest(VimivTestCase):
 
     def test_history_search(self):
         """Search through history."""
+        # Clear history so the commands are not here from previous sessions
+        self.vimiv["commandline"].history = []
+        self.assertFalse(self.vimiv["commandline"].history)
         # First run some very fast commands
         self.run_command("!ls")
         self.vimiv["commandline"].running_threads[0].join()
