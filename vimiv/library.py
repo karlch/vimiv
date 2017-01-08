@@ -179,7 +179,7 @@ class Library(object):
             size = self.filesize[fil]
             marked_string = ""
             if os.path.islink(fil):
-                markup_string = markup_string + "  →  " + os.path.realpath(fil)
+                markup_string += "  →  " + os.path.realpath(fil)
             if os.path.abspath(fil) in self.app["mark"].marked:
                 marked_string = "[*]"
             if os.path.isdir(fil):
@@ -295,9 +295,11 @@ class Library(object):
         """Only reload names of the treeview."""
         model = self.treeview.get_model()
         for i, name in enumerate(self.files):
-            markup_string = "<b>" + name + "</b>" \
-                if os.path.isdir(name) \
-                else name
+            markup_string = name
+            if os.path.islink(name):
+                markup_string += "  →  " + os.path.realpath(name)
+            if os.path.isdir(name):
+                markup_string = "<b>" + markup_string + "</b>"
             if i in self.app["commandline"].search_positions:
                 markup_string = self.markup + markup_string + "</span>"
             model[i][1] = markup_string

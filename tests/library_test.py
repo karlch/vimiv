@@ -172,6 +172,22 @@ class LibraryTest(VimivTestCase):
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
                          "ERROR: Invalid scroll direction o")
 
+    def test_display_symlink(self):
+        """Show real path of symbolic links in library as well."""
+        index = self.lib.files.index("symlink_to_image")
+        model = self.lib.treeview.get_model()
+        markup_string = model[index][1]
+        expected_string = "symlink_to_image  →  " \
+            + os.path.realpath("symlink_to_image")
+        self.assertEqual(markup_string, expected_string)
+        # Also after a search
+        self.vimiv["commandline"].cmd_search()
+        self.vimiv["commandline"].reset_text()
+        markup_string = model[index][1]
+        expected_string = "symlink_to_image  →  " \
+            + os.path.realpath("symlink_to_image")
+        self.assertEqual(markup_string, expected_string)
+
     def test_broken_symlink(self):
         """Reload library with broken symlink."""
         tmpfile = "temporary.png"
