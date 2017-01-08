@@ -126,8 +126,9 @@ def add_aliases(config, settings):
         try:
             settings["ALIASES"][alias] = alias_section[alias]
         except configparser.InterpolationError as e:
-            message += e.message + ".\nParsing alias '" + alias + "' failed." \
-                + "\nIf you meant to use % for current file, use %%."
+            message += "Parsing alias '%s' failed.\n" % alias \
+                + "If you meant to use % for current file, use %%.\n" \
+                + e.message + "\n"
 
     return settings, message
 
@@ -212,7 +213,7 @@ def parse_keys(running_tests=False):
         keys_command = keys["COMMAND"]
     except KeyError as e:
         message = "Missing section " + str(e) + " in keys.conf.\n" \
-                  + "Refer to vimivrc(5) to fix your config."
+                  "Refer to vimivrc(5) to fix your config."
         error_message(message, running_tests=running_tests)
         sys.exit(1)
 
