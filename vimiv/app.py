@@ -273,13 +273,18 @@ class Vimiv(Gtk.Application):
         Args:
             force: If True quit even if an image was edited.
         """
+        # If there is still an external command running, do not quit
+        if self["commandline"].running_threads:
+            self["statusbar"].message(
+                "You still have running external threads", "warning")
+            return
+        # Check if image has been edited
+        if self["image"].check_for_edit(force):
+            return
         for image in self["mark"].marked:
             print(image)
         # Run remaining rotate and flip threads
         self["manipulate"].thread_for_simple_manipulations()
-        # Check if image has been edited
-        if self["image"].check_for_edit(force):
-            return
         # Save the history
         histfile = os.path.join(self.directory, "history")
         histfile = open(histfile, 'w')

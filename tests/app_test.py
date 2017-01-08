@@ -69,6 +69,14 @@ class AppTest(VimivTestCase):
         tagdir = os.path.join(self.vimiv.directory, "Tags")
         self.assertIn("tmptag", os.listdir(tagdir))
 
+    def test_quit_with_running_threads(self):
+        """Quit vimiv with external threads running."""
+        self.vimiv["commandline"].entry.set_text(":!sleep 0.2")
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.vimiv.quit_wrapper()
+        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
+                         "WARNING: You still have running external threads")
+
     @classmethod
     def tearDownClass(cls):
         cls.vimiv.quit_wrapper()
