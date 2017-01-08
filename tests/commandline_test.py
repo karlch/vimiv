@@ -204,28 +204,30 @@ class CommandlineTest(VimivTestCase):
         self.vimiv["commandline"].history = []
         self.assertFalse(self.vimiv["commandline"].history)
         # First run some very fast commands
-        self.run_command("!ls")
+        self.run_command("!ls > /dev/null")
         self.vimiv["commandline"].running_threads[0].join()
-        self.run_command("!echo foo_bar")
+        self.run_command("!echo foo_bar > /dev/null")
         self.vimiv["commandline"].running_threads[0].join()
-        self.run_command("!echo baz")
+        self.run_command("!echo baz > /dev/null")
         self.vimiv["commandline"].running_threads[0].join()
         # Check if they were added to the history correctly
-        self.assertIn(":!ls", self.vimiv["commandline"].history)
-        self.assertIn(":!echo foo_bar", self.vimiv["commandline"].history)
-        self.assertIn(":!echo baz", self.vimiv["commandline"].history)
+        self.assertIn(":!ls > /dev/null", self.vimiv["commandline"].history)
+        self.assertIn(":!echo foo_bar > /dev/null",
+                      self.vimiv["commandline"].history)
+        self.assertIn(":!echo baz > /dev/null",
+                      self.vimiv["commandline"].history)
         # Set the text to :!e and search, should give the last two echos as
         # first results
         self.vimiv["commandline"].entry.set_text(":!e")
         self.vimiv["commandline"].history_search(False)
         self.assertEqual(self.vimiv["commandline"].entry.get_text(),
-                         ":!echo baz")
+                         ":!echo baz > /dev/null")
         self.vimiv["commandline"].history_search(False)
         self.assertEqual(self.vimiv["commandline"].entry.get_text(),
-                         ":!echo foo_bar")
+                         ":!echo foo_bar > /dev/null")
         self.vimiv["commandline"].history_search(True)
         self.assertEqual(self.vimiv["commandline"].entry.get_text(),
-                         ":!echo baz")
+                         ":!echo baz > /dev/null")
 
     def test_fail_hidden_command(self):
         """Fail running a hidden command."""
