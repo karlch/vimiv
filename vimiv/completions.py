@@ -262,6 +262,8 @@ class Completion():
                 info = infodict[command]
             elif command in self.app.aliases:
                 info = "Alias to " + self.app.aliases[command]
+                # Escape ampersand for Gtk
+                info = info.replace("&", "&amp;")
             else:
                 info = ""
             info = "<i>" + info + "</i>"
