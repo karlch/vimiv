@@ -39,8 +39,9 @@ class StatusbarTest(VimivTestCase):
         # Timer is running
         self.assertGreater(self.statusbar.timer_id, 0)
         # Remove error message by hand
-        self.statusbar.error_false()
-        self.assertNotEqual(self.statusbar.left_label.get_text(), "Test error")
+        self.statusbar.update_info()
+        self.assertNotEqual(self.statusbar.left_label.get_text(),
+                            "INFO: Test info")
 
     def test_hidden_message(self):
         """Show an error message with an initially hidden statusbar."""
