@@ -184,6 +184,9 @@ class Completion():
         directory = os.path.dirname(path) if os.path.dirname(path) else path
         if not os.path.exists(os.path.expanduser(directory)):
             directory = "."
+        # /dev causes havoc
+        if directory == "/dev":
+            return
         # Files in that directory
         files = listdir_wrapper(directory, self.app["library"].show_hidden)
         # Format them neatly depending on directory and type
