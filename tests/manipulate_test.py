@@ -200,7 +200,8 @@ class ManipulateTest(VimivTestCase):
         self.assertEqual(received_value, -1 + 2 * 5)
         # Not an integer
         self.manipulate.change_slider("hi")
-        self.check_statusbar("ERROR: Argument for slider must be of type integer")
+        self.check_statusbar(
+            "ERROR: Argument for slider must be of type integer")
         received_value = self.manipulate.sliders["bri"].get_value()
         self.assertEqual(received_value, -1 + 2 * 5)
 
