@@ -92,15 +92,11 @@ class FileActionsTest(VimivTestCase):
         # Should not work without a path
         self.vimiv.paths = []
         self.vimiv["fileextras"].format_files("formatted_")
-        err_message = self.vimiv["statusbar"].left_label.get_text()
-        expected_message = "INFO: No files in path"
-        self.assertEqual(expected_message, err_message)
+        self.check_statusbar("INFO: No files in path")
         # Should not work in library
         self.vimiv["library"].focus(True)
         self.vimiv["fileextras"].format_files("formatted_")
-        err_message = self.vimiv["statusbar"].left_label.get_text()
-        expected_message = "INFO: Format only works on opened image files"
-        self.assertEqual(expected_message, err_message)
+        self.check_statusbar("INFO: Format only works on opened image files")
 
     def test_format_files_with_exif(self):
         """Format files according to a formatstring with EXIF data."""
@@ -131,8 +127,7 @@ class FileActionsTest(VimivTestCase):
         # Copy basename and abspath to clipboard
         self.vimiv["fileextras"].copy_name(False)
         # Check if the info message is displayed correctly
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "INFO: Copied " + basename + " to clipboard")
+        self.check_statusbar("INFO: Copied " + basename + " to clipboard")
         clipboard.request_text(compare_text, basename)
         self.assertTrue(self.compare_result)
         self.vimiv["fileextras"].copy_name(True)

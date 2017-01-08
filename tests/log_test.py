@@ -53,8 +53,7 @@ class LogTest(VimivTestCase):
 
     def test_debug_mode_command(self):
         """Run a command in debug mode and therefore log it."""
-        self.vimiv["commandline"].focus("!:")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("!:")
         last_line = self.read_log(string=False)[-1]
         self.assertEqual(last_line, "%-15s %s\n" % ("[commandline]", ":!:"))
 

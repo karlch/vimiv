@@ -81,29 +81,25 @@ class ManipulateTest(VimivTestCase):
         backup = list(self.vimiv.paths)
         self.vimiv.paths = []
         self.manipulate.rotate(1, False)
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: No image to rotate")
+        self.check_statusbar("ERROR: No image to rotate")
         self.vimiv.paths = backup
         ##################
         #  Command line  #
         ##################
         # Rotate
-        self.vimiv["commandline"].focus("rotate 1")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("rotate 1")
         pixbuf = self.vimiv["image"].image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertTrue(is_portrait)
         # Rotate back
-        self.vimiv["commandline"].focus("rotate -1")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("rotate -1")
         pixbuf = self.vimiv["image"].image.get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertFalse(is_portrait)
         # Fail because of invalid argument
-        self.vimiv["commandline"].focus("rotate value")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Argument for rotate must be of type integer")
+        self.run_command("rotate value")
+        self.check_statusbar(
+            "ERROR: Argument for rotate must be of type integer")
 
     def test_flip(self):
         """Flip image."""
@@ -120,27 +116,22 @@ class ManipulateTest(VimivTestCase):
         backup = list(self.vimiv.paths)
         self.vimiv.paths = []
         self.manipulate.flip(1, False)
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: No image to flip")
+        self.check_statusbar("ERROR: No image to flip")
         self.vimiv.paths = backup
         ##################
         #  Command line  #
         ##################
         # Flip
-        self.vimiv["commandline"].focus("flip 1")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("flip 1")
         pixbuf_after_3 = self.vimiv["image"].image.get_pixbuf()
         self.assertNotEqual(pixbuf_after_2, pixbuf_after_3)
         # Flip back
-        self.vimiv["commandline"].focus("flip 1")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("flip 1")
         pixbuf_after_4 = self.vimiv["image"].image.get_pixbuf()
         self.assertNotEqual(pixbuf_after_3, pixbuf_after_4)
         # Fail because of invalid argument
-        self.vimiv["commandline"].focus("flip value")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Argument for flip must be of type integer")
+        self.run_command("flip value")
+        self.check_statusbar("ERROR: Argument for flip must be of type integer")
 
     def test_toggle(self):
         """Toggle manipulate."""
@@ -190,8 +181,7 @@ class ManipulateTest(VimivTestCase):
         self.assertTrue(self.manipulate.sliders["bri"].is_focus())
         # Slider does not exist
         self.manipulate.focus_slider("val")
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: No slider called val")
+        self.check_statusbar("ERROR: No slider called val")
         # Leave
         self.manipulate.button_clicked(None, False)
 
@@ -210,8 +200,7 @@ class ManipulateTest(VimivTestCase):
         self.assertEqual(received_value, -1 + 2 * 5)
         # Not an integer
         self.manipulate.change_slider("hi")
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Argument for slider must be of type integer")
+        self.check_statusbar("ERROR: Argument for slider must be of type integer")
         received_value = self.manipulate.sliders["bri"].get_value()
         self.assertEqual(received_value, -1 + 2 * 5)
 
@@ -222,24 +211,19 @@ class ManipulateTest(VimivTestCase):
         self.assertEqual(self.manipulate.sliders["sha"].get_value(), 20)
         self.assertTrue(self.manipulate.sliders["sha"].is_focus())
         # Set contrast via command line
-        self.vimiv["commandline"].entry.set_text(":set contrast 35")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("set contrast 35")
         self.assertEqual(self.manipulate.sliders["con"].get_value(), 35)
         self.assertTrue(self.manipulate.sliders["con"].is_focus())
         # No argument means 0
-        self.vimiv["commandline"].entry.set_text(":set contrast")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("set contrast")
         self.assertEqual(self.manipulate.sliders["con"].get_value(), 0)
         # Close via command line
-        self.vimiv["commandline"].entry.set_text(":discard_changes")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("discard_changes")
         self.assertFalse(self.manipulate.sliders["sha"].is_focus())
         # Error: not a valid integer for manipulation
-        self.vimiv["commandline"].entry.set_text(":set brightness value")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("set brightness value")
         self.assertFalse(self.manipulate.sliders["bri"].is_focus())
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Argument must be of type integer")
+        self.check_statusbar("ERROR: Argument must be of type integer")
 
     @classmethod
     def tearDownClass(cls):

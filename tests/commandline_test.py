@@ -40,8 +40,7 @@ class CommandlineTest(VimivTestCase):
     def test_run_command(self):
         """Run an internal vimiv command."""
         before_command = self.vimiv["image"].overzoom
-        self.vimiv["commandline"].entry.set_text(":set overzoom!")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("set overzoom!")
         after_command = self.vimiv["image"].overzoom
         self.assertNotEqual(before_command, after_command)
 
@@ -49,57 +48,46 @@ class CommandlineTest(VimivTestCase):
         """Run an alias."""
         self.vimiv.aliases = {"test_alias": "set overzoom!"}
         before_command = self.vimiv["image"].overzoom
-        self.vimiv["commandline"].entry.set_text(":test_alias")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("test_alias")
         after_command = self.vimiv["image"].overzoom
         self.assertNotEqual(before_command, after_command)
         # Alias that does not exist
         self.vimiv.aliases = {"test_alias": "useless_command"}
-        self.vimiv["commandline"].entry.set_text(":test_alias")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        error_message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(error_message,
-                         "ERROR: No command called useless_command")
+        self.run_command("test_alias")
+        self.check_statusbar("ERROR: No command called useless_command")
 
     def test_run_external(self):
         """Run an external command and test failures."""
         # Run command
-        self.vimiv["commandline"].entry.set_text(":!touch tmp_foo")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("!touch tmp_foo")
         self.vimiv["commandline"].running_threads[0].join()
         files = os.listdir()
         self.assertTrue("tmp_foo" in files)
         os.remove("tmp_foo")
         # Try to run a non-existent command
-        self.vimiv["commandline"].entry.set_text(":!foo_bar_baz")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("!foo_bar_baz")
         self.vimiv["commandline"].running_threads[0].join()
-        statusbar_text = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(statusbar_text,
-                         "ERROR: /bin/sh: foo_bar_baz: command not found")
+        self.check_statusbar("ERROR: /bin/sh: foo_bar_baz: command not found")
 
     def test_pipe(self):
         """Pipe a command to vimiv."""
         # Internal command
         before_command = self.vimiv["image"].overzoom
-        self.vimiv["commandline"].entry.set_text(":!echo set overzoom! |")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("!echo set overzoom! |")
         self.vimiv["commandline"].running_threads[0].join()
         refresh_gui(0.001)
         after_command = self.vimiv["image"].overzoom
         self.assertNotEqual(before_command, after_command)
         # Directory
         expected_dir = os.path.abspath("./vimiv/testimages/")
-        self.vimiv["commandline"].entry.set_text(":!echo vimiv/testimages |")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("!echo vimiv/testimages |")
         self.vimiv["commandline"].running_threads[0].join()
         refresh_gui(0.001)
         dir_after = os.getcwd()
         self.assertEqual(expected_dir, dir_after)
         # Image
         expected_image = os.path.abspath("arch-logo.png")
-        self.vimiv["commandline"].entry.set_text(":!echo arch-logo.png |")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("!echo arch-logo.png |")
         self.vimiv["commandline"].running_threads[0].join()
         refresh_gui()
         self.assertEqual(self.vimiv.paths[0], expected_image)
@@ -108,14 +96,12 @@ class CommandlineTest(VimivTestCase):
         """Enter a path in the commandline."""
         # Pass a directory
         expected_dir = os.path.abspath("./vimiv/testimages")
-        self.vimiv["commandline"].entry.set_text(":./vimiv/testimages")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("./vimiv/testimages")
         dir_after = os.getcwd()
         self.assertEqual(expected_dir, dir_after)
         # Pass an image
         expected_image = os.path.abspath("arch-logo.png")
-        self.vimiv["commandline"].entry.set_text(":./arch-logo.png")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("./arch-logo.png")
         self.assertEqual(self.vimiv.paths[0], expected_image)
 
     def test_search(self):
@@ -125,19 +111,16 @@ class CommandlineTest(VimivTestCase):
         self.assertEqual(self.vimiv["commandline"].entry.get_text(), "/")
         # Search should move into testimages
         expected_dir = os.path.abspath("./vimiv")
-        self.vimiv["commandline"].entry.set_text("/vimi")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_search("vimi")
         dir_after = os.getcwd()
         self.assertEqual(expected_dir, dir_after)
         expected_dir = os.path.abspath("./testimages")
-        self.vimiv["commandline"].entry.set_text("/test")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_search("test")
         dir_after = os.getcwd()
         self.assertEqual(expected_dir, dir_after)
         # Search should have these results
         self.vimiv["commandline"].search_case = False
-        self.vimiv["commandline"].entry.set_text("/Ar")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_search("Ar")
         expected_search_results = [1, 2]
         search_results = self.vimiv["commandline"].search_positions
         self.assertEqual(search_results, expected_search_results)
@@ -168,13 +151,11 @@ class CommandlineTest(VimivTestCase):
         self.assertEqual(self.vimiv.get_pos(), 1)
         # Searching case sensitively should have no results here
         self.vimiv["commandline"].search_case = True
-        self.vimiv["commandline"].entry.set_text("/Ar")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_search("Ar")
         self.assertFalse(self.vimiv["commandline"].search_positions)
         # Search move should give an error message without any results
         self.vimiv["commandline"].search_move()
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "WARNING: No search results")
+        self.check_statusbar("WARNING: No search results")
 
     def test_incsearch(self):
         """Incsearch."""
@@ -220,14 +201,11 @@ class CommandlineTest(VimivTestCase):
     def test_history_search(self):
         """Search through history."""
         # First run some very fast commands
-        self.vimiv["commandline"].entry.set_text(":!ls")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("!ls")
         self.vimiv["commandline"].running_threads[0].join()
-        self.vimiv["commandline"].entry.set_text(":!echo foo_bar")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("!echo foo_bar")
         self.vimiv["commandline"].running_threads[0].join()
-        self.vimiv["commandline"].entry.set_text(":!echo baz")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("!echo baz")
         self.vimiv["commandline"].running_threads[0].join()
         # Check if they were added to the history correctly
         self.assertIn(":!ls", self.vimiv["commandline"].history)
@@ -248,10 +226,8 @@ class CommandlineTest(VimivTestCase):
 
     def test_fail_hidden_command(self):
         """Fail running a hidden command."""
-        self.vimiv["commandline"].entry.set_text(":command")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: No command called command")
+        self.run_command("command")
+        self.check_statusbar("ERROR: No command called command")
 
     def tearDown(self):
         os.chdir(self.working_directory)

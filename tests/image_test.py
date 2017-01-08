@@ -58,8 +58,7 @@ class ImageTest(VimivTestCase):
                          pixbuf.get_width())
         # Unreasonable zoom
         self.image.zoom_to(1000)
-        message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(message, "WARNING: Image cannot be zoomed further")
+        self.check_statusbar("WARNING: Image cannot be zoomed further")
         pixbuf = self.image.image.get_pixbuf()
         self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
@@ -68,43 +67,33 @@ class ImageTest(VimivTestCase):
         """Test zooming from command line."""
         # Zoom in
         expected_zoom = self.image.zoom_percent * 1.25
-        self.vimiv["commandline"].focus("zoom_in")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("zoom_in")
         self.assertEqual(expected_zoom, self.image.zoom_percent)
         # Zoom out with step
         expected_zoom = self.image.zoom_percent / 1.5
-        self.vimiv["commandline"].focus("zoom_out 2")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("zoom_out 2")
         self.assertEqual(expected_zoom, self.image.zoom_percent)
         # Zoom with invalid argument
-        self.vimiv["commandline"].focus("zoom_out value")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Argument for zoom must be of type float")
+        self.run_command("zoom_out value")
+        self.check_statusbar("ERROR: Argument for zoom must be of type float")
         # Zoom to fit
-        self.vimiv["commandline"].focus("fit")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("fit")
         self.assertEqual(self.image.zoom_percent,
                          self.image.get_zoom_percent_to_fit())
         # Fit horizontally
-        self.vimiv["commandline"].focus("fit_horiz")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("fiz_horiz")
         self.assertEqual(self.image.zoom_percent,
                          self.image.get_zoom_percent_to_fit())
         # Fit vertically
-        self.vimiv["commandline"].focus("fit_vert")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("fit_vert")
         self.assertEqual(self.image.zoom_percent,
                          self.image.get_zoom_percent_to_fit(3))
         # Zoom_to 0.5
-        self.vimiv["commandline"].focus("zoom_to 05")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("zoom_to 05")
         self.assertEqual(self.image.zoom_percent, 0.5)
         # Zoom_to with invalid argument
-        self.vimiv["commandline"].focus("zoom_to value")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Argument for zoom must be of type float")
+        self.run_command("zoom_to value")
+        self.check_statusbar("ERROR: Argument for zoom must be of type float")
 
     def test_move(self):
         """Move from image to image."""

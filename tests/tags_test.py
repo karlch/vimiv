@@ -54,14 +54,10 @@ class TagsTest(VimivTestCase):
         if os.path.exists(unavailable_file):
             os.remove(unavailable_file)
         self.vimiv["tags"].load("foo_is_real")
-        expected_text = "ERROR: Tagfile 'foo_is_real' has no valid images"
-        received_text = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(expected_text, received_text)
+        self.check_statusbar("ERROR: Tagfile 'foo_is_real' has no valid images")
         os.remove(unavailable_file)
         self.vimiv["tags"].remove("foo_is_real")  # Error message
-        expected_text = "ERROR: Tagfile 'foo_is_real' does not exist"
-        received_text = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(expected_text, received_text)
+        self.check_statusbar("ERROR: Tagfile 'foo_is_real' does not exist")
 
     def test_tag_commandline(self):
         """Tag commands from command line."""
@@ -73,18 +69,15 @@ class TagsTest(VimivTestCase):
         for fil in self.vimiv["mark"].marked:
             print("In mark there is:", fil)
         # Write a tag
-        self.vimiv["commandline"].focus("tag_write new_test_tag")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("tag_write new_test_tag")
         created_file = os.path.expanduser("~/.vimiv/Tags/new_test_tag")
         file_content = read_file(created_file)
         self.assertEqual(taglist, file_content)
         # Load a tag
-        self.vimiv["commandline"].focus("tag_load new_test_tag")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("tag_load new_test_tag")
         self.assertEqual(self.vimiv.paths, taglist)
         # Delete a tag
-        self.vimiv["commandline"].focus("tag_remove new_test_tag")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("tag_remove new_test_tag")
         self.assertFalse(os.path.isfile(created_file))
 
     def tearDown(self):

@@ -105,9 +105,7 @@ class ThumbnailTest(VimivTestCase):
         self.vimiv["commandline"].leave()
         # Normal search
         self.vimiv["commandline"].incsearch = False
-        self.vimiv["commandline"].cmd_search()
-        self.vimiv["commandline"].entry.set_text("/logo")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_search("logo")
         self.assertIn("arch-logo", self.vimiv.get_pos(True))
 
     def test_zoom(self):

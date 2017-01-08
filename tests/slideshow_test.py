@@ -65,23 +65,17 @@ class SlideshowTest(VimivTestCase):
         #  Command line  #
         ##################
         # Increase by value
-        self.vimiv["commandline"].focus("slideshow_delay 03")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("slideshow_delay 03")
         self.assertEqual(self.slideshow.delay, 0.8)
         # Fail because of invalid argument
-        self.vimiv["commandline"].focus("slideshow_delay value")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Argument for delay must be of type float")
+        self.run_command("slideshow_delay value")
+        self.check_statusbar("ERROR: Argument for delay must be of type float")
         # Set to default
-        self.vimiv["commandline"].focus("set slideshow_delay")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("set slideshow_delay")
         self.assertEqual(self.slideshow.delay, self.slideshow.default_delay)
         # Fail because of invalid argument
-        self.vimiv["commandline"].focus("set slideshow_delay value")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Argument for delay must be of type float")
+        self.run_command("set slideshow_delay value")
+        self.check_statusbar("ERROR: Argument for delay must be of type float")
 
     def test_running(self):
         """Check if slideshow runs correctly."""

@@ -67,6 +67,21 @@ class VimivTestCase(TestCase):
         else:
             self.vimiv.activate_vimiv(self.vimiv)
 
+    def run_command(self, command):
+        """Run a command in the command line."""
+        self.vimiv["commandline"].focus(command)
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+
+    def run_search(self, string):
+        """Search for string from the command line."""
+        self.vimiv["commandline"].entry.set_text("/" + string)
+        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+
+    def check_statusbar(self, expected_text):
+        """Check statusbar for text."""
+        statusbar_text = self.vimiv["statusbar"].left_label.get_text()
+        self.assertEqual(expected_text, statusbar_text)
+
     @classmethod
     def tearDownClass(cls):
         cls.vimiv.quit()

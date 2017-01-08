@@ -31,14 +31,11 @@ class StatusbarTest(VimivTestCase):
     def test_message(self):
         """Show a message."""
         self.statusbar.message("Test error", "error")
-        self.assertEqual(self.statusbar.left_label.get_text(),
-                         "ERROR: Test error")
+        self.check_statusbar("ERROR: Test error")
         self.statusbar.message("Test warning", "warning")
-        self.assertEqual(self.statusbar.left_label.get_text(),
-                         "WARNING: Test warning")
+        self.check_statusbar("WARNING: Test warning")
         self.statusbar.message("Test info", "info")
-        self.assertEqual(self.statusbar.left_label.get_text(),
-                         "INFO: Test info")
+        self.check_statusbar("INFO: Test info")
         # Timer is running
         self.assertGreater(self.statusbar.timer_id, 0)
         # Remove error message by hand
@@ -52,8 +49,7 @@ class StatusbarTest(VimivTestCase):
         self.assertFalse(self.statusbar.bar.is_visible())
         # Send an error message
         self.statusbar.message("Test error")
-        self.assertEqual(self.statusbar.left_label.get_text(),
-                         "ERROR: Test error")
+        self.check_statusbar("ERROR: Test error")
         self.assertTrue(self.statusbar.bar.is_visible())
         # Remove error message
         self.statusbar.update_info()
@@ -69,8 +65,7 @@ class StatusbarTest(VimivTestCase):
         self.vimiv["keyhandler"].num_str = "42"
         self.vimiv["commandline"].search_positions = [1, 2, 3]
         self.statusbar.message("Catastrophe", "error")
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Catastrophe")
+        self.check_statusbar("ERROR: Catastrophe")
         self.statusbar.clear_status()
         self.assertEqual(self.vimiv["keyhandler"].num_str, "")
         self.assertFalse(self.vimiv["commandline"].search_positions)

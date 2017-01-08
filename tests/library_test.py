@@ -74,9 +74,7 @@ class LibraryTest(VimivTestCase):
         self.vimiv["keyhandler"].num_str = "300"
         self.lib.move_pos()
         self.assertEqual(self.vimiv.get_pos(True), "animation")
-        expected_message = "WARNING: Unsupported index"
-        received_message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(expected_message, received_message)
+        self.check_statusbar("WARNING: Unsupported index")
 
     def test_resize(self):
         """Resize library."""
@@ -101,42 +99,30 @@ class LibraryTest(VimivTestCase):
                          self.lib.scrollable_treeview.get_size_request()[0])
         # Throw errors
         self.lib.resize(False, False, "hi")
-        expected_message = "ERROR: Library width must be an integer"
-        received_message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(expected_message, received_message)
+        self.check_statusbar("ERROR: Library width must be an integer")
         self.lib.resize(False, True, "hi")
-        received_message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(expected_message, received_message)
+        self.check_statusbar("ERROR: Library width must be an integer")
         ##################
         #  Command line  #
         ##################
         # Default 20
-        self.vimiv["commandline"].focus(":grow_lib")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("grow_lib")
         self.assertEqual(120,
                          self.lib.scrollable_treeview.get_size_request()[0])
         # Value passed
-        self.vimiv["commandline"].focus(":grow_lib 30")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("grow_lib 30")
         self.assertEqual(150,
                          self.lib.scrollable_treeview.get_size_request()[0])
         # Fail by passing an invalid value
-        self.vimiv["commandline"].focus(":grow_lib value")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        expected_message = "ERROR: Library width must be an integer"
-        received_message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(expected_message, received_message)
+        self.run_command("grow_lib value")
+        self.check_statusbar("ERROR: Library width must be an integer")
         # Set width to default
-        self.vimiv["commandline"].focus(":set library_width")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.run_command("set library_width")
         self.assertEqual(self.lib.default_width,
                          self.lib.scrollable_treeview.get_size_request()[0])
         # Fail by passing an invalid value
-        self.vimiv["commandline"].focus(":set library_width value")
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
-        expected_message = "ERROR: Library width must be an integer"
-        received_message = self.vimiv["statusbar"].left_label.get_text()
-        self.assertEqual(expected_message, received_message)
+        self.run_command("set library_width value")
+        self.check_statusbar("ERROR: Library width must be an integer")
 
     def test_scroll(self):
         """Scroll library."""
@@ -169,8 +155,7 @@ class LibraryTest(VimivTestCase):
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         # Fail because of invalid argument
         self.lib.scroll("o")
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "ERROR: Invalid scroll direction o")
+        self.check_statusbar("ERROR: Invalid scroll direction o")
 
     def test_display_symlink(self):
         """Show real path of symbolic links in library as well."""

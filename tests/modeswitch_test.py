@@ -53,8 +53,8 @@ class ModeSwitchTestImage(VimivTestCase):
         self.vimiv["manipulate"].toggle()
         self.assertTrue(self.vimiv["thumbnail"].iconview.is_focus())
         self.assertFalse(self.vimiv["manipulate"].scrolled_win.is_visible())
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "WARNING: Manipulate not supported in thumbnail mode")
+        self.check_statusbar(
+            "WARNING: Manipulate not supported in thumbnail mode")
 
         self.vimiv["thumbnail"].toggle()
         self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
@@ -125,8 +125,7 @@ class ModeSwitchTestLibrary(VimivTestCase):
         self.vimiv["manipulate"].toggle()
         self.assertTrue(self.vimiv["library"].treeview.is_focus())
         self.assertFalse(self.vimiv["manipulate"].scrolled_win.is_visible())
-        self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
-                         "WARNING: Manipulate not supported in library")
+        self.check_statusbar("WARNING: Manipulate not supported in library")
 
     def tearDown(self):
         os.chdir(self.test_directory)

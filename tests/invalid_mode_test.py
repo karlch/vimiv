@@ -17,15 +17,13 @@ class FailingModeTest(VimivTestCase):
     def test_fail_focus_slider(self):
         """Fail focus slider because not in manipulate."""
         self.vimiv["manipulate"].focus_slider("bri")
-        self.assertEqual(
-            self.vimiv["statusbar"].left_label.get_text(),
+        self.check_statusbar(
             "ERROR: Focusing a slider only makes sense in manipulate")
 
     def test_fail_button_clicked(self):
         """Fail exiting manipulate via button_clicked."""
         self.vimiv["manipulate"].button_clicked(None, False)
-        self.assertEqual(
-            self.vimiv["statusbar"].left_label.get_text(),
+        self.check_statusbar(
             "ERROR: Finishing manipulate only makes sense in manipulate")
 
 
