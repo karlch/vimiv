@@ -59,36 +59,32 @@ class CommandlineTest(VimivTestCase):
     def test_run_external(self):
         """Run an external command and test failures."""
         # Run command
-        self.run_command("!touch tmp_foo")
-        self.vimiv["commandline"].running_threads[0].join()
+        self.run_command("!touch tmp_foo", True)
         files = os.listdir()
         self.assertTrue("tmp_foo" in files)
         os.remove("tmp_foo")
         # Try to run a non-existent command
-        self.run_command("!foo_bar_baz")
-        self.vimiv["commandline"].running_threads[0].join()
+        self.run_command("!foo_bar_baz", True)
+        # self.run_command("!sleep 10", True)
         self.check_statusbar("ERROR: /bin/sh: foo_bar_baz: command not found")
 
     def test_pipe(self):
         """Pipe a command to vimiv."""
         # Internal command
         before_command = self.vimiv["image"].overzoom
-        self.run_command("!echo set overzoom! |")
-        self.vimiv["commandline"].running_threads[0].join()
+        self.run_command("!echo set overzoom! |", True)
         refresh_gui(0.001)
         after_command = self.vimiv["image"].overzoom
         self.assertNotEqual(before_command, after_command)
         # Directory
         expected_dir = os.path.abspath("./vimiv/testimages/")
-        self.run_command("!echo vimiv/testimages |")
-        self.vimiv["commandline"].running_threads[0].join()
+        self.run_command("!echo vimiv/testimages |", True)
         refresh_gui(0.001)
         dir_after = os.getcwd()
         self.assertEqual(expected_dir, dir_after)
         # Image
-        expected_image = os.path.abspath("arch-logo.png")
-        self.run_command("!echo arch-logo.png |")
-        self.vimiv["commandline"].running_threads[0].join()
+        expected_image = os.path.abspath("arch_001.jpg")
+        self.run_command("!echo arch_001.jpg |", True)
         refresh_gui()
         self.assertEqual(self.vimiv.paths[0], expected_image)
 
@@ -204,12 +200,9 @@ class CommandlineTest(VimivTestCase):
         self.vimiv["commandline"].history = []
         self.assertFalse(self.vimiv["commandline"].history)
         # First run some very fast commands
-        self.run_command("!ls > /dev/null")
-        self.vimiv["commandline"].running_threads[0].join()
-        self.run_command("!echo foo_bar > /dev/null")
-        self.vimiv["commandline"].running_threads[0].join()
-        self.run_command("!echo baz > /dev/null")
-        self.vimiv["commandline"].running_threads[0].join()
+        self.run_command("!ls > /dev/null", True)
+        self.run_command("!echo foo_bar > /dev/null", True)
+        self.run_command("!echo baz > /dev/null", True)
         # Check if they were added to the history correctly
         self.assertIn(":!ls > /dev/null", self.vimiv["commandline"].history)
         self.assertIn(":!echo foo_bar > /dev/null",

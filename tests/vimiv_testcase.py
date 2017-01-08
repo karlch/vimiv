@@ -67,10 +67,20 @@ class VimivTestCase(TestCase):
         else:
             self.vimiv.activate_vimiv(self.vimiv)
 
-    def run_command(self, command):
-        """Run a command in the command line."""
+    def run_command(self, command, external=False):
+        """Run a command in the command line.
+
+        Args:
+            command: The command to run.
+            external: If True, run an external command and wait for it to
+                finish.
+        """
         self.vimiv["commandline"].focus(command)
         self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        if external:
+            while self.vimiv["commandline"].running_processes:
+                self.vimiv["commandline"].running_processes[0].wait()
+                time.sleep(0.001)
 
     def run_search(self, string):
         """Search for string from the command line."""

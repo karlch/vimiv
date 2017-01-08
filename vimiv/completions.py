@@ -182,7 +182,8 @@ class Completion():
         self.liststores["path"][0].clear()
         # Directory of the path, default to .
         directory = os.path.dirname(path) if os.path.dirname(path) else path
-        if not os.path.exists(os.path.expanduser(directory)):
+        if not os.path.exists(os.path.expanduser(directory)) \
+                or not os.path.isdir(directory):
             directory = "."
         # /dev causes havoc
         if directory == "/dev":

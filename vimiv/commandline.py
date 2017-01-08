@@ -25,7 +25,7 @@ class CommandLine(object):
         search_case: If True, search case sensitively.
         incsearch: If True, enable incremental search in the library.
         last_index: Index that was last selected in the library, if any.
-        running_threads: List of all running threads.
+        running_processes: List of all running external processes.
         last_focused: Widget that was focused before the command line.
     """
 
@@ -59,7 +59,7 @@ class CommandLine(object):
         if self.incsearch:
             self.entry.connect("changed", self.incremental_search)
         self.last_index = 0
-        self.running_threads = []
+        self.running_processes = []
         self.last_focused = ""
 
     def handler(self, entry):
@@ -139,20 +139,6 @@ class CommandLine(object):
             cmd: The command to run.
         """
         cmd = self.expand_filenames(cmd)
-        # Run the command in an extra thread, useful e.g. for gimp %
-        directory = os.getcwd()
-        cmd_thread = Thread(target=self.thread_for_external, args=(cmd,
-                                                                   directory))
-        self.running_threads.append(cmd_thread)
-        cmd_thread.start()
-
-    def thread_for_external(self, cmd, directory):
-        """Start a new thread for external commands.
-
-        Args:
-            cmd: The command to run.
-            directory: Directory which is affected by command.
-        """
         # Possibility to "pipe to vimiv"
         if cmd[-1] == "|":
             cmd = cmd.rstrip("|")
@@ -161,6 +147,21 @@ class CommandLine(object):
         else:
             p = Popen(cmd, stderr=PIPE, shell=True)
             from_pipe = False
+        self.running_processes.append(p)
+        # Run the command in an extra thread, useful e.g. for gimp %
+        cmd_thread = Thread(target=self.thread_for_external,
+                            args=(cmd, p, from_pipe))
+        cmd_thread.start()
+
+    def thread_for_external(self, cmd, p, from_pipe):
+        """Start a new thread for external commands.
+
+        Args:
+            cmd: The command to run.
+            directory: Directory which is affected by command.
+        """
+        # Remember current directory for reload
+        directory = os.getcwd()
         # Get output and error and run the command
         out, err = p.communicate()
         if p.returncode:
@@ -180,7 +181,7 @@ class CommandLine(object):
                 reload_path = True
             GLib.timeout_add(1, self.app["fileextras"].reload_changes,
                              directory, reload_path, from_pipe, out)
-        self.running_threads.pop()
+        self.running_processes.pop()
 
     def expand_filenames(self, cmd):
         """Expand % and * for the command to run.

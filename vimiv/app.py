@@ -273,11 +273,16 @@ class Vimiv(Gtk.Application):
         Args:
             force: If True quit even if an image was edited.
         """
-        # If there is still an external command running, do not quit
-        if self["commandline"].running_threads:
-            self["statusbar"].message(
-                "You still have running external threads", "warning")
-            return
+        # Check for running external processes
+        if self["commandline"].running_processes:
+            if force:
+                for p in self["commandline"].running_processes:
+                    p.kill()
+            else:
+                self["statusbar"].message(
+                    "You still have running external processes, add ! to force",
+                    "warning")
+                return
         # Check if image has been edited
         if self["image"].check_for_edit(force):
             return
