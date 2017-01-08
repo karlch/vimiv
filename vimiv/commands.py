@@ -19,7 +19,7 @@ class Commands(object):
 
         # Dictionary with command names and the corresponding functions
         # Structure:
-        # commandname:
+        # Command name:
         # [function, [default args], [positional args], [optional args]]
         self.app.commands = {
             "accept_changes": [self.app["manipulate"].button_clicked,

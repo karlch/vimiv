@@ -95,3 +95,10 @@ hasattr
 tmp
 center
 stdout
+keyname
+iterable
+gz
+gifs
+stderr
+bri
+sha

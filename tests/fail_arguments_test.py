@@ -16,7 +16,7 @@ class FailingArgTest(VimivTestCase):
 
     def test_args(self):
         """Fail commands because of wrong number of arguments."""
-        # 0 Arguments allowd
+        # 0 Arguments allowed
         for cmd in ["accept_changes", "autorotate", "center", "clear_thumbs",
                     "clear_trash", "copy_abspath", "copy_basename", "delete",
                     "first", "first_lib", "fit", "fit_horiz", "fit_vert",

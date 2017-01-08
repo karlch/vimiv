@@ -208,7 +208,7 @@ class ManipulateTest(VimivTestCase):
         self.manipulate.change_slider(2)
         received_value = self.manipulate.sliders["bri"].get_value()
         self.assertEqual(received_value, -1 + 2 * 5)
-        # Not a parseable integer
+        # Not an integer
         self.manipulate.change_slider("hi")
         self.assertEqual(self.vimiv["statusbar"].left_label.get_text(),
                          "ERROR: Argument for slider must be of type integer")
