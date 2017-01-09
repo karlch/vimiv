@@ -355,7 +355,11 @@ class Library(object):
             val = int(val) if val else self.default_width
             self.width = val
         else:  # Grow/shrink by value
-            val = int(val) if val else 20
+            step = int(self.app["keyhandler"].num_str) \
+                if self.app["keyhandler"].num_str \
+                else 1
+            self.app["keyhandler"].num_clear()
+            val = int(val) if val else 20 * step
             if inc:
                 self.width += val
             else:
