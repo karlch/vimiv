@@ -322,6 +322,9 @@ class CommandLine(object):
                 message = "Too many arguments for command " + name_func
                 self.app["statusbar"].message(message, "error")
             else:
+                # Check if the function supports passing count
+                if not func_and_args[-1]:
+                    self.app["keyhandler"].num_clear()
                 func(*args)
         # If the command name is not in the dictionary throw an error
         else:
