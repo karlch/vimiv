@@ -65,7 +65,7 @@ class Commands(object):
             "mark_all": [self.app["mark"].mark_all, [], [], [], False],
             "mark_between": [self.app["mark"].mark_between, [], [], [], False],
             "mark_toggle": [self.app["mark"].toggle_mark, [], [], [], False],
-            "move_up": [self.app["library"].move_up, [], [], [], False],
+            "move_up": [self.app["library"].move_up, [], [], [], True],
             "next": [self.app["image"].move_index, [True, True], [], [], True],
             "next!": [self.app["image"].move_index,
                       [True, True, 1, True], [], [], True],

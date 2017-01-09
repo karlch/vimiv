@@ -248,6 +248,9 @@ class Library(object):
             start: If True the function was called on startup and should not
                 reload the library as it does not exist yet.
         """
+        # Allow moving up multiple times if using .. as directory:
+        if directory == "..":
+            directory = "/".join(self.app["keyhandler"].num_receive() * [".."])
         try:
             curdir = os.getcwd()
             os.chdir(directory)

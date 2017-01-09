@@ -184,6 +184,16 @@ class LibraryTest(VimivTestCase):
         self.assertNotIn(sym, self.lib.files)
         os.remove(sym)
 
+    def test_move_up(self):
+        """Move up into directory."""
+        before = os.getcwd()
+        expected = "/".join(before.split("/")[:-2])
+        self.vimiv["keyhandler"].num_str = "2"
+        self.lib.move_up()
+        self.assertEqual(os.getcwd(), expected)
+        self.lib.move_up(before)
+        self.assertEqual(os.getcwd(), before)
+
     def tearDown(self):
         # Reopen and back to beginning
         if not self.lib.treeview.is_visible():
