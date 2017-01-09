@@ -390,8 +390,7 @@ class Manipulate(object):
         """Change the value of the currently focused slider.
 
         Args:
-            dec: If True decrease the value.
-            large: If True use large step (10) instead of small one (1)
+            step: Step to edit the slider by.
         """
         try:
             step = int(step)
