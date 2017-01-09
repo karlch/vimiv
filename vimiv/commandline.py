@@ -496,11 +496,7 @@ class CommandLine(object):
             self.app["statusbar"].message("No search results", "warning")
             return
         # Correct handling of prefixed numbers
-        if self.app["keyhandler"].num_str:
-            add_on = int(self.app["keyhandler"].num_str) - 1
-            self.app["keyhandler"].num_clear()
-        else:
-            add_on = 0
+        add_on = self.app["keyhandler"].num_receive() - 1
         # Next position depending on current position and direction
         pos = self.app.get_pos()
         if forward:

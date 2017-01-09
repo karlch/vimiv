@@ -232,8 +232,7 @@ class Thumbnail(object):
         # Start at current position
         new_pos = self.app.get_pos(force_widget="thu")
         # Check for a user prefixed step
-        step = int(self.app["keyhandler"].num_str) \
-            if self.app["keyhandler"].num_str else 1
+        step = self.app["keyhandler"].num_receive()
         # Get variables used for calculation of limits
         last = len(self.app.paths)
         rows = self.iconview.get_item_row(Gtk.TreePath(last - 1))

@@ -202,9 +202,7 @@ class Image(object):
                                           "warning")
         else:
             # Allow user steps
-            if self.app["keyhandler"].num_str:
-                step = self.app["keyhandler"].num_str
-                self.app["keyhandler"].num_clear()
+            step = self.app["keyhandler"].num_receive(step, True)
             if isinstance(step, str):
                 step, err = get_float_from_str(step)
                 if err:
@@ -232,10 +230,8 @@ class Image(object):
             return
         fallback_zoom = self.zoom_percent
         # Catch user zooms
-        if self.app["keyhandler"].num_str:
-            percent = self.app["keyhandler"].num_str
-            self.app["keyhandler"].num_clear()
-        # Either num_str or given from commandline
+        percent = self.app["keyhandler"].num_receive(percent, True)
+        # Given from commandline
         if isinstance(percent, str):
             percent, err = get_float_from_str(percent)
             if err:
@@ -310,12 +306,10 @@ class Image(object):
         # Run the simple manipulations
         self.app["manipulate"].run_simple_manipulations()
         # Check for prepended numbers and direction
-        if key and self.app["keyhandler"].num_str:
-            delta *= int(self.app["keyhandler"].num_str)
-            self.app["keyhandler"].num_clear()
+        if key:
+            delta *= self.app["keyhandler"].num_receive()
         if not forward:
             delta *= -1
-
         self.app.index = (self.app.index + delta) % len(self.app.paths)
         self.fit_image = 1
 
@@ -374,13 +368,10 @@ class Image(object):
         max_pos = len(self.app.paths)
         current = self.app.get_pos(force_widget="im")
         # Move to definition by keys or end/beg
-        if self.app["keyhandler"].num_str:
-            pos = int(self.app["keyhandler"].num_str)
-            self.app["keyhandler"].num_clear()
-        elif forward:
-            pos = max_pos
+        if forward:
+            pos = self.app["keyhandler"].num_receive(max_pos)
         else:
-            pos = 1
+            pos = self.app["keyhandler"].num_receive()
         # Catch range
         if pos < 0 or pos > max_pos:
             self.app["statusbar"].message("Unsupported index", "warning")

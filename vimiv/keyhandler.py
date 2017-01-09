@@ -5,6 +5,7 @@ from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gdk, GLib
 from vimiv.configparser import parse_keys
+from vimiv.helpers import get_float_from_str
 
 
 class KeyHandler(object):
@@ -103,3 +104,18 @@ class KeyHandler(object):
         # Reset
         self.num_str = ""
         self.app["statusbar"].update_info()
+
+    def num_receive(self, number=1, get_float=False):
+        """Receive self.num_str and clear it.
+
+        Args:
+            number: Number to return if there self.num_str is empty.
+            get_float: If True, convert num_str to float. Else to int.
+        Return:
+            The received number or default.
+        """
+        if self.num_str:
+            number = get_float_from_str(self.num_str)[0] \
+                if get_float else int(self.num_str)
+            self.num_clear()
+        return number

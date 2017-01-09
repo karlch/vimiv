@@ -402,9 +402,7 @@ class Manipulate(object):
         for slider in self.sliders.values():
             if slider.is_focus():
                 val = slider.get_value()
-                if self.app["keyhandler"].num_str:
-                    step *= int(self.app["keyhandler"].num_str)
-                    self.app["keyhandler"].num_clear()
+                step = self.app["keyhandler"].num_receive() * step
                 val += step
                 slider.set_value(val)
 

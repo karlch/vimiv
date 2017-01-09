@@ -317,21 +317,17 @@ class Library(object):
         if not self.files:
             self.app["statusbar"].message("No position to go to", "error")
             return
-        max_pos = len(self.files) - 1
+        max_pos = len(self.files)
         # Direct call from scroll
         if isinstance(defined_pos, int):
             new_pos = defined_pos
-        # Call from g/G via key-binding
-        elif self.app["keyhandler"].num_str:
-            new_pos = int(self.app["keyhandler"].num_str) - 1
-            self.app["keyhandler"].num_clear()
-            if new_pos < 0 or new_pos > max_pos:
-                self.app["statusbar"].message("Unsupported index", "warning")
-                return
         elif forward:
-            new_pos = max_pos
+            new_pos = self.app["keyhandler"].num_receive(max_pos) - 1
         else:
-            new_pos = 0
+            new_pos = self.app["keyhandler"].num_receive() - 1
+        if new_pos < 0 or new_pos > max_pos:
+            self.app["statusbar"].message("Unsupported index", "warning")
+            return
         self.treeview.set_cursor(Gtk.TreePath(new_pos), None, False)
         self.treeview.scroll_to_cell(Gtk.TreePath(new_pos), None, True,
                                      0.5, 0)
@@ -355,10 +351,7 @@ class Library(object):
             val = int(val) if val else self.default_width
             self.width = val
         else:  # Grow/shrink by value
-            step = int(self.app["keyhandler"].num_str) \
-                if self.app["keyhandler"].num_str \
-                else 1
-            self.app["keyhandler"].num_clear()
+            step = self.app["keyhandler"].num_receive()
             val = int(val) if val else 20 * step
             if inc:
                 self.width += val
@@ -435,9 +428,7 @@ class Library(object):
                              None, False)
         elif direction in ["j", "k"]:
             # Scroll the tree checking for a user step
-            step = int(self.app["keyhandler"].num_str) \
-                if self.app["keyhandler"].num_str \
-                else 1
+            step = self.app["keyhandler"].num_receive()
             if direction == "j":
                 new_pos = self.app.get_pos(force_widget="lib") + step
                 if new_pos >= len(self.treeview.get_model()):

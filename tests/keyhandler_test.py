@@ -46,6 +46,24 @@ class KeyHandlerTest(VimivTestCase):
         self.assertFalse(self.vimiv["keyhandler"].num_str)
         self.assertFalse(self.vimiv["keyhandler"].timer_id)
 
+    def test_receive_number(self):
+        """Get a number from numstr and clear it."""
+        # Integer
+        self.vimiv["keyhandler"].num_str = "03"
+        num = self.vimiv["keyhandler"].num_receive()
+        self.assertEqual(num, 3)
+        self.assertFalse(self.vimiv["keyhandler"].num_str)
+        # Float
+        self.vimiv["keyhandler"].num_str = "03"
+        num = self.vimiv["keyhandler"].num_receive(get_float=True)
+        self.assertEqual(num, 0.3)
+        self.assertFalse(self.vimiv["keyhandler"].num_str)
+        # Empty should give default
+        num = self.vimiv["keyhandler"].num_receive()
+        self.assertEqual(num, 1)
+        num = self.vimiv["keyhandler"].num_receive(5)
+        self.assertEqual(num, 5)
+
     def test_add_number_via_keypress(self):
         """Add a number to the numstr by keypress."""
         self.assertFalse(self.vimiv["keyhandler"].num_str)
