@@ -79,6 +79,15 @@ class CompletionsTest(VimivTestCase):
         for row in liststore:
             self.assertIn(row[0], expected_completions)
         self.assertEqual(len(liststore), len(expected_completions))
+        # Expand home
+        self.vimiv["library"].show_hidden = True
+        self.completions.entry.set_text(":~/.vimi")
+        liststore = self.completions.treeview.get_model()
+        completions = []
+        for row in liststore:
+            completions.append(row[0])
+        self.assertIn("~/.vimiv/", completions)
+        self.vimiv["library"].show_hidden = False
 
     def test_tag_completion(self):
         """Completion of tags."""
