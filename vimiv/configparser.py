@@ -219,13 +219,16 @@ def parse_keys(running_tests=False):
 
     # Update the dictionaries of every window with the keybindings that apply
     # for more than one window
-    keys_image.update(keys["GENERAL"])
-    keys_image.update(keys["IM_THUMB"])
-    keys_image.update(keys["IM_LIB"])
-    keys_thumbnail.update(keys["GENERAL"])
-    keys_thumbnail.update(keys["IM_THUMB"])
-    keys_library.update(keys["GENERAL"])
-    keys_library.update(keys["IM_LIB"])
+    def update_keybindings(sections, keydict):
+        """Add keybindings from generic sections to keydict."""
+        for section in sections:
+            if section in keys:
+                print("Section", section, "is deprecated and will be removed in"
+                      " a future version.")
+                keydict.update(keys[section])
+    update_keybindings(["GENERAL", "IM_THUMB", "IM_LIB"], keys_image)
+    update_keybindings(["GENERAL", "IM_THUMB"], keys_thumbnail)
+    update_keybindings(["GENERAL", "IM_LIB"], keys_library)
 
     # Generate one dictionary for all and return it
     keybindings = {"IMAGE": keys_image,
