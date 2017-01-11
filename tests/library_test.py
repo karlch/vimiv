@@ -93,6 +93,16 @@ class LibraryTest(VimivTestCase):
         self.lib.resize(False, False, "50")
         self.assertEqual(200,
                          self.lib.scrollable_treeview.get_size_request()[0])
+        # Grow via num_str
+        self.vimiv["keyhandler"].num_str = "2"
+        self.lib.resize(True)
+        self.assertEqual(240,
+                         self.lib.scrollable_treeview.get_size_request()[0])
+        self.vimiv["keyhandler"].num_str = "2"
+        self.lib.resize(False)
+        self.assertEqual(200,
+                         self.lib.scrollable_treeview.get_size_request()[0])
+        self.assertFalse(self.vimiv["keyhandler"].num_str)
         # Too small
         self.lib.resize(False, False, "500")
         self.assertEqual(100,
