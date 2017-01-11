@@ -254,7 +254,7 @@ class FileExtras(object):
                     self.app["thumbnail"].reload(image)
                 self.app["thumbnail"].move_to_pos(old_pos_thu)
             else:
-                self.app["keyhandler"].num_str = str(old_pos_im + 1)
+                self.app["eventhandler"].num_str = str(old_pos_im + 1)
                 self.app["image"].move_pos()
         # Run the pipe
         if pipe:

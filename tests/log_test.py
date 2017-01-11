@@ -63,21 +63,28 @@ class LogTest(VimivTestCase):
         last_line = self.read_log(string=False)[-1]
         self.assertEqual(last_line, "%-15s %s\n" % ("[info]", "Useful"))
 
-    def test_debug_mode_keyhandler(self):
-        """Run a keybinding in debug mode and therefore log it."""
+    def test_debug_mode_eventhandler(self):
+        """Run keybinding and mouse click in debug mode and therefore log it."""
+        # Keybinding
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("j")
         self.vimiv["library"].treeview.emit("key_press_event", event)
         last_line = self.read_log(string=False)[-1]
         self.assertEqual(last_line, "%-15s %s\n" % ("[key]", "j: scroll_lib j"))
+        # Mouse click
+        event = Gdk.Event().new(Gdk.EventType.BUTTON_PRESS)
+        event.button = 1
+        self.vimiv["window"].emit("button_press_event", event)
+        last_line = self.read_log(string=False)[-1]
+        self.assertEqual(last_line, "%-15s %s\n" % ("[mouse]", "Button1: next"))
 
     def test_debug_mode_numstr(self):
         """Add and clear num_str in debug mode and therefore log it."""
         self.vimiv.debug = True
-        self.vimiv["keyhandler"].num_append("3")
+        self.vimiv["eventhandler"].num_append("3")
         last_line = self.read_log(string=False)[-1]
         self.assertEqual(last_line, "%-15s %s\n" % ("[number]", "3->3"))
-        self.vimiv["keyhandler"].num_clear()
+        self.vimiv["eventhandler"].num_clear()
         last_line = self.read_log(string=False)[-1]
         self.assertEqual(last_line, "%-15s %s\n" % ("[number]", "cleared"))
 

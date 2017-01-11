@@ -69,8 +69,10 @@ class Thumbnail(object):
         self.liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str)
         self.iconview = Gtk.IconView.new()
         self.iconview.connect("item-activated", self.iconview_clicked)
-        self.iconview.connect("key_press_event", self.app["keyhandler"].run,
+        self.iconview.connect("key_press_event", self.app["eventhandler"].run,
                               "THUMBNAIL")
+        self.iconview.connect("button_press_event",
+                              self.app["eventhandler"].run_mouse, "THUMBNAIL")
         self.iconview.set_model(self.liststore)
         self.iconview.set_pixbuf_column(0)
         self.iconview.set_markup_column(1)
@@ -89,8 +91,8 @@ class Thumbnail(object):
         """
         self.toggle(True)
         count = path.get_indices()[0] + 1
-        self.app["keyhandler"].num_clear()
-        self.app["keyhandler"].num_str = str(count)
+        self.app["eventhandler"].num_clear()
+        self.app["eventhandler"].num_str = str(count)
         self.app["image"].move_pos()
 
     def toggle(self, select_image=False):
@@ -232,7 +234,7 @@ class Thumbnail(object):
         # Start at current position
         new_pos = self.app.get_pos(force_widget="thu")
         # Check for a user prefixed step
-        step = self.app["keyhandler"].num_receive()
+        step = self.app["eventhandler"].num_receive()
         # Get variables used for calculation of limits
         last = len(self.app.paths)
         rows = self.iconview.get_item_row(Gtk.TreePath(last - 1))
@@ -286,7 +288,7 @@ class Thumbnail(object):
         self.iconview.set_cursor(Gtk.TreePath(pos), cell_renderer, False)
         self.iconview.scroll_to_path(Gtk.TreePath(pos), True, 0.5, 0.5)
         # Clear the user prefixed step
-        self.app["keyhandler"].num_clear()
+        self.app["eventhandler"].num_clear()
 
     def zoom(self, inc=True):
         """Zoom thumbnails.

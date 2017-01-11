@@ -63,15 +63,15 @@ class LibraryTest(VimivTestCase):
         self.lib.move_pos()
         self.assertEqual(self.vimiv.get_pos(True), "vimiv.tiff")
         # 3g
-        self.vimiv["keyhandler"].num_str = "3"
+        self.vimiv["eventhandler"].num_str = "3"
         self.lib.move_pos()
         self.assertEqual(self.vimiv.get_pos(True), "arch_001.jpg")
-        self.assertFalse(self.vimiv["keyhandler"].num_str)
+        self.assertFalse(self.vimiv["eventhandler"].num_str)
         # g
         self.lib.move_pos(False)
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         # Throw an error
-        self.vimiv["keyhandler"].num_str = "300"
+        self.vimiv["eventhandler"].num_str = "300"
         self.lib.move_pos()
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         self.check_statusbar("WARNING: Unsupported index")
@@ -94,15 +94,15 @@ class LibraryTest(VimivTestCase):
         self.assertEqual(200,
                          self.lib.scrollable_treeview.get_size_request()[0])
         # Grow via num_str
-        self.vimiv["keyhandler"].num_str = "2"
+        self.vimiv["eventhandler"].num_str = "2"
         self.lib.resize(True)
         self.assertEqual(240,
                          self.lib.scrollable_treeview.get_size_request()[0])
-        self.vimiv["keyhandler"].num_str = "2"
+        self.vimiv["eventhandler"].num_str = "2"
         self.lib.resize(False)
         self.assertEqual(200,
                          self.lib.scrollable_treeview.get_size_request()[0])
-        self.assertFalse(self.vimiv["keyhandler"].num_str)
+        self.assertFalse(self.vimiv["eventhandler"].num_str)
         # Too small
         self.lib.resize(False, False, "500")
         self.assertEqual(100,
@@ -144,10 +144,10 @@ class LibraryTest(VimivTestCase):
         self.lib.scroll("k")
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         # 3j
-        self.vimiv["keyhandler"].num_str = "3"
+        self.vimiv["eventhandler"].num_str = "3"
         self.lib.scroll("j")
         self.assertEqual(self.vimiv.get_pos(True), "directory")
-        self.assertFalse(self.vimiv["keyhandler"].num_str)
+        self.assertFalse(self.vimiv["eventhandler"].num_str)
         # l
         expected_path = os.path.abspath("directory")
         self.lib.scroll("l")
@@ -160,7 +160,7 @@ class LibraryTest(VimivTestCase):
         # Remember pos
         self.assertEqual(self.vimiv.get_pos(True), "directory")
         # Back to beginning
-        self.vimiv["keyhandler"].num_str = "3"
+        self.vimiv["eventhandler"].num_str = "3"
         self.lib.scroll("k")
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         # Fail because of invalid argument
@@ -198,7 +198,7 @@ class LibraryTest(VimivTestCase):
         """Move up into directory."""
         before = os.getcwd()
         expected = "/".join(before.split("/")[:-2])
-        self.vimiv["keyhandler"].num_str = "2"
+        self.vimiv["eventhandler"].num_str = "2"
         self.lib.move_up()
         self.assertEqual(os.getcwd(), expected)
         self.lib.move_up(before)

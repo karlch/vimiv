@@ -75,6 +75,24 @@ class KeyHandler(object):
         else:
             return False
 
+    def run_mouse(self, widget, event, window):
+        # Only handle single clicks
+        if event.type != Gdk.EventType.BUTTON_PRESS:
+            return
+        keys = self.keys[window]
+        keyname = "Button" + str(event.button)
+        if keyname in keys:
+            keybinding = keys[keyname]
+            # Write keybinding and key to log in debug mode
+            if self.app.debug:
+                self.app["log"].write_message("mouse",
+                                              keyname + ": " + keybinding)
+            self.app["commandline"].run_command(keybinding, keyname)
+            return True  # Deactivates default bindings
+        # Activate default keybindings
+        else:
+            return False
+
     def num_append(self, num, remove_by_timeout=True):
         """Add a new char to num_str.
 

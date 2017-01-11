@@ -48,7 +48,7 @@ class Manipulate(object):
         grid = Gtk.Grid()
         grid.set_column_spacing(6)
         grid.set_border_width(6)
-        grid.connect("key_press_event", self.app["keyhandler"].run,
+        grid.connect("key_press_event", self.app["eventhandler"].run,
                      "MANIPULATE")
         self.scrolled_win.add(grid)
 
@@ -401,7 +401,7 @@ class Manipulate(object):
         for slider in self.sliders.values():
             if slider.is_focus():
                 val = slider.get_value()
-                step = self.app["keyhandler"].num_receive() * step
+                step = self.app["eventhandler"].num_receive() * step
                 val += step
                 slider.set_value(val)
 

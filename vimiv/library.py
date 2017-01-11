@@ -85,7 +85,9 @@ class Library(object):
         # Handle key events
         self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK)
         self.treeview.connect("key_press_event",
-                              self.app["keyhandler"].run, "LIBRARY")
+                              self.app["eventhandler"].run, "LIBRARY")
+        self.treeview.connect("button_press_event",
+                              self.app["eventhandler"].run_mouse, "LIBRARY")
         # Add the columns
         for i, name in enumerate(["Num", "Name", "Size", "M"]):
             renderer = Gtk.CellRendererText()
@@ -250,7 +252,7 @@ class Library(object):
         """
         # Allow moving up multiple times if using .. as directory:
         if directory == "..":
-            directory = "/".join(self.app["keyhandler"].num_receive() * [".."])
+            directory = "/".join(self.app["eventhandler"].num_receive() * [".."])
         try:
             curdir = os.getcwd()
             os.chdir(directory)
@@ -325,9 +327,9 @@ class Library(object):
         if isinstance(defined_pos, int):
             new_pos = defined_pos
         elif forward:
-            new_pos = self.app["keyhandler"].num_receive(max_pos) - 1
+            new_pos = self.app["eventhandler"].num_receive(max_pos) - 1
         else:
-            new_pos = self.app["keyhandler"].num_receive() - 1
+            new_pos = self.app["eventhandler"].num_receive() - 1
         if new_pos < 0 or new_pos > max_pos:
             self.app["statusbar"].message("Unsupported index", "warning")
             return
@@ -335,7 +337,7 @@ class Library(object):
         self.treeview.scroll_to_cell(Gtk.TreePath(new_pos), None, True,
                                      0.5, 0)
         # Clear the prefix
-        self.app["keyhandler"].num_clear()
+        self.app["eventhandler"].num_clear()
 
     def resize(self, inc=True, require_val=False, val=None):
         """Resize the library and update the image if necessary.
@@ -354,7 +356,7 @@ class Library(object):
             val = int(val) if val else self.default_width
             self.width = val
         else:  # Grow/shrink by value
-            step = self.app["keyhandler"].num_receive()
+            step = self.app["eventhandler"].num_receive()
             val = int(val) if val else 20 * step
             if inc:
                 self.width += val
@@ -431,7 +433,7 @@ class Library(object):
                              None, False)
         elif direction in ["j", "k"]:
             # Scroll the tree checking for a user step
-            step = self.app["keyhandler"].num_receive()
+            step = self.app["eventhandler"].num_receive()
             if direction == "j":
                 new_pos = self.app.get_pos(force_widget="lib") + step
                 if new_pos >= len(self.treeview.get_model()):

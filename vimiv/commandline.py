@@ -43,7 +43,7 @@ class CommandLine(object):
         self.entry = Gtk.Entry()
         self.entry.connect("activate", self.handler)
         self.entry.connect("key_press_event",
-                           self.app["keyhandler"].run, "COMMAND")
+                           self.app["eventhandler"].run, "COMMAND")
         self.entry.connect("changed", self.check_close)
         self.entry.set_hexpand(True)
 
@@ -126,9 +126,9 @@ class CommandLine(object):
             elif cmd[0] == "~" or cmd[0] == "." or cmd[0] == "/":
                 self.run_path(cmd)
             else:  # Default to internal cmd
-                self.app["keyhandler"].num_clear()
+                self.app["eventhandler"].num_clear()
                 while cmd[0].isdigit():
-                    self.app["keyhandler"].num_str += cmd[0]
+                    self.app["eventhandler"].num_str += cmd[0]
                     cmd = cmd[1:]
                 self.run_command(cmd)
 
@@ -294,7 +294,7 @@ class CommandLine(object):
         Args:
             cmd: Internal command to run.
             keyname: Key that called run_command. Passed when called from
-                keyhandler.
+                eventhandler.
         """
         name_func_and_args = cmd.split()
         if cmd.startswith("set "):
@@ -304,7 +304,7 @@ class CommandLine(object):
             name_func = name_func_and_args[0]
             conf_args = name_func_and_args[1:]
         # Get the actual dictionary from command or function dictionary
-        # depending on whether called from command line or keyhandler
+        # depending on whether called from command line or eventhandler
         func_dict = self.app.functions if keyname else self.app.commands
         if name_func in func_dict:
             func_and_args = func_dict[name_func]
@@ -324,7 +324,7 @@ class CommandLine(object):
             else:
                 # Check if the function supports passing count
                 if not func_and_args[-1]:
-                    self.app["keyhandler"].num_clear()
+                    self.app["eventhandler"].num_clear()
                 func(*args)
         # If the command name is not in the dictionary throw an error
         else:
@@ -496,7 +496,7 @@ class CommandLine(object):
             self.app["statusbar"].message("No search results", "warning")
             return
         # Correct handling of prefixed numbers
-        add_on = self.app["keyhandler"].num_receive() - 1
+        add_on = self.app["eventhandler"].num_receive() - 1
         # Next position depending on current position and direction
         pos = self.app.get_pos()
         if forward:
@@ -536,7 +536,7 @@ class CommandLine(object):
                     self.app["library"].treeview, Gtk.TreePath(position), None,
                     False)
         elif self.last_focused == "im":
-            self.app["keyhandler"].num_str = str(position + 1)
+            self.app["eventhandler"].num_str = str(position + 1)
             self.app["image"].move_pos()
         elif self.last_focused == "thu":
             self.app["thumbnail"].move_to_pos(position)

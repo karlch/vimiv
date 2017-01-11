@@ -46,9 +46,9 @@ class Slideshow(object):
             message = "Slideshow makes no sense in thumbnail mode"
             self.app["statusbar"].message(message, "warning")
             return
-        # Delay changed via vimiv["keyhandler"].num_str?
-        if self.app["keyhandler"].num_str:
-            self.set_delay(fixed_val=self.app["keyhandler"].num_str)
+        # Delay changed via vimiv["eventhandler"].num_str?
+        if self.app["eventhandler"].num_str:
+            self.set_delay(fixed_val=self.app["eventhandler"].num_str)
         # If the delay wasn't changed in any way just toggle the slideshow
         else:
             self.running = not self.running
@@ -77,7 +77,7 @@ class Slideshow(object):
                 self.app["statusbar"].message(
                     "Argument for delay must be of type float", "error")
                 return
-            step *= self.app["keyhandler"].num_receive(1, True)
+            step *= self.app["eventhandler"].num_receive(1, True)
             self.delay += step
         elif val:
             val, errorcode = get_float_from_str(str(val))
@@ -86,7 +86,7 @@ class Slideshow(object):
                     "Argument for delay must be of type float", "error")
                 return
             self.delay = val
-            self.app["keyhandler"].num_clear()
+            self.app["eventhandler"].num_clear()
         # Set a minimum
         if self.delay < 0.5:
             self.delay = 0.5

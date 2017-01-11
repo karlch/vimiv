@@ -54,7 +54,7 @@ class Image(object):
         self.image = Gtk.Image()
         self.scrolled_win.add(self.viewport)
         self.viewport.add(self.image)
-        self.scrolled_win.connect("key_press_event", self.app["keyhandler"].run,
+        self.scrolled_win.connect("key_press_event", self.app["eventhandler"].run,
                                   "IMAGE")
 
         # Settings
@@ -202,7 +202,7 @@ class Image(object):
                                           "warning")
         else:
             # Allow user steps
-            step = self.app["keyhandler"].num_receive(step, True)
+            step = self.app["eventhandler"].num_receive(step, True)
             if isinstance(step, str):
                 step, err = get_float_from_str(step)
                 if err:
@@ -230,7 +230,7 @@ class Image(object):
             return
         fallback_zoom = self.zoom_percent
         # Catch user zooms
-        percent = self.app["keyhandler"].num_receive(percent, True)
+        percent = self.app["eventhandler"].num_receive(percent, True)
         # Given from commandline
         if isinstance(percent, str):
             percent, err = get_float_from_str(percent)
@@ -296,7 +296,7 @@ class Image(object):
         Args:
             direction: Direction to scroll in.
         """
-        steps = self.app["keyhandler"].num_receive()
+        steps = self.app["eventhandler"].num_receive()
         scale = self.zoom_percent / self.get_zoom_percent_to_fit() * 2
         h_adj = Gtk.Scrollable.get_hadjustment(self.viewport)
         h_size = h_adj.get_upper() - h_adj.get_lower() - self.imsize[0]
@@ -342,7 +342,7 @@ class Image(object):
         self.app["manipulate"].run_simple_manipulations()
         # Check for prepended numbers and direction
         if key:
-            delta *= self.app["keyhandler"].num_receive()
+            delta *= self.app["eventhandler"].num_receive()
         if not forward:
             delta *= -1
         self.app.index = (self.app.index + delta) % len(self.app.paths)
@@ -404,9 +404,9 @@ class Image(object):
         current = self.app.get_pos(force_widget="im")
         # Move to definition by keys or end/beg
         if forward:
-            pos = self.app["keyhandler"].num_receive(max_pos)
+            pos = self.app["eventhandler"].num_receive(max_pos)
         else:
-            pos = self.app["keyhandler"].num_receive()
+            pos = self.app["eventhandler"].num_receive()
         # Catch range
         if pos < 0 or pos > max_pos:
             self.app["statusbar"].message("Unsupported index", "warning")

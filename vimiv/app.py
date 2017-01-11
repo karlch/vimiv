@@ -20,7 +20,7 @@ from vimiv.commandline import CommandLine
 from vimiv.commands import Commands
 from vimiv.completions import Completion
 from vimiv.slideshow import Slideshow
-from vimiv.keyhandler import KeyHandler
+from vimiv.eventhandler import KeyHandler
 from vimiv.tags import TagHandler
 from vimiv.mark import Mark
 from vimiv.information import Information
@@ -214,7 +214,7 @@ class Vimiv(Gtk.Application):
 
     def init_widgets(self):
         """Create all the other widgets and add them to the class."""
-        self["keyhandler"] = KeyHandler(self, self.settings)
+        self["eventhandler"] = KeyHandler(self, self.settings)
         self["commandline"] = CommandLine(self, self.settings)
         self["tags"] = TagHandler(self)
         self["mark"] = Mark(self, self.settings)

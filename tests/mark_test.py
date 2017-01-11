@@ -45,7 +45,7 @@ class MarkTest(VimivTestCase):
     def test_mark_between(self):
         """Mark between."""
         self.vimiv["mark"].mark()
-        self.vimiv["keyhandler"].num_str = "3"
+        self.vimiv["eventhandler"].num_str = "3"
         self.vimiv["library"].scroll("j")
         self.vimiv["mark"].mark()
         self.vimiv["mark"].mark_between()

@@ -176,7 +176,7 @@ class Statusbar(object):
 
     def set_right_status(self, mode):
         """Set the right side of the statusbar to mode and num_str."""
-        message = "{0:15}  {1:4}".format(mode, self.app["keyhandler"].num_str)
+        message = "{0:15}  {1:4}".format(mode, self.app["eventhandler"].num_str)
         self.right_label.set_markup(message)
 
     def set_window_title(self):
@@ -224,4 +224,4 @@ class Statusbar(object):
     def clear_status(self):
         """Clear num_str, search and error messages from the statusbar."""
         self.app["commandline"].reset_search(leaving=False)
-        self.app["keyhandler"].num_clear()
+        self.app["eventhandler"].num_clear()

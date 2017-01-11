@@ -34,8 +34,8 @@ class ImageTest(VimivTestCase):
         # Zoom in with a step
         self.image.zoom_delta(step=2)
         self.assertEqual(self.image.zoom_percent, perc_before * 1.5)
-        # zoom out by keyhandler to same level
-        self.vimiv["keyhandler"].num_str = "2"
+        # zoom out by eventhandler to same level
+        self.vimiv["eventhandler"].num_str = "2"
         self.image.zoom_delta(zoom_in=False)
         self.assertEqual(self.image.zoom_percent, perc_before)
         # Zoom to a size representing half the image size
@@ -43,8 +43,8 @@ class ImageTest(VimivTestCase):
         self.assertEqual(self.image.zoom_percent, 0.5)
         pixbuf = self.image.image.get_pixbuf()
         self.assertEqual(width * 0.5, pixbuf.get_width())
-        # Zoom by keyhandler
-        self.vimiv["keyhandler"].num_str = "03"
+        # Zoom by eventhandler
+        self.vimiv["eventhandler"].num_str = "03"
         self.image.zoom_to(0)
         self.assertEqual(self.image.zoom_percent, 0.3)
         pixbuf = self.image.image.get_pixbuf()
@@ -159,7 +159,6 @@ class ImageTest(VimivTestCase):
         self.vimiv["library"].toggle()
         after = self.image.zoom_percent
         self.assertEqual(after, before)
-
 
 if __name__ == '__main__':
     main()
