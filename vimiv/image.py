@@ -186,8 +186,7 @@ class Image(object):
         if self.app["library"].grid.is_visible():
             size = (size[0] - self.app["library"].width, size[1])
         if not self.app["statusbar"].hidden:
-            size = (size[0], size[1]
-                    - self.app["statusbar"].separator.get_margin_top() - 2)
+            size = (size[0], size[1] - self.app["statusbar"].get_bar_height())
         return size
 
     def zoom_delta(self, zoom_in=True, step=1):
@@ -277,10 +276,6 @@ class Image(object):
 
     def center_window(self):
         """Centre the image in the current window."""
-        # Don't do anything if no images are open
-        if not self.app.paths or self.app["thumbnail"].toggled:
-            return
-        # Get center of adjustments and set them
         h_adj = Gtk.Scrollable.get_hadjustment(self.viewport)
         h_middle = (h_adj.get_upper() - h_adj.get_lower() - self.imsize[0]) / 2
         h_adj.set_value(h_middle)

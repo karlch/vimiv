@@ -216,10 +216,13 @@ class Statusbar(object):
 
     def set_separator_height(self):
         """Set height of the separator used as background of the statusbar."""
+        self.separator.set_size_request(1, self.get_bar_height())
+
+    def get_bar_height(self):
+        """Return height of the statusbar + padding."""
         bar_height = self.bar.get_allocated_height()
         padding = self.app.settings["GENERAL"]["commandline_padding"]
-        separator_height = bar_height + 2 * padding
-        self.separator.set_margin_top(separator_height)
+        return bar_height + 2 * padding
 
     def clear_status(self):
         """Clear num_str, search and error messages from the statusbar."""

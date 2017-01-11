@@ -2,7 +2,10 @@
 """Test image mode for vimiv's testsuite."""
 
 from unittest import main
-from vimiv_testcase import VimivTestCase
+from vimiv_testcase import VimivTestCase, refresh_gui
+from gi import require_version
+require_version('Gtk', '3.0')
+from gi.repository import Gtk
 
 
 class ImageTest(VimivTestCase):
@@ -159,6 +162,55 @@ class ImageTest(VimivTestCase):
         self.vimiv["library"].toggle()
         after = self.image.zoom_percent
         self.assertEqual(after, before)
+
+    def test_scroll(self):
+        """Scroll an image."""
+        refresh_gui()
+        # First zoom so something can happen
+        self.image.zoom_to(1)
+        refresh_gui()
+        def there_and_back(there, back, check_end=False):
+            if there in "lL":
+                adj = Gtk.Scrollable.get_hadjustment(self.image.viewport)
+            else:
+                adj = Gtk.Scrollable.get_vadjustment(self.image.viewport)
+            self.image.scroll(there)
+            new_pos = adj.get_value()
+            self.assertGreater(adj.get_value(), 0)
+            self.image.scroll(back)
+            self.assertFalse(adj.get_value())
+            return new_pos
+        # Adjustments should be at 0
+        h_adj = Gtk.Scrollable.get_hadjustment(self.image.viewport)
+        v_adj = Gtk.Scrollable.get_vadjustment(self.image.viewport)
+        self.assertFalse(h_adj.get_value())
+        self.assertFalse(v_adj.get_value())
+        # Right and back left
+        there_and_back("l", "h")
+        # Down and back up
+        there_and_back("j", "k")
+        # Far right and back
+        right_end = there_and_back("L", "H", True)
+        self.assertEqual(
+            right_end,
+            h_adj.get_upper() - h_adj.get_lower() - self.image.imsize[0])
+        # Bottom and back
+        # off by 1?
+        bottom = there_and_back("J", "K", True)
+        self.assertEqual(
+            bottom,
+            v_adj.get_upper() - v_adj.get_lower() - self.image.imsize[1])
+        # Center
+        self.image.center_window()
+        h_adj = Gtk.Scrollable.get_hadjustment(self.image.viewport)
+        v_adj = Gtk.Scrollable.get_vadjustment(self.image.viewport)
+        h_middle = \
+            (h_adj.get_upper() - h_adj.get_lower() - self.image.imsize[0]) / 2
+        v_middle = \
+            (v_adj.get_upper() - v_adj.get_lower() - self.image.imsize[1]) / 2
+        self.assertEqual(h_adj.get_value(), h_middle)
+        self.assertEqual(v_adj.get_value(), v_middle)
+
 
 if __name__ == '__main__':
     main()
