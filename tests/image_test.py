@@ -165,11 +165,15 @@ class ImageTest(VimivTestCase):
 
     def test_scroll(self):
         """Scroll an image."""
-        refresh_gui()
-        # First zoom so something can happen
-        self.image.zoom_to(1)
-        refresh_gui()
-        def there_and_back(there, back, check_end=False):
+        def there_and_back(there, back):
+            """Scroll in direction and back to the beginning.
+
+            Args:
+                there: Direction to scroll in.
+                back: Direction to scroll back in.
+            Return:
+                Position after scrolling.
+            """
             if there in "lL":
                 adj = Gtk.Scrollable.get_hadjustment(self.image.viewport)
             else:
@@ -180,6 +184,10 @@ class ImageTest(VimivTestCase):
             self.image.scroll(back)
             self.assertFalse(adj.get_value())
             return new_pos
+        refresh_gui()
+        # First zoom so something can happen
+        self.image.zoom_to(1)
+        refresh_gui()
         # Adjustments should be at 0
         h_adj = Gtk.Scrollable.get_hadjustment(self.image.viewport)
         v_adj = Gtk.Scrollable.get_vadjustment(self.image.viewport)
@@ -190,13 +198,13 @@ class ImageTest(VimivTestCase):
         # Down and back up
         there_and_back("j", "k")
         # Far right and back
-        right_end = there_and_back("L", "H", True)
+        right_end = there_and_back("L", "H")
         self.assertEqual(
             right_end,
             h_adj.get_upper() - h_adj.get_lower() - self.image.imsize[0])
         # Bottom and back
         # off by 1?
-        bottom = there_and_back("J", "K", True)
+        bottom = there_and_back("J", "K")
         self.assertEqual(
             bottom,
             v_adj.get_upper() - v_adj.get_lower() - self.image.imsize[1])

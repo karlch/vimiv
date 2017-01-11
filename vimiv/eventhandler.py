@@ -32,13 +32,13 @@ class KeyHandler(object):
         self.timer_id = 0
         self.keys = parse_keys()
 
-    def run(self, widget, event, window):
+    def run(self, widget, event, widget_name):
         """Run the correct function per keypress.
 
         Args:
             widget: Focused Gtk Object.
             event: KeyPressEvent that called the function.
-            window: Gtk.Window to operate on.
+            widget_name: Name of widget to operate on: image, library...
         """
         keyval = event.keyval
         keyname = Gdk.keyval_name(keyval)
@@ -56,12 +56,12 @@ class KeyHandler(object):
         if keyname == "ISO_Left_Tab":  # Tab is named really weird under shift
             keyname = "Shift+Tab"
         # Numbers for the num_str
-        if window != "COMMAND" and keyname.isdigit():
+        if widget_name != "COMMAND" and keyname.isdigit():
             self.num_append(keyname)
             return True
         # Get the relevant keybindings for the window from the various
         # sections in the keys.conf file
-        keys = self.keys[window]
+        keys = self.keys[widget_name]
         # Get the command to which the pressed key is bound and run it
         if keyname in keys:
             keybinding = keys[keyname]
@@ -75,11 +75,18 @@ class KeyHandler(object):
         else:
             return False
 
-    def run_mouse(self, widget, event, window):
+    def run_mouse(self, widget, event, widget_name):
+        """Run the correct function per mouse click.
+
+        Args:
+            widget: Focused Gtk Object.
+            event: KeyPressEvent that called the function.
+            widget_name: Name of widget to operate on: image, library...
+        """
         # Only handle single clicks
         if event.type != Gdk.EventType.BUTTON_PRESS:
             return
-        keys = self.keys[window]
+        keys = self.keys[widget_name]
         keyname = "Button" + str(event.button)
         if keyname in keys:
             keybinding = keys[keyname]

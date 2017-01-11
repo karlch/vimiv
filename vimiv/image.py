@@ -54,8 +54,8 @@ class Image(object):
         self.image = Gtk.Image()
         self.scrolled_win.add(self.viewport)
         self.viewport.add(self.image)
-        self.scrolled_win.connect("key_press_event", self.app["eventhandler"].run,
-                                  "IMAGE")
+        self.scrolled_win.connect("key_press_event",
+                                  self.app["eventhandler"].run, "IMAGE")
 
         # Settings
         self.animation_toggled = False

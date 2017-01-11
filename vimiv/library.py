@@ -252,7 +252,8 @@ class Library(object):
         """
         # Allow moving up multiple times if using .. as directory:
         if directory == "..":
-            directory = "/".join(self.app["eventhandler"].num_receive() * [".."])
+            repeat = self.app["eventhandler"].num_receive()
+            directory = "/".join(repeat * [".."])
         try:
             curdir = os.getcwd()
             os.chdir(directory)
