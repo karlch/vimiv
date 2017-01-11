@@ -76,7 +76,7 @@ class LogTest(VimivTestCase):
         event.button = 1
         self.vimiv["window"].emit("button_press_event", event)
         last_line = self.read_log(string=False)[-1]
-        self.assertEqual(last_line, "%-15s %s\n" % ("[mouse]", "Button1: next"))
+        self.assertEqual(last_line, "%-15s %s\n" % ("[key]", "Button1: next"))
 
     def test_debug_mode_numstr(self):
         """Add and clear num_str in debug mode and therefore log it."""

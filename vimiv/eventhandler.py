@@ -40,8 +40,14 @@ class KeyHandler(object):
             event: KeyPressEvent that called the function.
             widget_name: Name of widget to operate on: image, library...
         """
-        keyval = event.keyval
-        keyname = Gdk.keyval_name(keyval)
+        if event.type == Gdk.EventType.KEY_PRESS:
+            keyval = event.keyval
+            keyname = Gdk.keyval_name(keyval)
+        elif event.type == Gdk.EventType.BUTTON_PRESS:
+            keyname = "Button" + str(event.button)
+        # Do not handle double clicks
+        else:
+            return
         shiftkeys = ["space", "Return", "Tab", "Escape", "BackSpace",
                      "Up", "Down", "Left", "Right"]
         # Check for Control (^), Mod1 (Alt) or Shift
@@ -51,7 +57,8 @@ class KeyHandler(object):
             keyname = "Alt+" + keyname
         # Shift+ for all letters and for keys that don't support it
         if (event.get_state() & Gdk.ModifierType.SHIFT_MASK and
-                (len(keyname) < 2 or keyname in shiftkeys)):
+                (len(keyname) < 2 or keyname in shiftkeys
+                 or keyname.startswith("Button"))):
             keyname = "Shift+" + keyname.lower()
         if keyname == "ISO_Left_Tab":  # Tab is named really weird under shift
             keyname = "Shift+Tab"
@@ -68,31 +75,6 @@ class KeyHandler(object):
             # Write keybinding and key to log in debug mode
             if self.app.debug:
                 self.app["log"].write_message("key",
-                                              keyname + ": " + keybinding)
-            self.app["commandline"].run_command(keybinding, keyname)
-            return True  # Deactivates default bindings
-        # Activate default keybindings
-        else:
-            return False
-
-    def run_mouse(self, widget, event, widget_name):
-        """Run the correct function per mouse click.
-
-        Args:
-            widget: Focused Gtk Object.
-            event: KeyPressEvent that called the function.
-            widget_name: Name of widget to operate on: image, library...
-        """
-        # Only handle single clicks
-        if event.type != Gdk.EventType.BUTTON_PRESS:
-            return
-        keys = self.keys[widget_name]
-        keyname = "Button" + str(event.button)
-        if keyname in keys:
-            keybinding = keys[keyname]
-            # Write keybinding and key to log in debug mode
-            if self.app.debug:
-                self.app["log"].write_message("mouse",
                                               keyname + ": " + keybinding)
             self.app["commandline"].run_command(keybinding, keyname)
             return True  # Deactivates default bindings

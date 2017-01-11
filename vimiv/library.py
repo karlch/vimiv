@@ -87,7 +87,7 @@ class Library(object):
         self.treeview.connect("key_press_event",
                               self.app["eventhandler"].run, "LIBRARY")
         self.treeview.connect("button_press_event",
-                              self.app["eventhandler"].run_mouse, "LIBRARY")
+                              self.app["eventhandler"].run, "LIBRARY")
         # Add the columns
         for i, name in enumerate(["Num", "Name", "Size", "M"]):
             renderer = Gtk.CellRendererText()

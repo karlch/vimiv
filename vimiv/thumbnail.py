@@ -72,7 +72,7 @@ class Thumbnail(object):
         self.iconview.connect("key_press_event", self.app["eventhandler"].run,
                               "THUMBNAIL")
         self.iconview.connect("button_press_event",
-                              self.app["eventhandler"].run_mouse, "THUMBNAIL")
+                              self.app["eventhandler"].run, "THUMBNAIL")
         self.iconview.set_model(self.liststore)
         self.iconview.set_pixbuf_column(0)
         self.iconview.set_markup_column(1)
