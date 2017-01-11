@@ -7,17 +7,6 @@ from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
-# Dictionary with all the scrolling
-scrolltypes = {}
-scrolltypes["h"] = (Gtk.ScrollType.STEP_BACKWARD, True)
-scrolltypes["j"] = (Gtk.ScrollType.STEP_FORWARD, False)
-scrolltypes["k"] = (Gtk.ScrollType.STEP_BACKWARD, False)
-scrolltypes["l"] = (Gtk.ScrollType.STEP_FORWARD, True)
-scrolltypes["H"] = (Gtk.ScrollType.START, True)
-scrolltypes["J"] = (Gtk.ScrollType.END, False)
-scrolltypes["K"] = (Gtk.ScrollType.START, False)
-scrolltypes["L"] = (Gtk.ScrollType.END, True)
-
 
 def listdir_wrapper(path, show_hidden=False):
     """Reimplementation of os.listdir which mustn't show hidden files.

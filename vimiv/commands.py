@@ -129,7 +129,7 @@ class Commands(object):
                              [True], [], [], False],
             "history_up": [self.app["commandline"].history_search,
                            [False], [], [], False],
-            "scroll": [self.app["window"].scroll, [], ["direction"], [], False],
+            "scroll": [self.app["window"].scroll, [], ["direction"], [], True],
             "scroll_lib": [self.app["library"].scroll,
                            [], ["direction"], [], True],
             "search": [self.app["commandline"].cmd_search, [], [], [], False],

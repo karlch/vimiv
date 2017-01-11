@@ -290,6 +290,41 @@ class Image(object):
         Gtk.Scrollable.set_hadjustment(self.viewport, h_adj)
         Gtk.Scrollable.set_vadjustment(self.viewport, v_adj)
 
+    def scroll(self, direction):
+        """Scroll the image.
+
+        Args:
+            direction: Direction to scroll in.
+        """
+        steps = self.app["keyhandler"].num_receive()
+        scale = self.zoom_percent / self.get_zoom_percent_to_fit() * 2
+        h_adj = Gtk.Scrollable.get_hadjustment(self.viewport)
+        h_size = h_adj.get_upper() - h_adj.get_lower() - self.imsize[0]
+        h_step = h_size / scale * steps
+        v_adj = Gtk.Scrollable.get_vadjustment(self.viewport)
+        v_size = v_adj.get_upper() - v_adj.get_lower() - self.imsize[1]
+        v_step = v_size / scale * steps
+        # To the ends
+        if direction == "H":
+            h_adj.set_value(0)
+        elif direction == "J":
+            v_adj.set_value(v_size)
+        elif direction == "K":
+            v_adj.set_value(0)
+        elif direction == "L":
+            h_adj.set_value(h_size)
+        # By step
+        elif direction == "h":
+            h_adj.set_value(h_adj.get_value() - h_step)
+        elif direction == "j":
+            v_adj.set_value(v_adj.get_value() + v_step)
+        elif direction == "k":
+            v_adj.set_value(v_adj.get_value() - v_step)
+        elif direction == "l":
+            h_adj.set_value(h_adj.get_value() + h_step)
+        Gtk.Scrollable.set_hadjustment(self.viewport, h_adj)
+        Gtk.Scrollable.set_vadjustment(self.viewport, v_adj)
+
     def move_index(self, forward=True, key=None, delta=1, force=False):
         """Move by delta in paths.
 

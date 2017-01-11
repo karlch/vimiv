@@ -4,7 +4,6 @@
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
-from vimiv.helpers import scrolltypes
 
 
 class Window(Gtk.ApplicationWindow):
@@ -119,15 +118,13 @@ class Window(Gtk.ApplicationWindow):
         Args:
             direction: Scroll direction to emit.
         """
-        if direction not in scrolltypes:
+        if direction not in "hjklHJKL":
             self.app["statusbar"].message(
                 "Invalid scroll direction " + direction, "error")
         elif self.app["thumbnail"].toggled:
             self.app["thumbnail"].move_direction(direction)
         else:
-            self.app["image"].scrolled_win.emit('scroll-child',
-                                                scrolltypes[direction][0],
-                                                scrolltypes[direction][1])
+            self.app["image"].scroll(direction)
         return True  # Deactivates default bindings (here for Arrows)
 
     def zoom(self, zoom_in=True, step=1):
