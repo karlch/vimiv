@@ -54,6 +54,10 @@ class SlideshowTest(VimivTestCase):
         self.assertEqual(self.slideshow.delay, 2.8)
         self.slideshow.set_delay(None, "+0.4")
         self.assertAlmostEqual(self.slideshow.delay, 3.2)
+        # Shrink with num_str
+        self.vimiv["keyhandler"].num_str = "2"
+        self.slideshow.set_delay(None, "-0.2")
+        self.assertAlmostEqual(self.slideshow.delay, 2.8)
         # Set via toggle
         self.vimiv["keyhandler"].num_str = "2"
         self.slideshow.toggle()

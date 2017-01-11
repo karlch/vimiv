@@ -77,6 +77,7 @@ class Slideshow(object):
                 self.app["statusbar"].message(
                     "Argument for delay must be of type float", "error")
                 return
+            step *= self.app["keyhandler"].num_receive(1, True)
             self.delay += step
         elif val:
             val, errorcode = get_float_from_str(str(val))

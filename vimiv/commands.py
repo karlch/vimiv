@@ -101,7 +101,7 @@ class Commands(object):
                            [False, False], [], ["value"], True],
             "slideshow": [self.app["slideshow"].toggle, [], [], [], True],
             "slideshow_delay": [self.app["slideshow"].set_delay,
-                                [None], ["value"], [], False],
+                                [None], ["value"], [], True],
             "tag_load": [self.app["tags"].load, [], ["tagname"], [], False],
             "tag_remove": [self.app["tags"].remove, [], ["tagname"], [], False],
             "tag_write": [self.app["tags"].write,
