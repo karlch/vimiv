@@ -3,8 +3,6 @@
 
 import os
 from random import shuffle
-from gi import require_version
-require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib
 from vimiv.helpers import get_float_from_str
 

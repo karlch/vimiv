@@ -5,8 +5,6 @@ Shows the current version, the icon, gives a link to the GitHub site and the
 possibility to display the licence.
 """
 
-from gi import require_version
-require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib
 
 

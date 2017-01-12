@@ -2,8 +2,6 @@
 """Library part of self.app."""
 
 import os
-from gi import require_version
-require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 from vimiv.fileactions import is_image, populate
 from vimiv.helpers import listdir_wrapper, sizeof_fmt

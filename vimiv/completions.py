@@ -5,8 +5,6 @@ import os
 import re
 from itertools import takewhile
 from string import digits
-from gi import require_version
-require_version('Gtk', '3.0')
 from gi.repository import Gtk
 from vimiv.helpers import listdir_wrapper
 from vimiv.helpers import read_info_from_man

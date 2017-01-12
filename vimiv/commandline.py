@@ -5,8 +5,6 @@ import os
 from bisect import bisect_left, bisect_right
 from threading import Thread
 from subprocess import Popen, PIPE
-from gi import require_version
-require_version('Gtk', '3.0')
 from gi.repository import Gtk, GLib
 from vimiv.fileactions import populate
 from vimiv.helpers import read_file

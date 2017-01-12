@@ -3,8 +3,6 @@
 
 import os
 from math import floor
-from gi import require_version
-require_version('Gtk', '3.0')
 from gi.repository import Gtk, GdkPixbuf, GLib
 from vimiv.imageactions import Thumbnails
 from vimiv.fileactions import populate

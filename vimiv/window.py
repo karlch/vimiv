@@ -1,8 +1,6 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Window class for vimiv."""
 
-from gi import require_version
-require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk
 
 

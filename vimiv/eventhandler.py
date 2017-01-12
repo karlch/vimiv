@@ -1,8 +1,6 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Handles the keyboard for vimiv."""
 
-from gi import require_version
-require_version('Gtk', '3.0')
 from gi.repository import Gdk, GLib
 from vimiv.configparser import parse_keys
 from vimiv.helpers import get_float_from_str

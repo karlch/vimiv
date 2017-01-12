@@ -6,8 +6,6 @@ import sys
 from shutil import rmtree
 from tempfile import mkdtemp
 from time import time
-from gi import require_version
-require_version('Gtk', '3.0')
 from gi.repository import Gtk, Gdk, Gio, GLib
 from vimiv.configparser import parse_dirs, parse_config, set_defaults
 from vimiv.image import Image
