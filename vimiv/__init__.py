@@ -8,9 +8,9 @@ try:
     require_version('Gtk', '3.0')
     from gi.repository import GLib, Gtk, Gdk, GdkPixbuf, Pango
     from PIL import Image, ImageEnhance
-    from vimiv.helpers import error_message
+    import vimiv
 
 except ImportError as import_error:
     message = import_error.msg + "\n" + "Are all dependencies installed?"
-    error_message(message)
+    print(message)
     sys.exit(1)
