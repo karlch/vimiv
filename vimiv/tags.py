@@ -1,9 +1,11 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Deal with the handling of tags for vimiv."""
+
 import os
+
 from gi.repository import Gtk
-from vimiv.helpers import read_file
 from vimiv.fileactions import populate
+from vimiv.helpers import read_file
 
 
 class TagHandler(object):

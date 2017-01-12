@@ -3,9 +3,10 @@
 
 import os
 from math import floor
-from gi.repository import Gtk, GdkPixbuf, GLib
-from vimiv.imageactions import Thumbnails
+
+from gi.repository import GdkPixbuf, GLib, Gtk
 from vimiv.fileactions import populate
+from vimiv.imageactions import Thumbnails
 
 
 class Thumbnail(object):

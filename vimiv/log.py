@@ -1,9 +1,10 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Class to handle log file for vimiv."""
 
-import time
 import os
 import sys
+import time
+
 from gi.repository import Gtk
 
 

@@ -4,11 +4,13 @@
 import os
 import shutil
 from unittest import main
+
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk, GLib
-from vimiv.configparser import parse_dirs
+from gi.repository import Gdk, GLib, Gtk
 import vimiv.fileactions as fileactions
+from vimiv.configparser import parse_dirs
+
 from vimiv_testcase import VimivTestCase
 
 

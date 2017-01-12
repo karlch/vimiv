@@ -1,7 +1,7 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Window class for vimiv."""
 
-from gi.repository import Gtk, Gdk
+from gi.repository import Gdk, Gtk
 
 
 class Window(Gtk.ApplicationWindow):

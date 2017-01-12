@@ -3,7 +3,8 @@
 
 import os
 from random import shuffle
-from gi.repository import Gtk, GdkPixbuf, GLib
+
+from gi.repository import GdkPixbuf, GLib, Gtk
 from vimiv.helpers import get_float_from_str
 
 

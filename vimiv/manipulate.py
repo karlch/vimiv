@@ -3,8 +3,9 @@
 
 import os
 from threading import Thread
+
+from gi.repository import GdkPixbuf, GLib, Gtk
 from PIL import Image, ImageEnhance
-from gi.repository import Gtk, GdkPixbuf, GLib
 from vimiv import imageactions
 from vimiv.fileactions import move_to_trash
 

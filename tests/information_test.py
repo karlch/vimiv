@@ -2,6 +2,7 @@
 """Test the Information class for vimiv's test suite."""
 
 from unittest import TestCase, main
+
 from vimiv.information import Information
 
 

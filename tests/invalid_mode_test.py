@@ -2,6 +2,7 @@
 """Fail functions because called from wrong mode test for vimiv's test suite."""
 
 from unittest import main
+
 from vimiv_testcase import VimivTestCase
 
 

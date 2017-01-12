@@ -5,10 +5,10 @@ import os
 import re
 from itertools import takewhile
 from string import digits
+
 from gi.repository import Gtk
-from vimiv.helpers import listdir_wrapper
-from vimiv.helpers import read_info_from_man
 from vimiv.fileactions import is_image
+from vimiv.helpers import listdir_wrapper, read_info_from_man
 
 
 class Completion():

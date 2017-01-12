@@ -5,8 +5,10 @@ import os
 import shutil
 from tempfile import mkdtemp
 from unittest import TestCase, main
-from PIL import Image
+
 import vimiv.imageactions as imageactions
+from PIL import Image
+
 from vimiv_testcase import compare_images
 
 

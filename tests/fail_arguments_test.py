@@ -2,6 +2,7 @@
 """Fail commands because of arguments test for vimiv's test suite."""
 
 from unittest import main
+
 from vimiv_testcase import VimivTestCase
 
 

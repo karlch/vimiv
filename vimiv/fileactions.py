@@ -4,8 +4,9 @@
 import os
 import shutil
 from random import shuffle
+
+from gi.repository import Gdk, GdkPixbuf, Gtk
 from PIL import Image
-from gi.repository import GdkPixbuf, Gtk, Gdk
 from vimiv.helpers import listdir_wrapper
 
 

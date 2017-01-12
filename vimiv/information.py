@@ -5,7 +5,7 @@ Shows the current version, the icon, gives a link to the GitHub site and the
 possibility to display the licence.
 """
 
-from gi.repository import Gtk, GLib
+from gi.repository import GLib, Gtk
 
 
 class Information():

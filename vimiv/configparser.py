@@ -1,8 +1,10 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """All parsers for vimiv."""
+
 import configparser
 import os
 import sys
+
 from vimiv.helpers import error_message
 
 

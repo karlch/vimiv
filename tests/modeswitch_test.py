@@ -1,12 +1,13 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Switching between modes tests for vimiv's test suite."""
 
-
 import os
 from unittest import main
+
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
+
 from vimiv_testcase import VimivTestCase
 
 

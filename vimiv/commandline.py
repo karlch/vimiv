@@ -1,11 +1,13 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Contains the commandline class for vimiv."""
-import re
+
 import os
+import re
 from bisect import bisect_left, bisect_right
+from subprocess import PIPE, Popen
 from threading import Thread
-from subprocess import Popen, PIPE
-from gi.repository import Gtk, GLib
+
+from gi.repository import GLib, Gtk
 from vimiv.fileactions import populate
 from vimiv.helpers import read_file
 

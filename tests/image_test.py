@@ -2,10 +2,12 @@
 """Test image mode for vimiv's testsuite."""
 
 from unittest import main
-from vimiv_testcase import VimivTestCase, refresh_gui
+
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import Gtk
+
+from vimiv_testcase import VimivTestCase, refresh_gui
 
 
 class ImageTest(VimivTestCase):

@@ -2,9 +2,11 @@
 """Tests eventhandler.py for vimiv's test suite."""
 
 from unittest import main
+
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gtk, Gdk
+from gi.repository import Gdk, Gtk
+
 from vimiv_testcase import VimivTestCase
 
 

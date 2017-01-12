@@ -1,11 +1,13 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Actions which act on the actual image file."""
+
 import os
 from shutil import copyfile, which
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 from threading import Thread
+
+from gi.repository import GdkPixbuf, Gtk
 from PIL import Image
-from gi.repository import Gtk, GdkPixbuf
 
 
 def save_image(im, filename):

@@ -4,10 +4,11 @@
 import os
 import time
 from unittest import TestCase, main
-from PIL import Image
+
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import Gio, Gtk, GLib
+from gi.repository import Gio, GLib, Gtk
+from PIL import Image
 from vimiv.app import Vimiv
 
 

@@ -3,7 +3,9 @@
 
 import os
 from unittest import main
+
 from vimiv.helpers import read_file
+
 from vimiv_testcase import VimivTestCase
 
 

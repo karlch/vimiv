@@ -4,9 +4,11 @@
 import os
 import sys
 from unittest import main
+
 from gi.repository import GLib
-from vimiv_testcase import VimivTestCase
 from vimiv.configparser import parse_dirs
+
+from vimiv_testcase import VimivTestCase
 
 
 class AppTest(VimivTestCase):

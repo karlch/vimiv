@@ -6,6 +6,7 @@ import shutil
 import sys
 import tempfile
 from unittest import TestCase, main
+
 import vimiv.configparser as parser
 
 

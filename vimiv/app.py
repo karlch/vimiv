@@ -6,24 +6,25 @@ import sys
 from shutil import rmtree
 from tempfile import mkdtemp
 from time import time
-from gi.repository import Gtk, Gdk, Gio, GLib
-from vimiv.configparser import parse_dirs, parse_config, set_defaults
-from vimiv.image import Image
-from vimiv.fileactions import FileExtras, populate
-from vimiv.library import Library
-from vimiv.thumbnail import Thumbnail
-from vimiv.manipulate import Manipulate
-from vimiv.statusbar import Statusbar
+
+from gi.repository import Gdk, Gio, GLib, Gtk
 from vimiv.commandline import CommandLine
 from vimiv.commands import Commands
 from vimiv.completions import Completion
-from vimiv.slideshow import Slideshow
+from vimiv.configparser import parse_config, parse_dirs, set_defaults
 from vimiv.eventhandler import KeyHandler
-from vimiv.tags import TagHandler
-from vimiv.mark import Mark
+from vimiv.fileactions import FileExtras, populate
+from vimiv.image import Image
 from vimiv.information import Information
-from vimiv.window import Window
+from vimiv.library import Library
 from vimiv.log import Log
+from vimiv.manipulate import Manipulate
+from vimiv.mark import Mark
+from vimiv.slideshow import Slideshow
+from vimiv.statusbar import Statusbar
+from vimiv.tags import TagHandler
+from vimiv.thumbnail import Thumbnail
+from vimiv.window import Window
 
 
 class Vimiv(Gtk.Application):

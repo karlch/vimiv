@@ -5,7 +5,9 @@ import os
 import shutil
 from time import sleep
 from unittest import main
+
 from PIL import Image
+
 from vimiv_testcase import VimivTestCase, compare_images
 
 

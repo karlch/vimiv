@@ -1,8 +1,8 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Expansion of % and * tests for vimiv's test suite."""
 
-
 from unittest import main
+
 from vimiv_testcase import VimivTestCase
 
 

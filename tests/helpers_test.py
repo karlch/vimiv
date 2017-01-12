@@ -4,6 +4,7 @@
 import os
 import shutil
 from unittest import TestCase, main
+
 import vimiv.helpers as helpers
 
 

@@ -3,6 +3,7 @@
 
 import os
 from unittest import main, skipUnless
+
 from vimiv_testcase import VimivTestCase, refresh_gui
 
 

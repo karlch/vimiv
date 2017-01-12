@@ -3,6 +3,7 @@
 
 import os
 from unittest import main
+
 from vimiv_testcase import VimivTestCase
 
 

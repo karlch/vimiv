@@ -2,7 +2,8 @@
 """Library part of self.app."""
 
 import os
-from gi.repository import Gtk, Gdk
+
+from gi.repository import Gdk, Gtk
 from vimiv.fileactions import is_image, populate
 from vimiv.helpers import listdir_wrapper, sizeof_fmt
 

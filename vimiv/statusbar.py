@@ -2,7 +2,8 @@
 """Statusbar for vimiv."""
 
 import os
-from gi.repository import GLib, Gtk, Gdk
+
+from gi.repository import Gdk, GLib, Gtk
 
 
 class Statusbar(object):
