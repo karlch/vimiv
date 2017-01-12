@@ -211,7 +211,7 @@ class Thumbnail(object):
         if filename in self.app["mark"].marked:
             name = name + " [*]"
         elif index in self.app["commandline"].search_positions:
-            name = self.markup + '<b>' + name + '</b></span>'
+            name = self.markup + "<b>" + name + "</b></span>"
         # Subsctipting the liststore directly works fine
         # pylint: disable=unsubscriptable-object
         # pylint: disable=unsupported-assignment-operation

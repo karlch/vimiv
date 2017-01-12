@@ -51,7 +51,7 @@ class TagHandler(object):
         imagelist = imagelist if imagelist else self.app["mark"].marked
         tagfile_name = os.path.join(self.directory, tagname)
         tagged_images = self.read(tagname)
-        with open(tagfile_name, 'a') as tagfile:
+        with open(tagfile_name, "a") as tagfile:
             for image in imagelist:
                 if image not in tagged_images:
                     tagfile.write(image + "\n")

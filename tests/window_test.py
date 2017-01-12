@@ -44,5 +44,5 @@ class WindowTest(VimivTestCase):
         self.assertEqual(self.vimiv["window"].winsize, (400, 300))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

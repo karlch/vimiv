@@ -291,7 +291,7 @@ class Vimiv(Gtk.Application):
         self["manipulate"].thread_for_simple_manipulations()
         # Save the history
         histfile = os.path.join(self.directory, "history")
-        histfile = open(histfile, 'w')
+        histfile = open(histfile, "w")
         for cmd in self["commandline"].history:
             cmd += "\n"
             histfile.write(cmd)

@@ -28,5 +28,5 @@ class FailingModeTest(VimivTestCase):
             "ERROR: Finishing manipulate only makes sense in manipulate")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

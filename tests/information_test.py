@@ -31,5 +31,5 @@ class InformationTest(TestCase):
         self.information.show_licence(None, True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

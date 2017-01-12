@@ -86,5 +86,5 @@ class TagsTest(VimivTestCase):
         os.chdir(self.working_directory)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

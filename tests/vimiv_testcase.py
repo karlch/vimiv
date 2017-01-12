@@ -6,7 +6,7 @@ import time
 from unittest import TestCase, main
 
 from gi import require_version
-require_version('Gtk', '3.0')
+require_version("Gtk", "3.0")
 from gi.repository import Gio, GLib, Gtk
 from PIL import Image
 from vimiv.app import Vimiv
@@ -99,5 +99,5 @@ class VimivTestCase(TestCase):
         os.chdir(cls.working_directory)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

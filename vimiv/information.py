@@ -41,7 +41,7 @@ class Information():
 
         version_label = Gtk.Label()
         version_label.set_markup(
-            '<span size="xx-large">' + self.version + '</span>')
+            '<span size="xx-large">' + self.version + "</span>")
 
         info_label = Gtk.Label()
         info_label.set_text("vimiv - an image viewer with vim-like keybindings")

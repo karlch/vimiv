@@ -64,5 +64,5 @@ class FailingArgTest(VimivTestCase):
         self.assertIn(expected, self.vimiv["statusbar"].left_label.get_text())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

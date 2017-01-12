@@ -110,5 +110,5 @@ class ImageActionsTest(TestCase):
         shutil.rmtree(self.thumbdir)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

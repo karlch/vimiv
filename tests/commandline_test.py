@@ -233,5 +233,5 @@ class CommandlineTest(VimivTestCase):
         self.vimiv["library"].reload(os.getcwd())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

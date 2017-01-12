@@ -244,7 +244,7 @@ class Completion():
             # Gtk ListStores are iterable
             # pylint:disable=not-an-iterable
             for row in self.liststores["path"][0]:
-                match = "!" + command + re.sub(r'^\./', '', row[0])
+                match = "!" + command + re.sub(r'^\./', "", row[0])
                 self.liststores["external"][0].append([match, ""])
         else:
             self.info.hide()
@@ -286,7 +286,7 @@ class Completion():
     def refilter(self, entry):
         """Refilter the completion list according to the text in entry."""
         # Replace multiple spaces with single space
-        entry.set_text(re.sub(r' +', ' ', entry.get_text()))
+        entry.set_text(re.sub(r' +', " ", entry.get_text()))
         comp_type = self.get_comp_type()
         command = entry.get_text().lstrip(":")
         if command:

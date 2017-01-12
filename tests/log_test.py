@@ -6,7 +6,7 @@ import sys
 from unittest import main
 
 from gi import require_version
-require_version('Gdk', '3.0')
+require_version("Gdk", "3.0")
 from gi.repository import Gdk
 
 from vimiv_testcase import VimivTestCase

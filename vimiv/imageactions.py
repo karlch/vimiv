@@ -75,8 +75,8 @@ def autorotate(filelist, method="auto"):
         cmd = ["jhead", "-autorot", "-ft"] + filelist
         p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
         out, err = p.communicate()
-        out = out.decode(encoding='UTF-8')
-        err = err.decode(encoding='UTF-8')
+        out = out.decode(encoding="UTF-8")
+        err = err.decode(encoding="UTF-8")
         # Find out how many images were rotated
         for line in out.split("\n"):
             if "Modified" in line and line.split()[1] not in err:

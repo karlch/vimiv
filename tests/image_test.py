@@ -4,7 +4,7 @@
 from unittest import main
 
 from gi import require_version
-require_version('Gtk', '3.0')
+require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
 from vimiv_testcase import VimivTestCase, refresh_gui
@@ -222,5 +222,5 @@ class ImageTest(VimivTestCase):
         self.assertEqual(v_adj.get_value(), v_middle)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

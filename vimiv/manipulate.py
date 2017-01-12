@@ -344,7 +344,7 @@ class Manipulate(object):
         g_data = GLib.Bytes.new(data)
         # pylint: disable=no-member
         w, h = imfile.size
-        if imfile.mode == 'RGBA':
+        if imfile.mode == "RGBA":
             pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
                 g_data, GdkPixbuf.Colorspace.RGB, True, 8, w, h, 4 * w)
         else:

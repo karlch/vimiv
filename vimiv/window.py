@@ -31,8 +31,8 @@ class Window(Gtk.ApplicationWindow):
         general = settings["GENERAL"]
         start_fullscreen = general["start_fullscreen"]
 
-        self.connect('destroy', self.app.quit_wrapper)
-        self.connect('button_press_event', self.app["eventhandler"].run,
+        self.connect("destroy", self.app.quit_wrapper)
+        self.connect("button_press_event", self.app["eventhandler"].run,
                      "IMAGE")
         self.add_events(Gdk.EventMask.KEY_PRESS_MASK |
                         Gdk.EventMask.POINTER_MOTION_MASK)
@@ -48,10 +48,10 @@ class Window(Gtk.ApplicationWindow):
 
         # Fullscreen
         if Gtk.get_minor_version() > 10:
-            self.connect_data('window-state-event',
+            self.connect_data("window-state-event",
                               Window.on_window_state_change, self)
         else:
-            self.connect_object('window-state-event',
+            self.connect_object("window-state-event",
                                 Window.on_window_state_change, self)
         if start_fullscreen:
             self.toggle_fullscreen()

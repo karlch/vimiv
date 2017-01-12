@@ -228,5 +228,5 @@ class ConfigparserTest(TestCase):
         shutil.rmtree(cls.tmpdir)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(buffer=True)

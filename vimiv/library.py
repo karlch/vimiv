@@ -186,7 +186,7 @@ class Library(object):
             if os.path.isdir(fil):
                 markup_string = "<b>" + markup_string + "</b>"
             if i in self.app["commandline"].search_positions:
-                markup_string = self.markup + markup_string + '</span>'
+                markup_string = self.markup + markup_string + "</span>"
             liststore.append([i + 1, markup_string, size, marked_string])
 
         return liststore
@@ -376,7 +376,7 @@ class Library(object):
     def toggle_hidden(self):
         """Toggle showing of hidden files."""
         self.show_hidden = not self.show_hidden
-        self.reload('.')
+        self.reload(".")
 
     def filelist_create(self, directory="."):
         """Create a filelist from all files in directory.

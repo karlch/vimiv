@@ -75,5 +75,5 @@ class HelpersTest(TestCase):
         shutil.rmtree("tmp_testdir")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

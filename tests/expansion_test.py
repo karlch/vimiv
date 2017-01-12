@@ -48,5 +48,5 @@ class ExpansionTest(VimivTestCase):
         self.assertEqual(expected_cmd, received_cmd)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

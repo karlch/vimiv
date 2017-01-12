@@ -75,5 +75,5 @@ class StatusbarTest(VimivTestCase):
                             "Error: Catastrophe")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

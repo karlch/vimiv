@@ -50,13 +50,13 @@ def sizeof_fmt(num):
     Return:
         Filesize in human-readable format.
     """
-    for unit in ['B', 'K', 'M', 'G', 'T', 'P', 'E', 'Z']:
+    for unit in ["B", "K", "M", "G", "T", "P", "E", "Z"]:
         if abs(num) < 1024.0:
             if abs(num) < 100:
                 return "%3.1f%s" % (num, unit)
             return "%3.0f%s" % (num, unit)
         num /= 1024.0
-    return "%.1f%s" % (num, 'Y')
+    return "%.1f%s" % (num, "Y")
 
 
 def error_message(message, running_tests=False):

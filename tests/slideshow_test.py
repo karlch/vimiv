@@ -4,7 +4,7 @@
 from unittest import main
 
 from gi import require_version
-require_version('Gtk', '3.0')
+require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
 from vimiv_testcase import VimivTestCase
@@ -101,5 +101,5 @@ class SlideshowTest(VimivTestCase):
         self.slideshow.delay = 2.0
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

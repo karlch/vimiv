@@ -165,7 +165,7 @@ class CommandLine(object):
         # Get output and error and run the command
         out, err = p.communicate()
         if p.returncode:
-            err = err.decode('utf-8').split("\n")[0]
+            err = err.decode("utf-8").split("\n")[0]
             self.app["statusbar"].message(err, "error")
         else:
             # Reload everything after an external command if we haven't
@@ -208,7 +208,7 @@ class CommandLine(object):
             # Substitute % and * with escaping
             cmd = re.sub(r'(?<!\\)(%)', fil, cmd)
             cmd = re.sub(r'(?<!\\)(\*)', " ".join(filelist), cmd)
-            cmd = re.sub(r'(\\)(?!\\)', '', cmd)
+            cmd = re.sub(r'(\\)(?!\\)', "", cmd)
         return cmd
 
     def pipe(self, pipe_input):
@@ -224,7 +224,7 @@ class CommandLine(object):
             self.app["statusbar"].message("No input from pipe", "info")
             return
         # Make the pipe_input a file
-        pipe_input = pipe_input.decode('utf-8')
+        pipe_input = pipe_input.decode("utf-8")
         # List of commands without empty line
         pipe_input = pipe_input.split("\n")[:-1]
         startout = pipe_input[0]
@@ -346,7 +346,7 @@ class CommandLine(object):
         # Only parts of the history that match the entered text
         if not self.sub_history:
             substring = self.entry.get_text()
-            matchstr = '^(' + substring + ')'
+            matchstr = "^(" + substring + ")"
             self.sub_history = [substring]
             for cmd in self.history:
                 if re.match(matchstr, cmd):

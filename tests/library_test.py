@@ -5,7 +5,7 @@ import os
 from unittest import main
 
 from gi import require_version
-require_version('Gtk', '3.0')
+require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
 from vimiv_testcase import VimivTestCase
@@ -213,5 +213,5 @@ class LibraryTest(VimivTestCase):
         self.lib.treeview.set_cursor([Gtk.TreePath(0)], None, False)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
