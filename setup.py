@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name = "vimiv",
-    version = "0.8.dev0",
+    version = "0.8",
     packages = ['vimiv'],
     scripts = ['vimiv/vimiv'],
     install_requires = ['pillow', 'PyGObject'],

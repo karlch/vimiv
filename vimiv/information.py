@@ -12,7 +12,7 @@ class Information():
     """Class containing information on vimiv."""
 
     def __init__(self):
-        self.version = "vimiv 0.8.dev0"
+        self.version = "vimiv 0.8"
 
     def get_version(self):
         """Return current version.
