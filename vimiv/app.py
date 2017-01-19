@@ -208,8 +208,6 @@ class Vimiv(Gtk.Application):
             self["library"].reload(os.getcwd())
             if self["library"].expand:
                 self["image"].scrolled_win.hide()
-            self["statusbar"].message(
-                "No valid paths, opening library viewer", "info")
 
     def init_widgets(self):
         """Create all the other widgets and add them to the class."""
