@@ -248,7 +248,7 @@ class Image(object):
         self.catch_unreasonable_zoom_and_update(fallback_zoom)
 
     def catch_unreasonable_zoom_and_update(self, fallback_zoom):
-        """Catch zooms unreasonable zooms otherwise update.
+        """Catch unreasonable zooms otherwise update.
 
         Args:
             fallback_zoom: Zoom percentage to fall back to if the zoom
