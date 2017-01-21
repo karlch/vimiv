@@ -267,7 +267,7 @@ class Image(object):
         # Image too small or too large
         if new_height < min_height or new_width < min_width \
                 or new_height > max_height or new_width > max_width:
-            message = "Image cannot be zoomed further"
+            message = "Image cannot be zoomed this far"
             self.app["statusbar"].message(message, "warning")
             self.zoom_percent = fallback_zoom
         else:
