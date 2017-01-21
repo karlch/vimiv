@@ -112,7 +112,7 @@ class Commands(object):
                         [], [], [], False],
             "zoom_in": [self.app["window"].zoom, [True], [], ["steps"], True],
             "zoom_out": [self.app["window"].zoom, [False], [], ["steps"], True],
-            "zoom_to": [self.app["image"].zoom_to, [], ["percent"], [], True]}
+            "zoom_to": [self.app["image"].zoom_to, [], [], ["percent"], True]}
 
         self.app.functions = {
             "clear_status": [self.app["statusbar"].clear_status,

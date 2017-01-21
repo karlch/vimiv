@@ -215,7 +215,7 @@ class Image(object):
             self.catch_unreasonable_zoom_and_update(fallback_zoom)
             self.fit_image = 0
 
-    def zoom_to(self, percent, fit=1):
+    def zoom_to(self, percent=0, fit=1):
         """Zoom to a given percentage.
 
         Args:
