@@ -63,7 +63,7 @@ class ImageTest(VimivTestCase):
                          pixbuf.get_width())
         # Unreasonable zoom
         self.image.zoom_to(1000)
-        self.check_statusbar("WARNING: Image cannot be zoomed further")
+        self.check_statusbar("WARNING: Image cannot be zoomed this far")
         pixbuf = self.image.image.get_pixbuf()
         self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
