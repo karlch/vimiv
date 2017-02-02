@@ -68,8 +68,6 @@ class TagsTest(VimivTestCase):
                    "vimiv/testimages/arch_001.jpg"]
         taglist = [os.path.abspath(image) for image in taglist]
         self.vimiv["mark"].marked = list(taglist)
-        for fil in self.vimiv["mark"].marked:
-            print("In mark there is:", fil)
         # Write a tag
         self.run_command("tag_write new_test_tag")
         created_file = os.path.expanduser("~/.vimiv/Tags/new_test_tag")
