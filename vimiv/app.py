@@ -225,7 +225,9 @@ class Vimiv(Gtk.Application):
         self["manipulate"] = Manipulate(self, self.settings)
         self["information"] = Information()
         self["window"] = Window(self, self.settings)
-        Commands(self, self.settings)
+        self["commands"] = Commands(self, self.settings).commands
+        # Generate completions as soon as commands exist
+        self["completions"].generate_commandlist()
         self["log"] = Log(self)
 
     def create_window_structure(self):

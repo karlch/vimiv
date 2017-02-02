@@ -296,6 +296,7 @@ class CommandLine(object):
             keyname: Key that called run_command. Passed when called from
                 eventhandler.
         """
+        # Get name and arguments
         name_func_and_args = cmd.split()
         if cmd.startswith("set "):
             name_func = " ".join(name_func_and_args[0:2])
@@ -303,29 +304,28 @@ class CommandLine(object):
         else:
             name_func = name_func_and_args[0]
             conf_args = name_func_and_args[1:]
-        # Get the actual dictionary from command or function dictionary
-        # depending on whether called from command line or eventhandler
-        func_dict = self.app.functions if keyname else self.app.commands
-        if name_func in func_dict:
-            func_and_args = func_dict[name_func]
-            func = func_and_args[0]
-            default_args = func_and_args[1]
-            # Check if the amount of arguments
-            required_args = func_and_args[2]
-            optional_args = func_and_args[3]
-            args = default_args + conf_args
-            if len(conf_args) < len(required_args):
-                message = "Missing positional arguments for command " + \
-                    name_func + ": " + ", ".join(required_args)
+        if name_func in self.app["commands"]:
+            cmd_dict = self.app["commands"][name_func]
+            # Do not allow calling hidden commands from the command line
+            if not keyname and cmd_dict["is_hidden"]:
+                message = "Called a hidden command from the command line"
                 self.app["statusbar"].message(message, "error")
-            elif len(conf_args) > len(required_args) + len(optional_args):
+                return
+            # Check if the amount of arguments
+            if len(conf_args) < len(cmd_dict["positional_args"]):
+                message = "Missing positional arguments for command " + \
+                    name_func + ": " + ", ".join(cmd_dict["positional_args"])
+                self.app["statusbar"].message(message, "error")
+            elif len(conf_args) > len(cmd_dict["positional_args"]) + \
+                    len(cmd_dict["optional_args"]):
                 message = "Too many arguments for command " + name_func
                 self.app["statusbar"].message(message, "error")
             else:
                 # Check if the function supports passing count
-                if not func_and_args[-1]:
+                if not cmd_dict["supports_count"]:
                     self.app["eventhandler"].num_clear()
-                func(*args)
+                args = cmd_dict["default_args"] + conf_args
+                cmd_dict["function"](*args)
         # If the command name is not in the dictionary throw an error
         else:
             message = "No command called " + name_func

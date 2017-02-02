@@ -226,7 +226,8 @@ class CommandlineTest(VimivTestCase):
     def test_fail_hidden_command(self):
         """Fail running a hidden command."""
         self.run_command("command")
-        self.check_statusbar("ERROR: No command called command")
+        self.check_statusbar(
+            "ERROR: Called a hidden command from the command line")
 
     def tearDown(self):
         os.chdir(self.working_directory)

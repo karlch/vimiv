@@ -251,7 +251,8 @@ class Completion():
 
     def generate_commandlist(self):
         """Generate a list of internal vimiv commands and store it."""
-        commands = list(self.app.commands.keys())
+        commands = [cmd for cmd in self.app["commands"]
+                    if not self.app["commands"][cmd]["is_hidden"]]
         aliases = list(self.app.aliases.keys())
         all_commands = sorted(commands + aliases)
         infodict = read_info_from_man()
