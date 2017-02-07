@@ -244,9 +244,10 @@ class CommandLine(object):
             if self.app.paths:  # Images were found
                 self.app["image"].scrolled_win.show()
                 self.app["image"].load_image()
-                # Close library if necessary
+                # Resize library and focus image if necessary
                 if self.app["library"].grid.is_visible():
-                    self.app["library"].toggle()
+                    self.app["library"].treeview.set_hexpand(False)
+                    self.app["library"].focus(False)
             elif old_pos:  # Nothing found, go back
                 self.app.paths, self.app.index = populate(old_pos)
                 self.app["statusbar"].message("No image found", "info")
