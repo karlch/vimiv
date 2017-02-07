@@ -165,7 +165,9 @@ class CommandLine(object):
         # Get output and error and run the command
         out, err = p.communicate()
         if p.returncode:
-            self.app["statusbar"].message(err.decode(), "error")
+            message = "Command exited with status " + str(p.returncode) + "\n"
+            message += err.decode()
+            self.app["statusbar"].message(message, "error")
         else:
             # Reload everything after an external command if we haven't
             # moved, you never know what happened ... Must be in a timer

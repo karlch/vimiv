@@ -67,7 +67,8 @@ class CommandlineTest(VimivTestCase):
         # Try to run a non-existent command
         self.run_command("!foo_bar_baz", True)
         # self.run_command("!sleep 10", True)
-        self.check_statusbar("ERROR: /bin/sh: foo_bar_baz: command not found")
+        self.check_statusbar("ERROR: Command exited with status 127\n"
+                             "/bin/sh: foo_bar_baz: command not found\n")
 
     def test_pipe(self):
         """Pipe a command to vimiv."""
