@@ -122,6 +122,7 @@ class Thumbnails:
         thumblist: List of required thumbnails.
         thumbdict: Dictionary with required thumbnails and original filename.
         threads: Threads that are running for thumbnail creation.
+        default_icon: Default icon if thumbnail creation fails.
     """
 
     def __init__(self, filelist, thumbsize, thumbdir):
@@ -139,9 +140,11 @@ class Thumbnails:
         self.thumbnails = os.listdir(self.directory)
         self.thumblist = []  # List of all files with thumbnails
         self.thumbdict = {}  # Asserts thumbnails to their original file
-        # Tuple containing all files for which thumbnail creation failed and
-        # their position
         self.threads = []
+        # Default icon if thumbnail creation fails
+        icon_theme = Gtk.IconTheme.get_default()
+        icon_info = icon_theme.lookup_icon("dialog-error", 256, 0)
+        self.default_thumbnail = icon_info.get_filename()
 
     def thumbnails_create(self):
         """Create thumbnails for all images in filelist if they do not exist."""
@@ -186,10 +189,7 @@ class Thumbnails:
         pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
             infile, self.thumbsize[0], self.thumbsize[1], True)
         if not pixbuf:
-            icon_theme = Gtk.IconTheme.get_default()
-            icon_info = icon_theme.lookup_icon("dialog-error", 256, 0)
-            default_infile = icon_info.get_filename()
-            copyfile(default_infile, outfile)
+            copyfile(self.default_thumbnail, outfile)
         else:
             pixbuf.savev(outfile, "png", ["compression"], ["0"])
         self.thumblist.append(outfile)
