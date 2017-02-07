@@ -278,9 +278,11 @@ class Vimiv(Gtk.Application):
                 for p in self["commandline"].running_processes:
                     p.kill()
             else:
-                self["statusbar"].message(
-                    "You still have running external processes, add ! to force",
-                    "warning")
+                processes = [p.args
+                             for p in self["commandline"].running_processes]
+                message = "Running external processes: %s. Add ! to force." \
+                    % (", ".join(processes))
+                self["statusbar"].message(message, "warning")
                 return
         # Check if image has been edited
         if self["image"].check_for_edit(force):

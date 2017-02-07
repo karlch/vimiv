@@ -76,8 +76,7 @@ class AppTest(VimivTestCase):
         self.run_command("!sleep 0.2")
         self.vimiv.quit_wrapper()
         self.check_statusbar(
-            "WARNING: You still have running external processes, "
-            "add ! to force")
+            "WARNING: Running external processes: sleep 0.2. Add ! to force.")
 
     @classmethod
     def tearDownClass(cls):
