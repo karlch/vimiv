@@ -178,8 +178,8 @@ class Thumbnail(object):
             pixbuf_max = GdkPixbuf.Pixbuf.new_from_file(thumb)
             self.pixbuf_max.append(pixbuf_max)
             pixbuf = self.scale_thumb(pixbuf_max)
-            name = thumb.split("___")[-1]
-            name = name.split(".")[0]
+            name = thumb.split("___")[-1].split(".thumbnail")[0]
+            name = os.path.splitext(name)[0]
             if self.app.paths[i] in self.app["mark"].marked:
                 name = name + " [*]"
             self.liststore.append([pixbuf, name])
