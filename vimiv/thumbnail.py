@@ -148,6 +148,8 @@ class Thumbnail(object):
         else:
             width = window_width
         self.columns = floor((width - 12) / (self.size[0] + 2 * self.padding))
+        if self.columns < 1:
+            self.columns = 1
         free_space = (width - 12) % (self.size[0] + 2 * self.padding)
         padding = floor(free_space / (self.columns))
         self.iconview.set_column_spacing(padding)
