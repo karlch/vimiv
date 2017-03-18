@@ -3,6 +3,12 @@
 
 import sys
 
+
+__license__ = "MIT"
+__version__ = "0.8.1.dev0"
+__author__ = __maintainer__ = "Christian Karl"
+__email__ = "karlch@protonmail.com"
+
 try:
     from gi import require_version
     require_version("Gtk", "3.0")

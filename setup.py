@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # encoding: utf-8
 from setuptools import setup
+import vimiv
 
 setup(
     name = "vimiv",
-    version = "0.8.1dev0",
+    version = vimiv.__version__
     packages = ['vimiv'],
     scripts = ['vimiv/vimiv'],
     install_requires = ['pillow', 'PyGObject'],
     description = "An image viewer with vim-like keybindings",
-    license = "MIT",
+    license = vimiv.__license__,
     url = "https://github.com/karlch/vimiv",
 )
