@@ -190,6 +190,11 @@ class ThumbnailManager(object):
             self.thumb_size = 128
 
     def get_thumbnail(self, filename):
+
+        # Don't create thumbnails for thumbnail cache
+        if filename.startswith(self.base_dir):
+            return filename
+
         thumbnail_filename = self._get_thumbnail_filename(filename)
         thumbnail_path = self._get_thumbnail_path(thumbnail_filename)
         if os.access(thumbnail_path, os.R_OK) \
@@ -199,7 +204,7 @@ class ThumbnailManager(object):
         fail_path = self._get_fail_path(thumbnail_filename)
         if os.path.exists(fail_path):
             # We already tried to create a thumbnail for the given file but
-            # failed; dont try again.
+            # failed; don't try again.
             return None
 
         if self._create_thumbnail(filename, thumbnail_filename):
