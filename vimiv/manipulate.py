@@ -150,18 +150,6 @@ class Manipulate(object):
             else:
                 message = "%s %d marked images" % (info, len(images))
             self.app["statusbar"].message(message, "info")
-        # Delete all thumbnails of manipulated images
-        thumbnails = os.listdir(self.app["thumbnail"].directory)
-        thumbnail_class = imageactions.Thumbnails(
-            images, self.app["thumbnail"].sizes[-1],
-            self.app["thumbnail"].directory)
-        for im in images:
-            thumb = thumbnail_class.create_thumbnail_name(im)
-            thumb = os.path.basename(thumb)
-            if thumb in thumbnails:
-                thumb = os.path.join(self.app["thumbnail"].directory, thumb)
-                os.remove(thumb)
-
         return images
 
     def rotate(self, cwise, rotate_file=True):

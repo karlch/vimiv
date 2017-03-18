@@ -4,10 +4,11 @@
 import os
 import hashlib
 import tempfile
-from shutil import copyfile, which
+from shutil import which
 from subprocess import PIPE, Popen
-from threading import Thread
+from multiprocessing import Pool
 
+import collections
 from gi.repository import GdkPixbuf, Gtk, GLib
 from PIL import Image
 from PIL import PngImagePlugin
@@ -114,93 +115,54 @@ def autorotate(filelist, method="auto"):
     return rotated_images, method
 
 
+ThumbTuple = collections.namedtuple('ThumbTuple', ['original', 'thumbnail'])
+
+
 class Thumbnails:
     """Thumbnail creation class.
 
     Attributes:
         filelist: List of files to operate on.
-        thumbsize: Size of thumbnails that are created.
-        directory: Directory to save thumbnails in.
-        thumbnails: Cached thumbnails that have been created already.
-        thumblist: List of required thumbnails.
-        thumbdict: Dictionary with required thumbnails and original filename.
-        threads: Threads that are running for thumbnail creation.
+        large: the thumbnail managing standard specifies two thumbnail sizes
+               256x256 (large) and 128x128 (normal)
+        default_thumbnail: Default icon if thumbnail creation fails.
     """
 
-    def __init__(self, filelist, thumbsize, thumbdir):
+    def __init__(self, filelist, large=True):
         """Create default settings.
 
         Args:
             filelist: List of files to operate on.
-            thumbsize: Size of thumbnails that are created.
+            large: Size of thumbnails that are created.
         """
         self.filelist = filelist
-        self.thumbsize = thumbsize
-        self.directory = thumbdir
-        if not os.path.isdir(self.directory):
-            os.mkdir(self.directory)
-        self.thumbnails = os.listdir(self.directory)
-        self.thumblist = []  # List of all files with thumbnails
-        self.thumbdict = {}  # Asserts thumbnails to their original file
-        # Tuple containing all files for which thumbnail creation failed and
-        # their position
-        self.threads = []
+        self.large = large
+        self.thumbnail_manager = ThumbnailManager()
+
+        # Default icon if thumbnail creation fails
+        icon_theme = Gtk.IconTheme.get_default()
+        icon_info = icon_theme.lookup_icon("dialog-error", 256, 0)
+        self.default_thumbnail = icon_info.get_filename()
+
+    def _get_thumbnail_tuple(self, source_file):
+        thumbnail_path = self.thumbnail_manager.get_thumbnail(source_file)
+        if thumbnail_path is None:
+            thumbnail_path = self.default_thumbnail
+        return ThumbTuple(original=source_file, thumbnail=thumbnail_path)
 
     def thumbnails_create(self):
         """Create thumbnails for all images in filelist if they do not exist."""
-        # Loop over all files
-        for i, infile in enumerate(self.filelist):
-            # Correct name
-            outfile = self.create_thumbnail_name(infile)
-            # Only if they aren't cached already
-            if os.path.basename(outfile) not in self.thumbnails:
-                thread_for_thumbnail = Thread(target=self.thread_for_thumbnails,
-                                              args=(infile, outfile, i))
-                self.threads.append(thread_for_thumbnail)
-                thread_for_thumbnail.start()
-            else:
-                self.thumblist.append(outfile)
-                self.thumbdict[outfile] = infile
 
-        while self.threads:
-            self.threads[0].join()
-        self.thumblist.sort(
-            key=lambda x: self.filelist.index(self.thumbdict[x]))
-        return self.thumblist
+        with Pool(os.cpu_count() * 2) as pool:
+            thumb_list = pool.map(self._get_thumbnail_tuple, self.filelist)
 
-    def create_thumbnail_name(self, infile):
-        """Create thumbnail name for infile respecting size."""
-        thumb_ext = ".thumbnail_%dx%d" % (self.thumbsize[0], self.thumbsize[1])
-        infile_tot = infile.replace("/", "___").lstrip("___")
-        outfile_base = infile_tot + thumb_ext + ".png"
-        outfile = os.path.join(self.directory, outfile_base)
-        return outfile
+        return thumb_list
 
-    def thread_for_thumbnails(self, infile, outfile, position):
-        """Create thumbnail in an extra thread.
-
-        If thumbnail creation fails, defaults to the Adwaita dialog error.
-
-        Args:
-            infile: Image file to operate on.
-            outfile: Name of thumbnail file to write to.
-            position: Integer position of this thumbnail in the filelist.
-        """
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            infile, self.thumbsize[0], self.thumbsize[1], True)
-        if not pixbuf:
-            icon_theme = Gtk.IconTheme.get_default()
-            icon_info = icon_theme.lookup_icon("dialog-error", 256, 0)
-            default_infile = icon_info.get_filename()
-            copyfile(default_infile, outfile)
-        else:
-            pixbuf.savev(outfile, "png", ["compression"], ["0"])
-        self.thumblist.append(outfile)
-        self.thumbdict[outfile] = infile
-        self.threads.pop(0)
 
 class ThumbnailManager(object):
-    """The ThumbnailManager implements freedestop.org's Thumbnail Managing Standard"""
+    """The ThumbnailManager implements freedestop.org's Thumbnail Managing
+    Standard.
+    """
 
     KEY_URI = "Thumb::URI"
     KEY_MTIME = "Thumb::MTime"
@@ -209,14 +171,15 @@ class ThumbnailManager(object):
     KEY_HEIGHT = "Thumb::Image::Height"
 
     def __init__(self, large=True):
-        import vimiv
         super(ThumbnailManager, self).__init__()
-        self.base_dir = GLib.get_user_cache_dir()
+        import vimiv
+        self.base_dir = os.path.join(GLib.get_user_cache_dir(), "thumbnails")
         self.fail_dir = os.path.join(
             self.base_dir, "fail", "vimiv-" + vimiv.__version__)
-        self.thumnail_dir = ""
+        self.thumbnail_dir = ""
         self.thumb_size = 0
         self.use_large_thumbnails(large)
+        self._ensure_dirs_exist()
 
     def use_large_thumbnails(self, enabled=True):
         if enabled:
@@ -244,6 +207,18 @@ class ThumbnailManager(object):
 
         return None
 
+    def _ensure_dirs_exist(self):
+        def ensure_dir_exists(directory):
+            try:
+                os.mkdir(directory)
+                os.chmod(directory, 0o700)
+            except FileExistsError:
+                pass
+
+        ensure_dir_exists(self.base_dir)
+        ensure_dir_exists(self.thumbnail_dir)
+        ensure_dir_exists(self.fail_dir)
+
     def _is_current(self, source_file, thumbnail_path):
         source_mtime = str(self._get_source_mtime(source_file))
         thumbnail_mtime = self._get_thumbnail_mtime(thumbnail_path)
@@ -253,7 +228,8 @@ class ThumbnailManager(object):
         uri = self._get_source_uri(filename)
         return hashlib.md5(bytes(uri, "UTF-8")).hexdigest() + ".png"
 
-    def _get_source_uri(self, filename):
+    @staticmethod
+    def _get_source_uri(filename):
         return "file://" + os.path.abspath(os.path.expanduser(filename))
 
     def _get_thumbnail_path(self, thumbnail_filename):
@@ -262,7 +238,8 @@ class ThumbnailManager(object):
     def _get_fail_path(self, thumbnail_filename):
         return os.path.join(self.fail_dir, thumbnail_filename)
 
-    def _get_source_mtime(self, src):
+    @staticmethod
+    def _get_source_mtime(src):
         return int(os.path.getmtime(src))
 
     def _get_thumbnail_mtime(self, thumbnail_path):
@@ -290,21 +267,22 @@ class ThumbnailManager(object):
             dest_path = self._get_fail_path(thumbnail_filename)
             success = False
 
-        pnginfo = PngImagePlugin.PngInfo()
-        pnginfo.add_text(self.KEY_URI, str(self._get_source_uri(source_file)))
-        pnginfo.add_text(self.KEY_MTIME, str(self._get_source_mtime(source_file)))
-        pnginfo.add_text(self.KEY_SIZE, str(os.path.getsize(source_file)))
+        png_info = PngImagePlugin.PngInfo()
+        png_info.add_text(self.KEY_URI, str(self._get_source_uri(source_file)))
+        png_info.add_text(self.KEY_MTIME, str(self._get_source_mtime(source_file)))
+        png_info.add_text(self.KEY_SIZE, str(os.path.getsize(source_file)))
 
         if width and height:
-            pnginfo.add_text(self.KEY_WIDTH, str(width))
-            pnginfo.add_text(self.KEY_HEIGHT, str(height))
+            png_info.add_text(self.KEY_WIDTH, str(width))
+            png_info.add_text(self.KEY_HEIGHT, str(height))
 
         # First create temporary file and then move it. This avoids problems
         # with concurrent access of the thumbnail cache, since "move" is an
         # atomic operation
-        handle, tmp_filename = tempfile.mkstemp()
-        image.save(handle, pnginfo=pnginfo)
-        handle.close()
+        handle, tmp_filename = tempfile.mkstemp(dir=self.base_dir)
+        os.close(handle)
+        os.chmod(tmp_filename, 0o600)
+        image.save(tmp_filename, format="png", pnginfo=png_info)
         image.close()
         os.replace(tmp_filename, dest_path)
 

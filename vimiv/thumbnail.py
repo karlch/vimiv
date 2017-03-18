@@ -6,7 +6,7 @@ from math import floor
 
 from gi.repository import GdkPixbuf, GLib, Gtk
 from vimiv.fileactions import populate
-from vimiv.imageactions import Thumbnails
+from vimiv.imageactions import Thumbnails, ThumbnailManager
 
 
 class Thumbnail(object):
@@ -163,7 +163,7 @@ class Thumbnail(object):
         self.liststore.clear()
         self.pixbuf_max = []
         # Create thumbnails
-        thumbnails = Thumbnails(self.app.paths, self.sizes[-1], self.directory)
+        thumbnails = Thumbnails(self.app.paths)
         self.elements = thumbnails.thumbnails_create()
         # Draw the icon view instead of the image
         if not toggled:
@@ -174,14 +174,11 @@ class Thumbnail(object):
         self.toggled = True
 
         # Add all thumbnails to the liststore
-        for i, thumb in enumerate(self.elements):
-            pixbuf_max = GdkPixbuf.Pixbuf.new_from_file(thumb)
+        for i, thumb_tuple in enumerate(self.elements):
+            pixbuf_max = GdkPixbuf.Pixbuf.new_from_file(thumb_tuple.thumbnail)
             self.pixbuf_max.append(pixbuf_max)
             pixbuf = self.scale_thumb(pixbuf_max)
-            name = thumb.split("___")[-1]
-            name = name.split(".")[0]
-            if self.app.paths[i] in self.app["mark"].marked:
-                name = name + " [*]"
+            name = self._get_name(thumb_tuple.original)
             self.liststore.append([pixbuf, name])
 
         # Set columns
@@ -189,13 +186,20 @@ class Thumbnail(object):
 
         # Focus the current image
         self.iconview.grab_focus()
-        pos = (self.app.index) % len(self.app.paths)
+        pos = self.app.index % len(self.app.paths)
         self.move_to_pos(pos)
 
         # Remove the files again if the thumbnails should not be cached
         if not self.cache:
-            for thumb in self.elements:
-                os.remove(thumb)
+            for thumb_tuple in self.elements:
+                os.remove(thumb_tuple)
+
+    def _get_name(self, filename):
+        name = os.path.splitext(os.path.basename(filename))[0]
+        if filename in self.app["mark"].marked:
+            name += " [*]"
+
+        return name
 
     def reload(self, filename, reload_image=True):
         """Reload the thumbnails of manipulated images.
@@ -206,18 +210,15 @@ class Thumbnail(object):
                 the name (useful for marking).
         """
         index = self.app.paths.index(filename)
-        name = self.elements[index].split("___")[-1]
-        name = name.split(".")[0]
-        if filename in self.app["mark"].marked:
-            name = name + " [*]"
-        elif index in self.app["commandline"].search_positions:
+        name = self._get_name(filename)
+        if index in self.app["commandline"].search_positions:
             name = self.markup + "<b>" + name + "</b></span>"
         # Subsctipting the liststore directly works fine
         # pylint: disable=unsubscriptable-object
         # pylint: disable=unsupported-assignment-operation
         if reload_image:
-            thumbnails = Thumbnails([filename], self.sizes[-1], self.directory)
-            thumb_name = thumbnails.create_thumbnail_name(filename)
+            manager = ThumbnailManager()
+            thumb_name = manager.get_thumbnail(filename)
             self.pixbuf_max[index] = GdkPixbuf.Pixbuf.new_from_file(thumb_name)
             pixbuf = self.scale_thumb(self.pixbuf_max[index])
             self.liststore[index] = [pixbuf, name]
@@ -264,7 +265,7 @@ class Thumbnail(object):
                 if column >= elem_last_row else rows * elem_per_row + column
         # First element in column
         elif direction == "K":
-            new_pos = new_pos % elem_per_row
+            new_pos %= elem_per_row
         # Last element in row
         elif direction == "L":
             new_pos = (row + 1) * elem_per_row - 1
