@@ -2,12 +2,15 @@
 """Actions which act on the actual image file."""
 
 import os
+import hashlib
+import tempfile
 from shutil import copyfile, which
 from subprocess import PIPE, Popen
 from threading import Thread
 
-from gi.repository import GdkPixbuf, Gtk
+from gi.repository import GdkPixbuf, Gtk, GLib
 from PIL import Image
+from PIL import PngImagePlugin
 
 
 def save_image(im, filename):
@@ -195,3 +198,114 @@ class Thumbnails:
         self.thumblist.append(outfile)
         self.thumbdict[outfile] = infile
         self.threads.pop(0)
+
+class ThumbnailManager(object):
+    """The ThumbnailManager implements freedestop.org's Thumbnail Managing Standard"""
+
+    KEY_URI = "Thumb::URI"
+    KEY_MTIME = "Thumb::MTime"
+    KEY_SIZE = "Thumb::Size"
+    KEY_WIDTH = "Thumb::Image::Width"
+    KEY_HEIGHT = "Thumb::Image::Height"
+
+    def __init__(self, large=True):
+        import vimiv
+        super(ThumbnailManager, self).__init__()
+        self.base_dir = GLib.get_user_cache_dir()
+        self.fail_dir = os.path.join(
+            self.base_dir, "fail", "vimiv-" + vimiv.__version__)
+        self.thumnail_dir = ""
+        self.thumb_size = 0
+        self.use_large_thumbnails(large)
+
+    def use_large_thumbnails(self, enabled=True):
+        if enabled:
+            self.thumbnail_dir = os.path.join(self.base_dir, "large")
+            self.thumb_size = 256
+        else:
+            self.thumbnail_dir = os.path.join(self.base_dir, "normal")
+            self.thumb_size = 128
+
+    def get_thumbnail(self, filename):
+        thumbnail_filename = self._get_thumbnail_filename(filename)
+        thumbnail_path = self._get_thumbnail_path(thumbnail_filename)
+        if os.access(thumbnail_path, os.R_OK) \
+                and self._is_current(filename, thumbnail_path):
+            return thumbnail_path
+
+        fail_path = self._get_fail_path(thumbnail_filename)
+        if os.path.exists(fail_path):
+            # We already tried to create a thumbnail for the given file but
+            # failed; dont try again.
+            return None
+
+        if self._create_thumbnail(filename, thumbnail_filename):
+            return thumbnail_path
+
+        return None
+
+    def _is_current(self, source_file, thumbnail_path):
+        source_mtime = str(self._get_source_mtime(source_file))
+        thumbnail_mtime = self._get_thumbnail_mtime(thumbnail_path)
+        return source_mtime == thumbnail_mtime
+
+    def _get_thumbnail_filename(self, filename):
+        uri = self._get_source_uri(filename)
+        return hashlib.md5(bytes(uri, "UTF-8")).hexdigest() + ".png"
+
+    def _get_source_uri(self, filename):
+        return "file://" + os.path.abspath(os.path.expanduser(filename))
+
+    def _get_thumbnail_path(self, thumbnail_filename):
+        return os.path.join(self.thumbnail_dir, thumbnail_filename)
+
+    def _get_fail_path(self, thumbnail_filename):
+        return os.path.join(self.fail_dir, thumbnail_filename)
+
+    def _get_source_mtime(self, src):
+        return int(os.path.getmtime(src))
+
+    def _get_thumbnail_mtime(self, thumbnail_path):
+        with Image.open(thumbnail_path) as image:
+            mtime = image.info[self.KEY_MTIME]
+
+        return mtime
+
+    def _create_thumbnail(self, source_file, thumbnail_filename):
+        # Cannot access source; create neither thumbnail nor fail file
+        if not os.access(source_file, os.R_OK):
+            return False
+
+        width = 0
+        height = 0
+        try:
+            image = Image.open(source_file)
+            image.thumbnail((self.thumb_size, self.thumb_size), Image.ANTIALIAS)
+            dest_path = self._get_thumbnail_path(thumbnail_filename)
+            width = image.size[0]
+            height = image.size[1]
+            success = True
+        except IOError:
+            image = Image.new('RGBA', (1, 1))
+            dest_path = self._get_fail_path(thumbnail_filename)
+            success = False
+
+        pnginfo = PngImagePlugin.PngInfo()
+        pnginfo.add_text(self.KEY_URI, str(self._get_source_uri(source_file)))
+        pnginfo.add_text(self.KEY_MTIME, str(self._get_source_mtime(source_file)))
+        pnginfo.add_text(self.KEY_SIZE, str(os.path.getsize(source_file)))
+
+        if width and height:
+            pnginfo.add_text(self.KEY_WIDTH, str(width))
+            pnginfo.add_text(self.KEY_HEIGHT, str(height))
+
+        # First create temporary file and then move it. This avoids problems
+        # with concurrent access of the thumbnail cache, since "move" is an
+        # atomic operation
+        handle, tmp_filename = tempfile.mkstemp()
+        image.save(handle, pnginfo=pnginfo)
+        handle.close()
+        image.close()
+        os.replace(tmp_filename, dest_path)
+
+        return success
