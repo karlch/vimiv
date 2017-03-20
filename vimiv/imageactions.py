@@ -9,9 +9,10 @@ from subprocess import PIPE, Popen
 from multiprocessing import Pool
 
 import collections
+
+from gi._error import GError
 from gi.repository import GdkPixbuf, Gtk, GLib
 from PIL import Image
-from PIL import PngImagePlugin
 
 
 def save_image(im, filename):
@@ -153,7 +154,7 @@ class Thumbnails:
     def thumbnails_create(self):
         """Create thumbnails for all images in filelist if they do not exist."""
 
-        with Pool(os.cpu_count() * 2) as pool:
+        with Pool(os.cpu_count() + 1) as pool:
             thumb_list = pool.map(self._get_thumbnail_tuple, self.filelist)
 
         return thumb_list
@@ -258,28 +259,33 @@ class ThumbnailManager(object):
         if not os.access(source_file, os.R_OK):
             return False
 
-        width = 0
-        height = 0
         try:
-            image = Image.open(source_file)
-            image.thumbnail((self.thumb_size, self.thumb_size), Image.ANTIALIAS)
+            image = GdkPixbuf.Pixbuf.new_from_file_at_scale(source_file, self.thumb_size, self.thumb_size, True)
             dest_path = self._get_thumbnail_path(thumbnail_filename)
-            width = image.size[0]
-            height = image.size[1]
             success = True
-        except IOError:
-            image = Image.new('RGBA', (1, 1))
+        except GError:
+            image = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, False, 8, 1, 1)
             dest_path = self._get_fail_path(thumbnail_filename)
             success = False
 
-        png_info = PngImagePlugin.PngInfo()
-        png_info.add_text(self.KEY_URI, str(self._get_source_uri(source_file)))
-        png_info.add_text(self.KEY_MTIME, str(self._get_source_mtime(source_file)))
-        png_info.add_text(self.KEY_SIZE, str(os.path.getsize(source_file)))
+        width = 0
+        height = 0
+        try:
+            with Image.open(source_file) as img:
+                width = img.size[0]
+                height = img.size[1]
+        except IOError:
+            pass
 
-        if width and height:
-            png_info.add_text(self.KEY_WIDTH, str(width))
-            png_info.add_text(self.KEY_HEIGHT, str(height))
+        options = {
+            "tEXt::" + self.KEY_URI: str(self._get_source_uri(source_file)),
+            "tEXt::" + self.KEY_MTIME: str(self._get_source_mtime(source_file)),
+            "tEXt::" + self.KEY_SIZE: str(os.path.getsize(source_file))
+        }
+
+        if width > 0 and height > 0:
+            options["tEXt::" + self.KEY_WIDTH] = str(width)
+            options["tEXt::" + self.KEY_HEIGHT] = str(height)
 
         # First create temporary file and then move it. This avoids problems
         # with concurrent access of the thumbnail cache, since "move" is an
@@ -287,8 +293,7 @@ class ThumbnailManager(object):
         handle, tmp_filename = tempfile.mkstemp(dir=self.base_dir)
         os.close(handle)
         os.chmod(tmp_filename, 0o600)
-        image.save(tmp_filename, format="png", pnginfo=png_info)
-        image.close()
+        image.savev(tmp_filename, "png", list(options.keys()), list(options.values()))
         os.replace(tmp_filename, dest_path)
 
         return success
