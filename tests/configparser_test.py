@@ -50,13 +50,14 @@ class ConfigparserTest(TestCase):
     def test_parse_config_empty(self):
         """Parse an empty configfile."""
         # Should set default values
-        settings = parser.parse_config("configfiles/empty_vimivrc")
+        settings = parser.parse_config("configfiles/empty_vimivrc", True)
         self.check_defaults(settings)
 
     def test_unexisting_configfile(self):
         """Parse a non-existing configfile."""
         # Should ignore it and set default values
-        settings = parser.parse_config("configfiles/this_file_does_not_exist")
+        settings = parser.parse_config("configfiles/this_file_does_not_exist",
+                                       True)
         self.check_defaults(settings)
 
     def test_correct_configfile(self):
@@ -88,7 +89,9 @@ class ConfigparserTest(TestCase):
                                 "tilde_in_statusbar": "no"},
                     "ALIASES": {"testalias": "zoom_in"}}
         configfile = self.create_configfile(settings=settings)
-        parsed_settings = parser.parse_config(configfile)
+        parsed_settings = parser.parse_config(configfile, True)
+        # False positive
+        # pylint: disable = unsubscriptable-object
         general = parsed_settings["GENERAL"]
         library = parsed_settings["LIBRARY"]
         aliases = parsed_settings["ALIASES"]

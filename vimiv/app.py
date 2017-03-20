@@ -135,9 +135,8 @@ class Vimiv(Gtk.Application):
             self.directory = mkdtemp()
         # Create settings as soon as we know which config files to use
         elif options.contains("config"):
-            local_config = options.lookup_value("config").unpack()
-            self.settings = parse_config(local_config=local_config,
-                                         system_config=None)
+            configfile = options.lookup_value("config").unpack()
+            self.settings = parse_config(commandline_config=configfile)
         else:
             self.settings = parse_config()
 

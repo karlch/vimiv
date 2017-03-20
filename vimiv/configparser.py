@@ -5,6 +5,7 @@ import configparser
 import os
 import sys
 
+from gi.repository import GLib
 from vimiv.helpers import error_message
 
 
@@ -135,47 +136,48 @@ def add_aliases(config, settings):
     return settings, message
 
 
-def parse_config(local_config="~/.vimiv/vimivrc",
-                 system_config="/etc/vimiv/vimivrc",
-                 running_tests=False):
+def parse_config(commandline_config=None, running_tests=False):
     """Check each configfile for settings and apply them.
 
     Args:
-        running_tests: If True running from testsuite. Do not show error popup.
+        commandline_config: Configfile given by command line flag to parse.
+        running_tests: If True, running from testsuite.
     Return:
         Dictionary of modified settings.
     """
     settings = set_defaults()
-    possible_configfiles = [system_config, local_config]
-    configfiles = [os.path.expanduser(configfile)
-                   for configfile in possible_configfiles
-                   if configfile
-                   and os.path.isfile(os.path.expanduser(configfile))]
+    # Generate list of all possible configuration files
+    configfiles = ["/etc/vimiv/vimivrc"]
+    # We do not want to parse user configuration files when running the test
+    # suite
+    if not running_tests:
+        configfiles += [
+            os.path.join(GLib.get_user_config_dir(), "vimiv/vimivrc"),
+            os.path.expanduser("~/.vimiv/vimivrc")]
+    if commandline_config:
+        configfiles.append(commandline_config)
+
     # Error message, gets filled with invalid sections in the user's configfile.
     # If any exist, a popup is displayed at startup.
     message = ""
 
-    # Iterate through the configfiles overwriting settings accordingly
-    for configfile in configfiles:
-        config = configparser.ConfigParser()
-        try:
-            config.read(configfile)
-        except UnicodeDecodeError:
-            message += "Could not decode configfile " + configfile
-            continue
-        except configparser.MissingSectionHeaderError:
-            message += "Invalid configfile " + configfile
-            continue
-        except configparser.ParsingError as e:
-            message += str(e)
-            continue
+    # Let ConfigParser parse the list of configuration files
+    config = configparser.ConfigParser()
+    try:
+        config.read(configfiles)
+    except UnicodeDecodeError as e:
+        message += "Could not decode configfile.\n" + str(e)
+    except configparser.MissingSectionHeaderError as e:
+        message += "Invalid configfile.\n" + str(e)
+    except configparser.ParsingError as e:
+        message += str(e)
 
-        keys = [key for key in config if key in ["GENERAL", "LIBRARY"]]
-        for key in keys:
-            settings, partial_message = overwrite_section(key, config, settings)
-            message += partial_message
-        settings, partial_message = add_aliases(config, settings)
+    keys = [key for key in config if key in ["GENERAL", "LIBRARY"]]
+    for key in keys:
+        settings, partial_message = overwrite_section(key, config, settings)
         message += partial_message
+    settings, partial_message = add_aliases(config, settings)
+    message += partial_message
 
     if message:
         error_message(message, running_tests=running_tests)
@@ -190,14 +192,14 @@ def parse_keys(running_tests=False):
     Return:
         Dictionary of keybindings.
     """
-    # Check which keyfile should be used
+    keyfiles = ["/etc/vimiv/keys.conf",
+                os.path.join(GLib.get_user_config_dir(), "vimiv/keys.conf"),
+                os.path.expanduser("~/.vimiv/keys.conf")]
+    # Read the list of files
     keys = configparser.ConfigParser()
     try:
-        if os.path.isfile(os.path.expanduser("~/.vimiv/keys.conf")):
-            keys.read(os.path.expanduser("~/.vimiv/keys.conf"))
-        elif os.path.isfile("/etc/vimiv/keys.conf"):
-            keys.read("/etc/vimiv/keys.conf")
-        else:
+        # No file for keybindings found
+        if not keys.read(keyfiles):
             message = "Keyfile not found. Exiting."
             error_message(message)
             sys.exit(1)
