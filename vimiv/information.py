@@ -11,16 +11,14 @@ from gi.repository import GLib, Gtk
 class Information():
     """Class containing information on vimiv."""
 
-    def __init__(self):
-        self.version = "vimiv 0.8.1.dev0"
-
     def get_version(self):
         """Return current version.
 
         Return:
             String of the current version.
         """
-        return self.version
+        import vimiv
+        return "vimiv version %s" % vimiv.__version__
 
     def show_version_info(self, running_tests=False):
         """Show information about current version in a Gtk pop-up.
@@ -41,7 +39,7 @@ class Information():
 
         version_label = Gtk.Label()
         version_label.set_markup(
-            '<span size="xx-large">' + self.version + "</span>")
+            '<span size="xx-large">' + self.get_version() + "</span>")
 
         info_label = Gtk.Label()
         info_label.set_text("vimiv - an image viewer with vim-like keybindings")
