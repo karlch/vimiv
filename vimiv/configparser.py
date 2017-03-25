@@ -26,7 +26,6 @@ def set_defaults():
                "recursive": False,
                "rescale_svg": True,
                "overzoom": False,
-               "cache_thumbnails": True,
                "copy_to_primary": False,
                "commandline_padding": 6,
                "thumb_padding": 10,

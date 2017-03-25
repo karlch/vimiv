@@ -52,7 +52,6 @@ class Thumbnail(object):
         self.possible_sizes = [(64, 64), (128, 128), (256, 256), (512, 512)]
         self.padding = general["thumb_padding"]
         self.current_size = 0
-        self.cache = general["cache_thumbnails"]
         self.directory = os.path.join(self.app.directory, "Thumbnails")
         self.timer_id = GLib.Timeout
         self.elements = []
@@ -193,11 +192,6 @@ class Thumbnail(object):
         self.iconview.grab_focus()
         pos = self.app.index % len(self.app.paths)
         self.move_to_pos(pos)
-
-        # Remove the files again if the thumbnails should not be cached
-        if not self.cache:
-            for thumb_tuple in self.elements:
-                os.remove(thumb_tuple)
 
     def _on_thumbnail_created(self, position, pixbuf):
         self.pixbuf_max[position] = pixbuf
