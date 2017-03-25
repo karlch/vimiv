@@ -6,7 +6,7 @@ from math import floor
 
 from gi.repository import GdkPixbuf, GLib, Gtk
 from vimiv.fileactions import populate
-from vimiv.imageactions import Thumbnails, ThumbnailManager
+from vimiv.thumbnail_manager import ThumbnailManager
 
 
 class Thumbnail(object):
@@ -80,6 +80,7 @@ class Thumbnail(object):
         self.iconview.set_item_width(0)
         self.iconview.set_item_padding(self.padding)
         self.last_focused = ""
+        self.thumbnail_manager = ThumbnailManager()
 
     def iconview_clicked(self, iconview, path):
         """Select and show image when thumbnail was activated.
@@ -112,7 +113,7 @@ class Thumbnail(object):
                 # Re-expand the library if there is no image and the setting
                 # applies
                 if self.app["library"].expand and \
-                        self.app["image"].pixbuf_original.get_height() == 1:
+                                self.app["image"].pixbuf_original.get_height() == 1:
                     self.app["image"].scrolled_win.hide()
                     self.app["library"].scrollable_treeview.set_hexpand(True)
             self.toggled = False
@@ -165,8 +166,6 @@ class Thumbnail(object):
         self.liststore.clear()
         self.pixbuf_max = []
         # Create thumbnails
-        thumbnails = Thumbnails(self.app.paths)
-        self.elements = thumbnails.thumbnails_create()
         # Draw the icon view instead of the image
         if not toggled:
             self.app["image"].scrolled_win.remove(self.app["image"].viewport)
@@ -175,13 +174,17 @@ class Thumbnail(object):
         self.iconview.show()
         self.toggled = True
 
-        # Add all thumbnails to the liststore
-        for i, thumb_tuple in enumerate(self.elements):
-            pixbuf_max = GdkPixbuf.Pixbuf.new_from_file(thumb_tuple.thumbnail)
-            self.pixbuf_max.append(pixbuf_max)
-            pixbuf = self.scale_thumb(pixbuf_max)
-            name = self._get_name(thumb_tuple.original)
-            self.liststore.append([pixbuf, name])
+        # Add initial placeholder for all thumbnails
+        default_pixbuf_max = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.thumbnail_manager.default_icon, *self.size, True)
+        default_pixbuf = self.scale_thumb(default_pixbuf_max)
+        for path in self.app.paths:
+            self.pixbuf_max.append(default_pixbuf_max)
+            name = self._get_name(path)
+            self.liststore.append([default_pixbuf, name])
+
+        # Generate thumbnails asynchronously
+        for i, path in enumerate(self.app.paths):
+            self.thumbnail_manager.get_thumbnail_pixbuf_async(path, i, self._on_thumbnail_created)
 
         # Set columns
         self.calculate_columns()
@@ -195,6 +198,12 @@ class Thumbnail(object):
         if not self.cache:
             for thumb_tuple in self.elements:
                 os.remove(thumb_tuple)
+
+    def _on_thumbnail_created(self, position, pixbuf):
+        self.pixbuf_max[position] = pixbuf
+        scaled = self.scale_thumb(pixbuf)
+        self.liststore[position][0] = scaled
+        self.calculate_columns()
 
     def _get_name(self, filename):
         name = os.path.splitext(os.path.basename(filename))[0]
@@ -219,11 +228,7 @@ class Thumbnail(object):
         # pylint: disable=unsubscriptable-object
         # pylint: disable=unsupported-assignment-operation
         if reload_image:
-            manager = ThumbnailManager()
-            thumb_name = manager.get_thumbnail(filename)
-            self.pixbuf_max[index] = GdkPixbuf.Pixbuf.new_from_file(thumb_name)
-            pixbuf = self.scale_thumb(self.pixbuf_max[index])
-            self.liststore[index] = [pixbuf, name]
+            self.thumbnail_manager.get_thumbnail_pixbuf_async(filename, index, self._on_thumbnail_created)
         else:
             self.liststore[index][1] = name
 
