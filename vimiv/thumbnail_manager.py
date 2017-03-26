@@ -12,13 +12,13 @@ ThumbTuple = collections.namedtuple('ThumbTuple', ['original', 'thumbnail'])
 
 
 class ThumbnailManager:
-    """Thumbnail creation class.
+    """The ThumbnailManager class provides an asynchronous mechanism to load thumbnails.
 
     Attributes:
-        filelist: List of files to operate on.
         large: the thumbnail managing standard specifies two thumbnail sizes
                256x256 (large) and 128x128 (normal)
-        default_thumbnail: Default icon if thumbnail creation fails.
+        default_icon: Default icon if thumbnails are not yet loaded.
+        error_icon: The path to the icon which is used, when thumbnail creation fails.
     """
 
     _cpu_count = os.cpu_count()
@@ -30,11 +30,10 @@ class ThumbnailManager:
     _thread_pool = Pool(_cpu_count)
 
     def __init__(self, large=True):
-        """Create default settings.
+        """Constructs a new ThumbnailManager
 
         Args:
-            filelist: List of files to operate on.
-            large: Size of thumbnails that are created.
+            large: Size of thumbnails that are created. If true 256x256 else 128x128
         """
         super(ThumbnailManager, self).__init__()
         self.thumbnail_store = ThumbnailStore(large=large)
@@ -44,25 +43,50 @@ class ThumbnailManager:
         self.error_icon = icon_theme.lookup_icon("dialog-error", 256, 0).get_filename()
         self.default_icon = icon_theme.lookup_icon("image-x-generic", 256, 0).get_filename()
 
-    def _get_thumbnail_tuple(self, source_file, position, callback):
+    def _do_get_thumbnail_at_scale(self, source_file, position, callback, size):
         thumbnail_path = self.thumbnail_store.get_thumbnail(source_file)
         if thumbnail_path is None:
             thumbnail_path = self.error_icon
         pixbuf = GdkPixbuf.Pixbuf.new_from_file(thumbnail_path)
+        pixbuf = self.scale_pixbuf(pixbuf, size)
 
         return callback, position, pixbuf
+
+    def scale_pixbuf(self, pixbuf, size):
+        """Scales the thumbnail image to the given size keeping the aspect ratio.
+
+        Either the width or the height of the returned pixbuf is `size` large, depending
+        on the aspect ratio.
+
+        Args:
+            pixbuf: The pixbuf to scale
+            size: The size of the new width or height
+
+        Return:
+            The scaled pixbuf.
+        """
+        width = size
+        height = size
+        ratio = pixbuf.get_width() / pixbuf.get_height()
+        if ratio > 1:
+            height /= ratio
+        else:
+            width *= ratio
+
+        pixbuf = pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
+        return pixbuf
 
     @staticmethod
     def _do_callback(result):
         GLib.idle_add(*result)
 
-    def get_thumbnail_pixbuf_async(self, filename, position, callback):
-        self._thread_pool.apply_async(self._get_thumbnail_tuple, (filename, position, callback),
+    def get_thumbnail_at_scale_async(self, filename, position, size, callback):
+        self._thread_pool.apply_async(self._do_get_thumbnail_at_scale, (filename, position, callback, size),
                                       callback=self._do_callback)
 
 
 class ThumbnailStore(object):
-    """The ThumbnailManager implements freedestop.org's Thumbnail Managing
+    """The ThumbnailStore implements freedestop.org's Thumbnail Managing
     Standard.
     """
 

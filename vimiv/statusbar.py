@@ -145,7 +145,7 @@ class Statusbar(object):
             message = "{0}/{1}  {2}  {3}".format(pos + 1,
                                                  len(self.app.paths),
                                                  name,
-                                                 self.app["thumbnail"].size)
+                                                 self.app["thumbnail"].get_zoom_level())
             self.left_label.set_text(message)
         # In commandline
         elif "COMMAND" in mode:
