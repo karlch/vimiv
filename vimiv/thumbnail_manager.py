@@ -61,14 +61,14 @@ class ThumbnailManager:
         self.default_icon = icon_theme.lookup_icon("image-x-generic", 256,
                                                    0).get_filename()
 
-    def _do_get_thumbnail_at_scale(self, source_file, position, callback, size):
+    def _do_get_thumbnail_at_scale(self, source_file, size, callback, args):
         thumbnail_path = self.thumbnail_store.get_thumbnail(source_file)
         if thumbnail_path is None:
             thumbnail_path = self.error_icon
         pixbuf = Pixbuf.new_from_file(thumbnail_path)
         pixbuf = self.scale_pixbuf(pixbuf, size)
 
-        return callback, position, pixbuf
+        return callback, pixbuf, args
 
     @staticmethod
     def scale_pixbuf(pixbuf, size):
@@ -101,9 +101,18 @@ class ThumbnailManager:
     def _do_callback(result):
         GLib.idle_add(*result)
 
-    def get_thumbnail_at_scale_async(self, filename, position, size, callback):
+    def get_thumbnail_at_scale_async(self, filename, size, callback, *args):
+        """Creates the thumbnail for the given filename at the given size and
+        then calls the given callback function with the resulting pixbuf.
+
+        Args:
+            filename: The filename to get the thumbnail for
+            size: The size the returned pixbuf is scaled to
+            callback: A callable of form callback(pixbuf, *args)
+            args: Any additional arguments that can be passed to callback
+        """
         self._thread_pool.apply_async(self._do_get_thumbnail_at_scale,
-                                      (filename, position, callback, size),
+                                      (filename, size, callback, args),
                                       callback=self._do_callback)
 
 

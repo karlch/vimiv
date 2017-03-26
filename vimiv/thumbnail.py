@@ -190,9 +190,9 @@ class Thumbnail(object):
         size = self.get_zoom_level()[0]
         for i, path in enumerate(self.app.paths):
             self.thumbnail_manager.get_thumbnail_at_scale_async(
-                path, i, size, self._on_thumbnail_created)
+                path, size, self._on_thumbnail_created, i)
 
-    def _on_thumbnail_created(self, position, pixbuf):
+    def _on_thumbnail_created(self, pixbuf, position):
         # Subsctipting the liststore directly works fine
         # pylint: disable=unsubscriptable-object
         self.liststore[position][0] = pixbuf
@@ -220,8 +220,8 @@ class Thumbnail(object):
         # pylint: disable=unsubscriptable-object
         if reload_image:
             self.thumbnail_manager.get_thumbnail_at_scale_async(
-                filename, index, self.get_zoom_level()[0],
-                self._on_thumbnail_created)
+                filename, self.get_zoom_level()[0],
+                self._on_thumbnail_created, index)
         else:
             self.liststore[index][1] = name
 
