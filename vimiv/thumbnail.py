@@ -17,16 +17,12 @@ class Thumbnail(object):
     Attributes:
         app: The main vimiv application to interact with.
         toggled: If True thumbnail mode is open.
-        current_zoom_level: Tuple containing the size of thumbnails.
-        max_size: Tuple containing the maximum size of thumbnails.
         zoom_levels: List of tuples containing the possible thumbnail sizes.
         zoom_level_index: Position in the possible_sizes list.
         directory: Directory in which thumbnails are stored.
         timer_id: ID of the currently running GLib.Timeout.
             creation failed.
-        pos: Current position in the Gtk.IconView.
         elements: List containing names of current thumbnail-files.
-        pixbuf_max: List containing current thumbnail-pixbufs at maximum size.
         markup: Markup string used to highlight search results.
         liststore: Gtk.ListStore containing thumbnail pixbufs and names.
         iconview: Gtk.IconView to display thumbnails.
@@ -107,7 +103,7 @@ class Thumbnail(object):
                 # Re-expand the library if there is no image and the setting
                 # applies
                 if self.app["library"].expand and \
-                                self.app["image"].pixbuf_original.get_height() == 1:
+                        self.app["image"].pixbuf_original.get_height() == 1:
                     self.app["image"].scrolled_win.hide()
                     self.app["library"].scrollable_treeview.set_hexpand(True)
             self.toggled = False
@@ -141,10 +137,12 @@ class Thumbnail(object):
         if self.app["library"].grid.is_visible():
             width -= self.app["library"].width
 
-        self.columns = floor((width - 12) / (self.get_zoom_level()[0] + 2 * self.padding))
+        self.columns = floor(
+            (width - 12) / (self.get_zoom_level()[0] + 2 * self.padding))
         if self.columns < 1:
             self.columns = 1
-        free_space = (width - 12) % (self.get_zoom_level()[0] + 2 * self.padding)
+        free_space = (width - 12) % (
+            self.get_zoom_level()[0] + 2 * self.padding)
         padding = floor(free_space / self.columns)
         self.iconview.set_column_spacing(padding)
         self.iconview.set_columns(self.columns)
@@ -157,8 +155,7 @@ class Thumbnail(object):
         """
         # Clean liststore
         self.liststore.clear()
-        self.pixbuf_max = []
-        # Create thumbnails
+
         # Draw the icon view instead of the image
         if not toggled:
             self.app["image"].scrolled_win.remove(self.app["image"].viewport)
@@ -168,12 +165,13 @@ class Thumbnail(object):
         self.toggled = True
 
         # Add initial placeholder for all thumbnails
-        default_pixbuf_max = GdkPixbuf.Pixbuf.new_from_file_at_scale(self.thumbnail_manager.default_icon,
-                                                                     *self.get_zoom_level(), True)
+        default_pixbuf_max = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            self.thumbnail_manager.default_icon,
+            *self.get_zoom_level(), True)
         size = self.get_zoom_level()[0]
-        default_pixbuf = self.thumbnail_manager.scale_pixbuf(default_pixbuf_max, size)
+        default_pixbuf = self.thumbnail_manager.scale_pixbuf(default_pixbuf_max,
+                                                             size)
         for path in self.app.paths:
-            self.pixbuf_max.append(default_pixbuf_max)
             name = self._get_name(path)
             self.liststore.append([default_pixbuf, name])
 
@@ -191,9 +189,12 @@ class Thumbnail(object):
     def reload_all(self):
         size = self.get_zoom_level()[0]
         for i, path in enumerate(self.app.paths):
-            self.thumbnail_manager.get_thumbnail_at_scale_async(path, i, size, self._on_thumbnail_created)
+            self.thumbnail_manager.get_thumbnail_at_scale_async(
+                path, i, size, self._on_thumbnail_created)
 
     def _on_thumbnail_created(self, position, pixbuf):
+        # Subsctipting the liststore directly works fine
+        # pylint: disable=unsubscriptable-object
         self.liststore[position][0] = pixbuf
 
     def _get_name(self, filename):
@@ -215,11 +216,12 @@ class Thumbnail(object):
         name = self._get_name(filename)
         if index in self.app["commandline"].search_positions:
             name = self.markup + "<b>" + name + "</b></span>"
-        # Subsctipting the liststore directly works fine
+
         # pylint: disable=unsubscriptable-object
-        # pylint: disable=unsupported-assignment-operation
         if reload_image:
-            self.thumbnail_manager.get_thumbnail_at_scale_async(filename, index, self._on_thumbnail_created)
+            self.thumbnail_manager.get_thumbnail_at_scale_async(
+                filename, index, self.get_zoom_level()[0],
+                self._on_thumbnail_created)
         else:
             self.liststore[index][1] = name
 
@@ -312,4 +314,3 @@ class Thumbnail(object):
 
     def get_zoom_level(self):
         return self.zoom_levels[self.zoom_level_index]
-

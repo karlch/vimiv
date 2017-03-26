@@ -1,3 +1,15 @@
+"""The thumbnail_manager module provides classes to store and load thumbnails
+from a shared thumbnail cache.
+
+The thumbnail store transparently creates and loads thumbnails according to the
+freedesktop.org thumbnail management standard.
+The thumbnail manager provides a asynchronous mechanism to load thumbnails from
+the store.
+
+If possible, you should avoid using the store directly but use the manager
+instead.
+"""
+
 import collections
 import hashlib
 import os
@@ -7,18 +19,21 @@ from multiprocessing.pool import ThreadPool as Pool
 from PIL import Image
 from gi._error import GError
 from gi.repository import Gtk, GLib, GdkPixbuf
+from gi.repository.GdkPixbuf import Pixbuf
 
 ThumbTuple = collections.namedtuple('ThumbTuple', ['original', 'thumbnail'])
 
 
 class ThumbnailManager:
-    """The ThumbnailManager class provides an asynchronous mechanism to load thumbnails.
+    """The ThumbnailManager class provides an asynchronous mechanism to load
+     thumbnails.
 
     Attributes:
         large: the thumbnail managing standard specifies two thumbnail sizes
                256x256 (large) and 128x128 (normal)
         default_icon: Default icon if thumbnails are not yet loaded.
-        error_icon: The path to the icon which is used, when thumbnail creation fails.
+        error_icon: The path to the icon which is used, when thumbnail creation
+                    fails.
     """
 
     _cpu_count = os.cpu_count()
@@ -33,30 +48,35 @@ class ThumbnailManager:
         """Constructs a new ThumbnailManager
 
         Args:
-            large: Size of thumbnails that are created. If true 256x256 else 128x128
+            large: Size of thumbnails that are created. If true 256x256 else
+                   128x128.
         """
         super(ThumbnailManager, self).__init__()
         self.thumbnail_store = ThumbnailStore(large=large)
 
         # Default icon if thumbnail creation fails
         icon_theme = Gtk.IconTheme.get_default()
-        self.error_icon = icon_theme.lookup_icon("dialog-error", 256, 0).get_filename()
-        self.default_icon = icon_theme.lookup_icon("image-x-generic", 256, 0).get_filename()
+        self.error_icon = icon_theme.lookup_icon("dialog-error", 256,
+                                                 0).get_filename()
+        self.default_icon = icon_theme.lookup_icon("image-x-generic", 256,
+                                                   0).get_filename()
 
     def _do_get_thumbnail_at_scale(self, source_file, position, callback, size):
         thumbnail_path = self.thumbnail_store.get_thumbnail(source_file)
         if thumbnail_path is None:
             thumbnail_path = self.error_icon
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file(thumbnail_path)
+        pixbuf = Pixbuf.new_from_file(thumbnail_path)
         pixbuf = self.scale_pixbuf(pixbuf, size)
 
         return callback, position, pixbuf
 
-    def scale_pixbuf(self, pixbuf, size):
-        """Scales the thumbnail image to the given size keeping the aspect ratio.
+    @staticmethod
+    def scale_pixbuf(pixbuf, size):
+        """Scales the thumbnail image to the given size keeping the aspect
+        ratio.
 
-        Either the width or the height of the returned pixbuf is `size` large, depending
-        on the aspect ratio.
+        Either the width or the height of the returned pixbuf is `size` large,
+        depending on the aspect ratio.
 
         Args:
             pixbuf: The pixbuf to scale
@@ -73,7 +93,8 @@ class ThumbnailManager:
         else:
             width *= ratio
 
-        pixbuf = pixbuf.scale_simple(width, height, GdkPixbuf.InterpType.BILINEAR)
+        pixbuf = pixbuf.scale_simple(width, height,
+                                     GdkPixbuf.InterpType.BILINEAR)
         return pixbuf
 
     @staticmethod
@@ -81,7 +102,8 @@ class ThumbnailManager:
         GLib.idle_add(*result)
 
     def get_thumbnail_at_scale_async(self, filename, position, size, callback):
-        self._thread_pool.apply_async(self._do_get_thumbnail_at_scale, (filename, position, callback, size),
+        self._thread_pool.apply_async(self._do_get_thumbnail_at_scale,
+                                      (filename, position, callback, size),
                                       callback=self._do_callback)
 
 
@@ -97,6 +119,12 @@ class ThumbnailStore(object):
     KEY_HEIGHT = "Thumb::Image::Height"
 
     def __init__(self, large=True):
+        """Constructs a new ThumbnailStore
+
+        Args:
+            large: Size of thumbnails that are created. If true 256x256 else
+                   128x128.
+        """
         super(ThumbnailStore, self).__init__()
         import vimiv
         self.base_dir = os.path.join(GLib.get_user_cache_dir(), "thumbnails")
@@ -108,6 +136,13 @@ class ThumbnailStore(object):
         self._ensure_dirs_exist()
 
     def use_large_thumbnails(self, enabled=True):
+        """Specifies whether this thumbnail store uses large thumbnails.
+
+        Large thumbnails have 256x256 pixels and non-large thumbnails 128x128.
+
+        Args:
+            enabled: If true large thumbnails will be used.
+        """
         if enabled:
             self.thumbnail_dir = os.path.join(self.base_dir, "large")
             self.thumb_size = 256
@@ -116,7 +151,17 @@ class ThumbnailStore(object):
             self.thumb_size = 128
 
     def get_thumbnail(self, filename):
+        """Gets the path of the thumbnail of the given filename.
 
+        If the requested thumbnail does not yet exist, it will first be created
+        before returning its path.
+
+        Args:
+            filename: The filename to get the thumbnail for.
+
+        Returns:
+            The path of the thumbnail file or None if thumbnail creation failed.
+        """
         # Don't create thumbnails for thumbnail cache
         if filename.startswith(self.base_dir):
             return filename
@@ -185,11 +230,12 @@ class ThumbnailStore(object):
             return False
 
         try:
-            image = GdkPixbuf.Pixbuf.new_from_file_at_scale(source_file, self.thumb_size, self.thumb_size, True)
+            image = Pixbuf.new_from_file_at_scale(source_file, self.thumb_size,
+                                                  self.thumb_size, True)
             dest_path = self._get_thumbnail_path(thumbnail_filename)
             success = True
         except GError:
-            image = GdkPixbuf.Pixbuf.new(GdkPixbuf.Colorspace.RGB, False, 8, 1, 1)
+            image = Pixbuf.new(GdkPixbuf.Colorspace.RGB, False, 8, 1, 1)
             dest_path = self._get_fail_path(thumbnail_filename)
             success = False
 
@@ -218,7 +264,8 @@ class ThumbnailStore(object):
         handle, tmp_filename = tempfile.mkstemp(dir=self.base_dir)
         os.close(handle)
         os.chmod(tmp_filename, 0o600)
-        image.savev(tmp_filename, "png", list(options.keys()), list(options.values()))
+        image.savev(tmp_filename, "png", list(options.keys()),
+                    list(options.values()))
         os.replace(tmp_filename, dest_path)
 
         return success
