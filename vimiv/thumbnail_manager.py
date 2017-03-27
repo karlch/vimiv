@@ -1,9 +1,8 @@
-"""The thumbnail_manager module provides classes to store and load thumbnails
-from a shared thumbnail cache.
+"""Provides classes to store and load thumbnails from a shared cache.
 
-The thumbnail store transparently creates and loads thumbnails according to the
+The ThumbnailStore transparently creates and loads thumbnails according to the
 freedesktop.org thumbnail management standard.
-The thumbnail manager provides a asynchronous mechanism to load thumbnails from
+The ThumbnailManager provides a asynchronous mechanism to load thumbnails from
 the store.
 
 If possible, you should avoid using the store directly but use the manager
@@ -25,8 +24,7 @@ ThumbTuple = collections.namedtuple('ThumbTuple', ['original', 'thumbnail'])
 
 
 class ThumbnailManager:
-    """The ThumbnailManager class provides an asynchronous mechanism to load
-     thumbnails.
+    """Provides an asynchronous mechanism to load thumbnails.
 
     Attributes:
         large: the thumbnail managing standard specifies two thumbnail sizes
@@ -45,7 +43,7 @@ class ThumbnailManager:
     _thread_pool = Pool(_cpu_count)
 
     def __init__(self, large=True):
-        """Constructs a new ThumbnailManager
+        """Construct a new ThumbnailManager.
 
         Args:
             large: Size of thumbnails that are created. If true 256x256 else
@@ -72,8 +70,7 @@ class ThumbnailManager:
 
     @staticmethod
     def scale_pixbuf(pixbuf, size):
-        """Scales the thumbnail image to the given size keeping the aspect
-        ratio.
+        """Scale the pixbuf to the given size keeping the aspect ratio.
 
         Either the width or the height of the returned pixbuf is `size` large,
         depending on the aspect ratio.
@@ -102,7 +99,9 @@ class ThumbnailManager:
         GLib.idle_add(*result)
 
     def get_thumbnail_at_scale_async(self, filename, size, callback, *args):
-        """Creates the thumbnail for the given filename at the given size and
+        """Create the thumbnail for 'filename' and return it via 'callback'.
+
+        Creates the thumbnail for the given filename at the given size and
         then calls the given callback function with the resulting pixbuf.
 
         Args:
@@ -117,9 +116,7 @@ class ThumbnailManager:
 
 
 class ThumbnailStore(object):
-    """The ThumbnailStore implements freedestop.org's Thumbnail Managing
-    Standard.
-    """
+    """Implements freedestop.org's Thumbnail Managing Standard."""
 
     KEY_URI = "Thumb::URI"
     KEY_MTIME = "Thumb::MTime"
@@ -128,7 +125,7 @@ class ThumbnailStore(object):
     KEY_HEIGHT = "Thumb::Image::Height"
 
     def __init__(self, large=True):
-        """Constructs a new ThumbnailStore
+        """Construct a new ThumbnailStore.
 
         Args:
             large: Size of thumbnails that are created. If true 256x256 else
@@ -145,7 +142,7 @@ class ThumbnailStore(object):
         self._ensure_dirs_exist()
 
     def use_large_thumbnails(self, enabled=True):
-        """Specifies whether this thumbnail store uses large thumbnails.
+        """Specify whether this thumbnail store uses large thumbnails.
 
         Large thumbnails have 256x256 pixels and non-large thumbnails 128x128.
 
@@ -160,7 +157,7 @@ class ThumbnailStore(object):
             self.thumb_size = 128
 
     def get_thumbnail(self, filename):
-        """Gets the path of the thumbnail of the given filename.
+        """Get the path of the thumbnail of the given filename.
 
         If the requested thumbnail does not yet exist, it will first be created
         before returning its path.
