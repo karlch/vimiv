@@ -196,6 +196,7 @@ class Thumbnail(object):
         # Subsctipting the liststore directly works fine
         # pylint: disable=unsubscriptable-object
         self.liststore[position][0] = pixbuf
+        self.move_to_pos(self.app.get_pos(force_widget="thu"))
 
     def _get_name(self, filename):
         name = os.path.splitext(os.path.basename(filename))[0]
