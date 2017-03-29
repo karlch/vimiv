@@ -32,8 +32,6 @@ class Commands(object):
         self.add_command("center", self.app["image"].center_window)
         self.add_command("clear_trash", self.app["fileextras"].clear,
                          default_args=["Trash"])
-        self.add_command("clear_thumbs", self.app["fileextras"].clear,
-                         default_args=["Thumbnails"])
         self.add_command("copy_basename", self.app["fileextras"].copy_name,
                          default_args=[False])
         self.add_command("copy_abspath", self.app["fileextras"].copy_name,

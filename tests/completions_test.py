@@ -106,29 +106,29 @@ class CompletionsTest(VimivTestCase):
     def test_tabbing(self):
         """Tabbing through completions."""
         # Complete to last matching character
-        self.completions.entry.set_text(":cl")
+        self.completions.entry.set_text(":co")
         self.completions.complete()
-        expected_text = ":clear_t"
+        expected_text = ":copy_"
         received_text = self.completions.entry.get_text()
         self.assertEqual(expected_text, received_text)
         # First result
         liststore = self.completions.treeview.get_model()
         self.vimiv["completions"].complete()
-        expected_text = "clear_thumbs"
+        expected_text = "copy_abspath"
         selected_path = self.completions.treeview.get_cursor()[0]
         selected_index = selected_path.get_indices()[0]
         selected_text = liststore[selected_index][0]
         self.assertEqual(expected_text, selected_text)
         # Second result
         self.vimiv["completions"].complete()
-        expected_text = "clear_trash"
+        expected_text = "copy_basename"
         selected_path = self.completions.treeview.get_cursor()[0]
         selected_index = selected_path.get_indices()[0]
         selected_text = liststore[selected_index][0]
         self.assertEqual(expected_text, selected_text)
         # First again
         self.vimiv["completions"].complete(inverse=True)
-        expected_text = "clear_thumbs"
+        expected_text = "copy_abspath"
         selected_path = self.completions.treeview.get_cursor()[0]
         selected_index = selected_path.get_indices()[0]
         selected_text = liststore[selected_index][0]
@@ -136,15 +136,15 @@ class CompletionsTest(VimivTestCase):
         # Now activate the completion
         self.completions.activate(None, None, None)
         entry_text = self.completions.entry.get_text()
-        expected_text = ":clear_thumbs"
+        expected_text = ":copy_abspath"
         self.assertEqual(expected_text, entry_text)
 
     def test_best_match_with_prefix(self):
         """Complete to best match with a prefixed number."""
         # Complete to last matching character
-        self.completions.entry.set_text(":2cl")
+        self.completions.entry.set_text(":2co")
         self.completions.complete()
-        expected_text = ":2clear_t"
+        expected_text = ":2copy_"
         received_text = self.completions.entry.get_text()
         self.assertEqual(expected_text, received_text)
 
