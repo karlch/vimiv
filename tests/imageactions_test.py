@@ -74,22 +74,6 @@ class ImageActionsTest(TestCase):
         imageactions.flip_file(self.files, True)
         self.assertTrue(compare_images(self.orig, self.filename))
 
-    def test_thumbnails_create(self):
-        """Creation of thumbnail files."""
-        expected_name = \
-            self.files[0].replace("/", "___").lstrip("___") + \
-            ".thumbnail_128x128.png"
-        thumbnails = imageactions.Thumbnails(self.files, (128, 128),
-                                             self.thumbdir)
-        thumbnails.thumbnails_create()
-        # Check if thumbnail exists
-        thumbnail = os.path.join(self.thumbdir, expected_name)
-        self.assertTrue(os.path.isfile(thumbnail))
-        # Check its size
-        with Image.open(thumbnail) as im:
-            thumbnail_size = max(im.size[0], im.size[1])
-            self.assertEqual(thumbnail_size, 128)
-
     def test_autorotate(self):
         """Autorotate files."""
         # Method jhead
