@@ -52,7 +52,7 @@ test:
 	@scripts/run_tests.sh
 
 lint:
-	pylint vimiv/*.py vimiv/vimiv tests/*.py
+	pylint vimiv/*.py tests/*.py
 	pydocstyle vimiv/*.py vimiv/vimiv tests/*.py
 	pycodestyle --config=.pycodestyle vimiv/*.py vimiv/vimiv tests/*.py
 
