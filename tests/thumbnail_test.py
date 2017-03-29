@@ -30,9 +30,6 @@ class ThumbnailTest(VimivTestCase):
     def setUpClass(cls):
         cls.init_test(cls, ["vimiv/testimages/arch-logo.png"])
         cls.thumb = cls.vimiv["thumbnail"]
-        cls.thumb.size = (128, 128)
-        cls.thumb.max_size = (256, 256)
-        cls.thumb.sizes = [(64, 64), (128, 128), (256, 256)]
 
     def setUp(self):
         self.thumb.toggle()
@@ -57,7 +54,7 @@ class ThumbnailTest(VimivTestCase):
 
     def test_calculate_columns(self):
         """Calculate thumbnail columns."""
-        expected_columns = int(800 / (self.thumb.size[0] + 30))
+        expected_columns = int(800 / (self.thumb.get_zoom_level()[0] + 30))
         received_columns = self.thumb.iconview.get_columns()
         self.assertEqual(expected_columns, received_columns)
 
@@ -112,54 +109,33 @@ class ThumbnailTest(VimivTestCase):
 
     def test_zoom(self):
         """Zoom in thumbnail mode."""
-        self.assertEqual(self.thumb.size, (128, 128))
+        # Zoom to the value of 128
+        while self.thumb.get_zoom_level()[0] > 128:
+            self.thumb.zoom(False)
+        while self.thumb.get_zoom_level()[0] < 128:
+            self.thumb.zoom(True)
+        self.assertEqual(self.thumb.get_zoom_level(), (128, 128))
+        # Zoom in and check thumbnail size and pixbuf
         self.thumb.zoom(True)
-        self.assertEqual(self.thumb.size, (256, 256))
+        self.assertEqual(self.thumb.get_zoom_level(), (256, 256))
         pixbuf = list(self.thumb.liststore)[0][0]
         width = pixbuf.get_width()
         height = pixbuf.get_height()
         scale = max(width, height)
         self.assertEqual(scale, 256)
+        # Zoom in twice should end at (512, 512)
         self.thumb.zoom(True)
-        # This is the max size, one more zoom shouldn't change anything
-        self.assertEqual(self.thumb.size, (256, 256))
+        self.thumb.zoom(True)
+        self.assertEqual(self.thumb.get_zoom_level(), (512, 512))
         # Zoom out
         self.thumb.zoom(False)
-        self.assertEqual(self.thumb.size, (128, 128))
+        self.thumb.zoom(False)
+        self.assertEqual(self.thumb.get_zoom_level(), (128, 128))
         # Zoom directly with the window implementation of zoom
         self.vimiv["window"].zoom(True)
-        self.assertEqual(self.thumb.size, (256, 256))
+        self.assertEqual(self.thumb.get_zoom_level(), (256, 256))
         self.vimiv["window"].zoom(False)
-        self.assertEqual(self.thumb.size, (128, 128))
-
-    def test_thumb_sizes(self):
-        """Parse sizes for thumbnails."""
-        # Large max size
-        self.thumb.max_size = (1000, 1000)
-        self.thumb.set_sizes()
-        expected_sizes = create_tuples(512)
-        self.assertEqual(self.thumb.sizes, expected_sizes)
-        # Small max size
-        self.thumb.max_size = (128, 128)
-        self.thumb.set_sizes()
-        expected_sizes = create_tuples(128)
-        self.assertEqual(self.thumb.sizes, expected_sizes)
-        # Medium max size and insert a value
-        self.thumb.max_size = (256, 256)
-        self.thumb.size = (200, 200)
-        self.thumb.set_sizes()
-        expected_sizes = create_tuples(256, 200)
-        self.assertEqual(self.thumb.sizes, expected_sizes)
-        # To large size
-        self.thumb.size = (1000, 1000)
-        self.thumb.set_sizes()
-        expected_sizes = create_tuples(256)
-        self.assertEqual(self.thumb.sizes, expected_sizes)
-        self.assertEqual(self.thumb.size, (256, 256))
-        # Reset
-        self.thumb.size = (128, 128)
-        self.thumb.max_size = (256, 256)
-        self.thumb.set_sizes()
+        self.assertEqual(self.thumb.get_zoom_level(), (128, 128))
 
     def tearDown(self):
         if self.thumb.toggled:
