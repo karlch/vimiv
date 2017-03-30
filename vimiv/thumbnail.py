@@ -176,7 +176,7 @@ class Thumbnail(object):
             self.liststore.append([default_pixbuf, name])
 
         # Generate thumbnails asynchronously
-        self.reload_all()
+        self.reload_all(ignore_cache=True)
 
         # Set columns
         self.calculate_columns()
@@ -186,11 +186,12 @@ class Thumbnail(object):
         pos = self.app.index % len(self.app.paths)
         self.move_to_pos(pos)
 
-    def reload_all(self):
+    def reload_all(self, ignore_cache=False):
         size = self.get_zoom_level()[0]
         for i, path in enumerate(self.app.paths):
             self.thumbnail_manager.get_thumbnail_at_scale_async(
-                path, size, self._on_thumbnail_created, i)
+                path, size, self._on_thumbnail_created, i,
+                ignore_cache=ignore_cache)
 
     def _on_thumbnail_created(self, pixbuf, position):
         # Subsctipting the liststore directly works fine
@@ -222,7 +223,7 @@ class Thumbnail(object):
         if reload_image:
             self.thumbnail_manager.get_thumbnail_at_scale_async(
                 filename, self.get_zoom_level()[0],
-                self._on_thumbnail_created, index)
+                self._on_thumbnail_created, index, ignore_cache=True)
         else:
             self.liststore[index][1] = name
 
