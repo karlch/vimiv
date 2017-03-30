@@ -6,7 +6,7 @@ from math import floor
 
 from gi.repository import GdkPixbuf, GLib, Gtk
 from vimiv.fileactions import populate
-from vimiv.imageactions import Thumbnails
+from vimiv.thumbnail_manager import ThumbnailManager
 
 
 class Thumbnail(object):
@@ -17,17 +17,12 @@ class Thumbnail(object):
     Attributes:
         app: The main vimiv application to interact with.
         toggled: If True thumbnail mode is open.
-        size: Tuple containing the size of thumbnails.
-        max_size: Tuple containing the maximum size of thumbnails.
-        possible_sizes: List of tuples containing the possible thumbnail sizes.
-        current_size: Position in the possible_sizes list.
-        cache: If True, cache thumbnails.
+        zoom_levels: List of tuples containing the possible thumbnail sizes.
+        zoom_level_index: Position in the possible_sizes list.
         directory: Directory in which thumbnails are stored.
         timer_id: ID of the currently running GLib.Timeout.
             creation failed.
-        pos: Current position in the Gtk.IconView.
         elements: List containing names of current thumbnail-files.
-        pixbuf_max: List containing current thumbnail-pixbufs at maximum size.
         markup: Markup string used to highlight search results.
         liststore: Gtk.ListStore containing thumbnail pixbufs and names.
         iconview: Gtk.IconView to display thumbnails.
@@ -47,20 +42,15 @@ class Thumbnail(object):
 
         # Settings
         self.toggled = False
-        self.size = general["thumbsize"]
-        self.max_size = general["thumb_maxsize"]
-        self.possible_sizes = [(64, 64), (128, 128), (256, 256), (512, 512)]
         self.padding = general["thumb_padding"]
-        self.current_size = 0
-        self.cache = general["cache_thumbnails"]
         self.directory = os.path.join(self.app.directory, "Thumbnails")
         self.timer_id = GLib.Timeout
         self.elements = []
-        self.pixbuf_max = []
         self.markup = self.app["library"].markup.replace("fore", "back")
 
-        # Prepare thumbnail sizes for zooming of thumbnails
-        self.set_sizes()
+        zoom_level = general["default_thumbsize"]
+        self.zoom_levels = [(64, 64), (128, 128), (256, 256), (512, 512)]
+        self.zoom_level_index = self.zoom_levels.index(zoom_level)
 
         # Creates the Gtk elements necessary for thumbnail mode, fills them
         # and focuses the iconview
@@ -80,6 +70,7 @@ class Thumbnail(object):
         self.iconview.set_item_width(0)
         self.iconview.set_item_padding(self.padding)
         self.last_focused = ""
+        self.thumbnail_manager = ThumbnailManager()
 
     def iconview_clicked(self, iconview, path):
         """Select and show image when thumbnail was activated.
@@ -142,14 +133,17 @@ class Thumbnail(object):
 
     def calculate_columns(self):
         """Calculate how many columns fit into the current window."""
-        window_width = self.app["window"].winsize[0]
+        width = self.app["window"].winsize[0]
         if self.app["library"].grid.is_visible():
-            width = window_width - self.app["library"].width
-        else:
-            width = window_width
-        self.columns = floor((width - 12) / (self.size[0] + 2 * self.padding))
-        free_space = (width - 12) % (self.size[0] + 2 * self.padding)
-        padding = floor(free_space / (self.columns))
+            width -= self.app["library"].width
+
+        self.columns = floor(
+            (width - 12) / (self.get_zoom_level()[0] + 2 * self.padding))
+        if self.columns < 1:
+            self.columns = 1
+        free_space = (width - 12) % (
+            self.get_zoom_level()[0] + 2 * self.padding)
+        padding = floor(free_space / self.columns)
         self.iconview.set_column_spacing(padding)
         self.iconview.set_columns(self.columns)
 
@@ -161,10 +155,7 @@ class Thumbnail(object):
         """
         # Clean liststore
         self.liststore.clear()
-        self.pixbuf_max = []
-        # Create thumbnails
-        thumbnails = Thumbnails(self.app.paths, self.sizes[-1], self.directory)
-        self.elements = thumbnails.thumbnails_create()
+
         # Draw the icon view instead of the image
         if not toggled:
             self.app["image"].scrolled_win.remove(self.app["image"].viewport)
@@ -173,29 +164,47 @@ class Thumbnail(object):
         self.iconview.show()
         self.toggled = True
 
-        # Add all thumbnails to the liststore
-        for i, thumb in enumerate(self.elements):
-            pixbuf_max = GdkPixbuf.Pixbuf.new_from_file(thumb)
-            self.pixbuf_max.append(pixbuf_max)
-            pixbuf = self.scale_thumb(pixbuf_max)
-            name = thumb.split("___")[-1].split(".thumbnail")[0]
-            name = os.path.splitext(name)[0]
-            if self.app.paths[i] in self.app["mark"].marked:
-                name = name + " [*]"
-            self.liststore.append([pixbuf, name])
+        # Add initial placeholder for all thumbnails
+        default_pixbuf_max = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            self.thumbnail_manager.default_icon,
+            *self.get_zoom_level(), True)
+        size = self.get_zoom_level()[0]
+        default_pixbuf = self.thumbnail_manager.scale_pixbuf(default_pixbuf_max,
+                                                             size)
+        for path in self.app.paths:
+            name = self._get_name(path)
+            self.liststore.append([default_pixbuf, name])
+
+        # Generate thumbnails asynchronously
+        self.reload_all(ignore_cache=True)
 
         # Set columns
         self.calculate_columns()
 
         # Focus the current image
         self.iconview.grab_focus()
-        pos = (self.app.index) % len(self.app.paths)
+        pos = self.app.index % len(self.app.paths)
         self.move_to_pos(pos)
 
-        # Remove the files again if the thumbnails should not be cached
-        if not self.cache:
-            for thumb in self.elements:
-                os.remove(thumb)
+    def reload_all(self, ignore_cache=False):
+        size = self.get_zoom_level()[0]
+        for i, path in enumerate(self.app.paths):
+            self.thumbnail_manager.get_thumbnail_at_scale_async(
+                path, size, self._on_thumbnail_created, i,
+                ignore_cache=ignore_cache)
+
+    def _on_thumbnail_created(self, pixbuf, position):
+        # Subsctipting the liststore directly works fine
+        # pylint: disable=unsubscriptable-object
+        self.liststore[position][0] = pixbuf
+        self.move_to_pos(self.app.get_pos(force_widget="thu"))
+
+    def _get_name(self, filename):
+        name = os.path.splitext(os.path.basename(filename))[0]
+        if filename in self.app["mark"].marked:
+            name += " [*]"
+
+        return name
 
     def reload(self, filename, reload_image=True):
         """Reload the thumbnails of manipulated images.
@@ -206,21 +215,15 @@ class Thumbnail(object):
                 the name (useful for marking).
         """
         index = self.app.paths.index(filename)
-        name = self.elements[index].split("___")[-1]
-        name = name.split(".")[0]
-        if filename in self.app["mark"].marked:
-            name = name + " [*]"
-        elif index in self.app["commandline"].search_positions:
+        name = self._get_name(filename)
+        if index in self.app["commandline"].search_positions:
             name = self.markup + "<b>" + name + "</b></span>"
-        # Subsctipting the liststore directly works fine
+
         # pylint: disable=unsubscriptable-object
-        # pylint: disable=unsupported-assignment-operation
         if reload_image:
-            thumbnails = Thumbnails([filename], self.sizes[-1], self.directory)
-            thumb_name = thumbnails.create_thumbnail_name(filename)
-            self.pixbuf_max[index] = GdkPixbuf.Pixbuf.new_from_file(thumb_name)
-            pixbuf = self.scale_thumb(self.pixbuf_max[index])
-            self.liststore[index] = [pixbuf, name]
+            self.thumbnail_manager.get_thumbnail_at_scale_async(
+                filename, self.get_zoom_level()[0],
+                self._on_thumbnail_created, index, ignore_cache=True)
         else:
             self.liststore[index][1] = name
 
@@ -264,7 +267,7 @@ class Thumbnail(object):
                 if column >= elem_last_row else rows * elem_per_row + column
         # First element in column
         elif direction == "K":
-            new_pos = new_pos % elem_per_row
+            new_pos %= elem_per_row
         # Last element in row
         elif direction == "L":
             new_pos = (row + 1) * elem_per_row - 1
@@ -296,62 +299,20 @@ class Thumbnail(object):
             inc: If True increase thumbnail size.
         """
         # What zoom and limits
-        if inc and self.current_size < len(self.sizes) - 1:
-            self.current_size += 1
-        elif not inc and self.current_size > 0:
-            self.current_size -= 1
+        if inc and self.zoom_level_index < len(self.zoom_levels) - 1:
+            self.zoom_level_index += 1
+        elif not inc and self.zoom_level_index > 0:
+            self.zoom_level_index -= 1
         else:
             return
-        self.size = self.sizes[self.current_size]
+
         # Rescale all images in liststore
         if self.toggled:
-            for i in range(len(self.liststore)):
-                # Subsctipting the liststore directly works fine
-                # pylint: disable=unsubscriptable-object
-                pixbuf_max = self.pixbuf_max[i]
-                pixbuf = self.scale_thumb(pixbuf_max)
-                self.liststore[i][0] = pixbuf
+            self.reload_all()
 
         # Set columns and refocus current image
         self.calculate_columns()
         self.move_to_pos(self.app.get_pos(force_widget="thu"))
 
-    def scale_thumb(self, pixbuf_max):
-        """Scale the thumbnail image to self.size.
-
-        Args:
-            pixbuf_max: Pixbuf at maximum thumbnail size to scale.
-
-        Return:
-            The scaled pixbuf.
-        """
-        width = \
-            pixbuf_max.get_width() * (float(self.size[0]) / self.max_size[0])
-        height = \
-            pixbuf_max.get_height() * (float(self.size[1]) / self.max_size[1])
-        pixbuf = pixbuf_max.scale_simple(width, height,
-                                         GdkPixbuf.InterpType.BILINEAR)
-        return pixbuf
-
-    def set_sizes(self):
-        """Set maximum size, current size and possible sizes for thumbnails."""
-        # Maximum
-        if self.max_size[0] >= self.possible_sizes[-1][0]:
-            self.sizes = self.possible_sizes
-        else:
-            for i, size in enumerate(self.possible_sizes):
-                if size[0] > self.max_size[0]:
-                    self.sizes = self.possible_sizes[0:i]
-                    break
-        # Current position
-        if self.size in self.sizes:
-            self.current_size = self.sizes.index(self.size)
-        elif self.size[0] > self.sizes[-1][0]:
-            self.current_size = len(self.sizes) - 1
-            self.size = self.sizes[-1]
-        else:
-            for i, size in enumerate(self.sizes):
-                if size[0] > self.size[0]:
-                    self.sizes.insert(i, self.size)
-                    self.current_size = i
-                    break
+    def get_zoom_level(self):
+        return self.zoom_levels[self.zoom_level_index]

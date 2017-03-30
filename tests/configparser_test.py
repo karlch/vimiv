@@ -6,6 +6,9 @@ import shutil
 import sys
 import tempfile
 from unittest import TestCase, main
+from gi import require_version
+require_version('Gtk', '3.0')
+from gi.repository import GLib
 
 import vimiv.configparser as parser
 
@@ -28,8 +31,13 @@ class ConfigparserTest(TestCase):
         parser.parse_dirs(vimivdir)
         trashdir = os.path.join(vimivdir, "Trash")
         tagdir = os.path.join(vimivdir, "Tags")
-        thumbdir = os.path.join(vimivdir, "Thumbnails")
-        for directory in [vimivdir, trashdir, tagdir, thumbdir]:
+        # Create all directory names used for thumbnail cache
+        cachedir = GLib.get_user_cache_dir()
+        thumbdir = os.path.join(cachedir, "thumbnails")
+        inner_thumbdirs = [os.path.join(thumbdir, name)
+                           for name in ["large", "normal", "fail"]]
+        all_dirs = [vimivdir, trashdir, tagdir, thumbdir] + inner_thumbdirs
+        for directory in all_dirs:
             with self.subTest(directory=directory):
                 self.assertTrue(os.path.isdir(directory))
 
@@ -41,7 +49,7 @@ class ConfigparserTest(TestCase):
         amount_general_settings = len(general.keys())
         amount_library_settings = len(library.keys())
         amount_aliases = len(aliases.keys())
-        self.assertEqual(amount_general_settings, 18)
+        self.assertEqual(amount_general_settings, 16)
         self.assertEqual(amount_library_settings, 9)
         self.assertEqual(amount_aliases, 0)
         defaults = parser.set_defaults()
@@ -66,15 +74,13 @@ class ConfigparserTest(TestCase):
                                 "start_slideshow": "yes",
                                 "shuffle": "yes",
                                 "display_bar": "no",
-                                "thumbsize": "(100, 100)",
-                                "thumb_maxsize": "(200, 200)",
+                                "default_thumbsize": "(256, 256)",
                                 "geometry": "400x400",
                                 "recursive": "yes",
                                 "rescale_svg": "yes",
                                 "overzoom": "yes",
                                 "search_case_sensitive": "yes",
                                 "incsearch": "no",
-                                "cache_thumbnails": "yes",
                                 "copy_to_primary": "no",
                                 "commandline_padding": 0,
                                 "completion_height": 100},
@@ -99,15 +105,13 @@ class ConfigparserTest(TestCase):
         self.assertEqual(general["start_slideshow"], True)
         self.assertEqual(general["shuffle"], True)
         self.assertEqual(general["display_bar"], False)
-        self.assertEqual(general["thumbsize"], (100, 100))
-        self.assertEqual(general["thumb_maxsize"], (200, 200))
+        self.assertEqual(general["default_thumbsize"], (256, 256))
         self.assertEqual(general["geometry"], "400x400")
         self.assertEqual(general["recursive"], True)
         self.assertEqual(general["rescale_svg"], True)
         self.assertEqual(general["overzoom"], True)
         self.assertEqual(general["search_case_sensitive"], True)
         self.assertEqual(general["incsearch"], False)
-        self.assertEqual(general["cache_thumbnails"], True)
         self.assertEqual(general["copy_to_primary"], False)
         self.assertEqual(general["commandline_padding"], 0)
         self.assertEqual(general["completion_height"], 100)
@@ -172,8 +176,8 @@ class ConfigparserTest(TestCase):
         settings = {"GENERAL": {"slideshow_delay": "wrong"}}
         run_check(settings, "slideshow_delay")
         # Value is not a tuple
-        settings = {"GENERAL": {"thumbsize": "wrong"}}
-        run_check(settings, "thumbsize")
+        settings = {"GENERAL": {"default_thumbsize": "wrong"}}
+        run_check(settings, "default_thumbsize")
         # Invalid markup
         settings = {"LIBRARY": {"markup": "wrong"}}
         run_check(settings, "")

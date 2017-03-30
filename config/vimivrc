@@ -7,15 +7,13 @@ start_slideshow: no
 slideshow_delay: 2
 shuffle: no
 display_bar: yes
-thumbsize: (128, 128)
-thumb_maxsize: (256, 256)
+default_thumbsize: (128, 128)
 geometry: 800x600
 recursive: no
 rescale_svg: yes
 overzoom: no
 search_case_sensitive: yes
 incsearch: yes
-cache_thumbnails: yes
 copy_to_primary: no
 commandline_padding: 6
 thumb_padding: 10

@@ -2,11 +2,9 @@
 """Actions which act on the actual image file."""
 
 import os
-from shutil import copyfile, which
+from shutil import which
 from subprocess import PIPE, Popen
-from threading import Thread
 
-from gi.repository import GdkPixbuf, Gtk
 from PIL import Image
 
 
@@ -109,89 +107,3 @@ def autorotate(filelist, method="auto"):
 
     # Return the amount of rotated images and the method used
     return rotated_images, method
-
-
-class Thumbnails:
-    """Thumbnail creation class.
-
-    Attributes:
-        filelist: List of files to operate on.
-        thumbsize: Size of thumbnails that are created.
-        directory: Directory to save thumbnails in.
-        thumbnails: Cached thumbnails that have been created already.
-        thumblist: List of required thumbnails.
-        thumbdict: Dictionary with required thumbnails and original filename.
-        threads: Threads that are running for thumbnail creation.
-        default_icon: Default icon if thumbnail creation fails.
-    """
-
-    def __init__(self, filelist, thumbsize, thumbdir):
-        """Create default settings.
-
-        Args:
-            filelist: List of files to operate on.
-            thumbsize: Size of thumbnails that are created.
-        """
-        self.filelist = filelist
-        self.thumbsize = thumbsize
-        self.directory = thumbdir
-        if not os.path.isdir(self.directory):
-            os.mkdir(self.directory)
-        self.thumbnails = os.listdir(self.directory)
-        self.thumblist = []  # List of all files with thumbnails
-        self.thumbdict = {}  # Asserts thumbnails to their original file
-        self.threads = []
-        # Default icon if thumbnail creation fails
-        icon_theme = Gtk.IconTheme.get_default()
-        icon_info = icon_theme.lookup_icon("dialog-error", 256, 0)
-        self.default_thumbnail = icon_info.get_filename()
-
-    def thumbnails_create(self):
-        """Create thumbnails for all images in filelist if they do not exist."""
-        # Loop over all files
-        for i, infile in enumerate(self.filelist):
-            # Correct name
-            outfile = self.create_thumbnail_name(infile)
-            # Only if they aren't cached already
-            if os.path.basename(outfile) not in self.thumbnails:
-                thread_for_thumbnail = Thread(target=self.thread_for_thumbnails,
-                                              args=(infile, outfile, i))
-                self.threads.append(thread_for_thumbnail)
-                thread_for_thumbnail.start()
-            else:
-                self.thumblist.append(outfile)
-                self.thumbdict[outfile] = infile
-
-        while self.threads:
-            self.threads[0].join()
-        self.thumblist.sort(
-            key=lambda x: self.filelist.index(self.thumbdict[x]))
-        return self.thumblist
-
-    def create_thumbnail_name(self, infile):
-        """Create thumbnail name for infile respecting size."""
-        thumb_ext = ".thumbnail_%dx%d" % (self.thumbsize[0], self.thumbsize[1])
-        infile_tot = infile.replace("/", "___").lstrip("___")
-        outfile_base = infile_tot + thumb_ext + ".png"
-        outfile = os.path.join(self.directory, outfile_base)
-        return outfile
-
-    def thread_for_thumbnails(self, infile, outfile, position):
-        """Create thumbnail in an extra thread.
-
-        If thumbnail creation fails, defaults to the Adwaita dialog error.
-
-        Args:
-            infile: Image file to operate on.
-            outfile: Name of thumbnail file to write to.
-            position: Integer position of this thumbnail in the filelist.
-        """
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            infile, self.thumbsize[0], self.thumbsize[1], True)
-        if not pixbuf:
-            copyfile(self.default_thumbnail, outfile)
-        else:
-            pixbuf.savev(outfile, "png", ["compression"], ["0"])
-        self.thumblist.append(outfile)
-        self.thumbdict[outfile] = infile
-        self.threads.pop(0)

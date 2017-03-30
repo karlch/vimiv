@@ -19,15 +19,13 @@ def set_defaults():
                "slideshow_delay": 2,
                "shuffle": False,
                "display_bar": True,
-               "thumbsize": (128, 128),
-               "thumb_maxsize": (256, 256),
+               "default_thumbsize": (128, 128),
                "geometry": "800x600",
                "search_case_sensitive": True,
                "incsearch": True,
                "recursive": False,
                "rescale_svg": True,
                "overzoom": False,
-               "cache_thumbnails": True,
                "copy_to_primary": False,
                "commandline_padding": 6,
                "thumb_padding": 10,
@@ -68,7 +66,7 @@ def overwrite_section(key, config, settings):
         try:
             if setting == "geometry":
                 file_set = section[setting]
-            elif setting in ["thumbsize", "thumb_maxsize"]:
+            elif setting in ["default_thumbsize"]:
                 file_set = section[setting].lstrip("(").rstrip(")")
                 file_set = file_set.split(",")
                 file_set[0] = int(file_set[0])

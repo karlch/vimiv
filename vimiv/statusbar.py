@@ -142,10 +142,10 @@ class Statusbar(object):
         elif "THUMBNAIL" in mode:
             pos = self.app.get_pos()
             name = os.path.basename(self.app.get_pos(True))
-            message = "{0}/{1}  {2}  {3}".format(pos + 1,
-                                                 len(self.app.paths),
-                                                 name,
-                                                 self.app["thumbnail"].size)
+            message = "{0}/{1}  {2}  {3}".format(
+                pos + 1, len(self.app.paths), name,
+                self.app["thumbnail"].get_zoom_level())
+
             self.left_label.set_text(message)
         # In commandline
         elif "COMMAND" in mode:
@@ -164,8 +164,8 @@ class Statusbar(object):
         """Set the centre of the statusbar depending on mode."""
         mark = "[*]" \
             if ("IMAGE" in mode or "MANIPULATE" in mode) \
-            and self.app.paths \
-            and self.app.paths[self.app.index] in self.app["mark"].marked \
+               and self.app.paths \
+               and self.app.paths[self.app.index] in self.app["mark"].marked \
             else ""
         slideshow = \
             "[slideshow - {0:.1f}s]".format(self.app["slideshow"].delay) \

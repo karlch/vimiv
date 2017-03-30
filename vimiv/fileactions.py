@@ -148,8 +148,6 @@ class FileExtras(object):
         """
         if directory_name == "Trash":
             directory = self.app["image"].trashdir
-        else:
-            directory = self.app["thumbnail"].directory
         for fil in os.listdir(directory):
             fil = os.path.join(directory, fil)
             os.remove(fil)

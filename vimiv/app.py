@@ -146,10 +146,13 @@ class Vimiv(Gtk.Application):
         if options.contains("start-from-desktop"):
             os.chdir(self.settings["LIBRARY"]["desktop_start_dir"])
         elif not sys.stdin.isatty():
-            tty_paths = []
-            for line in sys.stdin:
-                tty_paths.append(line.rstrip("\n"))
-            self.paths, self.index = populate(tty_paths)
+            try:
+                tty_paths = []
+                for line in sys.stdin:
+                    tty_paths.append(line.rstrip("\n"))
+                self.paths, self.index = populate(tty_paths)
+            except TypeError:
+                pass  # DebugConsoleStdIn is not iterable
 
         set_option("bar", "GENERAL", "display_bar", 1)
         set_option("no-bar", "GENERAL", "display_bar", 0)
@@ -280,7 +283,7 @@ class Vimiv(Gtk.Application):
                 processes = [p.args
                              for p in self["commandline"].running_processes]
                 message = "Running external processes: %s. Add ! to force." \
-                    % (", ".join(processes))
+                          % (", ".join(processes))
                 self["statusbar"].message(message, "warning")
                 return
         # Check if image has been edited

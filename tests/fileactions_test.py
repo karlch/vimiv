@@ -63,19 +63,13 @@ class FileActionsTest(VimivTestCase):
         self.assertFalse(fileactions.is_image("not_an_image.jpg"))
 
     def test_clear(self):
-        """Clear Trash/Thumbnails."""
+        """Clear Trash."""
         trashfile = os.path.join(self.trashdir, "foo")
-        thumbfile = os.path.join(self.thumbdir, "foo")
-        # Make sure there are some files in the directories
         os.system("touch " + trashfile)
-        os.system("touch " + thumbfile)
-        self.assertIn("foo", os.listdir(self.thumbdir))
         self.assertIn("foo", os.listdir(self.trashdir))
-        # Clear them
-        self.vimiv["fileextras"].clear("Thumbnails")
+        # Clear the file
         self.vimiv["fileextras"].clear("Trash")
-        self.assertEqual(os.listdir(self.thumbdir), [])
-        self.assertEqual(os.listdir(self.trashdir), [])
+        self.assertFalse(os.listdir(self.trashdir))
 
     def test_format_files(self):
         """Format files according to a formatstring."""
