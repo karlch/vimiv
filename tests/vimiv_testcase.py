@@ -54,7 +54,7 @@ class VimivTestCase(TestCase):
         # Create vimiv class with settings, paths, ...
         self.vimiv = Vimiv(True)  # True for running_tests
         self.vimiv.debug = debug
-        self.vimiv.do_handle_local_options(GLib.VariantDict())
+        self.vimiv.do_handle_local_options(GLib.VariantDict.new())
         # Set the required settings
         if key1:
             for i, section in enumerate(key1):

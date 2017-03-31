@@ -24,7 +24,7 @@ class AppTest(VimivTestCase):
         # We need to catch information from standard output
 
         # Get version should print information to standard output and return 0
-        option_version = GLib.VariantDict()
+        option_version = GLib.VariantDict.new()
         bool_true = GLib.Variant("b", True)
         option_version.insert_value("version", bool_true)
         returncode = self.vimiv.do_handle_local_options(option_version)
@@ -37,7 +37,7 @@ class AppTest(VimivTestCase):
         self.assertIn("vimiv", output)
         self.assertEqual(returncode, 0)
         # Set some different options and test if they were handled correctly
-        options = GLib.VariantDict()
+        options = GLib.VariantDict.new()
         options.insert_value("shuffle", bool_true)
         double_22 = GLib.Variant("d", 2.2)
         options.insert_value("slideshow-delay", double_22)
@@ -52,7 +52,7 @@ class AppTest(VimivTestCase):
 
     def test_temp_basedir(self):
         """Using a temporary basedir."""
-        options = GLib.VariantDict()
+        options = GLib.VariantDict.new()
         bool_true = GLib.Variant("b", True)
         options.insert_value("temp-basedir", bool_true)
         self.vimiv.do_handle_local_options(options)

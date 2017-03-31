@@ -24,7 +24,7 @@ class FileActionsTest(VimivTestCase):
         cls.init_test(cls, [cls.test_directory])
         # Run in a temporary directory to leave alone the user's Trash and
         # Thumbnails
-        options = GLib.VariantDict()
+        options = GLib.VariantDict.new()
         bool_true = GLib.Variant("b", True)
         options.insert_value("temp-basedir", bool_true)
         cls.vimiv.do_handle_local_options(options)
