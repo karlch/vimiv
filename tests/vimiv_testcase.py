@@ -52,7 +52,7 @@ class VimivTestCase(TestCase):
         """
         self.working_directory = os.getcwd()
         # Create vimiv class with settings, paths, ...
-        self.vimiv = Vimiv()
+        self.vimiv = Vimiv(True)  # True for running_tests
         self.vimiv.debug = debug
         self.vimiv.do_handle_local_options(GLib.VariantDict())
         # Set the required settings

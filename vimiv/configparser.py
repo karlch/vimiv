@@ -144,12 +144,12 @@ def parse_config(commandline_config=None, running_tests=False):
         Dictionary of modified settings.
     """
     settings = set_defaults()
-    # Generate list of all possible configuration files
-    configfiles = ["/etc/vimiv/vimivrc"]
+    configfiles = []
     # We do not want to parse user configuration files when running the test
     # suite
     if not running_tests:
         configfiles += [
+            "/etc/vimiv/vimivrc",
             os.path.join(GLib.get_user_config_dir(), "vimiv/vimivrc"),
             os.path.expanduser("~/.vimiv/vimivrc")]
     if commandline_config:

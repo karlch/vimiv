@@ -47,8 +47,14 @@ class Vimiv(Gtk.Application):
         screensize: Available screensize.
     """
 
-    def __init__(self):
-        """Create the Gtk.Application and connect the activate signal."""
+    def __init__(self, running_tests=False):
+        """Create the Gtk.Application and connect the activate signal.
+
+        Args:
+            running_tests: If True, running from test suite. Do not show pop-up
+                windows and do not parse user configuration files.
+        """
+        self.running_tests = running_tests
         # Init application and set default values
         app_id = "org.vimiv" + str(time()).replace(".", "")
         Gtk.Application.__init__(self, application_id=app_id)
@@ -136,9 +142,10 @@ class Vimiv(Gtk.Application):
         # Create settings as soon as we know which config files to use
         elif options.contains("config"):
             configfile = options.lookup_value("config").unpack()
-            self.settings = parse_config(commandline_config=configfile)
+            self.settings = parse_config(commandline_config=configfile,
+                                         running_tests=self.running_tests)
         else:
-            self.settings = parse_config()
+            self.settings = parse_config(running_tests=self.running_tests)
 
         # If we start from desktop, move to the wanted directory
         # Else if the input does not come from a tty, e.g. find "" | vimiv, set

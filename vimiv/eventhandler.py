@@ -28,7 +28,7 @@ class KeyHandler(object):
         # Settings
         self.num_str = ""
         self.timer_id = 0
-        self.keys = parse_keys()
+        self.keys = parse_keys(running_tests=self.app.running_tests)
 
     def run(self, widget, event, widget_name):
         """Run the correct function per keypress.
