@@ -92,9 +92,14 @@ class CompletionsTest(VimivTestCase):
 
     def test_tag_completion(self):
         """Completion of tags."""
+        # Create one tag to make sure tagfiles exist
+        new_tagfile = os.path.join(self.vimiv["tags"].directory, "testfile")
+        remove_created_tagfile = False
+        if not os.path.exists(new_tagfile):
+            remove_created_tagfile = True
+            with open(new_tagfile, "w") as f:
+                f.write(os.path.abspath("vimiv/testimages/arch-logo.png"))
         tagfiles = os.listdir(self.vimiv["tags"].directory)
-        if not tagfiles:
-            self.fail("There are no tagfiles to test tag completion with.")
         self.completions.entry.set_text(":tag_load ")
         self.completions.complete()
         liststore = self.completions.treeview.get_model()
@@ -102,6 +107,9 @@ class CompletionsTest(VimivTestCase):
         for row in liststore:
             self.assertIn(row[0], expected_completions)
         self.assertEqual(len(liststore), len(expected_completions))
+        # Clean up
+        if remove_created_tagfile:
+            os.remove(new_tagfile)
 
     def test_tabbing(self):
         """Tabbing through completions."""
