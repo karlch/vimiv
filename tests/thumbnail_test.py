@@ -8,7 +8,7 @@ from gi import require_version
 require_version("Gtk", "3.0")
 from gi.repository import Gtk
 
-from vimiv_testcase import VimivTestCase
+from vimiv_testcase import VimivTestCase, refresh_gui
 
 
 def create_tuples(max_val, insert=None):
@@ -117,8 +117,9 @@ class ThumbnailTest(VimivTestCase):
         self.assertEqual(self.thumb.get_zoom_level(), (128, 128))
         # Zoom in and check thumbnail size and pixbuf
         self.thumb.zoom(True)
+        refresh_gui()
         self.assertEqual(self.thumb.get_zoom_level(), (256, 256))
-        pixbuf = list(self.thumb.liststore)[0][0]
+        pixbuf = self.thumb.liststore[0][0]
         width = pixbuf.get_width()
         height = pixbuf.get_height()
         scale = max(width, height)
