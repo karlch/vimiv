@@ -2,6 +2,7 @@
 """Command line tests for vimiv's test suite."""
 
 import os
+from subprocess import Popen, PIPE
 from unittest import main
 
 from vimiv_testcase import VimivTestCase, refresh_gui
@@ -65,10 +66,13 @@ class CommandlineTest(VimivTestCase):
         self.assertTrue("tmp_foo" in files)
         os.remove("tmp_foo")
         # Try to run a non-existent command
+        fail_command = "foo_bar_baz"
+        p = Popen(fail_command, stdout=PIPE, stderr=PIPE, shell=True)
+        _, err_message = p.communicate()
+        err_message = err_message.decode()
         self.run_command("!foo_bar_baz", True)
-        # self.run_command("!sleep 10", True)
-        self.check_statusbar("ERROR: Command exited with status 127\n"
-                             "/bin/sh: foo_bar_baz: command not found\n")
+        self.check_statusbar("ERROR: Command exited with status 127\n" +
+                             err_message)
 
     def test_pipe(self):
         """Pipe a command to vimiv."""
