@@ -202,16 +202,8 @@ class ThumbnailStore(object):
         return None
 
     def _ensure_dirs_exist(self):
-        def ensure_dir_exists(directory):
-            try:
-                os.mkdir(directory)
-                os.chmod(directory, 0o700)
-            except FileExistsError:
-                pass
-
-        ensure_dir_exists(self.base_dir)
-        ensure_dir_exists(self.thumbnail_dir)
-        ensure_dir_exists(self.fail_dir)
+        os.makedirs(self.thumbnail_dir, 0o700, exist_ok=True)
+        os.makedirs(self.fail_dir, 0o700, exist_ok=True)
 
     def _is_current(self, source_file, thumbnail_path):
         source_mtime = str(self._get_source_mtime(source_file))
