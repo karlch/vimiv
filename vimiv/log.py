@@ -5,7 +5,7 @@ import os
 import sys
 import time
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 
 class Log():
@@ -21,7 +21,9 @@ class Log():
         Args:
             app: The main vimiv application to interact with.
         """
-        self.filename = os.path.join(app.directory, "vimiv.log")
+        datadir = os.path.join(GLib.get_user_data_dir(), "vimiv")
+        os.makedirs(datadir, exist_ok=True)
+        self.filename = os.path.join(datadir, "vimiv.log")
         self.terminal = sys.stderr
         # Redirect stderr in debug mode so it is written to the log file as well
         if app.debug:

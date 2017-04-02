@@ -36,6 +36,7 @@ def read_file(filename):
             for line in f:
                 content.append(line.rstrip("\n"))
     except FileNotFoundError:
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, "w") as f:
             f.write("")
     return content

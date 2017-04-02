@@ -6,8 +6,8 @@ import sys
 from unittest import main
 
 from gi import require_version
-require_version("Gdk", "3.0")
-from gi.repository import Gdk
+require_version("Gtk", "3.0")
+from gi.repository import Gdk, GLib
 
 from vimiv_testcase import VimivTestCase
 
@@ -18,7 +18,8 @@ class LogTest(VimivTestCase):
     @classmethod
     def setUpClass(cls):
         cls.init_test(cls, debug=True)
-        cls.logfile = os.path.join(cls.vimiv.directory, "vimiv.log")
+        cls.logfile = os.path.join(GLib.get_user_data_dir(),
+                                   "vimiv", "vimiv.log")
 
     def test_creation(self):
         """Creation and header of the log file."""

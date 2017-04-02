@@ -3,9 +3,9 @@
 
 import os
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 from vimiv.fileactions import populate
-from vimiv.helpers import read_file
+from vimiv.helpers import read_file, error_message
 
 
 class TagHandler(object):
@@ -24,7 +24,22 @@ class TagHandler(object):
             app: The main vimiv application to interact with.
         """
         self.app = app
-        self.directory = os.path.join(self.app.directory, "Tags")
+        # Create tags directory
+        self.directory = os.path.join(GLib.get_user_data_dir(), "vimiv", "Tags")
+        os.makedirs(self.directory, exist_ok=True)
+        # If there are tags in the old location, move them to the new one
+        # TODO remove this in a new version, assigned for 0.10
+        old_directory = os.path.join(self.app.directory, "Tags")
+        if os.path.isdir(old_directory):
+            old_tags = os.listdir(old_directory)
+            for f in old_tags:
+                old_path = os.path.join(old_directory, f)
+                new_path = os.path.join(self.directory, f)
+                os.rename(old_path, new_path)
+            message = "Moved tags from the old directory %s " \
+                "to the new location %s." % (old_directory, self.directory)
+            error_message(message, running_tests=self.app.running_tests)
+            os.rmdir(old_directory)
         self.last = ""
 
     def read(self, tagname):

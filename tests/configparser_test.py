@@ -6,9 +6,6 @@ import shutil
 import sys
 import tempfile
 from unittest import TestCase, main
-from gi import require_version
-require_version('Gtk', '3.0')
-from gi.repository import GLib
 
 import vimiv.configparser as parser
 
@@ -24,22 +21,6 @@ class ConfigparserTest(TestCase):
         cls.tmpdir = tempfile.mkdtemp()
         os.mkdir("configfiles")
         cls.configfile_counter = 0  # Used to always create unique new filenames
-
-    def test_parse_dirs(self):
-        """Check if all directories where created correctly."""
-        vimivdir = os.path.join(tempfile.mkdtemp() + "vimiv")
-        parser.parse_dirs(vimivdir)
-        trashdir = os.path.join(vimivdir, "Trash")
-        tagdir = os.path.join(vimivdir, "Tags")
-        # Create all directory names used for thumbnail cache
-        cachedir = GLib.get_user_cache_dir()
-        thumbdir = os.path.join(cachedir, "thumbnails")
-        inner_thumbdirs = [os.path.join(thumbdir, name)
-                           for name in ["large", "normal", "fail"]]
-        all_dirs = [vimivdir, trashdir, tagdir, thumbdir] + inner_thumbdirs
-        for directory in all_dirs:
-            with self.subTest(directory=directory):
-                self.assertTrue(os.path.isdir(directory))
 
     def check_defaults(self, settings):
         """Check is settings contain default values."""

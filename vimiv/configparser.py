@@ -248,11 +248,8 @@ def parse_dirs(basedir):
         basedir: The base directory of vimiv. ~/.vimiv or mkdtemp()
     """
     vimivdir = os.path.expanduser(basedir)
-    tagdir = os.path.join(vimivdir, "Tags")
-    thumbdir = os.path.join(vimivdir, "Thumbnails")
     trashdir = os.path.join(vimivdir, "Trash")
-    dirs = [vimivdir, tagdir, thumbdir, trashdir]
+    dirs = [vimivdir, trashdir]
 
     for directory in dirs:
-        if not os.path.isdir(directory):
-            os.mkdir(directory)
+        os.makedirs(directory, exist_ok=True)

@@ -9,7 +9,7 @@ from threading import Thread
 
 from gi.repository import GLib, Gtk
 from vimiv.fileactions import populate
-from vimiv.helpers import read_file
+from vimiv.helpers import read_file, error_message
 
 
 class CommandLine(object):
@@ -48,7 +48,26 @@ class CommandLine(object):
         self.entry.set_hexpand(True)
 
         # Cmd history from file
-        self.history = read_file(os.path.join(self.app.directory, "history"))
+        # If there is a history file in the old location move it and inform the
+        # user
+        # TODO remove this in a new version, assigned for 0.10
+        old_histfile = os.path.join(self.app.directory, "history")
+        new_histfile = os.path.join(GLib.get_user_data_dir(), "vimiv",
+                                    "history")
+        if os.path.isfile(old_histfile):
+            if os.path.isfile(new_histfile):
+                message = "There is a history file in the deprecated location" \
+                    " %s and the new location %s. Using the new one. If you " \
+                    "want the history from the old file you will have to " \
+                    "merge it manually." % (old_histfile, new_histfile)
+                error_message(message, running_tests=self.app.running_tests)
+            else:
+                os.rename(old_histfile, new_histfile)
+                message = "Moved the old history file %s " \
+                    "to the new location %s." % (old_histfile, new_histfile)
+                error_message(message, running_tests=self.app.running_tests)
+        self.history = read_file(os.path.join(GLib.get_user_data_dir(),
+                                              "vimiv", "history"))
 
         # Defaults
         self.pos = 0

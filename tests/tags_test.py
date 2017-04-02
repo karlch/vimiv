@@ -4,6 +4,10 @@
 import os
 from unittest import main
 
+from gi import require_version
+require_version('Gtk', '3.0')
+from gi.repository import GLib
+
 from vimiv.helpers import read_file
 
 from vimiv_testcase import VimivTestCase
@@ -15,6 +19,7 @@ class TagsTest(VimivTestCase):
     @classmethod
     def setUpClass(cls):
         cls.init_test(cls)
+        cls.tagdir = os.path.join(GLib.get_user_data_dir(), "vimiv", "Tags")
 
     def test_tag_create_remove(self):
         """Create and remove a tag."""
@@ -22,7 +27,7 @@ class TagsTest(VimivTestCase):
                    "vimiv/testimages/arch_001.jpg"]
         taglist = [os.path.abspath(image) for image in taglist]
         self.vimiv["tags"].write(taglist, "arch_test_tag")
-        created_file = os.path.expanduser("~/.vimiv/Tags/arch_test_tag")
+        created_file = os.path.join(self.tagdir, "arch_test_tag")
         file_content = read_file(created_file)
         self.assertEqual(file_content, taglist)
         self.vimiv["tags"].remove("arch_test_tag")
@@ -35,7 +40,7 @@ class TagsTest(VimivTestCase):
         taglist2 = [os.path.abspath("vimiv/testimages/arch_001.jpg")]
         self.vimiv["tags"].write(taglist2, "arch_test_tag")
         complete_taglist = taglist + taglist2
-        created_file = os.path.expanduser("~/.vimiv/Tags/arch_test_tag")
+        created_file = os.path.join(self.tagdir, "arch_test_tag")
         file_content = read_file(created_file)
         self.assertEqual(file_content, complete_taglist)
         self.vimiv["tags"].remove("arch_test_tag")
@@ -52,7 +57,7 @@ class TagsTest(VimivTestCase):
 
     def test_tag_errors(self):
         """Error messages with tags."""
-        unavailable_file = os.path.expanduser("~/.vimiv/Tags/foo_is_real")
+        unavailable_file = os.path.join(self.tagdir, "foo_is_real")
         if os.path.exists(unavailable_file):
             os.remove(unavailable_file)
         self.vimiv["tags"].load("foo_is_real")
@@ -70,7 +75,7 @@ class TagsTest(VimivTestCase):
         self.vimiv["mark"].marked = list(taglist)
         # Write a tag
         self.run_command("tag_write new_test_tag")
-        created_file = os.path.expanduser("~/.vimiv/Tags/new_test_tag")
+        created_file = os.path.join(self.tagdir, "new_test_tag")
         file_content = read_file(created_file)
         self.assertEqual(taglist, file_content)
         # Load a tag
