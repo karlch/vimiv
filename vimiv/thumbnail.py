@@ -19,7 +19,6 @@ class Thumbnail(object):
         toggled: If True thumbnail mode is open.
         zoom_levels: List of tuples containing the possible thumbnail sizes.
         zoom_level_index: Position in the possible_sizes list.
-        directory: Directory in which thumbnails are stored.
         timer_id: ID of the currently running GLib.Timeout.
             creation failed.
         elements: List containing names of current thumbnail-files.
@@ -43,7 +42,6 @@ class Thumbnail(object):
         # Settings
         self.toggled = False
         self.padding = general["thumb_padding"]
-        self.directory = os.path.join(self.app.directory, "Thumbnails")
         self.timer_id = GLib.Timeout
         self.elements = []
         self.markup = self.app["library"].markup.replace("fore", "back")
