@@ -49,8 +49,9 @@ class ThumbnailManagerTest(TestCase):
         # A file that does not exist
         self.assertFalse(self.thumb_store.get_thumbnail("bla"))
 
-        # Remove it for clean-up
+        # Remove for clean-up
         os.remove(received_name)
+        shutil.rmtree(new_dir)
 
 
 if __name__ == "__main__":
