@@ -12,7 +12,8 @@ from vimiv.helpers import error_message
 def set_defaults():
     """Return the default settings for vimiv.
 
-    Return: Dictionary of default settings.
+    Return:
+        Dictionary of default settings.
     """
     general = {"start_fullscreen": False,
                "start_slideshow": False,
