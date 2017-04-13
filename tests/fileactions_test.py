@@ -22,46 +22,11 @@ class FileActionsTest(VimivTestCase):
         cls.test_directory = os.path.abspath("vimiv/")
         cls.init_test(cls, [cls.test_directory])
 
-    def test_move_to_trash(self):
-        """Move file to trash."""
-        # TODO reactivate trash test
-        return
-        os.chdir("testimages/")
-        shutil.copyfile("arch_001.jpg", "image_to_edit.jpg")
-        filename = os.path.abspath("image_to_edit.jpg")
-        files = [filename]
-        fileactions.move_to_trash(files, self.trashdir)
-        trashed_file = os.path.join(self.trashdir, "image_to_edit.jpg")
-        self.assertTrue(os.path.isfile(trashed_file))
-        # Repeat, to check if backing up works
-        shutil.copyfile("arch_001.jpg", "image_to_edit.jpg")
-        fileactions.move_to_trash(files, self.trashdir)
-        trashed_file1 = os.path.join(self.trashdir, "image_to_edit.jpg.1")
-        self.assertTrue(os.path.isfile(trashed_file1))
-        shutil.copyfile("arch_001.jpg", "image_to_edit.jpg")
-        fileactions.move_to_trash(files, self.trashdir)
-        trashed_file2 = os.path.join(self.trashdir, "image_to_edit.jpg.2")
-        self.assertTrue(os.path.isfile(trashed_file2))
-        # Clear the files
-        os.remove(trashed_file)
-        os.remove(trashed_file1)
-
     def test_is_image(self):
         """Check whether file is an image."""
         os.chdir("testimages/")
         self.assertTrue(fileactions.is_image("arch_001.jpg"))
         self.assertFalse(fileactions.is_image("not_an_image.jpg"))
-
-    def test_clear(self):
-        """Clear Trash."""
-        # TODO reactivate trash test
-        return
-        trashfile = os.path.join(self.trashdir, "foo")
-        os.system("touch " + trashfile)
-        self.assertIn("foo", os.listdir(self.trashdir))
-        # Clear the file
-        self.vimiv["fileextras"].clear("Trash")
-        self.assertFalse(os.listdir(self.trashdir))
 
     def test_format_files(self):
         """Format files according to a formatstring."""
