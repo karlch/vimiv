@@ -8,7 +8,7 @@ test. We therefore test the implementation of the ThumbnailStore directly.
 import hashlib
 import os
 import shutil
-from tempfile import mkdtemp
+import tempfile
 from unittest import main, TestCase
 
 from gi import require_version
@@ -30,8 +30,8 @@ class ThumbnailManagerTest(TestCase):
     def test_get_thumbnail(self):
         """Get the filename of the thumbnail and create it."""
         # Standard file for which the thumbnail does not yet exist
-        new_dir = mkdtemp()
-        new_file = os.path.join(new_dir, "test.png")
+        new_dir = tempfile.TemporaryDirectory(prefix="vimivtests-")
+        new_file = os.path.join(new_dir.name, "test.png")
         shutil.copyfile("vimiv/testimages/arch-logo.png", new_file)
         received_name = self.thumb_store.get_thumbnail(new_file)
         # Check name
@@ -42,16 +42,14 @@ class ThumbnailManagerTest(TestCase):
         # File should exist and is a file
         self.assertTrue(os.path.isfile(received_name))
 
+        new_dir.cleanup()
+
         # Now the newly generated thumbnail file
         received_name = self.thumb_store.get_thumbnail(expected_name)
         self.assertEqual(received_name, expected_name)
 
         # A file that does not exist
         self.assertFalse(self.thumb_store.get_thumbnail("bla"))
-
-        # Remove for clean-up
-        os.remove(received_name)
-        shutil.rmtree(new_dir)
 
 
 if __name__ == "__main__":

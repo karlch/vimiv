@@ -3,8 +3,7 @@
 
 import os
 import sys
-from shutil import rmtree
-from tempfile import mkdtemp
+import tempfile
 from time import time
 
 from gi.repository import Gdk, Gio, GLib, Gtk
@@ -37,7 +36,7 @@ class Vimiv(Gtk.Application):
         widgets: Dictionary of vimiv widgets.
             widgets[widget-name] = Gtk.Widget
         debug: If True, write all messages and commands to log.
-        directory: Directory in which configfiles and data are stored.
+        tmpdir: tmpfile.TemporaryDirectory used when running with --temp-basedir
         commands: Dictionary of commands.
             commands[command-name] = [function, *args]
         aliases: Dicionary of aliases to commands.
@@ -65,7 +64,7 @@ class Vimiv(Gtk.Application):
         self.index = 0
         self.widgets = {}
         self.debug = False
-        self.directory = os.path.expanduser("~/.vimiv")
+        self.tmpdir = None
         self.commands = {}
         self.aliases = {}
         self.functions = {}
@@ -137,8 +136,14 @@ class Vimiv(Gtk.Application):
             return 0
         # Temp basedir removes all current settings and sets them to default
         if options.contains("temp-basedir"):
+            self.tmpdir = tempfile.TemporaryDirectory(prefix="vimiv-")
             self.settings = set_defaults()
-            self.directory = mkdtemp()
+            tmp = self.tmpdir.name
+            # Export environment variables for thumbnails, tags, history and
+            # logs
+            os.environ["XDG_CACHE_HOME"] = os.path.join(tmp, "cache")
+            os.environ["XDG_CONFIG_HOME"] = os.path.join(tmp, "config")
+            os.environ["XDG_DATA_HOME"] = os.path.join(tmp, "data")
         # Create settings as soon as we know which config files to use
         elif options.contains("config"):
             configfile = options.lookup_value("config").unpack()
@@ -183,7 +188,7 @@ class Vimiv(Gtk.Application):
         Args:
             app: The application itself.
         """
-        parse_dirs(self.directory)
+        parse_dirs()
         self.init_widgets()
         self.create_window_structure()
         app.add_window(self["window"])
@@ -309,9 +314,9 @@ class Vimiv(Gtk.Application):
         histfile.close()
         # Write to log
         self["log"].write_message("Exited", "time")
-        # Remove temporary directory
-        if "/tmp/" in self.directory:
-            rmtree(self.directory)
+        # Cleanup tmpdir
+        if self.tmpdir:
+            self.tmpdir.cleanup()
         # Call Gtk.Application.quit()
         self.quit()
 

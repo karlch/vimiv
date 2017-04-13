@@ -58,8 +58,6 @@ class TagsTest(VimivTestCase):
     def test_tag_errors(self):
         """Error messages with tags."""
         unavailable_file = os.path.join(self.tagdir, "foo_is_real")
-        if os.path.exists(unavailable_file):
-            os.remove(unavailable_file)
         self.vimiv["tags"].load("foo_is_real")
         self.check_statusbar("ERROR: Tagfile 'foo_is_real' has no valid images")
         os.remove(unavailable_file)

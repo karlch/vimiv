@@ -59,7 +59,7 @@ class Image(object):
         # Settings
         self.animation_toggled = False
         self.fit_image = 1  # Checks if the image fits the window somehow
-        self.trashdir = os.path.join(self.app.directory, "Trash")
+        self.trashdir = os.path.expanduser("~/.vimiv/Trash")
         self.overzoom = general["overzoom"]
         self.rescale_svg = general["rescale_svg"]
         self.shuffle = general["shuffle"]

@@ -3,7 +3,6 @@
 
 import os
 import shutil
-from tempfile import mkdtemp
 from unittest import TestCase, main
 
 import vimiv.imageactions as imageactions
@@ -24,7 +23,6 @@ class ImageActionsTest(TestCase):
         shutil.copyfile(self.orig, self.filename)
         shutil.copyfile(self.orig, self.filename_2)
         self.files = [self.filename]
-        self.thumbdir = mkdtemp()
 
     def test_rotate(self):
         """Rotate image file."""
@@ -91,7 +89,6 @@ class ImageActionsTest(TestCase):
         os.chdir(self.working_directory)
         os.remove(self.filename)
         os.remove(self.filename_2)
-        shutil.rmtree(self.thumbdir)
 
 
 if __name__ == "__main__":

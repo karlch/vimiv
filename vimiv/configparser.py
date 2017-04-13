@@ -241,13 +241,13 @@ def parse_keys(running_tests=False):
     return keybindings
 
 
-def parse_dirs(basedir):
+def parse_dirs():
     """Check for and create all required directories basedir.
 
     Args:
         basedir: The base directory of vimiv. ~/.vimiv or mkdtemp()
     """
-    vimivdir = os.path.expanduser(basedir)
+    vimivdir = os.path.expanduser("~/.vimiv/")
     trashdir = os.path.join(vimivdir, "Trash")
     dirs = [vimivdir, trashdir]
 

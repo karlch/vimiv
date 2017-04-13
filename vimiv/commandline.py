@@ -51,7 +51,7 @@ class CommandLine(object):
         # If there is a history file in the old location move it and inform the
         # user
         # TODO remove this in a new version, assigned for 0.10
-        old_histfile = os.path.join(self.app.directory, "history")
+        old_histfile = os.path.expanduser("~/.vimiv/history")
         new_histfile = os.path.join(GLib.get_user_data_dir(), "vimiv",
                                     "history")
         if os.path.isfile(old_histfile):

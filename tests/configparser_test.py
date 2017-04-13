@@ -18,7 +18,7 @@ class ConfigparserTest(TestCase):
         # Catch stdout for error messages
         if not hasattr(sys.stdout, "getvalue"):
             cls.fail(cls, "Need to run test in buffered mode.")
-        cls.tmpdir = tempfile.mkdtemp()
+        cls.tmpdir = tempfile.TemporaryDirectory(prefix="vimivtests-").name
         os.mkdir("configfiles")
         cls.configfile_counter = 0  # Used to always create unique new filenames
 
@@ -213,7 +213,6 @@ class ConfigparserTest(TestCase):
     @classmethod
     def tearDownClass(cls):
         shutil.rmtree("configfiles")
-        shutil.rmtree(cls.tmpdir)
 
 
 if __name__ == "__main__":

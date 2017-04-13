@@ -29,7 +29,7 @@ class TagHandler(object):
         os.makedirs(self.directory, exist_ok=True)
         # If there are tags in the old location, move them to the new one
         # TODO remove this in a new version, assigned for 0.10
-        old_directory = os.path.join(self.app.directory, "Tags")
+        old_directory = os.path.expanduser("~/.vimiv/Tags")
         if os.path.isdir(old_directory):
             old_tags = os.listdir(old_directory)
             for f in old_tags:

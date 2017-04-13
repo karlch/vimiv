@@ -6,7 +6,6 @@ import sys
 from unittest import main
 
 from gi.repository import GLib
-from vimiv.configparser import parse_dirs
 
 from vimiv_testcase import VimivTestCase
 
@@ -52,24 +51,20 @@ class AppTest(VimivTestCase):
 
     def test_temp_basedir(self):
         """Using a temporary basedir."""
-        options = GLib.VariantDict.new()
-        bool_true = GLib.Variant("b", True)
-        options.insert_value("temp-basedir", bool_true)
-        self.vimiv.do_handle_local_options(options)
-        # Directory should be in tmp
-        self.assertIn("/tmp/", self.vimiv.directory)
-        self.tmpdir = self.vimiv.directory
-        # Reinitialize the widgets with the new base directory
-        parse_dirs(self.vimiv.directory)
-        self.vimiv.init_widgets()
+        # XDG_*_HOME directories should be in tmp
+        self.assertIn("/tmp/vimiv-", os.getenv("XDG_CACHE_HOME"))
+        self.assertIn("/tmp/vimiv-", os.getenv("XDG_CONFIG_HOME"))
+        self.assertIn("/tmp/vimiv-", os.getenv("XDG_DATA_HOME"))
         # Thumbnail, Tag and Trash directory should contain tmp
-        self.assertIn("/tmp/", self.vimiv["thumbnail"].directory)
+        self.assertIn(
+            "/tmp/",
+            self.vimiv["thumbnail"].thumbnail_manager.thumbnail_store.base_dir)
         self.assertIn("/tmp/", self.vimiv["tags"].directory)
-        self.assertIn("/tmp/", self.vimiv["image"].trashdir)
+        # TODO get trash in tmp with new setup
+        # self.assertIn("/tmp/", self.vimiv["image"].trashdir)
         # Create a tag in tmp as a simple test
         self.vimiv["tags"].write(["image1.py", "image2.py"], "tmptag")
-        tagdir = os.path.join(self.vimiv.directory, "Tags")
-        self.assertIn("tmptag", os.listdir(tagdir))
+        self.assertIn("tmptag", os.listdir(self.vimiv["tags"].directory))
 
     def test_quit_with_running_threads(self):
         """Quit vimiv with external threads running."""
