@@ -2,7 +2,10 @@
 """Completion tests for vimiv's test suite."""
 
 import os
+import shutil
 from unittest import main
+
+from vimiv.trash_manager import TrashManager
 
 from vimiv_testcase import VimivTestCase
 
@@ -104,6 +107,23 @@ class CompletionsTest(VimivTestCase):
         for row in liststore:
             self.assertIn(row[0], expected_completions)
         self.assertEqual(len(liststore), len(expected_completions))
+
+    def test_trash_completion(self):
+        """Completion of files in trash."""
+        # Create one image file in trash and one with a similar name but not an
+        # image
+        # The completion is supposed to be unique as the non-image is ignored
+        trash_directory = TrashManager().get_files_directory()
+        trashed_file = os.path.join(trash_directory, "arch-logo.png")
+        shutil.copy("vimiv/testimages/arch-logo.png", trash_directory)
+        with open(os.path.join(trash_directory, "arch-logo.txt"), "w") as f:
+            f.write("test\n")
+        self.completions.entry.set_text(":undelete ")
+        self.completions.complete()
+        expected_text = ":undelete arch-logo.png"
+        self.assertEqual(expected_text, self.completions.entry.get_text())
+        # Clean up
+        os.remove(trashed_file)
 
     def test_tabbing(self):
         """Tabbing through completions."""

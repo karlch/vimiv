@@ -102,3 +102,9 @@ class TrashManager():
         os.fsync(temp_file.fileno())
         temp_file.close()
         shutil.move(temp_path, info_path)
+
+    def get_files_directory(self):
+        return self.files_directory
+
+    def get_info_directory(self):
+        return self.info_directory

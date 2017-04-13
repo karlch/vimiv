@@ -37,7 +37,8 @@ class Completion():
                            "external": [Gtk.ListStore(str, str)],
                            "path": [Gtk.ListStore(str, str)],
                            "tag": [Gtk.ListStore(str, str)],
-                           "search": [Gtk.ListStore(str, str)]}
+                           "search": [Gtk.ListStore(str, str)],
+                           "trash": [Gtk.ListStore(str, str)]}
         for liststore in self.liststores.values():
             comp_filter = liststore[0].filter_new()
             comp_filter.set_visible_func(self.completion_filter)
@@ -167,6 +168,9 @@ class Completion():
             # Tag commands
             elif re.match(r'^(tag_(write|remove|load) )', command):
                 return "tag"
+            # Undelete files from trash
+            elif command.startswith("undelete"):
+                return "trash"
         return "internal"
 
     def complete_path(self, path):
@@ -249,6 +253,26 @@ class Completion():
         else:
             self.info.hide()
 
+    def complete_trash(self, command):
+        """Complete files in trash directory for :undelete.
+
+        Args:
+            command: The internal command to complete.
+        """
+        # Get files in trash directory
+        self.liststores["trash"][0].clear()
+        trash_directory = \
+            self.app["manipulate"].trash_manager.get_files_directory()
+        trash_files = sorted(os.listdir(trash_directory))
+        # Add them to completion formatted to 'undelete $FILE'
+        for fil in trash_files:
+            # Ensure we only complete image files as vimiv is not meant as a
+            # general trash tool but provides this for convenience
+            abspath = os.path.join(trash_directory, fil)
+            if is_image(abspath):
+                completion = "undelete %s" % (fil)
+                self.liststores["trash"][0].append([completion, ""])
+
     def generate_commandlist(self):
         """Generate a list of internal vimiv commands and store it."""
         commands = [cmd for cmd in self.app["commands"]
@@ -300,6 +324,8 @@ class Completion():
             self.complete_search()
         elif comp_type == "external":
             self.complete_external(command)
+        elif comp_type == "trash":
+            self.complete_trash(command)
         self.treeview.set_model(self.liststores[comp_type][1])
         self.liststores[comp_type][1].refilter()
         self.reset()
