@@ -1,3 +1,4 @@
+# vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Provides classes to store and load thumbnails from a shared cache.
 
 The ThumbnailStore transparently creates and loads thumbnails according to the
