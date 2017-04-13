@@ -239,17 +239,3 @@ def parse_keys(running_tests=False):
                    "MANIPULATE": keys_manipulate,
                    "COMMAND": keys_command}
     return keybindings
-
-
-def parse_dirs():
-    """Check for and create all required directories basedir.
-
-    Args:
-        basedir: The base directory of vimiv. ~/.vimiv or mkdtemp()
-    """
-    vimivdir = os.path.expanduser("~/.vimiv/")
-    trashdir = os.path.join(vimivdir, "Trash")
-    dirs = [vimivdir, trashdir]
-
-    for directory in dirs:
-        os.makedirs(directory, exist_ok=True)

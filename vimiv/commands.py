@@ -30,13 +30,13 @@ class Commands(object):
                          positional_args=["name", "command"])
         self.add_command("autorotate", self.app["manipulate"].rotate_auto)
         self.add_command("center", self.app["image"].center_window)
-        self.add_command("clear_trash", self.app["fileextras"].clear,
-                         default_args=["Trash"])
         self.add_command("copy_basename", self.app["fileextras"].copy_name,
                          default_args=[False])
         self.add_command("copy_abspath", self.app["fileextras"].copy_name,
                          default_args=[True])
         self.add_command("delete", self.app["manipulate"].delete)
+        self.add_command("undelete", self.app["manipulate"].undelete,
+                         positional_args=["basename"])
         self.add_command("discard_changes",
                          self.app["manipulate"].button_clicked,
                          default_args=[None, False])

@@ -7,7 +7,7 @@ from threading import Thread
 from gi.repository import GdkPixbuf, GLib, Gtk
 from PIL import Image, ImageEnhance
 from vimiv import imageactions
-from vimiv.fileactions import move_to_trash
+from vimiv.trash_manager import TrashManager
 
 
 class Manipulate(object):
@@ -23,7 +23,7 @@ class Manipulate(object):
         scrolled_win: Gtk.ScrolledWindow for the widgets so they are accessible
             regardless of window size.
         sliders: Dictionary containing bri, con and sha sliders.
-        running_threads: List of running threads.
+        trash_manager: Class to handle a shared trash directory.
     """
 
     def __init__(self, app, settings):
@@ -51,7 +51,7 @@ class Manipulate(object):
                      "MANIPULATE")
         self.scrolled_win.add(grid)
 
-        # sliders
+        # Sliders
         bri_slider = Gtk.Scale()
         bri_slider.connect("value-changed", self.value_slider, "bri")
         con_slider = Gtk.Scale()
@@ -93,38 +93,40 @@ class Manipulate(object):
                      button_no]:
             grid.add(item)
 
+        # Generate trash manager
+        self.trash_manager = TrashManager()
+
     def delete(self):
         """Delete all marked images or the current one."""
         # Get all images
         images = self.get_manipulated_images("Deleted")
         self.app["mark"].marked = []
-        # Delete all images
+        # Delete all images remembering possible errors
+        message = ""
         for im in images:
-            message = ""
             if not os.path.exists(im):
-                message = "Image %s does not exist" % (im)
+                message += "Image %s does not exist." % (im)
             elif os.path.isdir(im):
-                message = "Deleting directories is not supported"
-            if message:
-                self.app["statusbar"].message(message, "error")
-                return
-        move_to_trash(images, self.app["image"].trashdir)
-
-        # Reload stuff if needed
-        if self.app["library"].grid.is_visible():
-            if self.app.get_pos():
-                self.app["library"].remember_pos(os.getcwd(),
-                                                 self.app.get_pos() - 1)
-            self.app["library"].reload(os.getcwd())
-        if self.app["image"].scrolled_win.is_focus():
-            del self.app.paths[self.app.index]
-            if self.app.paths:
-                self.app["image"].load_image()
+                message += "Deleting directory %s is not supported." % (im)
             else:
-                # No more images in this directory -> focus parent in library
-                self.app["library"].move_up()
-                self.app["library"].focus(True)
-                self.app["statusbar"].message("No more images", "info")
+                self.trash_manager.delete(im)
+        if message:
+            self.app["statusbar"].message(message, "error")
+        # Reload stuff if needed
+        self.app["fileextras"].reload_changes(os.getcwd(), reload_path=True)
+
+    def undelete(self, basename):
+        """Undelete an image in the trash.
+
+        Args:
+            basename: The basename of the image in the trash directory.
+        """
+        returncode = self.trash_manager.undelete(basename)
+        if returncode == 1:
+            message = "Could not restore %s, file does not exist." % (basename)
+            self.app["statusbar"].message(message, "error")
+        # Reload stuff if needed
+        self.app["fileextras"].reload_changes(os.getcwd(), reload_path=True)
 
     def get_manipulated_images(self, info):
         """Return the images which should be manipulated.

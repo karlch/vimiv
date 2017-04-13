@@ -10,7 +10,7 @@ from gi.repository import Gdk, Gio, GLib, Gtk
 from vimiv.commandline import CommandLine
 from vimiv.commands import Commands
 from vimiv.completions import Completion
-from vimiv.configparser import parse_config, parse_dirs, set_defaults
+from vimiv.configparser import parse_config, set_defaults
 from vimiv.eventhandler import KeyHandler
 from vimiv.fileactions import FileExtras, populate
 from vimiv.image import Image
@@ -188,7 +188,6 @@ class Vimiv(Gtk.Application):
         Args:
             app: The application itself.
         """
-        parse_dirs()
         self.init_widgets()
         self.create_window_structure()
         app.add_window(self["window"])

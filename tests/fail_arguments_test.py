@@ -18,16 +18,15 @@ class FailingArgTest(VimivTestCase):
     def test_args(self):
         """Fail commands because of wrong number of arguments."""
         # 0 Arguments allowed
-        for cmd in ["accept_changes", "autorotate", "center", "clear_trash",
-                    "copy_abspath", "copy_basename", "delete", "first",
-                    "first_lib", "fit", "fit_horiz", "fit_vert",
-                    "focus_library", "fullscreen", "last", "last_lib",
-                    "library", "manipulate", "mark", "mark_all", "mark_between",
-                    "move_up", "next", "next!", "prev", "prev!", "q", "q!",
-                    "reload_lib", "set animation!", "set clipboard!",
-                    "set overzoom!", "set rescale_svg!", "set show_hidden!",
-                    "set statusbar!", "slideshow", "thumbnail",
-                    "unfocus_library", "version"]:
+        for cmd in ["accept_changes", "autorotate", "center", "copy_abspath",
+                    "copy_basename", "delete", "first", "first_lib", "fit",
+                    "fit_horiz", "fit_vert", "focus_library", "fullscreen",
+                    "last", "last_lib", "library", "manipulate", "mark",
+                    "mark_all", "mark_between", "move_up", "next", "next!",
+                    "prev", "prev!", "q", "q!", "reload_lib", "set animation!",
+                    "set clipboard!", "set overzoom!", "set rescale_svg!",
+                    "set show_hidden!", "set statusbar!", "slideshow",
+                    "thumbnail", "unfocus_library", "version"]:
             self.fail_arguments(cmd, 1, too_many=True)
         # 1 Argument optional
         for cmd in ["grow_lib", "set brightness", "set contrast",
@@ -36,7 +35,7 @@ class FailingArgTest(VimivTestCase):
             self.fail_arguments(cmd, 2, too_many=True)
         # 1 Argument required
         for cmd in ["flip", "format", "rotate", "slideshow_delay", "tag_write",
-                    "tag_load", "tag_remove"]:
+                    "tag_load", "tag_remove", "undelete"]:
             self.fail_arguments(cmd, 2, too_many=True)
             self.fail_arguments(cmd, 0, too_many=False)
         # 2 Arguments required

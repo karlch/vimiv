@@ -1,7 +1,6 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Image part of vimiv."""
 
-import os
 from random import shuffle
 
 from gi.repository import GdkPixbuf, GLib, Gtk
@@ -25,7 +24,6 @@ class Image(object):
             1: Image is zoomed to fit.
             2: Image is zoomed to fit horizontally.
             3: Image is zoomed to fit vertically.
-        trashdir: Directory for all the deleted files.
         overzoom: If True, increase image size up to window size even if images
             are smaller than window.
         rescale_svg: If True rescale vector graphics when zooming.
@@ -59,7 +57,6 @@ class Image(object):
         # Settings
         self.animation_toggled = False
         self.fit_image = 1  # Checks if the image fits the window somehow
-        self.trashdir = os.path.expanduser("~/.vimiv/Trash")
         self.overzoom = general["overzoom"]
         self.rescale_svg = general["rescale_svg"]
         self.shuffle = general["shuffle"]

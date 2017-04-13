@@ -2,7 +2,6 @@
 """Different actions applying directly to files."""
 
 import os
-import shutil
 from random import shuffle
 
 from gi.repository import Gdk, GdkPixbuf, Gtk
@@ -84,39 +83,6 @@ def populate(args, recursive=False, shuffle_paths=False):
     return paths, 0
 
 
-def move_to_trash(filelist, trashdir):
-    """Move every file in filelist to the Trash.
-
-    If it is a directory, an error is thrown.
-
-    Args:
-        filelist: The list of files to operate on.
-        trashdir: The directory to move the files to.
-    """
-    # Create the directory if it isn't there yet
-    if not os.path.isdir(trashdir):
-        os.mkdir(trashdir)
-
-    # Loop over every file
-    for im in filelist:
-        if os.path.isdir(im):
-            return 1  # Error
-        if os.path.exists(im):
-            # Check if there is already a file with that name in the trash
-            # If so, add numbers to the filename until it doesn't exist anymore
-            delfile = os.path.join(trashdir, os.path.basename(im))
-            if os.path.exists(delfile):
-                backnum = 1
-                ndelfile = delfile + "." + str(backnum)
-                while os.path.exists(ndelfile):
-                    backnum += 1
-                    ndelfile = delfile + "." + str(backnum)
-                os.rename(delfile, ndelfile)
-            shutil.move(im, trashdir)
-
-        return 0  # Success
-
-
 def is_image(filename):
     """Check whether a file is an image.
 
@@ -139,18 +105,6 @@ class FileExtras(object):
         """
         self.app = app
         self.use_primary = self.app.settings["GENERAL"]["copy_to_primary"]
-
-    def clear(self, directory_name):
-        """Remove all files in directory (Trash or Thumbnails).
-
-        Args:
-            directory_name: Directory to clear.
-        """
-        if directory_name == "Trash":
-            directory = self.app["image"].trashdir
-        for fil in os.listdir(directory):
-            fil = os.path.join(directory, fil)
-            os.remove(fil)
 
     def format_files(self, string):
         """Format image names in filelist according to a formatstring.

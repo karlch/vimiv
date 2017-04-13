@@ -37,13 +37,19 @@ class ManipulateTest(VimivTestCase):
         # Reset mark
         self.vimiv["mark"].marked = []
 
-    def test_delete(self):
-        """Delete images."""
+    def test_delete_undelete(self):
+        """Delete and undelete images from within manipulate."""
+        # Delete
         self.assertTrue(os.path.exists("arch-logo.png"))
         self.manipulate.delete()
         self.assertFalse(os.path.exists("arch-logo.png"))
         self.assertEqual(self.vimiv.paths[self.vimiv.index],
                          os.path.abspath("arch_001.jpg"))
+        # Undelete
+        self.manipulate.undelete("arch-logo.png")
+        self.assertTrue(os.path.exists("arch-logo.png"))
+        self.assertEqual(self.vimiv.paths[self.vimiv.index],
+                         os.path.abspath("arch-logo.png"))
 
     def test_rotate(self):
         """Rotate image."""
