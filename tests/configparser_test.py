@@ -71,7 +71,7 @@ class ConfigparserTest(TestCase):
                                 "border_width": "12",
                                 "markup": "<span foreground=\"#FF0000\">",
                                 "show_hidden": "no",
-                                "desktop_start_dir": "~/.vimiv",
+                                "desktop_start_dir": "~/.local",
                                 "file_check_amount": "10",
                                 "tilde_in_statusbar": "no"},
                     "ALIASES": {"testalias": "zoom_in"}}
@@ -103,7 +103,7 @@ class ConfigparserTest(TestCase):
         self.assertEqual(library["markup"], "<span foreground=\"#FF0000\">")
         self.assertEqual(library["show_hidden"], False)
         self.assertEqual(library["desktop_start_dir"],
-                         os.path.expanduser("~/.vimiv"))
+                         os.path.expanduser("~/.local"))
         self.assertEqual(library["file_check_amount"], 10)
         self.assertEqual(library["tilde_in_statusbar"], False)
         self.assertIn("testalias", aliases.keys())
