@@ -60,8 +60,10 @@ class AppTest(VimivTestCase):
             "/tmp/",
             self.vimiv["thumbnail"].thumbnail_manager.thumbnail_store.base_dir)
         self.assertIn("/tmp/", self.vimiv["tags"].directory)
-        # TODO get trash in tmp with new setup
-        # self.assertIn("/tmp/", self.vimiv["image"].trashdir)
+        trash_dir = self.vimiv["manipulate"].trash_manager.get_files_directory()
+        info_dir = self.vimiv["manipulate"].trash_manager.get_info_directory()
+        self.assertIn("/tmp/", trash_dir)
+        self.assertIn("/tmp/", info_dir)
         # Create a tag in tmp as a simple test
         self.vimiv["tags"].write(["image1.py", "image2.py"], "tmptag")
         self.assertIn("tmptag", os.listdir(self.vimiv["tags"].directory))
