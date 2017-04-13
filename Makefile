@@ -61,3 +61,6 @@ spellcheck:
 
 spellcheck_add_unknown:
 	pylint --disable all --enable spelling --spelling-dict en_GB --spelling-private-dict-file=.spelling_dict.txt --spelling-store-unknown-words=y vimiv/*.py vimiv/vimiv tests/*.py
+
+todo:
+	pylint --disable all --enable fixme vimiv/*.py vimiv/vimiv tests/*.py
