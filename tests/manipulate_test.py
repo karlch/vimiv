@@ -3,6 +3,7 @@
 
 import os
 import shutil
+import tempfile
 from time import sleep
 from unittest import main
 
@@ -50,6 +51,21 @@ class ManipulateTest(VimivTestCase):
         self.assertTrue(os.path.exists("arch-logo.png"))
         self.assertEqual(self.vimiv.paths[self.vimiv.index],
                          os.path.abspath("arch-logo.png"))
+
+    def test_fail_delete_undelete(self):
+        """Fail deleting and undeleting images."""
+        # Restore a non-existent file
+        self.manipulate.undelete("foo_bar_baz")
+        self.check_statusbar(
+            "ERROR: Could not restore foo_bar_baz, file does not exist")
+        # Restore a directory
+        tmpdir = tempfile.mkdtemp()
+        basename = os.path.basename(tmpdir)
+        self.vimiv["manipulate"].trash_manager.delete(tmpdir)
+        self.manipulate.undelete(basename)
+        self.check_statusbar(
+            "ERROR: Could not restore %s, directories are not supported"
+            % (basename))
 
     def test_rotate(self):
         """Rotate image."""

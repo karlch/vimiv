@@ -57,6 +57,8 @@ class TrashManager():
         if not os.path.exists(info_filename) \
                 or not os.path.exists(trash_filename):
             return 1
+        if os.path.isdir(trash_filename):
+            return 2
         info = configparser.ConfigParser()
         info.read(info_filename)
         content = info["Trash Info"]

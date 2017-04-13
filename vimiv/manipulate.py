@@ -123,10 +123,14 @@ class Manipulate(object):
         """
         returncode = self.trash_manager.undelete(basename)
         if returncode == 1:
-            message = "Could not restore %s, file does not exist." % (basename)
+            message = "Could not restore %s, file does not exist" % (basename)
             self.app["statusbar"].message(message, "error")
-        # Reload stuff if needed
-        self.app["fileextras"].reload_changes(os.getcwd(), reload_path=True)
+        elif returncode == 2:
+            message = "Could not restore %s, directories are not supported" \
+                % (basename)
+            self.app["statusbar"].message(message, "error")
+        else:
+            self.app["fileextras"].reload_changes(os.getcwd(), reload_path=True)
 
     def get_manipulated_images(self, info):
         """Return the images which should be manipulated.
