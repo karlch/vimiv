@@ -5,3 +5,7 @@ Please check out the page on the
 ### Reporting bugs
 If possible, please reproduce the bug running with --debug and include the
 content of the created logfile in ~/.vimiv/vimiv.log.
+
+Vimiv tries to maintain backward compatibility with the latest Ubuntu LTS
+version. Supporting older systems is not planned and things will almost
+certainly break on them.
