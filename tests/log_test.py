@@ -25,7 +25,7 @@ class LogTest(VimivTestCase):
         """Creation and header of the log file."""
         self.assertTrue(os.path.isfile(self.logfile))
         content = self.read_log()
-        self.assertIn(self.logfile.replace(os.environ["HOME"], "~"), content)
+        self.assertIn(self.logfile.replace(os.getenv("HOME"), "~"), content)
         self.assertIn("[Version]", content)
         self.assertIn("[Python]", content)
         self.assertIn("[GTK]", content)

@@ -31,7 +31,7 @@ class Log():
         # Create a new log file at startup
         with open(self.filename, "w") as f:
             f.write("Vimiv log written to "
-                    + self.filename.replace(os.environ["HOME"], "~")
+                    + self.filename.replace(os.getenv("HOME"), "~")
                     + "\n")
         self.write_separator()
         # Header containing version and Gtk version

@@ -35,7 +35,7 @@ class WindowTest(VimivTestCase):
         self.vimiv["window"].scroll("m")
         self.check_statusbar("ERROR: Invalid scroll direction m")
 
-    @skipUnless(os.environ["DISPLAY"] == ":42", "Must run in Xvfb")
+    @skipUnless(os.getenv("DISPLAY") == ":42", "Must run in Xvfb")
     def test_check_resize(self):
         """Resize window and check winsize."""
         self.assertEqual(self.vimiv["window"].winsize, (800, 600))

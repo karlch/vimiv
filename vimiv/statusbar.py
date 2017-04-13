@@ -136,7 +136,7 @@ class Statusbar(object):
         if "LIBRARY" in mode:
             cur_dir = os.getcwd()
             if self.app["library"].tilde_in_statusbar:
-                cur_dir = cur_dir.replace(os.environ["HOME"], "~")
+                cur_dir = cur_dir.replace(os.getenv("HOME"), "~")
             self.left_label.set_text(cur_dir)
         # Position, name and thumbnail size in thumb mode
         elif "THUMBNAIL" in mode:
