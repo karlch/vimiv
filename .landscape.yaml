@@ -3,3 +3,5 @@ python-targets:
     - 3
 ignore-paths:
     - vimiv/__init__.py
+    - vimiv/vimiv
+    - vimiv.py
