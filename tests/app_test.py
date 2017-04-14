@@ -7,7 +7,9 @@ from unittest import main
 
 from gi.repository import GLib
 
-from vimiv_testcase import VimivTestCase
+from vimiv.app import Vimiv
+
+from vimiv_testcase import VimivTestCase, refresh_gui
 
 
 class AppTest(VimivTestCase):
@@ -16,7 +18,6 @@ class AppTest(VimivTestCase):
     @classmethod
     def setUpClass(cls):
         cls.init_test(cls)
-        cls.tmpdir = ""
 
     def test_handle_local_options(self):
         """Handle commandline arguments."""
@@ -68,19 +69,58 @@ class AppTest(VimivTestCase):
         self.vimiv["tags"].write(["image1.py", "image2.py"], "tmptag")
         self.assertIn("tmptag", os.listdir(self.vimiv["tags"].directory))
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.vimiv.quit_wrapper()
+        os.chdir(cls.working_directory)
+
+
+class QuitTest(VimivTestCase):
+    """Quit Tests."""
+
+    def setUp(self):
+        """Recreate vimiv for every run."""
+        self.vimiv = Vimiv()
+        self.init_test()
+
     def test_quit_with_running_threads(self):
         """Quit vimiv with external threads running."""
         self.run_command("!sleep 0.2")
         self.vimiv.quit_wrapper()
         self.check_statusbar(
             "WARNING: Running external processes: sleep 0.2. Add ! to force.")
+        p = self.vimiv["commandline"].running_processes[0]
+        # Kill the subprocess
+        self.assertFalse(p.poll())
+        self.vimiv.quit_wrapper(force=True)
+        refresh_gui()
+        self.assertEqual(p.poll(), -9)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.vimiv.quit_wrapper()
-        # Check if the temporary directory was deleted correctly
-        cls.assertFalse(cls, os.path.exists(cls.tmpdir))
-        os.chdir(cls.working_directory)
+    def test_clean_quit(self):
+        """Quit vimiv and write history and log."""
+        self.run_command("!:", external=True)
+        self.vimiv.quit_wrapper()
+        histfile = os.path.join(GLib.get_user_data_dir(), "vimiv", "history")
+        logfile = os.path.join(GLib.get_user_data_dir(), "vimiv", "vimiv.log")
+        with open(histfile) as f:
+            content = f.readlines()
+            self.assertEqual(content, [":!:\n"])
+        with open(logfile) as f:
+            content = f.readlines()
+            self.assertIn("Exited", content[-1])
+
+    def test_quit_with_edited_image(self):
+        """Quit vimiv with an edited image."""
+        # Fake a manipulation
+        self.vimiv["manipulate"].manipulations = {}
+        self.vimiv.quit_wrapper()
+        self.check_statusbar(
+            "WARNING: Image has been edited, add ! to force")
+        # Force quit
+        self.vimiv.quit_wrapper(force=True)
+        self.assertEqual(self.vimiv["manipulate"].manipulations,
+                         {"bri": 1, "con": 1, "sha": 1})
+        refresh_gui()
 
 
 if __name__ == "__main__":
