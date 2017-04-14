@@ -1,8 +1,8 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Configparser Tests for vimiv's testsuite."""
 
+import configparser
 import os
-import shutil
 import sys
 import tempfile
 from unittest import TestCase, main
@@ -18,35 +18,35 @@ class ConfigparserTest(TestCase):
         # Catch stdout for error messages
         if not hasattr(sys.stdout, "getvalue"):
             cls.fail(cls, "Need to run test in buffered mode.")
-        cls.tmpdir = tempfile.TemporaryDirectory(prefix="vimivtests-").name
-        os.mkdir("configfiles")
+        cls.tmpdir = tempfile.TemporaryDirectory(prefix="vimivtests-")
+        cls.configdir = cls.tmpdir.name
         cls.configfile_counter = 0  # Used to always create unique new filenames
+        cls.keybindings = {}
+        cls.keybindings["IMAGE"] = {"a": "autorotate"}
+        cls.keybindings["THUMBNAIL"] = {"a": "autorotate"}
+        cls.keybindings["LIBRARY"] = {"a": "autorotate"}
+        cls.keybindings["MANIPULATE"] = {"a": "autorotate"}
+        cls.keybindings["COMMAND"] = {"Tab": "complete"}
 
     def check_defaults(self, settings):
         """Check is settings contain default values."""
-        general = settings["GENERAL"]
-        library = settings["LIBRARY"]
-        aliases = settings["ALIASES"]
-        amount_general_settings = len(general.keys())
-        amount_library_settings = len(library.keys())
-        amount_aliases = len(aliases.keys())
-        self.assertEqual(amount_general_settings, 16)
-        self.assertEqual(amount_library_settings, 9)
-        self.assertEqual(amount_aliases, 0)
         defaults = parser.set_defaults()
         self.assertEqual(settings, defaults)
 
     def test_parse_config_empty(self):
         """Parse an empty configfile."""
         # Should set default values
-        settings = parser.parse_config("configfiles/empty_vimivrc", True)
+        path = os.path.join(self.configdir, "empty_vimivrc")
+        with open(path, "w") as f:
+            f.write("")
+        settings = parser.parse_config(path, True)
         self.check_defaults(settings)
 
     def test_unexisting_configfile(self):
         """Parse a non-existing configfile."""
+        path = os.path.join(self.configdir, "this_file_does_not_exist")
         # Should ignore it and set default values
-        settings = parser.parse_config("configfiles/this_file_does_not_exist",
-                                       True)
+        settings = parser.parse_config(path, True)
         self.check_defaults(settings)
 
     def test_correct_configfile(self):
@@ -167,10 +167,48 @@ class ConfigparserTest(TestCase):
         run_check(settings, "")
 
     def test_parse_keys(self):
-        """Check if the keybindings are parsed correctly."""
-        keybindings = parser.parse_keys()
-        image_bindings = keybindings["IMAGE"]
-        self.assertEqual(image_bindings["j"], "scroll j")
+        """Parse a correct minimal keyfile."""
+        keyfile = self.create_keyfile(self.keybindings)
+        parsed_bindings = parser.parse_keys(keyfiles=[keyfile],
+                                            running_tests=True)
+        # Checking one should be enough
+        image = parsed_bindings["IMAGE"]
+        self.assertEqual(self.keybindings["IMAGE"]["a"], image["a"])
+
+    def test_parse_keys_missing_section(self):
+        """Parse a keyfile missing a section."""
+        keybindings = self.keybindings
+        del keybindings["IMAGE"]
+        keyfile = self.create_keyfile(keybindings)
+        # Catch the sys.exit(1)
+        with self.assertRaises(SystemExit):
+            parser.parse_keys(keyfiles=[keyfile], running_tests=True)
+        # pylint:disable=no-member
+        output = sys.stdout.getvalue().strip()
+        self.assertIn("Missing section", output)
+
+    def test_parse_keys_no_keyfile(self):
+        """Parse keybindings without any existing keyfiles."""
+        keyfile = os.path.join(self.configdir, "nope_not_a_keyfile")
+        # Catch the sys.exit(1)
+        with self.assertRaises(SystemExit):
+            parser.parse_keys(keyfiles=[keyfile], running_tests=True)
+        # pylint:disable=no-member
+        output = sys.stdout.getvalue().strip()
+        self.assertIn("Keyfile not found", output)
+
+    def test_parse_keys_duplicate(self):
+        """Parse keybindings with a duplicate keybinding."""
+        keybindings = self.keybindings
+        keyfile = self.create_keyfile(keybindings)
+        with open(keyfile, "a") as f:
+            f.write("\nTab: complete_inverse")
+        # Catch the sys.exit(1)
+        with self.assertRaises(SystemExit):
+            parser.parse_keys(keyfiles=[keyfile], running_tests=True)
+        # pylint:disable=no-member
+        output = sys.stdout.getvalue().strip()
+        self.assertIn("Duplicate keybinding", output)
 
     @classmethod
     def create_configfile(cls, settings=None, text=None):
@@ -182,7 +220,8 @@ class ConfigparserTest(TestCase):
         Return:
             path to the created configfile
         """
-        configfile = "configfiles/vimivrc_" + str(cls.configfile_counter)
+        configfile = os.path.join(cls.configdir,
+                                  "vimivrc_" + str(cls.configfile_counter))
         cls.configfile_counter += 1
         if settings:
             general = settings["GENERAL"] \
@@ -211,8 +250,26 @@ class ConfigparserTest(TestCase):
         return configfile
 
     @classmethod
+    def create_keyfile(cls, keybindings):
+        """Create a vimiv keybinding file.
+
+        Args:
+            keybindings: Dictionary containing the keybindings for the file.
+        Return:
+            path to the created file
+        """
+        path = os.path.join(cls.configdir,
+                            "keys.conf_" + str(cls.configfile_counter))
+        keys = configparser.ConfigParser()
+        for section in keybindings:
+            keys[section] = keybindings[section]
+        with open(path, "w") as keyfile:
+            keys.write(keyfile)
+        return path
+
+    @classmethod
     def tearDownClass(cls):
-        shutil.rmtree("configfiles")
+        cls.tmpdir.cleanup()
 
 
 if __name__ == "__main__":

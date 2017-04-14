@@ -183,28 +183,32 @@ def parse_config(commandline_config=None, running_tests=False):
     return settings
 
 
-def parse_keys(running_tests=False):
+def parse_keys(keyfiles=None, running_tests=False):
     """Check for a keyfile and parse it.
 
     Args:
+        keyfiles: List of keybinding files. If not None, use this list instead
+            of the default files.
         running_tests: If True running from testsuite. Do not show error popup.
     Return:
         Dictionary of keybindings.
     """
-    keyfiles = ["/etc/vimiv/keys.conf",
-                os.path.join(GLib.get_user_config_dir(), "vimiv/keys.conf"),
-                os.path.expanduser("~/.vimiv/keys.conf")]
+    if not keyfiles:
+        keyfiles = \
+            ["/etc/vimiv/keys.conf",
+             os.path.join(GLib.get_user_config_dir(), "vimiv/keys.conf"),
+             os.path.expanduser("~/.vimiv/keys.conf")]
     # Read the list of files
     keys = configparser.ConfigParser()
     try:
         # No file for keybindings found
         if not keys.read(keyfiles):
             message = "Keyfile not found. Exiting."
-            error_message(message)
+            error_message(message, running_tests=running_tests)
             sys.exit(1)
     except configparser.DuplicateOptionError as e:
         message = e.message + ".\n Duplicate keybinding. Exiting."
-        error_message(message)
+        error_message(message, running_tests=running_tests)
         sys.exit(1)
 
     # Get the keybinding dictionaries checking for errors
