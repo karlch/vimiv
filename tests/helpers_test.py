@@ -65,8 +65,7 @@ class HelpersTest(TestCase):
             autorot_info,
             "Rotate all images in the current filelist according to exif data")
         # Containing extra periods
-        trash_info = infodict["clear_trash"]
-        self.assertEqual(trash_info, "Delete all files in the trash directory")
+        # TODO reactivate if this case re-appears
         # More than one sentence
         flip_info = infodict["flip"]
         self.assertEqual(flip_info, "Flip the current image")

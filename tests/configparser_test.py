@@ -202,7 +202,7 @@ class ConfigparserTest(TestCase):
         keybindings = self.keybindings
         keyfile = self.create_keyfile(keybindings)
         with open(keyfile, "a") as f:
-            f.write("\nTab: complete_inverse")
+            f.write("\na: scroll j")
         # Catch the sys.exit(1)
         with self.assertRaises(SystemExit):
             parser.parse_keys(keyfiles=[keyfile], running_tests=True)
@@ -261,7 +261,7 @@ class ConfigparserTest(TestCase):
         path = os.path.join(cls.configdir,
                             "keys.conf_" + str(cls.configfile_counter))
         keys = configparser.ConfigParser()
-        for section in keybindings:
+        for section in sorted(keybindings.keys()):
             keys[section] = keybindings[section]
         with open(path, "w") as keyfile:
             keys.write(keyfile)
