@@ -3,13 +3,15 @@
 vimivrc \- configuration files for the vimiv image viewer
 
 .SH SYNOPSIS
-/etc/vimiv/vimivrc, ~/.vimiv/vimivrc, /etc/vimiv/keys.conf, ~/.vimiv/keys.conf
+/etc/vimiv/vimivrc, $XDG_CONFIG_HOME/vimiv/vimivrc, ~/.vimiv/vimivrc
+/etc/vimiv/keys.conf, $XDG_CONFIG_HOME/vimiv/keys.conf, ~/.vimiv/keys.conf
 
 .SH DESCRIPTION
 Vimiv is configured via two files: basedir/vimivrc and basedir/keys.conf where
-basedir is one of /etc/vimiv/ and ~/.vimiv/. The default configuration files are
-installed to /etc/vimiv/. It is considered best-practice to copy them to
-~/.vimiv/ and configure the copied files.
+basedir is one of /etc/vimiv/, $XDG_CONFIG_HOME/vimiv and ~/.vimiv/.
+The default configuration files are installed to /etc/vimiv/. It is considered
+best-practice to copy them to $XDG_CONFIG_HOME/vimiv/ and configure the copied
+files.
 .TP
 More information in a nicer format is available at:
 .TP
@@ -195,9 +197,6 @@ Rotate all images in the current filelist according to exif data.
 .BR center
 Scroll to the center of the image.
 .TP
-.BR clear_trash
-Delete all files in the trash directory.
-.TP
 .BR copy_abspath
 Copy the absolute path of the currently selected file to the clipboard.
 .TP
@@ -344,6 +343,9 @@ Delete a tagfile.
 .TP
 .BR thumbnail
 Toggle thumbnail mode.
+.TP
+.BR undelete
+Undelete an image.
 .TP
 .BR unfocus_library
 Focus the widget last focused before the library.
