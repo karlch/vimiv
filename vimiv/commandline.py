@@ -48,12 +48,13 @@ class CommandLine(object):
         self.entry.set_hexpand(True)
 
         # Cmd history from file
+        datadir = os.path.join(GLib.get_user_data_dir(), "vimiv")
+        os.makedirs(datadir, exist_ok=True)
         # If there is a history file in the old location move it and inform the
         # user
         # TODO remove this in a new version, assigned for 0.10
         old_histfile = os.path.expanduser("~/.vimiv/history")
-        new_histfile = os.path.join(GLib.get_user_data_dir(), "vimiv",
-                                    "history")
+        new_histfile = os.path.join(datadir, "history")
         if os.path.isfile(old_histfile):
             if os.path.isfile(new_histfile):
                 message = "There is a history file in the deprecated location" \
@@ -66,8 +67,7 @@ class CommandLine(object):
                 message = "Moved the old history file %s " \
                     "to the new location %s." % (old_histfile, new_histfile)
                 error_message(message, running_tests=self.app.running_tests)
-        self.history = read_file(os.path.join(GLib.get_user_data_dir(),
-                                              "vimiv", "history"))
+        self.history = read_file(os.path.join(datadir, "history"))
 
         # Defaults
         self.pos = 0
