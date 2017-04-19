@@ -94,7 +94,8 @@ class TrashManager():
             os.path.basename(trash_filename) + ".trashinfo")
         # Write to temporary file and use shutil.move to make sure the operation
         # is an atomic operation as specified by the standard
-        _, temp_path = tempfile.mkstemp(dir=self.info_directory)
+        fd, temp_path = tempfile.mkstemp(dir=self.info_directory)
+        os.close(fd)
         temp_file = open(temp_path, "w")
         temp_file.write("[Trash Info]\n")
         temp_file.write("Path=%s\n" % (original_filename))
