@@ -222,8 +222,8 @@ class Thumbnail(object):
             self.thumbnail_manager.get_thumbnail_at_scale_async(
                 filename, self.get_zoom_level()[0],
                 self._on_thumbnail_created, index, ignore_cache=True)
-        else:
-            self.liststore[index][1] = name
+
+        self.liststore[index][1] = name
 
     def move_direction(self, direction):
         """Scroll with "hjkl".
