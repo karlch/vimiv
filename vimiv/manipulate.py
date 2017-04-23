@@ -129,6 +129,10 @@ class Manipulate(object):
             message = "Could not restore %s, directories are not supported" \
                 % (basename)
             self.app["statusbar"].message(message, "error")
+        elif returncode == 3:
+            message = "Could not restore %s, directory is not accessible" \
+                % (basename)
+            self.app["statusbar"].message(message, "error")
         else:
             self.app["fileextras"].reload_changes(os.getcwd(), reload_path=True)
 

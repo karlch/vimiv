@@ -50,6 +50,8 @@ class TrashManager():
         Return:
             0: No errors.
             1: File does not exist.
+            2: File is a directory.
+            3: Directory of the file does not exist.
         """
         info_filename = os.path.join(self.info_directory,
                                      basename + ".trashinfo")
@@ -63,6 +65,9 @@ class TrashManager():
         info.read(info_filename)
         content = info["Trash Info"]
         original_filename = content["Path"]
+        # Directory of the file is not accessible
+        if not os.path.isdir(os.path.dirname(original_filename)):
+            return 3
         shutil.move(trash_filename, original_filename)
         os.remove(info_filename)
         return 0

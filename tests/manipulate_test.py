@@ -66,6 +66,20 @@ class ManipulateTest(VimivTestCase):
         self.check_statusbar(
             "ERROR: Could not restore %s, directories are not supported"
             % (basename))
+        # Restore a file without a top directory
+        tmpdir = tempfile.mkdtemp()
+        extra_directory = os.path.join(tmpdir, "extra_directory")
+        new_file = os.path.join(extra_directory, "new_file")
+        os.mkdir(extra_directory)
+        with open(new_file, "w") as f:
+            f.write("")
+        self.vimiv["manipulate"].trash_manager.delete(new_file)
+        basename = os.path.basename(new_file)
+        shutil.rmtree(tmpdir)
+        self.manipulate.undelete(basename)
+        self.check_statusbar(
+            "ERROR: Could not restore %s, directory is not accessible"
+            % (basename))
 
     def test_rotate(self):
         """Rotate image."""
