@@ -300,7 +300,6 @@ class Manipulate(object):
                 size = self.app["image"].imsize
                 self.pil_image = Image.open(self.app.paths[self.app.index])
                 self.pil_thumb = Image.open(self.app.paths[self.app.index])
-                # pylint: disable=no-member
                 self.pil_thumb.thumbnail(size, Image.ANTIALIAS)
         else:
             if self.app["thumbnail"].toggled:
@@ -340,7 +339,6 @@ class Manipulate(object):
         # Load Pixbuf from PIL data
         data = enhanced_im.tobytes()
         g_data = GLib.Bytes.new(data)
-        # pylint: disable=no-member
         w, h = imfile.size
         if imfile.mode == "RGBA":
             pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
