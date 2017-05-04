@@ -43,7 +43,7 @@ class CommandLine(object):
         self.entry = Gtk.Entry()
         self.entry.connect("activate", self.handler)
         self.entry.connect("key_press_event",
-                           self.app["eventhandler"].run, "COMMAND")
+                           self.app["eventhandler"].key_pressed, "COMMAND")
         self.entry.connect("changed", self.check_close)
         self.entry.set_hexpand(True)
 

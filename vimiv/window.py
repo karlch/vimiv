@@ -11,7 +11,7 @@ class Window(Gtk.ApplicationWindow):
 
     Attributes:
         app: The main vimiv application to interact with.
-        fullscreen: If True, the window is displayed fullscreen.
+        is_fullscreen: If True, the window is displayed fullscreen.
         winsize: The windowsize as tuple.
     """
 
@@ -32,8 +32,9 @@ class Window(Gtk.ApplicationWindow):
         start_fullscreen = general["start_fullscreen"]
 
         self.connect("destroy", self.app.quit_wrapper)
-        self.connect("button_press_event", self.app["eventhandler"].run,
+        self.connect("button_press_event", self.app["eventhandler"].clicked,
                      "IMAGE")
+        self.connect("touch-event", self.app["eventhandler"].touched)
         self.add_events(Gdk.EventMask.KEY_PRESS_MASK |
                         Gdk.EventMask.POINTER_MOTION_MASK)
 

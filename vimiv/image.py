@@ -52,7 +52,7 @@ class Image(object):
         self.scrolled_win.add(self.viewport)
         self.viewport.add(self.image)
         self.scrolled_win.connect("key_press_event",
-                                  self.app["eventhandler"].run, "IMAGE")
+                                  self.app["eventhandler"].key_pressed, "IMAGE")
 
         # Settings
         self.animation_toggled = False

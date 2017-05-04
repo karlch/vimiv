@@ -13,6 +13,8 @@ class KeyHandler(object):
         app: The main vimiv application to interact with.
         num_str: String containing repetition number for commands.
         timer_id: ID of the current timer running to clear num_str.
+        timer_id_touch: ID of the current timer running to reconnect clicks
+            after a touch by touchscreen.
         keys: Keybindings from configfiles.
     """
 
@@ -23,43 +25,19 @@ class KeyHandler(object):
             vimiv: The main vimiv class to interact with.
             settings: Settings from configfiles to use.
         """
-        # Add events to vimiv
         self.app = app
-        # Settings
         self.num_str = ""
         self.timer_id = 0
+        self.timer_id_touch = 0
         self.keys = parse_keys(running_tests=self.app.running_tests)
 
-    def run(self, widget, event, widget_name):
+    def run(self, keyname, widget_name):
         """Run the correct function per keypress.
 
         Args:
-            widget: Focused Gtk Object.
-            event: KeyPressEvent that called the function.
+            keyname: Name of the key that was pressed/clicked/...
             widget_name: Name of widget to operate on: image, library...
         """
-        if event.type == Gdk.EventType.KEY_PRESS:
-            keyval = event.keyval
-            keyname = Gdk.keyval_name(keyval)
-        elif event.type == Gdk.EventType.BUTTON_PRESS:
-            keyname = "Button" + str(event.button)
-        # Do not handle double clicks
-        else:
-            return
-        shiftkeys = ["space", "Return", "Tab", "Escape", "BackSpace",
-                     "Up", "Down", "Left", "Right"]
-        # Check for Control (^), Mod1 (Alt) or Shift
-        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
-            keyname = "^" + keyname
-        if event.get_state() & Gdk.ModifierType.MOD1_MASK:
-            keyname = "Alt+" + keyname
-        # Shift+ for all letters and for keys that don't support it
-        if (event.get_state() & Gdk.ModifierType.SHIFT_MASK and
-                (len(keyname) < 2 or keyname in shiftkeys
-                 or keyname.startswith("Button"))):
-            keyname = "Shift+" + keyname.lower()
-        if keyname == "ISO_Left_Tab":  # Tab is named really weird under shift
-            keyname = "Shift+Tab"
         # Numbers for the num_str
         if widget_name != "COMMAND" and keyname.isdigit():
             self.num_append(keyname)
@@ -79,6 +57,63 @@ class KeyHandler(object):
         # Activate default keybindings
         else:
             return False
+
+    def key_pressed(self, widget, event, widget_name):
+        """Handle key press event."""
+        if event.type == Gdk.EventType.KEY_PRESS:
+            keyval = event.keyval
+            keyname = Gdk.keyval_name(keyval)
+        keyname = self.check_modifiers(event, keyname)
+        return self.run(keyname, widget_name)
+
+    def clicked(self, widget, event, widget_name):
+        """Handle click event."""
+        # Do not handle double clicks
+        if not event.type == Gdk.EventType.BUTTON_PRESS:
+            return
+        button_name = "Button" + str(event.button)
+        button_name = self.check_modifiers(event, button_name)
+        return self.run(button_name, widget_name)
+
+    def touched(self, widget, event):
+        """Clear mouse connection when touching screen.
+
+        This stops calling the ButtonX bindings when using the touch screen.
+        Reasoning: We do not want to e.g. move to the next image when trying to
+            zoom in.
+        """
+        try:
+            self.app["window"].disconnect_by_func(self.clicked)
+        # Was already disconnected
+        except TypeError:
+            pass
+        if self.timer_id_touch:
+            GLib.source_remove(self.timer_id_touch)
+        self.timer_id_touch = GLib.timeout_add(5, self.connect_click)
+        return True
+
+    def connect_click(self):
+        """Reconnect the click signal after a touch event."""
+        self.app["window"].connect("button_press_event", self.clicked, "IMAGE")
+        self.timer_id_touch = 0
+
+    def check_modifiers(self, event, keyname):
+        """Update keyname according to modifiers in event."""
+        shiftkeys = ["space", "Return", "Tab", "Escape", "BackSpace",
+                     "Up", "Down", "Left", "Right"]
+        # Check for Control (^), Mod1 (Alt) or Shift
+        if event.get_state() & Gdk.ModifierType.CONTROL_MASK:
+            keyname = "^" + keyname
+        if event.get_state() & Gdk.ModifierType.MOD1_MASK:
+            keyname = "Alt+" + keyname
+        # Shift+ for all letters and for keys that don't support it
+        if (event.get_state() & Gdk.ModifierType.SHIFT_MASK and
+                (len(keyname) < 2 or keyname in shiftkeys
+                 or keyname.startswith("Button"))):
+            keyname = "Shift+" + keyname.lower()
+        if keyname == "ISO_Left_Tab":  # Tab is named really weird under shift
+            keyname = "Shift+Tab"
+        return keyname
 
     def num_append(self, num, remove_by_timeout=True):
         """Add a new char to num_str.

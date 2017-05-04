@@ -49,7 +49,7 @@ class Manipulate(object):
         grid = Gtk.Grid()
         grid.set_column_spacing(6)
         grid.set_border_width(6)
-        grid.connect("key_press_event", self.app["eventhandler"].run,
+        grid.connect("key_press_event", self.app["eventhandler"].key_pressed,
                      "MANIPULATE")
         self.scrolled_win.add(grid)
 
