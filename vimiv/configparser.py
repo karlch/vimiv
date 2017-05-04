@@ -30,7 +30,8 @@ def set_defaults():
                "copy_to_primary": False,
                "commandline_padding": 6,
                "thumb_padding": 10,
-               "completion_height": 200}
+               "completion_height": 200,
+               "autoplay_gifs": True}
     library = {"show_library": False,
                "library_width": 300,
                "expand_lib": True,

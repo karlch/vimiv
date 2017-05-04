@@ -8,6 +8,7 @@ from gi.repository import GdkPixbuf, GLib, Gtk
 from PIL import Image, ImageEnhance
 from vimiv import imageactions
 from vimiv.trash_manager import TrashManager
+from vimiv.fileactions import is_animation
 
 
 class Manipulate(object):
@@ -171,14 +172,14 @@ class Manipulate(object):
             cwise: Rotate image 90 * cwise degrees.
             rotate_file: If True call thread to rotate files.
         """
-        # Do not rotate animations
-        if self.app["image"].is_anim:
-            self.app["statusbar"].message(
-                "Animations cannot be rotated", "warning")
-            return
-        elif not self.app.paths:
+        if not self.app.paths:
             self.app["statusbar"].message(
                 "No image to rotate", "error")
+            return
+        # Do not rotate animations
+        elif is_animation(self.app.paths[self.app.index]):
+            self.app["statusbar"].message(
+                "Animations cannot be rotated", "warning")
             return
         try:
             cwise = int(cwise)
@@ -193,7 +194,7 @@ class Manipulate(object):
                     self.app["image"].zoom_percent = \
                         self.app["image"].get_zoom_percent_to_fit(
                             self.app["image"].fit_image)
-                self.app["image"].update(False, False)
+                self.app["image"].update(False)
             if rotate_file:
                 for fil in images:
                     if fil in self.simple_manipulations:
@@ -236,14 +237,14 @@ class Manipulate(object):
             horizontal: If 1 flip horizontally. Else vertically.
             rotate_file: If True call thread to rotate files.
         """
-        # Do not flip animations
-        if self.app["image"].is_anim:
-            self.app["statusbar"].message(
-                "Animations cannot be flipped", "warning")
-            return
-        elif not self.app.paths:
+        if not self.app.paths:
             self.app["statusbar"].message(
                 "No image to flip", "error")
+            return
+        # Do not flip animations
+        elif is_animation(self.app.paths[self.app.index]):
+            self.app["statusbar"].message(
+                "Animations cannot be flipped", "warning")
             return
         try:
             horizontal = int(horizontal)
@@ -291,7 +292,7 @@ class Manipulate(object):
             if os.path.islink(self.app.paths[self.app.index]):
                 self.app["statusbar"].message(
                     "Manipulating symbolic links is not supported", "warning")
-            elif self.app["image"].is_anim:
+            elif is_animation(self.app.paths[self.app.index]):
                 self.app["statusbar"].message(
                     "Manipulating Gifs is not supported", "warning")
             else:

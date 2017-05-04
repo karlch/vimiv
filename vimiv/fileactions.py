@@ -93,6 +93,17 @@ def is_image(filename):
     return bool(GdkPixbuf.Pixbuf.get_file_info(complete_name)[0])
 
 
+def is_animation(filename):
+    """Check whether a file is an animated image.
+
+    Args:
+        filename: Name of file to check.
+    """
+    complete_name = os.path.abspath(os.path.expanduser(filename))
+    info = GdkPixbuf.Pixbuf.get_file_info(complete_name)[0]
+    return "gif" in info.get_extensions()
+
+
 class FileExtras(object):
     """Extra fileactions for vimiv."""
 

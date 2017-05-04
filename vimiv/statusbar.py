@@ -209,8 +209,7 @@ class Statusbar(object):
         self.hidden = not self.hidden
         # Resize the image if necessary
         if self.app["image"].fit_image and self.app.paths and \
-                not self.app["thumbnail"].toggled and \
-                not self.app["image"].is_anim:
+                not self.app["thumbnail"].toggled:
             self.app["image"].zoom_to(0, self.app["image"].fit_image)
 
     def set_separator_height(self):
