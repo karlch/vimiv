@@ -43,6 +43,8 @@ class Manipulate(object):
 
         # A scrollable window so all tools are always accessible
         self.scrolled_win = Gtk.ScrolledWindow()
+        self.scrolled_win.set_policy(Gtk.PolicyType.AUTOMATIC,
+                                     Gtk.PolicyType.NEVER)
         # A grid in which everything gets packed
         grid = Gtk.Grid()
         grid.set_column_spacing(6)
