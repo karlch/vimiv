@@ -59,7 +59,7 @@ class ConfigparserTest(TestCase):
                                 "geometry": "400x400",
                                 "recursive": "yes",
                                 "rescale_svg": "yes",
-                                "overzoom": "yes",
+                                "overzoom": "1.5",
                                 "search_case_sensitive": "yes",
                                 "incsearch": "no",
                                 "copy_to_primary": "no",
@@ -90,7 +90,7 @@ class ConfigparserTest(TestCase):
         self.assertEqual(general["geometry"], "400x400")
         self.assertEqual(general["recursive"], True)
         self.assertEqual(general["rescale_svg"], True)
-        self.assertEqual(general["overzoom"], True)
+        self.assertEqual(general["overzoom"], 1.5)
         self.assertEqual(general["search_case_sensitive"], True)
         self.assertEqual(general["incsearch"], False)
         self.assertEqual(general["copy_to_primary"], False)

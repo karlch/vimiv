@@ -26,8 +26,8 @@ class Image(object):
             1: Image is zoomed to fit.
             2: Image is zoomed to fit horizontally.
             3: Image is zoomed to fit vertically.
-        overzoom: If True, increase image size up to window size even if images
-            are smaller than window.
+        overzoom: Float describing the maximum amount to zoom images above
+            their default size.
         rescale_svg: If True rescale vector graphics when zooming.
         shuffle: If True randomly shuffle paths.
         zoom_percent: Percentage to zoom to compared to the original size.
@@ -99,20 +99,21 @@ class Image(object):
         # Size of the file
         pbo_width = self.pixbuf_original.get_width()
         pbo_height = self.pixbuf_original.get_height()
-        pbo_scale = pbo_width / pbo_height
-        # Size of the image to be shown
-        w_scale = self.imsize[0] / self.imsize[1]
-        stickout = fit > 1
-
-        # Image is completely shown and user doesn't want overzoom
-        if (pbo_width < self.imsize[0] and pbo_height < self.imsize[1] and
-                not (stickout or self.overzoom)):
-            return 1
-        # "Portrait" image
-        elif (pbo_scale < w_scale and not stickout) or fit == 3:
-            return self.imsize[1] / pbo_height
-        # "Panorama/landscape" image
-        return self.imsize[0] / pbo_width
+        # Maximum size respecting overzoom
+        max_width = pbo_width * self.overzoom
+        max_height = pbo_height * self.overzoom
+        # Get scales for "panorama" vs "portrait" image
+        w_scale = pbo_width / self.imsize[0]
+        h_scale = pbo_height / self.imsize[1]
+        scale_width = True if w_scale > h_scale else False
+        # Image fits completely even in with overzoom
+        if max_width < self.imsize[0] and max_height < self.imsize[1]:
+            return self.overzoom
+        # Force horizontal fit or "panorama" image
+        elif fit == 2 or (scale_width and fit != 3):
+            return self.imsize[0] / pbo_width
+        # Force vertical fit or "portrait" image
+        return self.imsize[1] / pbo_height
 
     def update(self, update_info=True):
         """Show the final image.
@@ -406,9 +407,18 @@ class Image(object):
         """Toggle rescale state of vector images."""
         self.rescale_svg = not self.rescale_svg
 
-    def toggle_overzoom(self):
-        """Toggle overzoom of images."""
-        self.overzoom = not self.overzoom
+    def set_overzoom(self, new_value):
+        """Set overzoom of images."""
+        new_value, error = get_float_from_str(new_value)
+        if error:
+            self.app["statusbar"].message(
+                "Argument for zoom must be of type float", "error")
+            return
+        self.overzoom = new_value
+        # Update image if it makes sense
+        if self.fit_image:
+            self.zoom_percent = self.get_zoom_percent_to_fit(self.fit_image)
+            self.update()
 
     def toggle_animation(self):
         """Toggle animation status of Gifs."""

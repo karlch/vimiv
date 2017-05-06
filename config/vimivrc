@@ -11,7 +11,7 @@ default_thumbsize: (128, 128)
 geometry: 800x600
 recursive: no
 rescale_svg: yes
-overzoom: no
+overzoom: 1
 search_case_sensitive: yes
 incsearch: yes
 copy_to_primary: no

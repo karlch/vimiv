@@ -114,8 +114,8 @@ class ImageTest(VimivTestCase):
         self.image.move_pos(forward=False)
         self.assertEqual(0, self.vimiv.index)
 
-    def test_toggles(self):
-        """Toggle image.py settings."""
+    def test_settings(self):
+        """Change image.py settings."""
         # Rescale svg
         before = self.image.rescale_svg
         self.image.toggle_rescale_svg()
@@ -123,11 +123,8 @@ class ImageTest(VimivTestCase):
         self.image.toggle_rescale_svg()
         self.assertTrue(before == self.image.rescale_svg)
         # Overzoom
-        before = self.image.overzoom
-        self.image.toggle_overzoom()
-        self.assertFalse(before == self.image.overzoom)
-        self.image.toggle_overzoom()
-        self.assertTrue(before == self.image.overzoom)
+        self.image.set_overzoom("1.66")
+        self.assertEqual(self.image.overzoom, 1.66)
         # Animations should be tested in animation_test.py
 
     def test_check_for_edit(self):
@@ -188,7 +185,10 @@ class ImageTest(VimivTestCase):
             return new_pos
         refresh_gui()
         # First zoom so something can happen
-        self.image.zoom_to(1)
+        w_scale = self.image.imsize[0] / self.image.pixbuf_original.get_width()
+        h_scale = self.image.imsize[1] / self.image.pixbuf_original.get_height()
+        needed_scale = max(w_scale, h_scale) * 1.5
+        self.image.zoom_to(needed_scale)
         refresh_gui()
         # Adjustments should be at 0
         h_adj = Gtk.Scrollable.get_hadjustment(self.image.viewport)

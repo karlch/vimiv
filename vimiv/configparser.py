@@ -26,7 +26,7 @@ def set_defaults():
                "incsearch": True,
                "recursive": False,
                "rescale_svg": True,
-               "overzoom": False,
+               "overzoom": 1,
                "copy_to_primary": False,
                "commandline_padding": 6,
                "thumb_padding": 10,
@@ -58,6 +58,9 @@ def overwrite_section(key, config, settings):
         settings: Dictionary of modified settings.
         message: Error message for settings that are given in an invalid way.
     """
+    # Just checking for all the different settings is not very complex and
+    # absolutely readable
+    # pylint: disable = too-many-branches
     section = config[key]
     message = ""
     for setting in section:
@@ -95,6 +98,8 @@ def overwrite_section(key, config, settings):
                         or not markup_str.endswith(">"):
                     continue
                 file_set = section[setting]
+            elif setting == "overzoom":
+                file_set = float(section[setting])
             else:
                 file_set = section.getboolean(setting)
 

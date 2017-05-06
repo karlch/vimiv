@@ -41,17 +41,17 @@ class CommandlineTest(VimivTestCase):
 
     def test_run_command(self):
         """Run an internal vimiv command."""
-        before_command = self.vimiv["image"].overzoom
-        self.run_command("set overzoom!")
-        after_command = self.vimiv["image"].overzoom
+        before_command = self.vimiv["library"].show_hidden
+        self.run_command("set show_hidden!")
+        after_command = self.vimiv["library"].show_hidden
         self.assertNotEqual(before_command, after_command)
 
     def test_run_alias(self):
         """Run an alias."""
-        self.vimiv.aliases = {"test_alias": "set overzoom!"}
-        before_command = self.vimiv["image"].overzoom
+        self.vimiv.aliases = {"test_alias": "set show_hidden!"}
+        before_command = self.vimiv["library"].show_hidden
         self.run_command("test_alias")
-        after_command = self.vimiv["image"].overzoom
+        after_command = self.vimiv["library"].show_hidden
         self.assertNotEqual(before_command, after_command)
         # Alias that does not exist
         self.vimiv.aliases = {"test_alias": "useless_command"}
@@ -77,10 +77,10 @@ class CommandlineTest(VimivTestCase):
     def test_pipe(self):
         """Pipe a command to vimiv."""
         # Internal command
-        before_command = self.vimiv["image"].overzoom
-        self.run_command("!echo set overzoom! |", True)
+        before_command = self.vimiv["library"].show_hidden
+        self.run_command("!echo set show_hidden! |", True)
         refresh_gui(0.001)
-        after_command = self.vimiv["image"].overzoom
+        after_command = self.vimiv["library"].show_hidden
         self.assertNotEqual(before_command, after_command)
         # Directory
         expected_dir = os.path.abspath("./vimiv/testimages/")
