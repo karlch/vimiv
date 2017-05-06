@@ -189,9 +189,7 @@ class CommandLine(object):
             self.app["statusbar"].message(message, "error")
         else:
             # Reload everything after an external command if we haven't
-            # moved, you never know what happened ... Must be in a timer
-            # because not all Gtk stuff can be accessed from an external
-            # thread.
+            # moved, you never know what happened ...
             # Only reload paths if the path directory or any file was in the
             # command
             reload_path = False
@@ -199,8 +197,8 @@ class CommandLine(object):
                     [fil for fil in self.app.paths
                      if os.path.basename(fil) in cmd]:
                 reload_path = True
-            GLib.timeout_add(1, self.app["fileextras"].reload_changes,
-                             directory, reload_path, from_pipe, out)
+            GLib.idle_add(self.app["fileextras"].reload_changes,
+                          directory, reload_path, from_pipe, out)
         self.running_processes.pop()
 
     def expand_filenames(self, cmd):

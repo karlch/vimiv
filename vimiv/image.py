@@ -428,6 +428,7 @@ class ImageLoader(object):
     Attributes:
         image: Image class above to interact with.
     """
+
     identifier = 0  # Used so the GUI callbacks are only done if the image is
                     # still visible
 
@@ -445,7 +446,10 @@ class ImageLoader(object):
             loader.connect("area-prepared", self._set_image_pixbuf)
             loader.connect("closed",
                            self._finish_image_pixbuf, ImageLoader.identifier)
-        load_thread = Thread(target=self._load_thread, args=(loader, path))
+        load_thread = Thread(target=self._load_thread, args=(loader, path),
+                             daemon=True)
+        # Daemon is set to True so the program can exit with "q" immediately if
+        # only a loading thread is left
         load_thread.start()
 
     def _load_thread(self, loader, path):
