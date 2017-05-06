@@ -2,6 +2,7 @@
 """Image part of vimiv."""
 
 from random import shuffle
+from threading import Thread
 
 from gi.repository import GdkPixbuf, GLib, Gtk
 from vimiv.helpers import get_float_from_str
@@ -145,6 +146,8 @@ class Image(object):
     def play_gif(self):
         """Run the animation of a gif."""
         self.animation_toggled = True
+        self.pixbuf_original = self.pixbuf_iter.get_pixbuf()
+        GLib.idle_add(self.update)
         if self.pixbuf_iter.advance():
             # Clear old timer
             if self.timer_id:
@@ -153,8 +156,6 @@ class Image(object):
             delay = self.pixbuf_iter.get_delay_time()
             self.timer_id = GLib.timeout_add(delay, self.play_gif) \
                 if delay >= 0 else 0
-        self.pixbuf_original = self.pixbuf_iter.get_pixbuf()
-        self.update()
 
     def pause_gif(self):
         """Pause a gif or show initial image."""
@@ -355,19 +356,8 @@ class Image(object):
             self.pause_gif()
         # Load file
         try:
-            if is_animation(path):
-                anim = GdkPixbuf.PixbufAnimation.new_from_file(path)
-                self.pixbuf_iter = anim.get_iter()
-                self.pixbuf_original = self.pixbuf_iter.get_pixbuf()
-                if self.autoplay_gifs:
-                    delay = self.pixbuf_iter.get_delay_time()
-                    self.timer_id = GLib.timeout_add(delay, self.play_gif) \
-                        if delay >= 0 else 0
-            else:
-                self.pixbuf_original = GdkPixbuf.Pixbuf.new_from_file(path)
-            self.imsize = self.get_available_size()
-            self.zoom_percent = self.get_zoom_percent_to_fit()
-            self.update()
+            loader = ImageLoader(self)
+            loader.load(path)
         except (PermissionError, FileNotFoundError):
             self.app.paths.remove(path)
             self.move_pos(False)
@@ -428,3 +418,56 @@ class Image(object):
                 self.pause_gif()
             else:
                 self.play_gif()
+
+
+class ImageLoader(object):
+    """An image loader for the Image class above.
+
+    Loads images and animations asynchronously.
+
+    Attributes:
+        image: Image class above to interact with.
+    """
+    identifier = 0  # Used so the GUI callbacks are only done if the image is
+                    # still visible
+
+    def __init__(self, image):
+        """Initialize loader with vimiv's image class."""
+        self.image = image
+
+    def load(self, path):
+        """Load an image from path."""
+        loader = GdkPixbuf.PixbufLoader()
+        ImageLoader.identifier += 1
+        if is_animation(path):
+            loader.connect("area-prepared", self._set_image_anim)
+        else:
+            loader.connect("area-prepared", self._set_image_pixbuf)
+            loader.connect("closed",
+                           self._finish_image_pixbuf, ImageLoader.identifier)
+        load_thread = Thread(target=self._load_thread, args=(loader, path))
+        load_thread.start()
+
+    def _load_thread(self, loader, path):
+        with open(path, "rb") as f:
+            loader.write(f.read())
+        loader.close()
+
+    def _set_image_pixbuf(self, loader):
+        self.image.pixbuf_original = loader.get_pixbuf()
+        self.image.imsize = self.image.get_available_size()
+        self.image.zoom_percent = self.image.get_zoom_percent_to_fit()
+
+    def _finish_image_pixbuf(self, loader, image_id):
+        if ImageLoader.identifier == image_id:
+            GLib.idle_add(self.image.update)
+
+    def _set_image_anim(self, loader):
+        self.image.pixbuf_iter = loader.get_animation().get_iter()
+        self.image.pixbuf_original = self.image.pixbuf_iter.get_pixbuf()
+        self.image.imsize = self.image.get_available_size()
+        self.image.zoom_percent = self.image.get_zoom_percent_to_fit()
+        if self.image.autoplay_gifs:
+            delay = self.image.pixbuf_iter.get_delay_time()
+            self.image.timer_id = GLib.timeout_add(delay, self.image.play_gif) \
+                if delay >= 0 else 0
