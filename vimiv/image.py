@@ -429,8 +429,8 @@ class ImageLoader(object):
         image: Image class above to interact with.
     """
 
-    identifier = 0  # Used so the GUI callbacks are only done if the image is
-                    # still visible
+    # Used so the GUI callbacks are only done if the image is still visible
+    identifier = 0
 
     def __init__(self, image):
         """Initialize loader with vimiv's image class."""
