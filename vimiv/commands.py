@@ -101,7 +101,7 @@ class Commands(object):
         self.add_command("set library_width", self.app["library"].resize,
                          default_args=[None, True], optional_args=["value"])
         self.add_command("set overzoom", self.app["image"].set_overzoom,
-                         positional_args=["value"])
+                         optional_args=["value"])
         self.add_command("set rescale_svg!",
                          self.app["image"].toggle_rescale_svg)
         self.add_command("set sharpness", self.app["manipulate"].cmd_edit,

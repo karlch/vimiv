@@ -31,11 +31,12 @@ class FailingArgTest(VimivTestCase):
         # 1 Argument optional
         for cmd in ["grow_lib", "set brightness", "set contrast",
                     "set library_width", "set sharpness", "set slideshow_delay",
-                    "shrink_lib", "zoom_in", "zoom_out", "zoom_to"]:
+                    "shrink_lib", "zoom_in", "zoom_out", "zoom_to",
+                    "set overzoom"]:
             self.fail_arguments(cmd, 2, too_many=True)
         # 1 Argument required
         for cmd in ["flip", "format", "rotate", "slideshow_delay", "tag_write",
-                    "tag_load", "tag_remove", "undelete", "set overzoom"]:
+                    "tag_load", "tag_remove", "undelete"]:
             self.fail_arguments(cmd, 2, too_many=True)
             self.fail_arguments(cmd, 0, too_many=False)
         # 2 Arguments required

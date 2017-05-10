@@ -397,7 +397,7 @@ class Image(object):
         """Toggle rescale state of vector images."""
         self.rescale_svg = not self.rescale_svg
 
-    def set_overzoom(self, new_value):
+    def set_overzoom(self, new_value="1"):
         """Set overzoom of images."""
         new_value, error = get_float_from_str(new_value)
         if error:
