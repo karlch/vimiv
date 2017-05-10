@@ -16,7 +16,7 @@ Vimiv is, as one would expect from an application with vim-like keybindings,
 completely keyboard driven. To get you started some of the most important
 keybindings for controlling vimiv are listed below. For a complete list of
 them check out the [keybindings]({{ site.baseurl
-}}/docs/keybindings-commands#keybindings) documentation.
+}}/docs/keybindings_commands#keybindings) documentation.
 
 #### Image
 
@@ -121,5 +121,5 @@ be appended to it, if they aren't in the tagfile already.
 
 You may want to check out how to
 [configure]({{ site.baseurl }}/docs/configuration) vimiv, a list of
-all [keybindings]({{ site.baseurl }}/docs/keybindings-commands#keybindings)
-or of all [commands]({{ site.baseurl }}/docs/keybindings-commands#commands).
+all [keybindings]({{ site.baseurl }}/docs/keybindings_commands#keybindings)
+or of all [commands]({{ site.baseurl }}/docs/keybindings_commands#commands).

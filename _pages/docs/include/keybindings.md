@@ -24,7 +24,7 @@ Supported modifiers are:
 <i class="command">command [arguments]</i> has to be a valid vimiv
 command with correct arguments. For a complete list of commands with
 explanations check
-<a href="{{ site.baseurl }}/docs/keybindings-commands#commands">the commands
+<a href="{{ site.baseurl }}/docs/keybindings_commands#commands">the commands
 documentation</a>.
 
 Mouse bindings are defined in the same form. Simply use "Button" and the

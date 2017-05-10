@@ -1,6 +1,6 @@
 ---
 layout: page
-permalink: /docs/keybindings-commands
+permalink: /docs/keybindings_commands
 ---
 
 # Keybindings

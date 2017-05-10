@@ -17,9 +17,9 @@ The following documents are available:
   <a href="{{ site.baseurl }}/docs/usage#command-line" class="tab2">Command line</a>  
   <a href="{{ site.baseurl }}/docs/usage#marks-and-tags" class="tab2">Marks and tags</a>
 
-<a href="{{ site.baseurl }}/docs/keybindings-commands/" class="tab1">Keybindings and commands</a>  
-<a href="{{ site.baseurl }}/docs/keybindings-commands#keybindings" class="tab2">Keybindings</a>  
-<a href="{{ site.baseurl }}/docs/keybindings-commands#commands" class="tab2">Commands</a>
+<a href="{{ site.baseurl }}/docs/keybindings_commands/" class="tab1">Keybindings and commands</a>  
+<a href="{{ site.baseurl }}/docs/keybindings_commands#keybindings" class="tab2">Keybindings</a>  
+<a href="{{ site.baseurl }}/docs/keybindings_commands#commands" class="tab2">Commands</a>
 
 <a href="{{ site.baseurl }}/docs/configuration" class="tab1">Configuration</a>  
 <a href="{{ site.baseurl }}/docs/configuration#settings" class="tab2">Settings</a>  
