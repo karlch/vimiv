@@ -1,105 +1,105 @@
-.TH VIMIV 1
+.TH VIMIV 1 "May 2017" Linux vimiv
 .SH NAME
-vimiv \- an image viewer with vim-like keybindings
-
+.PP
+vimiv \- an image viewer with vim\-like keybindings
 .SH SYNOPSIS
-.B vimiv
-.RB [ \-bBfFhlLrRsSv ]
-.RB [ \--start-from-desktop ]
-.RB [ \--slideshow ]
-.RB [ \--slideshow-delay
-.IR SLIDESHOW-DELAY ]
-.RB [ \-g,\ \--geometry
-.IR GEOMETRY ]
-.RB [ \--temp-basedir ]
-.RB [ \--config
-.IR FILE ]
-.RB [ \--debug ]
-.IR FILE[S]
-
+.PP
+\fB\fCvimiv\fR
+[\fB\fC\-bBfFhlLrRsSv\fR]
+[\fB\fC\-\-start\-from\-desktop\fR]
+[\fB\fC\-\-slideshow\fR]
+[\fB\fC\-\-slideshow\-delay\fR \fISLIDESHOW\-DELAY\fP]
+[\fB\fC\-g\fR, \fB\fC\-\-geometry\fR \fIGEOMETRY\fP]
+[\fB\fC\-\-temp\-basedir\fR]
+[\fB\fC\-\-config\fR \fIFILE\fP]
+[\fB\fC\-\-debug\fR]
+[\fIFILE\fP]
+\&...
 .SH DESCRIPTION
-Vimiv is an image viewer with vim-like keybindings. It is written in
+.PP
+Vimiv is an image viewer with vim\-like keybindings. It is written in
 python3 using the Gtk3 toolkit. Some of the features are:
-.P
-- Thumbnail mode
-.P
-- Simple library browser
-.P
-- Basic image editing
-.P
-- Command line with tab completion
-.P
+.RS
+.IP \(bu 2
+Thumbnail mode
+.IP \(bu 2
+Simple library browser
+.IP \(bu 2
+Basic image editing
+.IP \(bu 2
+Command line with tab completion
+.RE
+.PP
 The complete documentation is not included in this manpage but is available at:
-.P
-http://karlch.github.io/vimiv/documentation/
-
+.PP
+\[la]http://karlch.github.io/vimiv/documentation/\[ra]
 .SH OPTIONS
-
-.B "\-b, \--bar"
+.TP
+\fB\fC\-b\fR, \fB\fC\-\-bar\fR
 display the statusbar
-.P
-.B "\-f, \--fullscreen"
+.TP
+\fB\fC\-f\fR, \fB\fC\-\-fullscreen\fR
 start in fullscreen
-.P
-.B "\-h, \--help"
+.TP
+\fB\fC\-h\fR, \fB\fC\-\-help\fR
 display a simple help text
-.P
-.B "\-l, \--library"
+.TP
+\fB\fC\-l\fR, \fB\fC\-\-library\fR
 display the library
-.P
-.B "\-r, \--recursive"
+.TP
+\fB\fC\-r\fR, \fB\fC\-\-recursive\fR
 search the directory recursively for images
-.P
-.B "\-s, \--shuffle"
+.TP
+\fB\fC\-s\fR, \fB\fC\-\-shuffle\fR
 shuffle the filelist
-.P
-.B "\-v, \--version"
+.TP
+\fB\fC\-v\fR, \fB\fC\-\-version\fR
 show version information and exit
-.P
-.B \--start-from-desktop
+.TP
+\fB\fC\-\-start\-from\-desktop\fR
 start using the desktop_start_dir as path
-.P
-.B \--slideshow
+.TP
+\fB\fC\-\-slideshow\fR
 start in slideshow mode
-.P
-.BI "\--slideshow-delay " SLIDESHOW_DELAY
+.TP
+\fB\fC\-\-slideshow\-delay\fR \fISLIDESHOW_DELAY\fP
 set the slideshow delay
-.P
-.BI "\-g, \--geometry " GEOMETRY
+.TP
+\fB\fC\-g\fR, \fB\fC\-\-geometry\fR \fIGEOMETRY\fP
 set the starting geometry
-.P
-.BI "\--temp-basedir"
+.TP
+\fB\fC\-\-temp\-basedir\fR
 use a temporary basedir
-.P
-.BI "\--config " FILE
-use FILE as local configuration file instead of $XDG_CONFIG_HOME/vimiv/vimivrc
-and ~/.vimiv/vimivrc.
-.P
-.BI "\--debug "
+.TP
+\fB\fC\-\-config\fR \fIFILE\fP
+use FILE as local configuration file instead of
+$XDG_CONFIG_HOME/vimiv/vimivrc and ~/.vimiv/vimivrc.
+.TP
+\fB\fC\-\-debug\fR
 run in debug mode
-.P
-All capitals negate the setting, so e.g. -B means do not display the statusbar.
-For the long version prepend no-, e.g. --no-bar.
-
+.PP
+All capitals negate the setting, so e.g. \-B means do not display the statusbar.
+For the long version prepend no\-, e.g. \-\-no\-bar.
 .SH BUGS
+.PP
 Probably. Please contact me under <karlch at protonmail dot com> or, even
 better, open an issue on the github homepage.
-
 .SH SEE ALSO
-vimivrc(5)
-
+.PP
+.BR vimivrc (5)
 .SH THANKS TO
-James Campos, author of Pim https://github.com/Narrat/Pim upon which vimiv is
+.PP
+James Campos, author of Pim \[la]https://github.com/Narrat/Pim\[ra] upon which vimiv is
 built.
-
-Bert Muennich, author of sxiv https://github.com/muennich/sxiv which inspired
+.PP
+Bert Muennich, author of sxiv \[la]https://github.com/muennich/sxiv\[ra] which inspired
 many of the features of vimiv.
-
+.PP
 Anyone who has contributed or reported bugs.
-
 .SH RESOURCES
-.B Website
-https://karlch.github.io/vimiv/
-.TP
-.B Github
-https://github.com/karlch/vimiv/
+.PP
+\fBWebsite\fP
+\[la]https://karlch.github.io/vimiv/\[ra]
+.PP
+\fBGithub\fP
+\[la]https://github.com/karlch/vimiv/\[ra]

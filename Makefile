@@ -64,3 +64,6 @@ spellcheck_add_unknown:
 
 todo:
 	pylint --disable all --enable fixme vimiv/*.py vimiv/vimiv tests/*.py --score no
+
+manpages:
+	python3 scripts/generate_manpages.py

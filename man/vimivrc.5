@@ -1,415 +1,399 @@
-.TH VIMIVRC 5
+.TH VIMVRC 5 "May 2017" Linux vimiv
 .SH NAME
+.PP
 vimivrc \- configuration files for the vimiv image viewer
-
 .SH SYNOPSIS
+.PP
 /etc/vimiv/vimivrc, $XDG_CONFIG_HOME/vimiv/vimivrc, ~/.vimiv/vimivrc
+.PP
 /etc/vimiv/keys.conf, $XDG_CONFIG_HOME/vimiv/keys.conf, ~/.vimiv/keys.conf
-
 .SH DESCRIPTION
-Vimiv is configured via two files: basedir/vimivrc and basedir/keys.conf where
-basedir is one of /etc/vimiv/, $XDG_CONFIG_HOME/vimiv and ~/.vimiv/.
-The default configuration files are installed to /etc/vimiv/. It is considered
-best-practice to copy them to $XDG_CONFIG_HOME/vimiv/ and configure the copied
-files.
-.TP
+.PP
+Vimiv is configured via two files:
+.RS
+.IP \(bu 2
+the vimivrc for basic configuration
+.IP \(bu 2
+the keys.conf for keybindings
+.RE
+.PP
+Per default these files are installed to /etc/vimiv/. It is considered best
+practice to copy them to $XDG_CONFIG_HOME/vimiv/ and configure the copied files.
+.PP
 More information in a nicer format is available at:
-.TP
-http://karlch.github.io/vimiv/documentation/configuration/
-
+.PP
+\[la]http://karlch.github.io/vimiv/documentation/configuration/\[ra]
 .SH SETTINGS
+.PP
 Settings are configured in the vimivrc file. This file is separated into three
 sections:
+.RS
+.IP \(bu 2
+GENERAL
+.IP \(bu 2
+LIBRARY
+.IP \(bu 2
+ALIASES
+.RE
+.PP
+The first two sections group settings, the third is used to define aliases. What
+each setting means and what values are possible is explained below:
+.SS GENERAL
 .TP
-- GENERAL
+\fB\fCstart_fullscreen\fR, \fB\fCBool\fR
+If yes, start fullscreen.
 .TP
-- LIBRARY
+\fB\fCstart_slideshow\fR, \fB\fCBool\fR
+If yes, start slideshow at startup.
 .TP
-- ALIASES
-.TP
-The first two sections configure settings, the third is used to define aliases.
-.TP
-What each setting means and what values are possible is explained below:
-.TP
-.B GENERAL
-.TP
-.TP
-.BR start_fullscreen\ (Bool)
-If yes, start in fullscreen mode.
-.TP
-.TP
-.BR start_slideshow\ (Bool)
-If yes, start in slideshow mode.
-.TP
-.TP
-.BR slideshow_delay\ (Float)
+\fB\fCslideshow_delay\fR, \fB\fCFloat\fR
 Specify the delay for the slideshow.
 .TP
-.TP
-.BR shuffle\ (Bool)
+\fB\fCshuffle\fR, \fB\fCBool\fR
 If yes, shuffle the images in the filelist randomly.
 .TP
+\fB\fCdisplay_bar\fR, \fB\fCBool\fR
+If yes, show the statusbar at the bottom. Else hide it.Note that error messages are still displayed, even if the statusbar is hidden.
 .TP
-.BR display_bar\ (Bool)
-If yes, show the statusbar at the bottom.
+\fB\fCdefault_thumbsize\fR, \fB\fCTuple\fR
+Size for the thumbnails in the form of (x, y).
 .TP
+\fB\fCgeometry\fR, \fB\fCString\fR
+String in the form of "WIDTHxHEIGHT" specifying the default size for the window. Note that not all window managers respect this setting.
 .TP
-.BR default_thumbsize\ (Tuple)
-Size of the thumbnails when the thumbnail mode is activated the first time.
-Possible values: (64, 64), (128, 128), (256, 256), (512, 512)
+\fB\fCrecursive\fR, \fB\fCBool\fR
+If yes, search the given directory recursively for images at startup.
 .TP
+\fB\fCrescale_svg\fR, \fB\fCBool\fR
+If yes, rescale vector graphics automatically by reloading the image. Otherwise simply zoom as if they were a normal image.
 .TP
-.BR geometry\ (string)
-A string of the form "WIDTHxHEIGHT" which sets the default size for the window.
-Note that not all window managers respect this setting.
+\fB\fCoverzoom\fR, \fB\fCFloat\fR
+Float defining the maximum amount to scale images up by trying to fit the window.
 .TP
+\fB\fCsearch_case_sensitive\fR, \fB\fCBool\fR
+If yes, search case sensitively. Ignore case otherwise.
 .TP
-.BR recursive\ (Bool)
-If yes,  search the given directory recursively for images at startup.
-.TP
-.TP
-.BR rescale_svg\ (Bool)
-If yes, rescale vector graphics automatically by reloading the image. Otherwise
-simply zoom as if it were a normal image.
-.TP
-.TP
-.BR overzoom\ (Float)
-Float defining the maximum amount to scale images up by trying to fit the
-window.
-.TP
-.TP
-.BR search_case_sensitive\ (Bool)
-If yes, search case sensitively, ignore case otherwise.
-.TP
-.TP
-.BR incsearch\ (Bool)
+\fB\fCincsearch\fR, \fB\fCBool\fR
 If yes, search incrementally when typing.
 .TP
-.TP
-.BR copy_to_primary\ (Bool)
+\fB\fCcopy_to_primary\fR, \fB\fCBool\fR
 If yes, copy to primary selection instead of clipboard.
 .TP
+\fB\fCcommandline_padding\fR, \fB\fCInt\fR
+Padding to use in the command line and statusbar.
 .TP
-.BR commandline_padding\ (Int)
-Padding to use in the commandline and statusbar.
+\fB\fCthumb_padding\fR, \fB\fCInt\fR
+Padding to use between thumbnails. Note: Additionally to the padding column spacing gets updated dynamically to best fit the current window width.
 .TP
-.BR thumb_padding\ (Int)
-Padding to use between thumbnails.
-.TP
-.TP
-.BR completion_height\ (Int)
+\fB\fCcompletion_height\fR, \fB\fCInt\fR
 Height of the completion menu when showing command line completions.
 .TP
-.BR autoplay_gifs\ (Bool)
-If yes, automatically start playing animated gifs when opened.
+\fB\fCautoplay_gifs\fR, \fB\fCBool\fR
+If yes, automatically start playing an animated gif when the file is opened.
+.SS LIBRARY
 .TP
-.BR LIBRARY
+\fB\fCshow_library\fR, \fB\fCBool\fR
+If yes, always show library at start\-up.
 .TP
-.TP
-.BR show_library\ (Bool)
-If yes, always show library at start-up.
-.TP
-.TP
-.BR library_width\ (Int)
+\fB\fClibrary_width\fR, \fB\fCInt\fR
 Default width of the library when an image is open.
 .TP
-.TP
-.BR expand_lib\ (Bool)
+\fB\fCexpand_lib\fR, \fB\fCBool\fR
 If yes, automatically expand the library to full window size if no image is open.
 .TP
-.TP
-.BR border_width\ (Int)
+\fB\fCborder_width\fR, \fB\fCInt\fR
 Width of the border separating library and image.
 .TP
+\fB\fCmarkup\fR, \fB\fCString\fR
+Markup used to highlight search results. This must be a correct markup opening in the form of one <span ...> element as it gets closed with </span>
 .TP
-.BR markup\ (String)
-Markup used to highlight search results. This must be a correct markup opening
-in the form of one <span ...> element as it gets closed with </span/>
-.TP
-.TP
-.BR show_hidden\ (Bool)
+\fB\fCshow_hidden\fR, \fB\fCBool\fR
 If yes, show hidden files in the library and open hidden images.
 .TP
-.TP
-.BR desktop_start_dir\ (String)
+\fB\fCdesktop_start_dir\fR, \fB\fCString\fR
 The directory in which vimiv should start if opened via the .desktop file.
 .TP
+\fB\fCfile_check_amount\fR, \fB\fCInt\fR
+The amount of files vimiv should check in a directory for whether they are images or not. This affects the size column of directories in the library. As soon as this number is reached, checks are stopped and a + is appended, e.g. 30+. A higher number increases precision and information at the cost of speed.
 .TP
-.BR file_check_amount\ (Int)
-The amount of files vimiv should check in a directory for whether they are
-images or not. This affects the size column of directories in the library. As
-soon as this number is reached, checks are stopped and a + is appended, e.g.
-30+. A higher number increases precision and information at the cost of speed.
-.TP
-.TP
-.BR ALIASES
-.TP
+\fB\fCtilde_in_statusbar\fR, \fB\fCBool\fR
+If yes, collapse $HOME to ~ in the statusbar in the library.
+.SS ALIASES
+.PP
 It is possible to configure aliases for the command line in this section.
-.TP
-An alias is defined in the form of: aliasname: command.
-
+An alias is defined in the form of:
+.PP
+aliasname: command
+.PP
+See also: the alias command.
 .SH KEYBINDINGS
-Keybindings are configured in the keys.conf file. Similar to the vimivrc this
-file is split up into sections:
-.TP
-.BR GENERAL:
-keybindings defined here apply in image and thumbnail mode as well as the library.
-.TP
-.BR IM_THUMB:
-keybindings defined here apply in image and thumbnail mode.
-.TP
-.BR IM_LIB:
-keybindings defined here apply in image mode and in the library.
-.TP
-.BR IMAGE:
-keybindings defined here only apply in image mode.
-.TP
-.BR THUMBNAIL:
-keybindings defined here only apply in thumbnail mode. Note: empty by default.
-.TP
-.BR LIBRARY:
-keybindings defined here only apply in the library.
-.TP
-.BR MANIPULATE:
-keybindings defined here only apply in manipulate mode.
-.TP
-.BR COMMAND:
-keybindings defined here only apply in the command line.
-.TP
-Keybindings are defined in the form of keyname: command [arguments]
-.TP
-Supported\ modifiers:
-Shift via Shift+keyname, Control via ^keyname, Alt via Alt+keyname.
-.TP
-command [arguments] has to be a valid vimiv command with correct arguments.
-
+.PP
+Keybindings are defined in the keys.conf file. Similar
+to the vimivrc, this file is split up into sections:
+.RS
+.IP \(bu 2
+IMAGE: Keybindings defined here apply in image mode.
+.IP \(bu 2
+THUMBNAIL: Keybindings defined here apply in thumbnail mode.
+.IP \(bu 2
+LIBRARY: Keybindings defined here apply in library mode.
+.IP \(bu 2
+MANIPULATE: Keybindings defined here apply in manipulate mode.
+.IP \(bu 2
+COMMAND: Keybindings defined here apply in the command line.
+.RE
+.PP
+Keybindings are defined in the form of:
+.PP
+keyname: command [arguments]
+.PP
+keyname has to be a valid key symbol like "a" or "b", but
+also e.g. "colon" for ":". A useful tool in X to check for these names
+interactively is \fB\fCxev\fR\&.
+.PP
+Supported modifiers are:
+.RS
+.IP \(bu 2
+Shift via Shift+keyname
+.IP \(bu 2
+Control via 
+.IP \(bu 2
+Alt via Alt+keyname
+.RE
+.PP
+command [arguments] has to be a valid vimiv
+command with correct arguments. For a complete list of commands with
+explanations check
+the commands
+documentation.
+.PP
+Mouse bindings are defined in the same form. Simply use "Button" and the
+corresponding number like "Button1" as keyname.
 .SH COMMANDS
-
 .TP
-.TP
-.BR accept_changes
+\fB\fCaccept_changes\fR
 Accept changes made in manipulate.
 .TP
-.BR alias
+\fB\fCalias\fR
 Add an alias for a command.
 .TP
-.BR autorotate
+\fB\fCautorotate\fR
 Rotate all images in the current filelist according to exif data.
 .TP
-.BR center
+\fB\fCcenter\fR
 Scroll to the center of the image.
 .TP
-.BR copy_abspath
+\fB\fCcopy_abspath\fR
 Copy the absolute path of the currently selected file to the clipboard.
 .TP
-.BR copy_basename
+\fB\fCcopy_basename\fR
 Copy the base name of the currently selected file to the clipboard.
 .TP
-.BR delete
+\fB\fCdelete\fR
 Delete the current image.
 .TP
-.BR discard_changes
+\fB\fCdiscard_changes\fR
 Discard any changes made in manipulate mode and leave it.
 .TP
-.BR first
+\fB\fCfirst\fR
 Move to the first image of the filelist in image/thumbnail mode.
 .TP
-.BR first_lib
+\fB\fCfirst_lib\fR
 Move to the first file of the filelist in the library.
 .TP
-.BR fit
-Fit the image to the current window size..
+\fB\fCfit\fR
+Fit the image to the current window size.. 
 .TP
-.BR fit_horiz
-Fit the image horizontally to the current window size.
+\fB\fCfit_horiz\fR
+Fit the image horizontally to the current window size. 
 .TP
-.BR fit_vert
-Fit the image vertically to the current window size.
+\fB\fCfit_vert\fR
+Fit the image vertically to the current window size. 
 .TP
-.BR flip
+\fB\fCflip\fR
 Flip the current image.
 .TP
-.BR focus_library
+\fB\fCfocus_library\fR
 Focus the library.
 .TP
-.BR format
+\fB\fCformat\fR
 Format all currently open filenames.
 .TP
-.BR fullscreen
+\fB\fCfullscreen\fR
 Toggle fullscreen mode.
 .TP
-.BR grow_lib
+\fB\fCgrow_lib\fR
 Increase the library width.
 .TP
-.BR last
+\fB\fClast\fR
 Move to the last image of the filelist in image/thumbnail mode.
 .TP
-.BR last_lib
+\fB\fClast_lib\fR
 Move to the last file of the filelist in the library.
 .TP
-.BR library
+\fB\fClibrary\fR
 Toggle the library.
 .TP
-.BR manipulate
+\fB\fCmanipulate\fR
 Enter manipulate mode.
 .TP
-.BR mark
+\fB\fCmark\fR
 Mark the currently selected image.
 .TP
-.BR mark_all
+\fB\fCmark_all\fR
 Mark all images in the current filelist.
 .TP
-.BR mark_between
+\fB\fCmark_between\fR
 Mark all images between the last two marked images.
 .TP
-.BR mark_toggle
-Toggle the current
+\fB\fCmark_toggle\fR
+Toggle the current mark status.
 .TP
-.BR move_up
+\fB\fCmove_up\fR
 Move up one directory in the library.
 .TP
-.BR next
+\fB\fCnext\fR
 Move to the next image in the filelist of image mode.
 .TP
-.BR next!
+\fB\fCnext!\fR
 Force moving to the next image in the filelist of image mode.
 .TP
-.BR prev
+\fB\fCprev\fR
 Move to the previous image in the filelist of image mode.
 .TP
-.BR prev!
+\fB\fCprev!\fR
 Force moving to the previous image in the filelist of image mode.
 .TP
-.BR q
+\fB\fCq\fR
 Quit vimiv.
 .TP
-.BR q!
+\fB\fCq!\fR
 Force quitting vimiv.
 .TP
-.BR reload_lib
+\fB\fCreload_lib\fR
 Reload the library.
 .TP
-.BR rotate
-Rotate the image counter-clockwise.
+\fB\fCrotate\fR
+Rotate the image counter\-clockwise.
 .TP
-.BR set\ animation!
+\fB\fCset animation!\fR
 Toggle the animation status of animated Gifs.
 .TP
-.BR set\ brightness
+\fB\fCset brightness\fR
 Set the brightness of the current image.
 .TP
-.BR set\ clipboard!
+\fB\fCset clipboard!\fR
 Toggle the copy_to_primary setting.
 .TP
-.BR set\ contrast
+\fB\fCset contrast\fR
 Set the contrast of the current image.
 .TP
-.BR set\ library_width
+\fB\fCset library_width\fR
 Set the library width.
 .TP
-.BR set\ overzoom!
-Toggle the overzoom setting.
+\fB\fCset overzoom\fR
+Set the overzoom setting.
 .TP
-.BR set\ rescale_svg!
+\fB\fCset rescale_svg!\fR
 Toggle the rescale_svg setting.
 .TP
-.BR set\ sharpness
+\fB\fCset sharpness\fR
 Set the sharpness of the current image.
 .TP
-.BR set\ show_hidden!
+\fB\fCset show_hidden!\fR
 Toggle the show_hidden setting.
 .TP
-.BR set\ slideshow_delay
+\fB\fCset slideshow_delay\fR
 Set the slideshow delay.
 .TP
-.BR set\ statusbar!
+\fB\fCset statusbar!\fR
 Toggle the statusbar.
 .TP
-.BR shrink_lib
+\fB\fCshrink_lib\fR
 Decrease the library width.
 .TP
-.BR slideshow
+\fB\fCslideshow\fR
 Toggle the slideshow.
 .TP
-.BR slideshow_delay
+\fB\fCslideshow_delay\fR
 Change the value of the slideshow delay.
 .TP
-.BR tag_write
+\fB\fCtag_write\fR
 Write the names of all currently marked images to a tagfile.
 .TP
-.BR tag_load
+\fB\fCtag_load\fR
 Load all images in a tagfile into image mode.
 .TP
-.BR tag_remove
+\fB\fCtag_remove\fR
 Delete a tagfile.
 .TP
-.BR thumbnail
+\fB\fCthumbnail\fR
 Toggle thumbnail mode.
 .TP
-.BR undelete
+\fB\fCundelete\fR
 Undelete an image.
 .TP
-.BR unfocus_library
+\fB\fCunfocus_library\fR
 Focus the widget last focused before the library.
 .TP
-.BR version
-Display pop-up with version information.
+\fB\fCversion\fR
+Display pop\-up with version information.
 .TP
-.BR zoom_in
+\fB\fCzoom_in\fR
 Zoom in.
 .TP
-.BR zoom_out
+\fB\fCzoom_out\fR
 Zoom out.
 .TP
-.BR zoom_to
+\fB\fCzoom_to\fR
 Zoom image to a given percentage.
-
-.SH KEY-COMMANDS
+.SH HIDDEN COMMANDS
+.PP
 The following commands can only be bound to keys and are not accessible from the
 command line.
 .TP
-.TP
-.BR clear_status
+\fB\fCclear_status\fR
 Clear any numbers or messages from the statusbar and reset search.
 .TP
-.BR command
+\fB\fCcommand\fR
 Enter the command line.
 .TP
-.BR scroll
+\fB\fCscroll\fR
 Scroll image or thumbnail.
 .TP
-.BR scroll_lib
+\fB\fCscroll_lib\fR
 Scroll the library.
 .TP
-.BR search
+\fB\fCsearch\fR
 Search for text in the current filelist.
 .TP
-.BR search_next
+\fB\fCsearch_next\fR
 Navigate to the next search result.
 .TP
-.BR search_next
+\fB\fCsearch_prev\fR
 Navigate to the previous search result.
 .TP
-.BR history_down
+\fB\fChistory_down\fR
 Go down by one in command history.
 .TP
-.BR history_up
+\fB\fChistory_up\fR
 Go up by one in command history.
 .TP
-.BR discard_command
+\fB\fCdiscard_command\fR
 Leave the command line discarding currently entered text.
 .TP
-.BR complete
+\fB\fCcomplete\fR
 Start command line completion.
 .TP
-.BR complete_inverse
+\fB\fCcomplete_inverse\fR
 Start command line completion selecting items inversely.
 .TP
-.BR slider
+\fB\fCslider\fR
 Change the value of the currently focused slider.
 .TP
-.BR focus_slider
+\fB\fCfocus_slider\fR
 Focus one of the manipulate sliders.
-
 .SH SEE ALSO
-vimiv(1), date(1)
+.PP
+.BR vimiv (1), 
+.BR date (1)
