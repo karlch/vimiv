@@ -38,8 +38,8 @@ Search for text in the current filelist.
 
 Search through the current filelist for matching text. Focus the next
 result. Per default search is [case-sensitive]({{ site.baseurl
-}}/documentation/configuration/#search-case-sensitive) and [incsearch]({{
-site.baseurl }}/documentation/configuration/#incsearch) is enabled.
+}}/documentation/configuration#search-case-sensitive) and [incsearch]({{
+site.baseurl }}/documentation/configuration#incsearch) is enabled.
 
 **Positional arguments:**
 * <i class="command">text</i>: The text to search for.

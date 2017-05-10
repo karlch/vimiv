@@ -29,14 +29,14 @@ Copy the absolute path of the currently selected file to the clipboard.
 
 The selection is either clipboard or primary depending on the
 [copy\_to\_primary]({{ site.baseurl
-}}/docs/configuration/#copy-to-primary) setting.
+}}/docs/configuration#copy-to-primary) setting.
 
 ##### copy\_basename
 Copy the base name of the currently selected file to the clipboard.
 
 The selection is either clipboard or primary depending on the
 [copy\_to\_primary]({{ site.baseurl
-}}/docs/configuration/#copy-to-primary) setting.
+}}/docs/configuration#copy-to-primary) setting.
 
 ##### delete
 Delete the currently selected image.
@@ -219,7 +219,7 @@ Enter manipulate mode if not there yet.
 
 ##### set clipboard!
 Toggle the [copy\_to\_primary]({{ site.baseurl
-}}/docs/configuration/#copy-to-primary) setting.
+}}/docs/configuration#copy-to-primary) setting.
 
 Switches between primary and clipboard.
 
@@ -242,13 +242,13 @@ Set the library width.
 **Optional arguments:**
 * <i class="command">value</i>: Value to set the library width to. Defaults to
   the [library\_width]({{
-  site.baseurl}}/docs/configuration/#library-width) setting.
+  site.baseurl}}/docs/configuration#library-width) setting.
 
 ##### set overzoom
 **Syntax:** <t class="command"><b>:set overzoom</b> <i>[value]</i></t>
 
 Set the [overzoom]({{
-site.baseurl}}/docs/configuration/#overzoom) setting.
+site.baseurl}}/docs/configuration#overzoom) setting.
 
 **Optional arguments:**
 * <i class="command">value</i>: Value to set the overzoom setting to. Defaults
@@ -256,7 +256,7 @@ site.baseurl}}/docs/configuration/#overzoom) setting.
 
 ##### set rescale\_svg!
 Toggle the [rescale\_svg]({{
-site.baseurl}}/docs/configuration/#rescale-svg) setting.
+site.baseurl}}/docs/configuration#rescale-svg) setting.
 
 ##### set sharpness
 **Syntax:** <t class="command"><b>:set sharpness</b> <i>[value]</i></t>
@@ -271,7 +271,7 @@ Enter manipulate mode if not there yet.
 
 ##### set show\_hidden!
 Toggle the [show\_hidden]({{
-  site.baseurl}}/docs/configuration/#show-hidden) setting.
+  site.baseurl}}/docs/configuration#show-hidden) setting.
 
 ##### set slideshow\_delay
 **Syntax:** <t class="command"><b>:set slideshow_delay</b> <i>[value]</i></t>
@@ -281,7 +281,7 @@ Set the slideshow delay.
 **Optional arguments:**
 * <i class="command">value</i>: Value to set the slideshow delay to.  Defaults
   to the [slideshow\_delay]({{ site.baseurl
-}}/docs/configuration/#slideshow-delay) setting.
+}}/docs/configuration#slideshow-delay) setting.
 
 ##### set statusbar!
 Toggle the statusbar.

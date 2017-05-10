@@ -77,4 +77,4 @@ An alias is defined in the form of:
 
 <t class="command"><b>aliasname</b>: <i>command</i></t>
 
-See also: the <a href="{{ site.baseurl }}/docs/keybindings-commands/#alias">alias command</a>.
+See also: the <a href="{{ site.baseurl }}/docs/keybindings-commands#alias">alias command</a>.
