@@ -1,0 +1,12 @@
+_site
+.DS_Store
+.jekyll
+.jekyll-metadata
+.bundle
+vendor
+.sass-cache
+Gemfile.lock
+node_modules
+package.json
+man
+generate_manpages.sh

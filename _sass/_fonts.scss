@@ -1,0 +1,113 @@
+// Define OpenSans fonts from source
+
+$font: OpenSansLight;
+$font-path: fonts/OpenSans-Light-webfont;
+@mixin embed-font($font, $font-path) {
+  @font-face {
+    font-family: $font;
+    src: url($font-path+".eot");
+    src: url($font-path+".eot?#iefix") format("embedded-opentype"),
+         url($font-path+".woff") format("woff"),
+         url($font-path+".ttf") format("truetype"),
+         url($font-path+".svg#svgFontName") format("svg");
+  }
+}
+@include embed-font($font, $font-path);
+
+$font: OpenSansLightItalic;
+$font-path: fonts/OpenSans-LightItalic-webfont;
+@mixin embed-font($font, $font-path) {
+  @font-face {
+    font-family: $font;
+    src: url($font-path+".eot");
+    src: url($font-path+".eot?#iefix") format("embedded-opentype"),
+         url($font-path+".woff") format("woff"),
+         url($font-path+".ttf") format("truetype"),
+         url($font-path+".svg#svgFontName") format("svg");
+  }
+}
+@include embed-font($font, $font-path);
+
+$font: OpenSansRegular;
+$font-path: fonts/OpenSans-Regular-webfont;
+@mixin embed-font($font, $font-path) {
+  @font-face {
+    font-family: $font;
+    src: url($font-path+".eot");
+    src: url($font-path+".eot?#iefix") format("embedded-opentype"),
+         url($font-path+".woff") format("woff"),
+         url($font-path+".ttf") format("truetype"),
+         url($font-path+".svg#svgFontName") format("svg");
+  }
+}
+@include embed-font($font, $font-path);
+
+$font: OpenSansItalic;
+$font-path: fonts/OpenSans-Italic-webfont;
+@mixin embed-font($font, $font-path) {
+  @font-face {
+    font-family: $font;
+    src: url($font-path+".eot");
+    src: url($font-path+".eot?#iefix") format("embedded-opentype"),
+         url($font-path+".woff") format("woff"),
+         url($font-path+".ttf") format("truetype"),
+         url($font-path+".svg#svgFontName") format("svg");
+  }
+}
+@include embed-font($font, $font-path);
+
+$font: OpenSansSemibold;
+$font-path: fonts/OpenSans-Semibold-webfont;
+@mixin embed-font($font, $font-path) {
+  @font-face {
+    font-family: $font;
+    src: url($font-path+".eot");
+    src: url($font-path+".eot?#iefix") format("embedded-opentype"),
+         url($font-path+".woff") format("woff"),
+         url($font-path+".ttf") format("truetype"),
+         url($font-path+".svg#svgFontName") format("svg");
+  }
+}
+@include embed-font($font, $font-path);
+
+$font: OpenSansSemiboldItalic;
+$font-path: fonts/OpenSans-SemiboldItalic-webfont;
+@mixin embed-font($font, $font-path) {
+  @font-face {
+    font-family: $font;
+    src: url($font-path+".eot");
+    src: url($font-path+".eot?#iefix") format("embedded-opentype"),
+         url($font-path+".woff") format("woff"),
+         url($font-path+".ttf") format("truetype"),
+         url($font-path+".svg#svgFontName") format("svg");
+  }
+}
+@include embed-font($font, $font-path);
+
+$font: OpenSansBold;
+$font-path: fonts/OpenSans-Bold-webfont;
+@mixin embed-font($font, $font-path) {
+  @font-face {
+    font-family: $font;
+    src: url($font-path+".eot");
+    src: url($font-path+".eot?#iefix") format("embedded-opentype"),
+         url($font-path+".woff") format("woff"),
+         url($font-path+".ttf") format("truetype"),
+         url($font-path+".svg#svgFontName") format("svg");
+  }
+}
+@include embed-font($font, $font-path);
+
+$font: OpenSansBoldItalic;
+$font-path: fonts/OpenSans-BoldItalic-webfont;
+@mixin embed-font($font, $font-path) {
+  @font-face {
+    font-family: $font;
+    src: url($font-path+".eot");
+    src: url($font-path+".eot?#iefix") format("embedded-opentype"),
+         url($font-path+".woff") format("woff"),
+         url($font-path+".ttf") format("truetype"),
+         url($font-path+".svg#svgFontName") format("svg");
+  }
+}
+@include embed-font($font, $font-path);

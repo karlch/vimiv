@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <title>vimiv{% if page.title %} - {{ page.title | downcase }}{% endif %}</title>
+
+    <!--[if lt IE 9]>
+      <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/style.css" />
+    <link rel="alternate" type="application/rss+xml" title="{{ site.name }} - {{ site.description }}" href="{{ site.baseurl }}/feed.xml" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+    <script type="text/javascript">
+    {% include {{ site.baseurl }}/javascripts/toggle_headers.js %}
+    </script>
+
+  </head>
+
+  <body>
+    <div id="header">
+      <div class="wrapper">
+        <a href="{{ site.baseurl }}" class="btn">Home</a>
+        <a href="https://github.com/karlch/vimiv" class="btn">GitHub</a>
+        <a href="{{ site.baseurl }}/docs/install" class="btn">Install</a>
+        <a href="{{ site.baseurl }}/documentation" class="btn">Docs</a>
+        <a href="{{ site.baseurl }}/changelog" class="btn">Changelog</a>
+        <a href="{{ site.baseurl }}/screenshots" class="btn">Screenshots</a>
+      </div>
+    </div>
+
+    <div id="main" role="main" class="container">
+      {{ content }}
+    </div>
+
+  </body>
+</html>

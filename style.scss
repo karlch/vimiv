@@ -1,0 +1,350 @@
+---
+---
+
+@import "normalize";
+@import "fonts";
+@import "variables";
+
+* {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+body {
+  padding-bottom: 20px;
+  margin: 0px;
+  font: 15px/1.47 $fonts;
+  color: $white-dull;
+  font-weight: normal;
+  background: $background;
+  background-attachment: fixed !important;
+  background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #2a2a29), color-stop(100%, #1c1c1c));
+  background: -moz-linear-gradient(#2a2a29, #1c1c1c);
+  background: -webkit-linear-gradient(#2a2a29, #1c1c1c);
+  background: linear-gradient(#2a2a29, #1c1c1c);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: $white;
+  margin-bottom: 0px;
+}
+
+ul, ol, table, pre, dl {
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 2.5em;
+  margin-top: 0.67em;
+}
+
+h2 {
+  font-size: 2em;
+  margin-top: 0.83em;
+}
+
+h3 {
+  font-size: 1.75em;
+  margin-top: 1em;
+}
+
+h4 {
+  font-size: 1.5em;
+  margin-top: 1.33em;
+}
+
+h5 {
+  font-size: 1.33em;
+  margin-top: 1.67em;
+}
+
+h6 {
+  font-size: 1em;
+}
+
+p {
+  margin: 0.5em 0;
+  line-height: 1.7em;
+}
+
+a {
+  color: $link;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+a:hover {
+  color: $link-hover;
+  border-bottom: 1px solid;
+}
+
+// Anchors should not look like they are clickable
+a.anchor {
+  color: $white-dull;
+  font-weight: normal;
+}
+a.anchor:hover {
+  border-bottom: 0px;
+}
+
+.btn {
+  font-size: 15px;
+  color: $white;
+  padding: 6px 20px;
+  display: inline-block;
+  transition: all 150ms ease;
+}
+.btn:hover {
+  color: $white;
+  background: $header-light;
+  border-bottom: 0px solid;
+  box-shadow: 0;
+}
+.btn-image {
+    display: inline;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 0px 0px;
+}
+
+.tab1 {
+    font-size: 1.5em;
+    line-height: 2em;
+    color: $white;
+}
+.tab1:hover {
+    color: $white;
+}
+
+.tab2 {
+    margin: 0 40px;
+    font-size: 1.25em;
+    line-height: 1.5em;
+    color: $white-dull;
+}
+.tab2:hover {
+    color: $white-dull;
+}
+
+.filename {
+    color: $filename;
+}
+
+.command {
+    color: $command;
+}
+
+.hidden {
+    display: none;
+}
+.unhidden {
+    display: block;
+}
+
+.unhidden_header {
+    font-size: 16px;
+    padding: 0 16% 0 0;
+}
+.hidden_header {
+    font-size: 16px;
+    padding: 0 16% 0 0;
+    color: $white-dull;
+}
+
+.hidden_header:hover {
+    color: $white;
+}
+
+li {
+  list-style-image: url("../images/bullet.png");
+}
+
+.wrapper {
+  max-width: 960px;
+  margin: 0 auto;
+  position: relative;
+  padding: 0 30px;
+}
+
+section img {
+  max-width: 100%;
+}
+
+blockquote {
+  border-left: 3px solid #FFC107;
+  margin: 0;
+  padding: 0 0 0 20px;
+  font-style: italic;
+}
+
+code {
+  font-family: 'Lucida Sans', Monaco, Bitstream Vera Sans Mono, Lucida Console, Terminal;
+  color: $white;
+  background: $code-bg;
+  font-size: 15px;
+  margin: 0 4px;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+
+pre {
+  padding: 8px 15px;
+  background: $code-bg;
+  border-radius: 2px;
+  -moz-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  overflow: auto;
+  overflow-y: hidden;
+}
+pre code {
+  color: $white;
+  text-shadow: 0px 1px 0px #000;
+  margin: 0;
+  padding: 0;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  padding: 5px 10px;
+  border-bottom: 1px solid $table-border;
+  color: #e6e6e6;
+  font-family: $fonts !important;
+  font-weight: 900;
+}
+
+td {
+  text-align: left;
+  padding: 5px 10px;
+  border-bottom: 1px solid $table-border;
+}
+
+.no_border {
+    border-bottom: 0px;
+}
+
+hr {
+  border: 0;
+  outline: none;
+  height: 3px;
+  background: transparent url("../images/hr.gif") center center repeat-x;
+  margin: 0 0 20px;
+}
+
+dt {
+  color: #F0E7D5;
+  font-family: $fonts !important;
+  font-weight: normal;
+}
+
+#header {
+  z-index: 100;
+  position: fixed;
+  left: 0;
+  top: 0px;
+  width: 100%;
+  background: $header;
+  border-bottom: 4px solid $header-light;
+  padding: 0 0;
+  line-height: 40px;
+  overflow: hidden;
+}
+
+section {
+  padding: 30px 0px 50px 0px;
+  margin: 20px 0;
+  margin-top: 70px;
+}
+section ul li {
+  line-height: 1.4em;
+}
+section #title {
+  border: 0;
+  outline: none;
+  margin: 0 0 50px 0;
+  padding: 0 0 5px 0;
+}
+section #title h1 {
+  text-align: center;
+  line-height: 1em;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+section #title h5 {
+  color: $white-verydull;
+  text-align: center;
+  font-weight: 100;
+  margin-top: 10px;
+  margin-bottom: 40px;
+}
+section #title .credits {
+  font-size: 12px;
+  color: $white-verydull;
+  margin-top: 0px;
+}
+section #title .credits.left {
+  float: left;
+}
+section #title .credits.right {
+  float: right;
+}
+
+@media print, screen and (max-width: 640px) {
+  #title .credits {
+    display: block;
+    width: 100%;
+    line-height: 30px;
+    text-align: center;
+  }
+  #title .credits .left {
+    float: none;
+    display: block;
+  }
+  #title .credits .right {
+    float: none;
+    display: block;
+  }
+
+  #header {
+    position: static;
+    line-height: 20px;
+  }
+  #header .wrapper {
+    padding: 0 10px;
+  }
+
+  .btn {
+      padding: 2px 4px;
+      width: 32%;
+  }
+}
+@media print, screen and (max-width: 480px) {
+  #header {
+    position: static;
+    border-bottom: 2px solid $header-light;
+    padding: 0 0;
+    line-height: 20px;
+  }
+  #header .wrapper {
+    padding: 0 10px;
+  }
+
+  .btn {
+      padding: 2px 4px;
+      width: 100%;
+  }
+}
+
+// Fix moving off by header height with anchors
+:target:before {
+  content: "";
+  display: block;
+  height: 60px;
+  margin: -60px 0 0;
+}
