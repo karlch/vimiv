@@ -14,7 +14,7 @@ For much more information please check out the [documentation](documentation).
 If you are new to vimiv, this is a good place to
 <a href="docs/usage/#getting_started">get started</a>. For a
 quick overview check out the
-<a href="docs/keybindings-commands/#keybinding-cheatsheet">
+<a href="docs/keybindings_commands#keybinding-cheatsheet">
 keybinding cheatsheet</a>.
 
 <img src="{{ site.baseurl }}/images/screenshots/library.png" alt="Library">
@@ -29,7 +29,7 @@ for instructions on how to get vimiv running.
 ### Contributing and bugs
 
 If you want to contribute, awesome! The
-<a href="docs/develop/#contributing">contribution guidelines</a>
+<a href="docs/develop#contributing">contribution guidelines</a>
 will help to get you started.
 
 For bugs and feature requests the best place to go is the
