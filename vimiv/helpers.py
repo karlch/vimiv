@@ -110,24 +110,12 @@ def read_info_from_man():
             man_text = f.read().decode()
     else:
         return {}
-    sections = man_text.split("\n\n")
-    # Get section with command information
-    for i, section in enumerate(sections):
-        if ".SH COMMANDS" in section:
-            command_section = sections[i + 1]
-            break
-    # Loop over every command
-    for command in command_section.split(".TP"):
-        lines = command.split("\n")
-        if len(lines) > 2:
-            name = lines[1].lstrip(".BR ").replace("\\", "").replace(
-                "[COUNT]", "").rstrip()
-            if "set" in name:
-                name = " ".join(name.split()[0:2])
-            else:
-                name = name.split()[0]
-            info = " ".join(lines[2:])
-            info = info.split(". ")[0].replace("[COUNT]", "")
+    # Loop over lines receiving command name and info
+    lines = man_text.split("\n")
+    for i, line in enumerate(man_text.split("\n")):
+        if line.startswith("\\fB\\fC"):
+            name = line.replace("\\fB\\fC", "").replace("\\fR", "")
+            info = lines[i + 1].rstrip(".")  # Remove trailing periods
             infodict[name] = info
     return infodict
 
