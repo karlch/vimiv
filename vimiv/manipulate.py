@@ -424,7 +424,6 @@ class Manipulate(Gtk.ScrolledWindow):
         self.app["image"].load_image()
         # Done
         self.toggle()
-        self.app["statusbar"].update_info()
 
     def cmd_edit(self, manipulation, num="0"):
         """Run the specified manipulation.

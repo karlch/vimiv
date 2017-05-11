@@ -131,15 +131,7 @@ class Library(Gtk.TreeView):
             self.focus(True)
             # Markings and other stuff might have changed
             self.reload(os.getcwd())
-        # Resize image and grid if necessary
-        if self.app.paths and update_image:
-            if self.app["thumbnail"].toggled:
-                self.app["thumbnail"].calculate_columns()
-            elif self.app["image"].fit_image:
-                self.app["image"].zoom_to(0, self.app["image"].fit_image)
-            else:
-                #  Change the toggle state of animation
-                self.app["image"].update()
+        self.app.emit("widgets_changed", self)
 
     def focus(self, focus_library=True):
         """Set or remove focus from the library.
@@ -364,9 +356,7 @@ class Library(Gtk.TreeView):
         elif self.width < 100:
             self.width = 100
         self.scrollable_treeview.set_size_request(self.width, 10)
-        # Rezoom image
-        if self.app["image"].fit_image and self.app.paths:
-            self.app["image"].zoom_to(0, self.app["image"].fit_image)
+        self.app.emit("widgets-changed", self)
 
     def toggle_hidden(self):
         """Toggle showing of hidden files."""

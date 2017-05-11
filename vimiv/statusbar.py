@@ -65,6 +65,9 @@ class Statusbar(Gtk.Grid):
         self.set_margin_bottom(padding)
         self.separator = Gtk.Separator()
 
+        # Connect signals
+        self.app.connect("widgets-changed", self.update_info)
+
     def message(self, message, style="error"):
         """Push a message to the statusbar.
 
@@ -108,7 +111,7 @@ class Statusbar(Gtk.Grid):
             Gdk.Screen.get_default(), css_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-    def update_info(self):
+    def update_info(self, app=None, widget=None):
         """Update the statusbar and the window title."""
         # Return if it is locked
         if self.lock:
@@ -207,10 +210,7 @@ class Statusbar(Gtk.Grid):
             self.show()
             self.separator.show()
         self.hidden = not self.hidden
-        # Resize the image if necessary
-        if self.app["image"].fit_image and self.app.paths and \
-                not self.app["thumbnail"].toggled:
-            self.app["image"].zoom_to(0, self.app["image"].fit_image)
+        self.app.emit("widgets-changed", self)
 
     def set_separator_height(self):
         """Set height of the separator used as background of the statusbar."""

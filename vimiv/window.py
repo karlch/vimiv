@@ -97,11 +97,7 @@ class Window(Gtk.ApplicationWindow):
         """
         if self.get_size() != self.winsize:
             self.winsize = self.get_size()
-            if self.app.paths:
-                if self.app["thumbnail"].toggled:
-                    self.app["thumbnail"].calculate_columns()
-                if self.app["image"].fit_image:
-                    self.app["image"].zoom_to(0, self.app["image"].fit_image)
+            self.app.emit("widgets-changed", self)
 
     def focus_on_mouse_click(self, widget, event_button):
         """Update statusbar with the currently focused widget after mouse click.

@@ -6,7 +6,7 @@ import sys
 import tempfile
 from time import time
 
-from gi.repository import Gdk, Gio, GLib, Gtk
+from gi.repository import Gdk, Gio, GLib, Gtk, GObject
 from vimiv.commandline import CommandLine
 from vimiv.commands import Commands
 from vimiv.completions import Completion
@@ -44,6 +44,11 @@ class Vimiv(Gtk.Application):
         functions: Dictionary of functions. Includes all commands and additional
             functions that cannot be called from the commandline.
         screensize: Available screensize.
+
+    Signals:
+        widgets-changed: Emitted when the layout of the widgets changed in some
+            way. This allows other widgets to trigger an update when this
+            happens, e.g. rezoom an image when the library was toggled.
     """
 
     def __init__(self, running_tests=False):
@@ -68,6 +73,9 @@ class Vimiv(Gtk.Application):
         self.aliases = {}
         self.functions = {}
         self.running_tests = running_tests
+        # Set up signals
+        GObject.signal_new("widgets-changed", self, GObject.SIGNAL_RUN_LAST,
+                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         # Set up all commandline options
         self.init_commandline_options()
 

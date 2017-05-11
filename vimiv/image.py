@@ -65,6 +65,9 @@ class Image(Gtk.Image):
         self.pixbuf_iter = GdkPixbuf.PixbufAnimationIter()
         self.timer_id = 0
 
+        # Connect signals
+        self.app.connect("widgets_changed", self._on_widgets_changed)
+
     def check_for_edit(self, force):
         """Check if an image was edited before moving.
 
@@ -413,6 +416,19 @@ class Image(Gtk.Image):
                 self.pause_gif()
             else:
                 self.play_gif()
+
+    def _on_widgets_changed(self, app, widget):
+        """Rezoom the image if necessary when the layout changed.
+
+        Args:
+            app: Vimiv application that emitted the signal.
+            widget: Widget that has changed.
+        """
+        if self.app.paths and not self.app["thumbnail"].toggled:
+            if self.fit_image:
+                self.zoom_to(0, self.fit_image)
+            else:
+                self.update()
 
 
 class ImageLoader(object):
