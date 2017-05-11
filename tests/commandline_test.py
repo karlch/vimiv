@@ -22,22 +22,22 @@ class CommandlineTest(VimivTestCase):
         """Open and leave the commandline."""
         # Focusing
         self.vimiv["commandline"].focus()
-        self.assertEqual(self.vimiv["commandline"].entry.get_text(), ":")
-        self.assertTrue(self.vimiv["commandline"].entry.is_focus())
-        self.assertTrue(self.vimiv["commandline"].entry.is_visible())
+        self.assertEqual(self.vimiv["commandline"].get_text(), ":")
+        self.assertTrue(self.vimiv["commandline"].is_focus())
+        self.assertTrue(self.vimiv["commandline"].is_visible())
         # Leaving by deleting the colon
-        self.vimiv["commandline"].entry.set_text("")
-        self.assertFalse(self.vimiv["commandline"].entry.is_visible())
-        self.assertFalse(self.vimiv["commandline"].entry.is_focus())
+        self.vimiv["commandline"].set_text("")
+        self.assertFalse(self.vimiv["commandline"].is_visible())
+        self.assertFalse(self.vimiv["commandline"].is_focus())
         # Focusing with text
         self.vimiv["commandline"].focus("test")
-        self.assertEqual(self.vimiv["commandline"].entry.get_text(), ":test")
-        self.assertTrue(self.vimiv["commandline"].entry.is_focus())
-        self.assertTrue(self.vimiv["commandline"].entry.is_visible())
+        self.assertEqual(self.vimiv["commandline"].get_text(), ":test")
+        self.assertTrue(self.vimiv["commandline"].is_focus())
+        self.assertTrue(self.vimiv["commandline"].is_visible())
         # Leaving normally
         self.vimiv["commandline"].leave()
-        self.assertFalse(self.vimiv["commandline"].entry.is_visible())
-        self.assertFalse(self.vimiv["commandline"].entry.is_focus())
+        self.assertFalse(self.vimiv["commandline"].is_visible())
+        self.assertFalse(self.vimiv["commandline"].is_focus())
 
     def test_run_command(self):
         """Run an internal vimiv command."""
@@ -110,7 +110,7 @@ class CommandlineTest(VimivTestCase):
         """Search for images, directories and navigate search results."""
         self.vimiv["commandline"].incsearch = False
         self.vimiv["commandline"].cmd_search()
-        self.assertEqual(self.vimiv["commandline"].entry.get_text(), "/")
+        self.assertEqual(self.vimiv["commandline"].get_text(), "/")
         # Search should move into testimages
         expected_dir = os.path.abspath("./vimiv")
         self.run_search("vimi")
@@ -166,11 +166,11 @@ class CommandlineTest(VimivTestCase):
         file_before = self.vimiv.get_pos(True)
         self.vimiv["commandline"].cmd_search()
         # Search should be done automatically
-        self.vimiv["commandline"].entry.set_text("/vi")
+        self.vimiv["commandline"].set_text("/vi")
         expected_pos = self.vimiv["library"].files.index("vimiv")
         self.assertEqual(self.vimiv["commandline"].search_positions,
                          [expected_pos])
-        focused_path = self.vimiv["library"].treeview.get_cursor()[0]
+        focused_path = self.vimiv["library"].get_cursor()[0]
         position = focused_path.get_indices()[0]
         focused_file = self.vimiv["library"].files[position]
         self.assertEqual(focused_file, "vimiv")
@@ -183,13 +183,13 @@ class CommandlineTest(VimivTestCase):
         self.vimiv["library"].move_up("vimiv/testimages")
         # First search should stay at animation
         self.vimiv["commandline"].cmd_search()
-        self.vimiv["commandline"].entry.set_text("/a")
+        self.vimiv["commandline"].set_text("/a")
         self.assertEqual(self.vimiv.get_pos(True, "lib"), "animation")
         # Now move to arch-logo
-        self.vimiv["commandline"].entry.set_text("/arch")
+        self.vimiv["commandline"].set_text("/arch")
         self.assertEqual(self.vimiv.get_pos(True, "lib"), "arch-logo.png")
         # Accept
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.vimiv["commandline"].handler(self.vimiv["commandline"])
         self.assertEqual(self.vimiv.get_pos(True), "arch-logo.png")
         # Move to the next result as a final check
         self.vimiv["commandline"].search_move(forward=True)
@@ -217,15 +217,15 @@ class CommandlineTest(VimivTestCase):
                       self.vimiv["commandline"].history)
         # Set the text to :!e and search, should give the last two echos as
         # first results
-        self.vimiv["commandline"].entry.set_text(":!e")
+        self.vimiv["commandline"].set_text(":!e")
         self.vimiv["commandline"].history_search(False)
-        self.assertEqual(self.vimiv["commandline"].entry.get_text(),
+        self.assertEqual(self.vimiv["commandline"].get_text(),
                          ":!echo baz > /dev/null")
         self.vimiv["commandline"].history_search(False)
-        self.assertEqual(self.vimiv["commandline"].entry.get_text(),
+        self.assertEqual(self.vimiv["commandline"].get_text(),
                          ":!echo foo_bar > /dev/null")
         self.vimiv["commandline"].history_search(True)
-        self.assertEqual(self.vimiv["commandline"].entry.get_text(),
+        self.assertEqual(self.vimiv["commandline"].get_text(),
                          ":!echo baz > /dev/null")
 
     def test_fail_hidden_command(self):

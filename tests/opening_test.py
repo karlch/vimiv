@@ -23,7 +23,7 @@ class OpeningTest(VimivTestCase):
                           "directory", "symlink_to_image", "vimiv.bmp",
                           "vimiv.svg", "vimiv.tiff"]
         self.assertEqual(self.vimiv["library"].files, expected_files)
-        self.assertTrue(self.vimiv["library"].treeview.is_focus())
+        self.assertTrue(self.vimiv["library"].is_focus())
         self.assertTrue(self.vimiv["library"].grid.is_visible())
 
     def test_opening_with_image(self):

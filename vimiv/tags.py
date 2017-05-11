@@ -104,8 +104,8 @@ class TagHandler(object):
             if self.app["library"].grid.is_visible():
                 self.app["library"].reload(self.directory)
                 tag_pos = self.app["library"].files.index(tagname)
-                self.app["library"].treeview.set_cursor(Gtk.TreePath(tag_pos),
-                                                        None, False)
+                self.app["library"].set_cursor(Gtk.TreePath(tag_pos),
+                                               None, False)
             # Remember last tag selected
             self.last = tagname
         else:

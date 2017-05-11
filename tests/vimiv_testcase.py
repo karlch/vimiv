@@ -80,7 +80,7 @@ class VimivTestCase(TestCase):
                 finish.
         """
         self.vimiv["commandline"].focus(command)
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.vimiv["commandline"].handler(self.vimiv["commandline"])
         if external:
             while self.vimiv["commandline"].running_processes:
                 self.vimiv["commandline"].running_processes[0].wait()
@@ -88,8 +88,8 @@ class VimivTestCase(TestCase):
 
     def run_search(self, string):
         """Search for string from the command line."""
-        self.vimiv["commandline"].entry.set_text("/" + string)
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.vimiv["commandline"].set_text("/" + string)
+        self.vimiv["commandline"].handler(self.vimiv["commandline"])
 
     def check_statusbar(self, expected_text):
         """Check statusbar for text."""

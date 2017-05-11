@@ -11,14 +11,13 @@ from vimiv.fileactions import is_image
 from vimiv.helpers import listdir_wrapper, read_info_from_man
 
 
-class Completion():
+class Completion(Gtk.TreeView):
     """Completion for vimiv's commandline.
 
     Attributes:
         app: The main vimiv application to interact with.
         liststores: Dictionary containing the liststore models for different
             completion types.
-        entry: The commandline entry.
         info: ScrolledWindow containing the completion information.
         tab_position: Position when tabbing through completion elements.
         tab_presses: Amount of tab presses.
@@ -31,6 +30,7 @@ class Completion():
         Args:
             app: The main vimiv application to interact with.
         """
+        super(Completion, self).__init__()
         self.app = app
         # Create liststore dictionary with the filter used.
         self.liststores = {"internal": [Gtk.ListStore(str, str)],
@@ -44,27 +44,25 @@ class Completion():
             comp_filter.set_visible_func(self.completion_filter)
             liststore.append(comp_filter)
         # Use the commandline entry here and connect to the refilter method
-        self.entry = self.app["commandline"].entry
-        self.entry.connect("changed", self.refilter)
-        # Create treeview
-        self.treeview = Gtk.TreeView()
-        self.treeview.set_enable_search(False)
-        self.treeview.set_headers_visible(False)
-        self.treeview.set_activate_on_single_click(True)
+        self.app["commandline"].connect("changed", self.refilter)
+        # Edit treeview
+        self.set_enable_search(False)
+        self.set_headers_visible(False)
+        self.set_activate_on_single_click(True)
         padding = self.app.settings["GENERAL"]["commandline_padding"]
         renderer = Gtk.CellRendererText()
         renderer.set_padding(padding, 0)
         command_column = Gtk.TreeViewColumn("Command", renderer, markup=0)
         command_column.set_expand(True)
-        self.treeview.append_column(command_column)
+        self.append_column(command_column)
         info_column = Gtk.TreeViewColumn("Info", renderer, markup=1)
-        self.treeview.append_column(info_column)
-        self.treeview.connect("row-activated", self.activate)
+        self.append_column(info_column)
+        self.connect("row-activated", self.activate)
         # Scrolled window for the completion info
         self.info = Gtk.ScrolledWindow()
         self.info.set_size_request(
             10, self.app.settings["GENERAL"]["completion_height"])
-        self.info.add(self.treeview)
+        self.info.add(self)
         # Defaults
         self.tab_position = 0
         self.tab_presses = 0
@@ -79,7 +77,7 @@ class Completion():
         Args:
             inverse: If True, tabbing backwards.
         """
-        maximum = len(self.treeview.get_model())
+        maximum = len(self.get_model())
         # If we have no entries, completing makes no sense
         if not maximum:
             return
@@ -95,9 +93,9 @@ class Completion():
                     best_match += char
                 else:
                     break
-            if best_match != self.entry.get_text():
-                self.entry.set_text(best_match)
-                self.entry.set_position(-1)
+            if best_match != self.app["commandline"].get_text():
+                self.app["commandline"].set_text(best_match)
+                self.app["commandline"].set_position(-1)
                 return
             # Start at the last element with Shift+Tab
             elif inverse:
@@ -109,16 +107,16 @@ class Completion():
             self.tab_position += 1
         self.tab_presses += 1
         self.tab_position %= maximum
-        self.treeview.set_cursor(Gtk.TreePath(self.tab_position), None, False)
-        self.treeview.scroll_to_cell(Gtk.TreePath(self.tab_position),
-                                     None, True, 0.5, 0)
+        self.set_cursor(Gtk.TreePath(self.tab_position), None, False)
+        self.scroll_to_cell(Gtk.TreePath(self.tab_position),
+                            None, True, 0.5, 0)
         return True  # Deactivate default keybinding (here for Tab)
 
     def show(self):
         """Show the completion information."""
         # Hacky way to not show the last selected item
-        self.treeview.set_model(Gtk.ListStore(str, str))
-        self.refilter(self.entry)
+        self.set_model(Gtk.ListStore(str, str))
+        self.refilter(self.app["commandline"])
         self.info.show()
 
     def hide(self):
@@ -135,25 +133,25 @@ class Completion():
         """
         if treeview:
             count = path.get_indices()[0]
-            self.entry.grab_focus()
+            self.app["commandline"].grab_focus()
         else:
             count = self.tab_position
         comp_type = self.get_comp_type()
         row = self.liststores[comp_type][1][count]
-        self.entry.set_text(":" + self.prefixed_digits + row[0])
-        self.entry.set_position(-1)
+        self.app["commandline"].set_text(":" + self.prefixed_digits + row[0])
+        self.app["commandline"].set_position(-1)
 
     def get_comp_type(self, command=""):
         """Get the current completion type depending on command.
 
         Args:
             command: The command to check completion type for. If there is none,
-                default to getting the text from self.entry.
+                default to getting the text from self.app["commandline"].
         Return:
             The completion type to use.
         """
         if not command:
-            command = self.entry.get_text()
+            command = self.app["commandline"].get_text()
         if command and command[0] != ":":
             return "search"
         command = command.lstrip(":")
@@ -302,7 +300,7 @@ class Completion():
         Return:
             True for a match, False else.
         """
-        command = self.entry.get_text().lstrip(":")
+        command = self.app["commandline"].get_text().lstrip(":")
         # Allow number prefixes
         self.prefixed_digits = "".join(takewhile(str.isdigit, command))
         command = command.lstrip(digits)
@@ -326,7 +324,7 @@ class Completion():
             self.complete_external(command)
         elif comp_type == "trash":
             self.complete_trash(command)
-        self.treeview.set_model(self.liststores[comp_type][1])
+        self.set_model(self.liststores[comp_type][1])
         self.liststores[comp_type][1].refilter()
         self.reset()
 

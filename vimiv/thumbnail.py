@@ -9,7 +9,7 @@ from vimiv.fileactions import populate
 from vimiv.thumbnail_manager import ThumbnailManager
 
 
-class Thumbnail(object):
+class Thumbnail(Gtk.IconView):
     """Thumbnail class for vimiv.
 
     Includes the iconview with the thumnbails and all actions that apply to it.
@@ -36,6 +36,7 @@ class Thumbnail(object):
             app: The main application class to interact with.
             settings: Settings from configfiles to use.
         """
+        super(Thumbnail, self).__init__()
         self.app = app
         general = settings["GENERAL"]
 
@@ -54,23 +55,22 @@ class Thumbnail(object):
         # and focuses the iconview
         # Create the liststore and iconview
         self.liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str)
-        self.iconview = Gtk.IconView.new()
-        self.iconview.connect("item-activated", self.iconview_clicked)
-        self.iconview.connect("key_press_event",
-                              self.app["eventhandler"].key_pressed, "THUMBNAIL")
-        self.iconview.connect("button_press_event",
-                              self.app["eventhandler"].clicked, "THUMBNAIL")
-        self.iconview.set_model(self.liststore)
-        self.iconview.set_pixbuf_column(0)
-        self.iconview.set_markup_column(1)
+        self.connect("item-activated", self.clicked)
+        self.connect("key_press_event",
+                     self.app["eventhandler"].key_pressed, "THUMBNAIL")
+        self.connect("button_press_event",
+                     self.app["eventhandler"].clicked, "THUMBNAIL")
+        self.set_model(self.liststore)
+        self.set_pixbuf_column(0)
+        self.set_markup_column(1)
 
         self.columns = 0
-        self.iconview.set_item_width(0)
-        self.iconview.set_item_padding(self.padding)
+        self.set_item_width(0)
+        self.set_item_padding(self.padding)
         self.last_focused = ""
         self.thumbnail_manager = ThumbnailManager()
 
-    def iconview_clicked(self, iconview, path):
+    def clicked(self, iconview, path):
         """Select and show image when thumbnail was activated.
 
         Args:
@@ -92,8 +92,8 @@ class Thumbnail(object):
         """
         # Close
         if self.toggled:
-            self.app["image"].scrolled_win.remove(self.iconview)
-            self.app["image"].scrolled_win.add(self.app["image"].viewport)
+            self.app["image"].scrolled_win.remove(self)
+            self.app["image"].scrolled_win.add(self.app["image"])
             if self.last_focused == "im" or select_image:
                 self.app["image"].scrolled_win.grab_focus()
             elif self.last_focused == "lib":
@@ -110,7 +110,7 @@ class Thumbnail(object):
             self.last_focused = "im"
             self.show()
         elif self.app["library"].files \
-                and self.app["library"].treeview.is_focus():
+                and self.app["library"].is_focus():
             self.last_focused = "lib"
             self.app.paths, self.app.index = populate(self.app["library"].files)
             if self.app.paths:
@@ -124,7 +124,7 @@ class Thumbnail(object):
             self.app["statusbar"].message("No open image", "error")
             return
         # Manipulate bar is useless in thumbnail mode
-        if self.app["manipulate"].scrolled_win.is_visible():
+        if self.app["manipulate"].is_visible():
             self.app["manipulate"].toggle()
         # Update info for the current mode
         self.app["statusbar"].update_info()
@@ -142,8 +142,8 @@ class Thumbnail(object):
         free_space = (width - 12) % (
             self.get_zoom_level()[0] + 2 * self.padding)
         padding = floor(free_space / self.columns)
-        self.iconview.set_column_spacing(padding)
-        self.iconview.set_columns(self.columns)
+        self.set_column_spacing(padding)
+        self.set_columns(self.columns)
 
     def show(self, toggled=False):
         """Show thumbnails when called from toggle.
@@ -156,10 +156,10 @@ class Thumbnail(object):
 
         # Draw the icon view instead of the image
         if not toggled:
-            self.app["image"].scrolled_win.remove(self.app["image"].viewport)
-            self.app["image"].scrolled_win.add(self.iconview)
+            self.app["image"].scrolled_win.remove(self.app["image"])
+            self.app["image"].scrolled_win.add(self)
         # Show the window
-        self.iconview.show()
+        super(Thumbnail, self).show()
         self.toggled = True
 
         # Add initial placeholder for all thumbnails
@@ -180,7 +180,7 @@ class Thumbnail(object):
         self.calculate_columns()
 
         # Focus the current image
-        self.iconview.grab_focus()
+        self.grab_focus()
         pos = self.app.index % len(self.app.paths)
         self.move_to_pos(pos)
 
@@ -237,11 +237,11 @@ class Thumbnail(object):
         step = self.app["eventhandler"].num_receive()
         # Get variables used for calculation of limits
         last = len(self.app.paths)
-        rows = self.iconview.get_item_row(Gtk.TreePath(last - 1))
+        rows = self.get_item_row(Gtk.TreePath(last - 1))
         elem_last_row = last - rows * self.columns
         elem_per_row = floor((last - elem_last_row) / rows) if rows else last
-        column = self.iconview.get_item_column(Gtk.TreePath(new_pos))
-        row = self.iconview.get_item_row(Gtk.TreePath(new_pos))
+        column = self.get_item_column(Gtk.TreePath(new_pos))
+        row = self.get_item_row(Gtk.TreePath(new_pos))
         min_pos = 0
         max_pos = last - 1
         # Simple scrolls
@@ -283,10 +283,10 @@ class Thumbnail(object):
         Args:
             pos: The position to focus.
         """
-        self.iconview.select_path(Gtk.TreePath(pos))
-        cell_renderer = self.iconview.get_cells()[0]
-        self.iconview.set_cursor(Gtk.TreePath(pos), cell_renderer, False)
-        self.iconview.scroll_to_path(Gtk.TreePath(pos), True, 0.5, 0.5)
+        self.select_path(Gtk.TreePath(pos))
+        cell_renderer = self.get_cells()[0]
+        self.set_cursor(Gtk.TreePath(pos), cell_renderer, False)
+        self.scroll_to_path(Gtk.TreePath(pos), True, 0.5, 0.5)
         # Clear the user prefixed step
         self.app["eventhandler"].num_clear()
 

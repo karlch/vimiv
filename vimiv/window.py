@@ -22,7 +22,7 @@ class Window(Gtk.ApplicationWindow):
             app: The main vimiv application to interact with.
             settings: Settings from configfiles to use.
         """
-        Gtk.ApplicationWindow.__init__(self)
+        super(Window, self).__init__()
 
         self.app = app
         self.is_fullscreen = False
@@ -60,12 +60,12 @@ class Window(Gtk.ApplicationWindow):
         # Auto resize
         self.connect("check-resize", self.auto_resize)
         # Focus changes with mouse
-        for widget in [self.app["library"].treeview,
-                       self.app["thumbnail"].iconview,
+        for widget in [self.app["library"],
+                       self.app["thumbnail"],
                        self.app["manipulate"].sliders["bri"],
                        self.app["manipulate"].sliders["con"],
                        self.app["manipulate"].sliders["sha"],
-                       self.app["image"].image]:
+                       self.app["image"]]:
             widget.connect("button-release-event", self.focus_on_mouse_click)
 
     def on_window_state_change(self, event, window=None):

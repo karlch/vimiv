@@ -71,7 +71,7 @@ class LogTest(VimivTestCase):
         # Keybinding
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("j")
-        self.vimiv["library"].treeview.emit("key_press_event", event)
+        self.vimiv["library"].emit("key_press_event", event)
         last_line = self.read_log(string=False)[-1]
         self.assertEqual(last_line, "%-15s %s\n" % ("[key]", "j: scroll_lib j"))
         # Mouse click

@@ -12,12 +12,11 @@ from vimiv.fileactions import populate
 from vimiv.helpers import read_file, error_message
 
 
-class CommandLine(object):
+class CommandLine(Gtk.Entry):
     """Commandline of vimiv.
 
     Attributes:
         app: The main vimiv application to interact with.
-        entry: Gtk.Entry as commandline entry.
         history: List of commandline history to save.
         pos: Position in history completion.
         sub_history: Parts of the history that match entered text.
@@ -36,16 +35,16 @@ class CommandLine(object):
             app: The main vimiv application to interact with.
             settings: Settings from configfiles to use.
         """
+        super(CommandLine, self).__init__()
         self.app = app
         general = settings["GENERAL"]
 
         # Command line
-        self.entry = Gtk.Entry()
-        self.entry.connect("activate", self.handler)
-        self.entry.connect("key_press_event",
-                           self.app["eventhandler"].key_pressed, "COMMAND")
-        self.entry.connect("changed", self.check_close)
-        self.entry.set_hexpand(True)
+        self.connect("activate", self.handler)
+        self.connect("key_press_event",
+                     self.app["eventhandler"].key_pressed, "COMMAND")
+        self.connect("changed", self.check_close)
+        self.set_hexpand(True)
 
         # Cmd history from file
         datadir = os.path.join(GLib.get_user_data_dir(), "vimiv")
@@ -76,7 +75,7 @@ class CommandLine(object):
         self.search_case = general["search_case_sensitive"]
         self.incsearch = general["incsearch"]
         if self.incsearch:
-            self.entry.connect("changed", self.incremental_search)
+            self.connect("changed", self.incremental_search)
         self.last_index = 0
         self.running_processes = []
         self.last_focused = ""
@@ -124,15 +123,15 @@ class CommandLine(object):
         """
         if command[0] == "/":  # Search
             # Do not search again if incsearch was running
-            if not (self.app["library"].treeview.is_focus() or
-                    self.app["thumbnail"].iconview.is_focus()) or \
+            if not (self.app["library"].is_focus() or
+                    self.app["thumbnail"].is_focus()) or \
                     not self.incsearch:
                 self.search(command.lstrip("/"))
             # Auto select single file in the library
             elif self.incsearch and len(self.search_positions) == 1 and \
-                    self.app["library"].treeview.is_focus():
+                    self.app["library"].is_focus():
                 self.app["library"].file_select(
-                    self.app["library"].treeview,
+                    self.app["library"],
                     Gtk.TreePath(self.app.get_pos()), None, False)
         else:  # Run a command
             cmd = command.lstrip(":")
@@ -263,7 +262,7 @@ class CommandLine(object):
                 self.app["image"].load_image()
                 # Resize library and focus image if necessary
                 if self.app["library"].grid.is_visible():
-                    self.app["library"].treeview.set_hexpand(False)
+                    self.app["library"].set_hexpand(False)
                     self.app["library"].focus(False)
             elif old_pos:  # Nothing found, go back
                 self.app.paths, self.app.index = populate(old_pos)
@@ -297,7 +296,7 @@ class CommandLine(object):
                     # Focus it in the treeview so it can be accessed via "l"
                     index = \
                         self.app["library"].files.index(os.path.basename(path))
-                    self.app["library"].treeview.set_cursor(
+                    self.app["library"].set_cursor(
                         Gtk.TreePath(index), None, False)
                     # Show the image
                     self.app["library"].scrollable_treeview.set_hexpand(False)
@@ -355,16 +354,16 @@ class CommandLine(object):
     def history_search(self, down):
         """Search through history with substring match.
 
-        Updates the text of self.entry with the matching history search.
+        Updates the text of self with the matching history search.
 
         Args:
             down: If True, search downwards. Else search upwards.
         """
         # Shortly disconnect the change signal as it resets the history search
-        self.entry.disconnect_by_func(self.check_close)
+        self.disconnect_by_func(self.check_close)
         # Only parts of the history that match the entered text
         if not self.sub_history:
-            substring = self.entry.get_text()
+            substring = self.get_text()
             matchstr = "^(" + substring + ")"
             self.sub_history = [substring]
             for cmd in self.history:
@@ -376,32 +375,32 @@ class CommandLine(object):
         else:
             self.pos += 1
         self.pos = self.pos % len(self.sub_history)
-        self.entry.set_text(self.sub_history[self.pos])
-        self.entry.set_position(-1)
+        self.set_text(self.sub_history[self.pos])
+        self.set_position(-1)
         # Reconnect when done
-        self.entry.connect("changed", self.check_close)
+        self.connect("changed", self.check_close)
 
     def focus(self, text=""):
         """Open and focus the command line."""
         # Colon for text
-        self.entry.set_text(":" + text)
+        self.set_text(":" + text)
         # Show/hide the relevant stuff
-        self.entry.show()
+        self.show()
         self.app["completions"].show()
         # Remember what widget was focused before
-        if self.app["library"].treeview.is_focus():
+        if self.app["library"].is_focus():
             # In the library remember current file to refocus if incsearch was
             # not applied
             self.last_focused = "lib"
-        elif self.app["manipulate"].scrolled_win.is_visible():
+        elif self.app["manipulate"].is_visible():
             self.last_focused = "man"
         elif self.app["thumbnail"].toggled:
             self.last_focused = "thu"
         else:
             self.last_focused = "im"
         self.reset_search(leaving=False)
-        self.entry.grab_focus()
-        self.entry.set_position(-1)
+        self.grab_focus()
+        self.set_position(-1)
         # Update info for command mode
         self.app["statusbar"].update_info()
 
@@ -410,7 +409,7 @@ class CommandLine(object):
 
         Trigger check_close() and therefore leave()
         """
-        self.entry.set_text("")
+        self.set_text("")
 
     def check_close(self, entry):
         """Close the entry if the colon/slash is deleted.
@@ -426,8 +425,8 @@ class CommandLine(object):
 
     def leave(self, reset_search=False):
         """Apply actions to close the commandline."""
-        self.app["completions"].treeview.scroll_to_point(0, 0)
-        self.entry.hide()
+        self.app["completions"].scroll_to_point(0, 0)
+        self.hide()
         self.app["completions"].hide()
         self.app["completions"].reset()
         # Refocus the remembered widget
@@ -436,7 +435,7 @@ class CommandLine(object):
         elif self.last_focused == "man":
             self.app["manipulate"].sliders["bri"].grab_focus()
         elif self.last_focused == "thu":
-            self.app["thumbnail"].iconview.grab_focus()
+            self.app["thumbnail"].grab_focus()
         else:
             self.app["image"].scrolled_win.grab_focus()
         if reset_search:
@@ -461,8 +460,8 @@ class CommandLine(object):
     def cmd_search(self):
         """Prepend search character '/' to the cmd_line and open it."""
         self.focus()
-        self.entry.set_text("/")
-        self.entry.set_position(-1)
+        self.set_text("/")
+        self.set_position(-1)
 
     def search(self, searchstr, incsearch=False):
         """Run a search on the appropriate filelist.
@@ -489,7 +488,7 @@ class CommandLine(object):
         elif self.last_focused == "thu":
             # Reload all thumbnails in incsearch, only some otherwise
             if incsearch:
-                self.app["thumbnail"].iconview.grab_focus()
+                self.app["thumbnail"].grab_focus()
                 for image in self.app.paths:
                     self.app["thumbnail"].reload(image, False)
             else:
@@ -500,8 +499,8 @@ class CommandLine(object):
         if self.search_positions:
             self.search_move_internal(incsearch)
         elif incsearch:
-            self.entry.grab_focus()
-            self.entry.set_position(-1)
+            self.grab_focus()
+            self.set_position(-1)
         else:
             self.app["statusbar"].message("No matching file", "info")
 
@@ -545,14 +544,13 @@ class CommandLine(object):
         """
         # Select new file in library, image or thumbnail
         if self.last_focused == "lib":
-            self.app["library"].treeview.set_cursor(Gtk.TreePath(position),
-                                                    None, False)
-            self.app["library"].treeview.scroll_to_cell(Gtk.TreePath(position),
-                                                        None, True, 0.5, 0)
+            self.app["library"].set_cursor(Gtk.TreePath(position), None, False)
+            self.app["library"].scroll_to_cell(Gtk.TreePath(position),
+                                               None, True, 0.5, 0)
             # Auto select single file
             if len(self.search_positions) == 1 and not self.incsearch:
                 self.app["library"].file_select(
-                    self.app["library"].treeview, Gtk.TreePath(position), None,
+                    self.app["library"], Gtk.TreePath(position), None,
                     False)
         elif self.last_focused == "im":
             self.app["eventhandler"].num_str = str(position + 1)
@@ -561,8 +559,8 @@ class CommandLine(object):
             self.app["thumbnail"].move_to_pos(position)
         # Refocus entry if incsearch is appropriate
         if incsearch and not self.last_focused == "im":
-            self.entry.grab_focus()
-            self.entry.set_position(-1)
+            self.grab_focus()
+            self.set_position(-1)
 
     def reset_search(self, leaving):
         """Reset all search parameters to null.
@@ -578,9 +576,9 @@ class CommandLine(object):
         if self.last_focused == "lib":
             self.app["library"].reload_names()
             if leaving:
-                self.app["library"].treeview.set_cursor(
+                self.app["library"].set_cursor(
                     Gtk.TreePath(self.last_index), None, False)
-                self.app["library"].treeview.scroll_to_cell(
+                self.app["library"].scroll_to_cell(
                     Gtk.TreePath(self.last_index), None, True, 0.5, 0)
         elif self.last_focused == "thu":
             for image in self.app.paths:

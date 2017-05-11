@@ -37,17 +37,17 @@ class ThumbnailTest(VimivTestCase):
     def test_toggle(self):
         """Toggle thumbnail mode."""
         self.assertTrue(self.thumb.toggled)
-        self.assertTrue(self.thumb.iconview.is_focus())
+        self.assertTrue(self.thumb.is_focus())
         self.thumb.toggle()
         self.assertFalse(self.thumb.toggled)
-        self.assertFalse(self.thumb.iconview.is_focus())
+        self.assertFalse(self.thumb.is_focus())
 
     def test_iconview_clicked(self):
         """Select thumbnail."""
         path = Gtk.TreePath([1])
-        self.thumb.iconview_clicked(None, path)
+        self.thumb.clicked(None, path)
         self.assertFalse(self.thumb.toggled)
-        self.assertFalse(self.thumb.iconview.is_focus())
+        self.assertFalse(self.thumb.is_focus())
         expected_image = os.path.abspath("arch_001.jpg")
         received_image = self.vimiv.paths[self.vimiv.index]
         self.assertEqual(expected_image, received_image)
@@ -55,7 +55,7 @@ class ThumbnailTest(VimivTestCase):
     def test_calculate_columns(self):
         """Calculate thumbnail columns."""
         expected_columns = int(800 / (self.thumb.get_zoom_level()[0] + 30))
-        received_columns = self.thumb.iconview.get_columns()
+        received_columns = self.thumb.get_columns()
         self.assertEqual(expected_columns, received_columns)
 
     def test_reload(self):
@@ -99,7 +99,7 @@ class ThumbnailTest(VimivTestCase):
         # Incsearch
         self.vimiv["commandline"].incsearch = True
         self.vimiv["commandline"].cmd_search()
-        self.vimiv["commandline"].entry.set_text("/symlink")
+        self.vimiv["commandline"].set_text("/symlink")
         self.assertIn("symlink_to_image", self.vimiv.get_pos(True, "thu"))
         self.vimiv["commandline"].leave()
         # Normal search

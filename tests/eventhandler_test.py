@@ -28,7 +28,7 @@ class KeyHandlerTest(VimivTestCase):
         self.assertNotEqual(image_before, image_after)
         event.keyval = Gdk.keyval_from_name("O")
         self.vimiv["image"].scrolled_win.emit("key_press_event", event)
-        self.assertTrue(self.vimiv["library"].treeview.is_focus())
+        self.assertTrue(self.vimiv["library"].is_focus())
 
     def test_button_click(self):
         """Click mouse button."""
@@ -48,7 +48,7 @@ class KeyHandlerTest(VimivTestCase):
         event = Gdk.Event().new(Gdk.EventType.BUTTON_PRESS)
         event.button = 2
         self.vimiv["window"].emit("button_press_event", event)
-        self.assertTrue(self.vimiv["library"].treeview.is_focus())
+        self.assertTrue(self.vimiv["library"].is_focus())
 
     def test_add_number(self):
         """Add number to the numstr and clear it."""
@@ -91,7 +91,7 @@ class KeyHandlerTest(VimivTestCase):
         self.assertFalse(self.vimiv["eventhandler"].num_str)
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("2")
-        self.vimiv["library"].treeview.emit("key_press_event", event)
+        self.vimiv["library"].emit("key_press_event", event)
         self.assertEqual(self.vimiv["eventhandler"].num_str, "2")
         # Clear as it might interfere
         self.vimiv["eventhandler"].num_clear()
@@ -102,7 +102,7 @@ class KeyHandlerTest(VimivTestCase):
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("h")
         event.state = Gdk.ModifierType.CONTROL_MASK
-        self.vimiv["library"].treeview.emit("key_press_event", event)
+        self.vimiv["library"].emit("key_press_event", event)
         after = self.vimiv["library"].show_hidden
         self.assertNotEqual(before, after)
 

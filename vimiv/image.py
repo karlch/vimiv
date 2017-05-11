@@ -9,7 +9,7 @@ from vimiv.helpers import get_float_from_str
 from vimiv.fileactions import is_animation
 
 
-class Image(object):
+class Image(Gtk.Image):
     """Image class for vimiv.
 
     Includes the scrollable window with the image and all actions that apply
@@ -19,7 +19,6 @@ class Image(object):
         app: The main vimiv class to interact with.
         scrolled_win: Gtk.ScrollableWindow for the image.
         viewport: Gtk.Viewport to be able to scroll the image.
-        image: Gtk.Image containing the actual image Pixbuf.
         animation_toggled: If True, animation is playing.
         autoplay_gifs: If True, autoplay animations.
         fit_image:
@@ -40,6 +39,7 @@ class Image(object):
 
     def __init__(self, app, settings):
         """Set default values for attributes."""
+        super(Image, self).__init__()
         self.app = app
         general = settings["GENERAL"]
 
@@ -48,12 +48,7 @@ class Image(object):
         self.scrolled_win = Gtk.ScrolledWindow()
         self.scrolled_win.set_hexpand(True)
         self.scrolled_win.set_vexpand(True)
-
-        # Viewport
-        self.viewport = Gtk.Viewport()
-        self.image = Gtk.Image()
-        self.scrolled_win.add(self.viewport)
-        self.viewport.add(self.image)
+        self.scrolled_win.add(self)
         self.scrolled_win.connect("key_press_event",
                                   self.app["eventhandler"].key_pressed, "IMAGE")
 
@@ -138,7 +133,7 @@ class Image(object):
         else:
             pixbuf_final = self.pixbuf_original.scale_simple(
                 pbf_width, pbf_height, GdkPixbuf.InterpType.BILINEAR)
-        self.image.set_from_pixbuf(pixbuf_final)
+        self.set_from_pixbuf(pixbuf_final)
         # Update the statusbar if required
         if update_info:
             self.app["statusbar"].update_info()
@@ -165,7 +160,7 @@ class Image(object):
             self.timer_id = 0
         else:
             image = self.pixbuf_iter.get_pixbuf()
-            self.image.set_from_pixbuf(image)
+            self.set_from_pixbuf(image)
 
     def get_available_size(self):
         """Receive size not occupied by other Widgets.
@@ -262,14 +257,14 @@ class Image(object):
 
     def center_window(self):
         """Centre the image in the current window."""
-        h_adj = Gtk.Scrollable.get_hadjustment(self.viewport)
+        h_adj = self.scrolled_win.get_hadjustment()
         h_middle = (h_adj.get_upper() - h_adj.get_lower() - self.imsize[0]) / 2
         h_adj.set_value(h_middle)
-        v_adj = Gtk.Scrollable.get_vadjustment(self.viewport)
+        v_adj = self.scrolled_win.get_vadjustment()
         v_middle = (v_adj.get_upper() - v_adj.get_lower() - self.imsize[1]) / 2
         v_adj.set_value(v_middle)
-        Gtk.Scrollable.set_hadjustment(self.viewport, h_adj)
-        Gtk.Scrollable.set_vadjustment(self.viewport, v_adj)
+        self.scrolled_win.set_hadjustment(h_adj)
+        self.scrolled_win.set_vadjustment(v_adj)
 
     def scroll(self, direction):
         """Scroll the image.
@@ -279,10 +274,10 @@ class Image(object):
         """
         steps = self.app["eventhandler"].num_receive()
         scale = self.zoom_percent / self.get_zoom_percent_to_fit() * 2
-        h_adj = Gtk.Scrollable.get_hadjustment(self.viewport)
+        h_adj = self.scrolled_win.get_hadjustment()
         h_size = h_adj.get_upper() - h_adj.get_lower() - self.imsize[0]
         h_step = h_size / scale * steps
-        v_adj = Gtk.Scrollable.get_vadjustment(self.viewport)
+        v_adj = self.scrolled_win.get_vadjustment()
         v_size = v_adj.get_upper() - v_adj.get_lower() - self.imsize[1]
         v_step = v_size / scale * steps
         # To the ends
@@ -303,8 +298,8 @@ class Image(object):
             v_adj.set_value(v_adj.get_value() - v_step)
         elif direction == "l":
             h_adj.set_value(h_adj.get_value() + h_step)
-        Gtk.Scrollable.set_hadjustment(self.viewport, h_adj)
-        Gtk.Scrollable.set_vadjustment(self.viewport, v_adj)
+        self.scrolled_win.set_hadjustment(h_adj)
+        self.scrolled_win.set_vadjustment(v_adj)
 
     def move_index(self, forward=True, key=None, delta=1, force=False):
         """Move by delta in paths.

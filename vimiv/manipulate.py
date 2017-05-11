@@ -11,7 +11,7 @@ from vimiv.trash_manager import TrashManager
 from vimiv.fileactions import is_animation
 
 
-class Manipulate(object):
+class Manipulate(Gtk.ScrolledWindow):
     """Manipulate class for vimiv.
 
     Includes the manipulation toolbar, all the actions that apply to it and all
@@ -21,8 +21,6 @@ class Manipulate(object):
         app: The main vimiv application to interact with.
         manipulations: Dictionary of possible manipulations. Includes
             brightness, contrast and sharpness.
-        scrolled_win: Gtk.ScrolledWindow for the widgets so they are accessible
-            regardless of window size.
         sliders: Dictionary containing bri, con and sha sliders.
         trash_manager: Class to handle a shared trash directory.
     """
@@ -34,6 +32,7 @@ class Manipulate(object):
             app: The main vimiv application to interact with.
             settings: Settings from configfiles to use.
         """
+        super(Manipulate, self).__init__()
         self.app = app
 
         # Settings
@@ -43,16 +42,14 @@ class Manipulate(object):
         self.pil_thumb = Image
 
         # A scrollable window so all tools are always accessible
-        self.scrolled_win = Gtk.ScrolledWindow()
-        self.scrolled_win.set_policy(Gtk.PolicyType.AUTOMATIC,
-                                     Gtk.PolicyType.NEVER)
+        self.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
         # A grid in which everything gets packed
         grid = Gtk.Grid()
         grid.set_column_spacing(6)
         grid.set_border_width(6)
         grid.connect("key_press_event", self.app["eventhandler"].key_pressed,
                      "MANIPULATE")
-        self.scrolled_win.add(grid)
+        self.add(grid)
 
         # Sliders
         bri_slider = Gtk.Scale()
@@ -150,7 +147,7 @@ class Manipulate(object):
         images = []
         # Add the image shown
         if not self.app["mark"].marked and not self.app["thumbnail"].toggled:
-            if self.app["library"].treeview.is_focus():
+            if self.app["library"].is_focus():
                 images.append(
                     os.path.abspath(self.app.get_pos(True)))
             else:
@@ -283,12 +280,12 @@ class Manipulate(object):
 
     def toggle(self):
         """Toggle the manipulation bar."""
-        if self.scrolled_win.is_visible():
-            self.scrolled_win.hide()
+        if self.is_visible():
+            self.hide()
             self.app["image"].scrolled_win.grab_focus()
             self.app["statusbar"].update_info()
         elif self.app.paths and not(self.app["thumbnail"].toggled or
-                                    self.app["library"].treeview.is_focus()):
+                                    self.app["library"].is_focus()):
             if os.path.islink(self.app.paths[self.app.index]):
                 self.app["statusbar"].message(
                     "Manipulating symbolic links is not supported", "warning")
@@ -296,7 +293,7 @@ class Manipulate(object):
                 self.app["statusbar"].message(
                     "Manipulating Gifs is not supported", "warning")
             else:
-                self.scrolled_win.show()
+                self.show()
                 self.sliders["bri"].grab_focus()
                 self.app["statusbar"].update_info()
                 # Create PIL image to work with
@@ -308,7 +305,7 @@ class Manipulate(object):
             if self.app["thumbnail"].toggled:
                 self.app["statusbar"].message(
                     "Manipulate not supported in thumbnail mode", "warning")
-            elif self.app["library"].treeview.is_focus():
+            elif self.app["library"].is_focus():
                 self.app["statusbar"].message(
                     "Manipulate not supported in library", "warning")
             else:
@@ -375,7 +372,7 @@ class Manipulate(object):
             name: Name of slider to focus.
         """
         # If manipulate is not toggled, this makes no sense
-        if not self.scrolled_win.is_visible():
+        if not self.is_visible():
             self.app["statusbar"].message(
                 "Focusing a slider only makes sense in manipulate", "error")
         elif name not in self.sliders:
@@ -411,7 +408,7 @@ class Manipulate(object):
             accept: If True apply changes to image file. Else discard them.
         """
         # If manipulate is not toggled, this makes no sense
-        if not self.scrolled_win.is_visible():
+        if not self.is_visible():
             self.app["statusbar"].message(
                 "Finishing manipulate only makes sense in manipulate", "error")
             return
@@ -441,7 +438,7 @@ class Manipulate(object):
             self.app["statusbar"].message(
                 "Argument must be of type integer", "error")
             return
-        if not self.scrolled_win.is_visible():
+        if not self.is_visible():
             if not self.app.paths:
                 self.app["statusbar"].message("No image to manipulate", "error")
                 return

@@ -6,7 +6,7 @@ import os
 from gi.repository import Gdk, GLib, Gtk
 
 
-class Statusbar(object):
+class Statusbar(Gtk.Grid):
     """Create the statusbar and handle all events for it.
 
     Attributes:
@@ -28,6 +28,7 @@ class Statusbar(object):
     """
 
     def __init__(self, app, settings):
+        super(Statusbar, self).__init__()
         self.app = app
         general = settings["GENERAL"]
 
@@ -42,8 +43,7 @@ class Statusbar(object):
         self.was_hidden = False
 
         # Statusbar on the bottom
-        self.bar = Gtk.Grid()
-        self.bar.set_name("StatusBar")  # Name for css
+        self.set_name("StatusBar")  # Name for css
         # Two labels for two sides of statusbar and one in the middle for
         # additional info
         self.left_label = Gtk.Label()
@@ -54,15 +54,15 @@ class Statusbar(object):
         self.center_label.set_justify(Gtk.Justification.CENTER)
         self.center_label.set_hexpand(True)
         # Add them all
-        self.bar.attach(self.left_label, 0, 0, 1, 1)
-        self.bar.attach(self.center_label, 1, 0, 1, 1)
-        self.bar.attach(self.right_label, 2, 0, 1, 1)
+        self.attach(self.left_label, 0, 0, 1, 1)
+        self.attach(self.center_label, 1, 0, 1, 1)
+        self.attach(self.right_label, 2, 0, 1, 1)
         # Padding and separator
         padding = self.app.settings["GENERAL"]["commandline_padding"]
-        self.bar.set_margin_start(padding)
-        self.bar.set_margin_end(padding)
-        self.bar.set_margin_top(padding)
-        self.bar.set_margin_bottom(padding)
+        self.set_margin_start(padding)
+        self.set_margin_end(padding)
+        self.set_margin_top(padding)
+        self.set_margin_bottom(padding)
         self.separator = Gtk.Separator()
 
     def message(self, message, style="error"):
@@ -128,7 +128,7 @@ class Statusbar(object):
         self.set_right_status(mode)
         self.set_window_title()
         # Size of statusbar for resizing image
-        self.size = self.app["statusbar"].bar.get_allocated_height()
+        self.size = self.get_allocated_height()
 
     def set_left_status(self, mode):
         """Set the left side of the statusbar depending on mode."""
@@ -188,11 +188,11 @@ class Statusbar(object):
 
     def get_mode(self):
         """Return which widget is currently focused."""
-        if self.app["commandline"].entry.is_focus():
+        if self.app["commandline"].is_focus():
             return "<b>-- COMMAND --</b>"
-        elif self.app["library"].treeview.is_focus():
+        elif self.app["library"].is_focus():
             return "<b>-- LIBRARY --</b>"
-        elif self.app["manipulate"].scrolled_win.is_visible():
+        elif self.app["manipulate"].is_visible():
             return "<b>-- MANIPULATE --</b>"
         elif self.app["thumbnail"].toggled:
             return "<b>-- THUMBNAIL --</b>"
@@ -200,11 +200,11 @@ class Statusbar(object):
 
     def toggle(self):
         """Toggle statusbar and resize image if necessary."""
-        if not self.hidden and not self.app["commandline"].entry.is_visible():
-            self.bar.hide()
+        if not self.hidden and not self.app["commandline"].is_visible():
+            self.hide()
             self.separator.hide()
         else:
-            self.bar.show()
+            self.show()
             self.separator.show()
         self.hidden = not self.hidden
         # Resize the image if necessary
@@ -218,7 +218,7 @@ class Statusbar(object):
 
     def get_bar_height(self):
         """Return height of the statusbar + padding."""
-        bar_height = self.bar.get_allocated_height()
+        bar_height = self.get_allocated_height()
         padding = self.app.settings["GENERAL"]["commandline_padding"]
         return bar_height + 2 * padding
 

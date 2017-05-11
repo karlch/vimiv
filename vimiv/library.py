@@ -8,7 +8,7 @@ from vimiv.fileactions import is_image, populate
 from vimiv.helpers import listdir_wrapper, sizeof_fmt
 
 
-class Library(object):
+class Library(Gtk.TreeView):
     """Library of vimiv.
 
     Includes the treeview with the library and all actions that apply to it
@@ -32,8 +32,6 @@ class Library(object):
         grid: Gtk.Grid containing the TreeView and the border.
         scrollable_treeview: Gtk.ScrolledWindow in which the TreeView gets
             packed.
-        treeview: Gtk.TreeView object with own liststore model containing
-            number, filename, filesize and is_marked.
     """
 
     def __init__(self, app, settings):
@@ -43,6 +41,7 @@ class Library(object):
             app: The main vimiv application to interact with.
             settings: Settings from configfiles to use.
         """
+        super(Library, self).__init__()
         self.app = app
         library = settings["LIBRARY"]
 
@@ -76,17 +75,16 @@ class Library(object):
         self.scrollable_treeview.set_size_request(self.width, 10)
         self.grid.attach(self.scrollable_treeview, 0, 0, 1, 1)
         # Treeview
-        self.treeview = Gtk.TreeView()
-        self.scrollable_treeview.add(self.treeview)
-        self.treeview.set_enable_search(False)
+        self.scrollable_treeview.add(self)
+        self.set_enable_search(False)
         # Select file when row activated
-        self.treeview.connect("row-activated", self.file_select, True)
+        self.connect("row-activated", self.file_select, True)
         # Handle key events
-        self.treeview.add_events(Gdk.EventMask.KEY_PRESS_MASK)
-        self.treeview.connect("key_press_event",
-                              self.app["eventhandler"].key_pressed, "LIBRARY")
-        self.treeview.connect("button_press_event",
-                              self.app["eventhandler"].clicked, "LIBRARY")
+        self.add_events(Gdk.EventMask.KEY_PRESS_MASK)
+        self.connect("key_press_event",
+                     self.app["eventhandler"].key_pressed, "LIBRARY")
+        self.connect("button_press_event",
+                     self.app["eventhandler"].clicked, "LIBRARY")
         # Add the columns
         for i, name in enumerate(["Num", "Name", "Size", "M"]):
             renderer = Gtk.CellRendererText()
@@ -94,12 +92,12 @@ class Library(object):
             if name == "Name":
                 column.set_expand(True)
                 column.set_max_width(20)
-            self.treeview.append_column(column)
+            self.append_column(column)
         # Set the liststore model
-        self.treeview.set_model(self.liststore_create())
+        self.set_model(self.liststore_create())
         # Set the hexpand property if requested in the configfile
         if not self.app.paths and self.expand:
-            self.treeview.set_hexpand(True)
+            self.set_hexpand(True)
 
     def toggle(self, update_image=True):
         """Toggle the library.
@@ -150,7 +148,7 @@ class Library(object):
             focus_library: If True focus the library. Else unfocus it.
         """
         if focus_library:
-            self.treeview.grab_focus()
+            self.grab_focus()
             if not self.grid.is_visible():
                 self.toggle()
         else:
@@ -220,7 +218,7 @@ class Library(object):
             # If thumbnail toggled, go out
             if self.app["thumbnail"].toggled:
                 self.app["thumbnail"].toggle()
-                self.treeview.grab_focus()
+                self.grab_focus()
             if self.app.paths and fil in self.app.paths[self.app.index]:
                 close = True  # Close if file selected twice
             index = 0  # Catch directories to focus correctly
@@ -281,7 +279,7 @@ class Library(object):
         if not search:
             self.app["commandline"].search_positions = []
         # Create model in new directory
-        self.treeview.set_model(self.liststore_create())
+        self.set_model(self.liststore_create())
         self.focus(True)
         # Warn if there are no files in the directory
         if not self.files:
@@ -297,7 +295,7 @@ class Library(object):
 
     def reload_names(self):
         """Only reload names of the treeview."""
-        model = self.treeview.get_model()
+        model = self.get_model()
         for i, name in enumerate(self.files):
             markup_string = name
             if os.path.islink(name):
@@ -332,9 +330,8 @@ class Library(object):
         if new_pos < 0 or new_pos > max_pos:
             self.app["statusbar"].message("Unsupported index", "warning")
             return
-        self.treeview.set_cursor(Gtk.TreePath(new_pos), None, False)
-        self.treeview.scroll_to_cell(Gtk.TreePath(new_pos), None, True,
-                                     0.5, 0)
+        self.set_cursor(Gtk.TreePath(new_pos), None, False)
+        self.scroll_to_cell(Gtk.TreePath(new_pos), None, True, 0.5, 0)
         # Clear the prefix
         self.app["eventhandler"].num_clear()
 
@@ -427,15 +424,15 @@ class Library(object):
                               self.app.get_pos(force_widget="lib"))
             self.move_up()
         elif direction == "l":
-            self.file_select(self.treeview, self.treeview.get_cursor()[0],
+            self.file_select(self, self.get_cursor()[0],
                              None, False)
         elif direction in ["j", "k"]:
             # Scroll the tree checking for a user step
             step = self.app["eventhandler"].num_receive()
             if direction == "j":
                 new_pos = self.app.get_pos(force_widget="lib") + step
-                if new_pos >= len(self.treeview.get_model()):
-                    new_pos = len(self.treeview.get_model()) - 1
+                if new_pos >= len(self.get_model()):
+                    new_pos = len(self.get_model()) - 1
             else:
                 new_pos = self.app.get_pos(force_widget="lib") - step
                 if new_pos < 0:

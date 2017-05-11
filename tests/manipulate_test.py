@@ -84,12 +84,12 @@ class ManipulateTest(VimivTestCase):
     def test_rotate(self):
         """Rotate image."""
         # Before
-        pixbuf = self.vimiv["image"].image.get_pixbuf()
+        pixbuf = self.vimiv["image"].get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertFalse(is_portrait)
         # Rotate
         self.manipulate.rotate(1, True)
-        pixbuf = self.vimiv["image"].image.get_pixbuf()
+        pixbuf = self.vimiv["image"].get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertTrue(is_portrait)
         # Rotate the file
@@ -104,7 +104,7 @@ class ManipulateTest(VimivTestCase):
             self.assertTrue(im.width < im.height)
         # Rotate back
         self.manipulate.rotate(1, True)
-        pixbuf = self.vimiv["image"].image.get_pixbuf()
+        pixbuf = self.vimiv["image"].get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertFalse(is_portrait)
         # Rotate the file
@@ -126,12 +126,12 @@ class ManipulateTest(VimivTestCase):
         ##################
         # Rotate
         self.run_command("rotate 1")
-        pixbuf = self.vimiv["image"].image.get_pixbuf()
+        pixbuf = self.vimiv["image"].get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertTrue(is_portrait)
         # Rotate back
         self.run_command("rotate -1")
-        pixbuf = self.vimiv["image"].image.get_pixbuf()
+        pixbuf = self.vimiv["image"].get_pixbuf()
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertFalse(is_portrait)
         # Fail because of invalid argument
@@ -142,13 +142,13 @@ class ManipulateTest(VimivTestCase):
     def test_flip(self):
         """Flip image."""
         # Flip
-        pixbuf_before = self.vimiv["image"].image.get_pixbuf()
+        pixbuf_before = self.vimiv["image"].get_pixbuf()
         self.manipulate.flip(1, False)
-        pixbuf_after = self.vimiv["image"].image.get_pixbuf()
+        pixbuf_after = self.vimiv["image"].get_pixbuf()
         self.assertNotEqual(pixbuf_before, pixbuf_after)
         # Flip back
         self.manipulate.flip(1, False)
-        pixbuf_after_2 = self.vimiv["image"].image.get_pixbuf()
+        pixbuf_after_2 = self.vimiv["image"].get_pixbuf()
         self.assertNotEqual(pixbuf_after, pixbuf_after_2)
         # Fail because of no paths
         backup = list(self.vimiv.paths)
@@ -161,11 +161,11 @@ class ManipulateTest(VimivTestCase):
         ##################
         # Flip
         self.run_command("flip 1")
-        pixbuf_after_3 = self.vimiv["image"].image.get_pixbuf()
+        pixbuf_after_3 = self.vimiv["image"].get_pixbuf()
         self.assertNotEqual(pixbuf_after_2, pixbuf_after_3)
         # Flip back
         self.run_command("flip 1")
-        pixbuf_after_4 = self.vimiv["image"].image.get_pixbuf()
+        pixbuf_after_4 = self.vimiv["image"].get_pixbuf()
         self.assertNotEqual(pixbuf_after_3, pixbuf_after_4)
         # Fail because of invalid argument
         self.run_command("flip value")
@@ -175,10 +175,10 @@ class ManipulateTest(VimivTestCase):
         """Toggle manipulate."""
         # Via function
         self.manipulate.toggle()
-        self.assertTrue(self.manipulate.scrolled_win.is_visible())
+        self.assertTrue(self.manipulate.is_visible())
         self.assertTrue(self.manipulate.sliders["bri"].is_focus())
         self.manipulate.toggle()
-        self.assertFalse(self.manipulate.scrolled_win.is_visible())
+        self.assertFalse(self.manipulate.is_visible())
         self.assertFalse(self.manipulate.sliders["bri"].is_focus())
         self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
         # Close via button

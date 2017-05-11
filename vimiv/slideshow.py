@@ -1,11 +1,11 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Slideshow for vimiv."""
 
-from gi.repository import GLib
+from gi.repository import GLib, GObject
 from vimiv.helpers import get_float_from_str
 
 
-class Slideshow(object):
+class Slideshow(GObject.Object):
     """Handle everything related to slideshow for vimiv.
 
     Attributes:
@@ -26,6 +26,7 @@ class Slideshow(object):
             app: The main vimiv application to interact with.
             settings: Settings from configfiles to use.
         """
+        super(Slideshow, self).__init__()
         self.app = app
         general = settings["GENERAL"]
 

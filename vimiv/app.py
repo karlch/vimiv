@@ -53,10 +53,9 @@ class Vimiv(Gtk.Application):
             running_tests: If True, running from test suite. Do not show pop-up
                 windows and do not parse user configuration files.
         """
-        self.running_tests = running_tests
         # Init application and set default values
         app_id = "org.vimiv" + str(time()).replace(".", "")
-        Gtk.Application.__init__(self, application_id=app_id)
+        super(Vimiv, self).__init__(application_id=app_id)
         self.set_flags(Gio.ApplicationFlags.HANDLES_OPEN)
         self.connect("activate", self.activate_vimiv)
         self.settings = {}
@@ -68,11 +67,10 @@ class Vimiv(Gtk.Application):
         self.commands = {}
         self.aliases = {}
         self.functions = {}
+        self.running_tests = running_tests
         # Set up all commandline options
         self.init_commandline_options()
 
-    # Any different number of arguments will fail
-    # pylint: disable=arguments-differ
     def do_open(self, files, n_files, hint):
         """Open files by populating self.paths and self.index.
 
@@ -97,8 +95,6 @@ class Vimiv(Gtk.Application):
         # Activate vimiv after opening files
         self.activate_vimiv(self)
 
-    # Any different number of arguments will fail
-    # pylint: disable=arguments-differ
     def do_handle_local_options(self, options):
         """Handle commandline arguments.
 
@@ -193,12 +189,12 @@ class Vimiv(Gtk.Application):
         app.add_window(self["window"])
         # Show everything and then hide whatever needs to be hidden
         self["window"].show_all()
-        self["manipulate"].scrolled_win.hide()
-        self["commandline"].entry.hide()
+        self["manipulate"].hide()
+        self["commandline"].hide()
         self["completions"].hide()
         # Statusbar depending on setting
         if self["statusbar"].hidden:
-            self["statusbar"].bar.hide()
+            self["statusbar"].hide()
         self["statusbar"].set_separator_height()
         # Try to generate imagelist recursively from the current directory if
         # recursive is given and not paths exist
@@ -252,13 +248,13 @@ class Vimiv(Gtk.Application):
         main_grid = Gtk.Grid()
         main_grid.attach(self["library"].grid, 0, 0, 1, 1)
         main_grid.attach(self["image"].scrolled_win, 1, 0, 1, 1)
-        main_grid.attach(self["manipulate"].scrolled_win, 0, 1, 2, 1)
+        main_grid.attach(self["manipulate"], 0, 1, 2, 1)
         main_grid.attach(self["statusbar"].separator, 0, 2, 2, 1)
 
         overlay_grid = Gtk.Grid()
-        overlay_grid.attach(self["statusbar"].bar, 0, 0, 1, 1)
+        overlay_grid.attach(self["statusbar"], 0, 0, 1, 1)
         overlay_grid.attach(self["completions"].info, 0, 1, 1, 1)
-        overlay_grid.attach(self["commandline"].entry, 0, 2, 1, 1)
+        overlay_grid.attach(self["commandline"], 0, 2, 1, 1)
         overlay_grid.set_valign(Gtk.Align.END)
 
         # Make it nice using CSS
@@ -332,20 +328,20 @@ class Vimiv(Gtk.Application):
         if force_widget:
             focused_widget = force_widget
         elif self["image"].scrolled_win.is_focus() or \
-                self["manipulate"].scrolled_win.is_visible():
+                self["manipulate"].is_visible():
             focused_widget = "im"
-        elif self["library"].treeview.is_focus():
+        elif self["library"].is_focus():
             focused_widget = "lib"
-        elif self["thumbnail"].iconview.is_focus():
+        elif self["thumbnail"].is_focus():
             focused_widget = "thu"
 
         # Get position and name
         if focused_widget != "im":
             if focused_widget == "lib":
-                path = self["library"].treeview.get_cursor()[0]
+                path = self["library"].get_cursor()[0]
                 filelist = self["library"].files
             elif focused_widget == "thu":
-                path = self["thumbnail"].iconview.get_cursor()[1]
+                path = self["thumbnail"].get_cursor()[1]
                 filelist = self.paths
             if path:
                 position = path.get_indices()[0]

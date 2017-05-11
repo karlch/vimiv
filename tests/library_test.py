@@ -22,9 +22,9 @@ class LibraryTest(VimivTestCase):
     def test_toggle(self):
         """Toggle the library."""
         self.lib.toggle()
-        self.assertFalse(self.lib.treeview.is_focus())
+        self.assertFalse(self.lib.is_focus())
         self.lib.toggle()
-        self.assertTrue(self.lib.treeview.is_focus())
+        self.assertTrue(self.lib.is_focus())
 
     def test_toggle_with_slideshow(self):
         """Toggle the library with running slideshow."""
@@ -32,7 +32,7 @@ class LibraryTest(VimivTestCase):
         self.vimiv["slideshow"].toggle()
         self.lib.toggle()
         self.assertFalse(self.vimiv["slideshow"].running)
-        self.assertTrue(self.lib.treeview.is_focus())
+        self.assertTrue(self.lib.is_focus())
 
     def test_file_select(self):
         """Select file in library."""
@@ -42,7 +42,7 @@ class LibraryTest(VimivTestCase):
         self.assertEqual(self.lib.files, ["symlink with spaces .jpg"])
         self.lib.move_up()
         # Library still focused
-        self.assertTrue(self.lib.treeview.is_focus())
+        self.assertTrue(self.lib.is_focus())
         # Image by position closing library
         path = Gtk.TreePath([self.lib.files.index("arch_001.jpg")])
         self.lib.file_select(None, path, None, True)
@@ -54,7 +54,7 @@ class LibraryTest(VimivTestCase):
         expected_image = os.path.abspath("arch_001.jpg")
         self.assertEqual(expected_image, open_image)
         # Library closed, image has focus
-        self.assertFalse(self.lib.treeview.is_focus())
+        self.assertFalse(self.lib.is_focus())
         self.assertFalse(self.lib.grid.is_focus())
         self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
 
@@ -172,7 +172,7 @@ class LibraryTest(VimivTestCase):
     def test_display_symlink(self):
         """Show real path of symbolic links in library as well."""
         index = self.lib.files.index("symlink_to_image")
-        model = self.lib.treeview.get_model()
+        model = self.lib.get_model()
         markup_string = model[index][1]
         expected_string = "symlink_to_image  →  " \
             + os.path.realpath("symlink_to_image")
@@ -208,9 +208,9 @@ class LibraryTest(VimivTestCase):
 
     def tearDown(self):
         # Reopen and back to beginning
-        if not self.lib.treeview.is_visible():
+        if not self.lib.is_visible():
             self.lib.toggle()
-        self.lib.treeview.set_cursor([Gtk.TreePath(0)], None, False)
+        self.lib.set_cursor([Gtk.TreePath(0)], None, False)
 
 
 if __name__ == "__main__":

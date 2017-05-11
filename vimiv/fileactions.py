@@ -127,7 +127,7 @@ class FileExtras(object):
             string: Formatstring to use.
         """
         # Catch problems
-        if self.app["library"].treeview.is_focus():
+        if self.app["library"].is_focus():
             message = "Format only works on opened image files"
             self.app["statusbar"].message(message, "info")
             return
@@ -187,6 +187,7 @@ class FileExtras(object):
             pipe: If True, input came from a pipe. Therefore run pipe.
             pipe_input: Command that comes from pipe.
         """
+        # TODO delete this
         # Reload library remembering position
         if (directory == os.getcwd() and directory != self.app["tags"].directory
                 and self.app["library"].grid.is_visible()):
@@ -199,7 +200,7 @@ class FileExtras(object):
             if self.app["commandline"].last_focused == "im":
                 self.app["image"].scrolled_win.grab_focus()
             elif self.app["commandline"].last_focused == "thu":
-                self.app["thumbnail"].iconview.grab_focus()
+                self.app["thumbnail"].grab_focus()
         # Reload image/thumbnail
         if self.app.paths and reload_path:
             old_pos_im = self.app.get_pos(False, "im")
@@ -210,7 +211,7 @@ class FileExtras(object):
             self.app.paths, self.app.index = populate(files)
             # Expand library if set by user and all paths were removed
             if self.app["library"].expand and not self.app.paths:
-                self.app["library"].treeview.set_hexpand(True)
+                self.app["library"].set_hexpand(True)
             # Refocus the current position
             if self.app["thumbnail"].toggled:
                 old_pos_thu = self.app.get_pos(False, "thu")

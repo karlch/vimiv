@@ -18,15 +18,15 @@ class StatusbarTest(VimivTestCase):
 
     def test_toggle_statusbar(self):
         """Toggle the statusbar."""
-        self.assertTrue(self.statusbar.bar.is_visible())
+        self.assertTrue(self.statusbar.is_visible())
         self.assertFalse(self.statusbar.hidden)
         # Hide
         self.statusbar.toggle()
-        self.assertFalse(self.statusbar.bar.is_visible())
+        self.assertFalse(self.statusbar.is_visible())
         self.assertTrue(self.statusbar.hidden)
         # Show again
         self.statusbar.toggle()
-        self.assertTrue(self.statusbar.bar.is_visible())
+        self.assertTrue(self.statusbar.is_visible())
         self.assertFalse(self.statusbar.hidden)
 
     def test_message(self):
@@ -48,19 +48,19 @@ class StatusbarTest(VimivTestCase):
         """Show an error message with an initially hidden statusbar."""
         # Hide
         self.statusbar.toggle()
-        self.assertFalse(self.statusbar.bar.is_visible())
+        self.assertFalse(self.statusbar.is_visible())
         # Send an error message
         self.statusbar.message("Test error")
         self.check_statusbar("ERROR: Test error")
-        self.assertTrue(self.statusbar.bar.is_visible())
+        self.assertTrue(self.statusbar.is_visible())
         # Remove error message
         self.statusbar.update_info()
         self.assertNotEqual(self.statusbar.left_label.get_text(),
                             "ERROR: Test error")
-        self.assertFalse(self.statusbar.bar.is_visible())
+        self.assertFalse(self.statusbar.is_visible())
         # Show again
         self.statusbar.toggle()
-        self.assertTrue(self.statusbar.bar.is_visible())
+        self.assertTrue(self.statusbar.is_visible())
 
     def test_clear_status(self):
         """Clear num_str, search and error message."""

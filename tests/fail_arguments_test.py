@@ -13,7 +13,6 @@ class FailingArgTest(VimivTestCase):
     def setUpClass(cls):
         cls.init_test(cls)
         cls.cmdline = cls.vimiv["commandline"]
-        cls.entry = cls.cmdline.entry
 
     def test_args(self):
         """Fail commands because of wrong number of arguments."""
@@ -56,8 +55,8 @@ class FailingArgTest(VimivTestCase):
                 few.
         """
         text = ":" + command + " arg" * n_args
-        self.entry.set_text(text)
-        self.cmdline.handler(self.entry)
+        self.cmdline.set_text(text)
+        self.cmdline.handler(self.cmdline)
         expected = "ERROR: Too many arguments for command" \
             if too_many \
             else "ERROR: Missing positional arguments for command"

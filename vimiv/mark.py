@@ -50,7 +50,7 @@ class Mark(object):
     def mark_all(self):
         """Mark all images."""
         # Get the correct filelist
-        if self.app["library"].treeview.is_focus():
+        if self.app["library"].is_focus():
             files = []
             for fil in self.app["library"].files:
                 files.append(os.path.abspath(fil))
@@ -73,7 +73,7 @@ class Mark(object):
         start = self.marked[-2]
         end = self.marked[-1]
         # Get the correct filelist
-        if self.app["library"].treeview.is_focus():
+        if self.app["library"].is_focus():
             files = []
             for fil in self.app["library"].files:
                 if not os.path.isdir(fil):
@@ -96,7 +96,7 @@ class Mark(object):
         """Reload all information which contains marks."""
         # Update lib
         if self.app["library"].grid.is_visible():
-            model = self.app["library"].treeview.get_model()
+            model = self.app["library"].get_model()
             for i, name in enumerate(self.app["library"].files):
                 model[i][3] = "[*]" \
                     if os.path.abspath(name) in self.marked \

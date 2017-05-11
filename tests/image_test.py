@@ -3,10 +3,6 @@
 
 from unittest import main
 
-from gi import require_version
-require_version("Gtk", "3.0")
-from gi.repository import Gtk
-
 from vimiv_testcase import VimivTestCase, refresh_gui
 
 
@@ -46,25 +42,25 @@ class ImageTest(VimivTestCase):
         # Zoom to a size representing half the image size
         self.image.zoom_to(0.5)
         self.assertEqual(self.image.zoom_percent, 0.5)
-        pixbuf = self.image.image.get_pixbuf()
+        pixbuf = self.image.get_pixbuf()
         self.assertEqual(width * 0.5, pixbuf.get_width())
         # Zoom by eventhandler
         self.vimiv["eventhandler"].num_str = "03"
         self.image.zoom_to(0)
         self.assertEqual(self.image.zoom_percent, 0.3)
-        pixbuf = self.image.image.get_pixbuf()
+        pixbuf = self.image.get_pixbuf()
         self.assertEqual(width * 0.3, pixbuf.get_width())
         # Zoom back to fit
         self.image.zoom_to(0)
         self.assertEqual(self.image.zoom_percent,
                          self.image.get_zoom_percent_to_fit())
-        pixbuf = self.image.image.get_pixbuf()
+        pixbuf = self.image.get_pixbuf()
         self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
         # Unreasonable zoom
         self.image.zoom_to(1000)
         self.check_statusbar("WARNING: Image cannot be zoomed this far")
-        pixbuf = self.image.image.get_pixbuf()
+        pixbuf = self.image.get_pixbuf()
         self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
 
@@ -140,6 +136,7 @@ class ImageTest(VimivTestCase):
         if self.vimiv["statusbar"].hidden:
             self.vimiv["statusbar"].toggle()
         # Zoom to fit vertically so something happens
+        refresh_gui()
         self.image.zoom_to(0, 3)
         before = self.image.zoom_percent
         # Hide statusbar -> larger image
@@ -174,9 +171,9 @@ class ImageTest(VimivTestCase):
                 Position after scrolling.
             """
             if there in "lL":
-                adj = Gtk.Scrollable.get_hadjustment(self.image.viewport)
+                adj = self.image.scrolled_win.get_hadjustment()
             else:
-                adj = Gtk.Scrollable.get_vadjustment(self.image.viewport)
+                adj = self.image.scrolled_win.get_vadjustment()
             self.image.scroll(there)
             new_pos = adj.get_value()
             self.assertGreater(adj.get_value(), 0)
@@ -191,8 +188,8 @@ class ImageTest(VimivTestCase):
         self.image.zoom_to(needed_scale)
         refresh_gui()
         # Adjustments should be at 0
-        h_adj = Gtk.Scrollable.get_hadjustment(self.image.viewport)
-        v_adj = Gtk.Scrollable.get_vadjustment(self.image.viewport)
+        h_adj = self.image.scrolled_win.get_hadjustment()
+        v_adj = self.image.scrolled_win.get_vadjustment()
         self.assertFalse(h_adj.get_value())
         self.assertFalse(v_adj.get_value())
         # Right and back left
@@ -212,8 +209,8 @@ class ImageTest(VimivTestCase):
             v_adj.get_upper() - v_adj.get_lower() - self.image.imsize[1])
         # Center
         self.image.center_window()
-        h_adj = Gtk.Scrollable.get_hadjustment(self.image.viewport)
-        v_adj = Gtk.Scrollable.get_vadjustment(self.image.viewport)
+        h_adj = self.image.scrolled_win.get_hadjustment()
+        v_adj = self.image.scrolled_win.get_vadjustment()
         h_middle = \
             (h_adj.get_upper() - h_adj.get_lower() - self.image.imsize[0]) / 2
         v_middle = \

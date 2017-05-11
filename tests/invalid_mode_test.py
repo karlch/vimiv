@@ -13,7 +13,6 @@ class FailingModeTest(VimivTestCase):
     def setUpClass(cls):
         cls.init_test(cls)
         cls.cmdline = cls.vimiv["commandline"]
-        cls.entry = cls.cmdline.entry
 
     def test_fail_focus_slider(self):
         """Fail focus slider because not in manipulate."""

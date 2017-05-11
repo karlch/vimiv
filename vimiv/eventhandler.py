@@ -1,12 +1,12 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Handles the keyboard for vimiv."""
 
-from gi.repository import Gdk, GLib
+from gi.repository import Gdk, GLib, GObject
 from vimiv.configparser import parse_keys
 from vimiv.helpers import get_float_from_str
 
 
-class KeyHandler(object):
+class KeyHandler(GObject.Object):
     """Handle key press for vimiv invoking the correct commands.
 
     Attributes:
@@ -25,6 +25,7 @@ class KeyHandler(object):
             vimiv: The main vimiv class to interact with.
             settings: Settings from configfiles to use.
         """
+        super(KeyHandler, self).__init__()
         self.app = app
         self.num_str = ""
         self.timer_id = 0
