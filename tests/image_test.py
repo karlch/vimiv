@@ -18,8 +18,8 @@ class ImageTest(VimivTestCase):
         """Test getting the fitting image zoom."""
         # Panorama image
         width = 1920
-        im_width = self.image.imsize[0]
-        perc = self.image.get_zoom_percent_to_fit()
+        im_width = self.image._size[0]
+        perc = self.image._get_zoom_percent_to_fit()
         self.assertEqual(im_width / width, perc)
 
     def test_zooming(self):
@@ -31,7 +31,7 @@ class ImageTest(VimivTestCase):
         self.assertEqual(self.image.zoom_percent, perc_before * 1.25)
         # Zoom out should go back to same level
         self.image.zoom_delta(zoom_in=False)
-        self.assertEqual(self.image.zoom_percent, perc_before)
+        self.assertAlmostEqual(self.image.zoom_percent, perc_before)
         # Zoom in with a step
         self.image.zoom_delta(step=2)
         self.assertEqual(self.image.zoom_percent, perc_before * 1.5)
@@ -53,15 +53,15 @@ class ImageTest(VimivTestCase):
         # Zoom back to fit
         self.image.zoom_to(0)
         self.assertEqual(self.image.zoom_percent,
-                         self.image.get_zoom_percent_to_fit())
+                         self.image._get_zoom_percent_to_fit())
         pixbuf = self.image.get_pixbuf()
-        self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
+        self.assertEqual(width * self.image._get_zoom_percent_to_fit(),
                          pixbuf.get_width())
         # Unreasonable zoom
         self.image.zoom_to(1000)
         self.check_statusbar("WARNING: Image cannot be zoomed this far")
         pixbuf = self.image.get_pixbuf()
-        self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
+        self.assertEqual(width * self.image._get_zoom_percent_to_fit(),
                          pixbuf.get_width())
 
     def test_zoom_from_commandline(self):
@@ -80,15 +80,15 @@ class ImageTest(VimivTestCase):
         # Zoom to fit
         self.run_command("fit")
         self.assertEqual(self.image.zoom_percent,
-                         self.image.get_zoom_percent_to_fit())
+                         self.image._get_zoom_percent_to_fit())
         # Fit horizontally
         self.run_command("fiz_horiz")
         self.assertEqual(self.image.zoom_percent,
-                         self.image.get_zoom_percent_to_fit())
+                         self.image._get_zoom_percent_to_fit())
         # Fit vertically
         self.run_command("fit_vert")
         self.assertEqual(self.image.zoom_percent,
-                         self.image.get_zoom_percent_to_fit(3))
+                         self.image._get_zoom_percent_to_fit(3))
         # Zoom_to 0.5
         self.run_command("zoom_to 05")
         self.assertEqual(self.image.zoom_percent, 0.5)
@@ -113,22 +113,15 @@ class ImageTest(VimivTestCase):
     def test_settings(self):
         """Change image.py settings."""
         # Rescale svg
-        before = self.image.rescale_svg
+        before = self.image._rescale_svg
         self.image.toggle_rescale_svg()
-        self.assertFalse(before == self.image.rescale_svg)
+        self.assertFalse(before == self.image._rescale_svg)
         self.image.toggle_rescale_svg()
-        self.assertTrue(before == self.image.rescale_svg)
+        self.assertTrue(before == self.image._rescale_svg)
         # Overzoom
         self.image.set_overzoom("1.66")
-        self.assertEqual(self.image.overzoom, 1.66)
+        self.assertEqual(self.image._overzoom, 1.66)
         # Animations should be tested in animation_test.py
-
-    def test_check_for_edit(self):
-        """Check if an image was edited."""
-        self.assertEqual(0, self.image.check_for_edit(False))
-        self.vimiv["manipulate"].manipulations = {"bri": 10, "con": 0, "sha": 0}
-        self.assertEqual(1, self.image.check_for_edit(False))
-        self.assertEqual(0, self.image.check_for_edit(True))
 
     def test_auto_rezoom_on_changes(self):
         """Automatically rezoom the image when different widgets are shown."""
@@ -182,8 +175,8 @@ class ImageTest(VimivTestCase):
             return new_pos
         refresh_gui()
         # First zoom so something can happen
-        w_scale = self.image.imsize[0] / self.image.pixbuf_original.get_width()
-        h_scale = self.image.imsize[1] / self.image.pixbuf_original.get_height()
+        w_scale = self.image._size[0] / self.image.pixbuf_original.get_width()
+        h_scale = self.image._size[1] / self.image.pixbuf_original.get_height()
         needed_scale = max(w_scale, h_scale) * 1.5
         self.image.zoom_to(needed_scale)
         refresh_gui()
@@ -200,21 +193,21 @@ class ImageTest(VimivTestCase):
         right_end = there_and_back("L", "H")
         self.assertEqual(
             right_end,
-            h_adj.get_upper() - h_adj.get_lower() - self.image.imsize[0])
+            h_adj.get_upper() - h_adj.get_lower() - self.image._size[0])
         # Bottom and back
         # off by 1?
         bottom = there_and_back("J", "K")
         self.assertEqual(
             bottom,
-            v_adj.get_upper() - v_adj.get_lower() - self.image.imsize[1])
+            v_adj.get_upper() - v_adj.get_lower() - self.image._size[1])
         # Center
         self.image.center_window()
         h_adj = self.image.scrolled_win.get_hadjustment()
         v_adj = self.image.scrolled_win.get_vadjustment()
         h_middle = \
-            (h_adj.get_upper() - h_adj.get_lower() - self.image.imsize[0]) / 2
+            (h_adj.get_upper() - h_adj.get_lower() - self.image._size[0]) / 2
         v_middle = \
-            (v_adj.get_upper() - v_adj.get_lower() - self.image.imsize[1]) / 2
+            (v_adj.get_upper() - v_adj.get_lower() - self.image._size[1]) / 2
         self.assertEqual(h_adj.get_value(), h_middle)
         self.assertEqual(v_adj.get_value(), v_middle)
 

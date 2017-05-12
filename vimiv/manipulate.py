@@ -96,6 +96,23 @@ class Manipulate(Gtk.ScrolledWindow):
         # Generate trash manager
         self.trash_manager = TrashManager()
 
+    def check_for_edit(self, force):
+        """Check if an image was edited.
+
+        Args:
+            force: If True move and ignore any editing.
+        Return:
+            0 if no edits were done or force, 1 else.
+        """
+        if force:
+            self.manipulations = {"bri": 1, "con": 1, "sha": 1}
+            return 0
+        elif self.manipulations != {"bri": 1, "con": 1, "sha": 1}:
+            self.app["statusbar"].message(
+                "Image has been edited, add ! to force", "warning")
+            return 1
+        return 0
+
     def delete(self):
         """Delete all marked images or the current one."""
         # Get all images
@@ -188,8 +205,9 @@ class Manipulate(Gtk.ScrolledWindow):
                     self.app["image"].pixbuf_original.rotate_simple(
                         (90 * cwise))
                 if self.app["image"].fit_image:
+                    # TODO private accessed
                     self.app["image"].zoom_percent = \
-                        self.app["image"].get_zoom_percent_to_fit(
+                        self.app["image"]._get_zoom_percent_to_fit(
                             self.app["image"].fit_image)
                 self.app["image"].update(False)
             if rotate_file:
@@ -272,7 +290,7 @@ class Manipulate(Gtk.ScrolledWindow):
         """Autorotate all pictures in the current pathlist."""
         amount, method = imageactions.autorotate(self.app.paths)
         if amount:
-            self.app["image"].load_image()
+            self.app["image"].load()
             message = "Autorotated %d image(s) using %s." % (amount, method)
         else:
             message = "No image rotated. Tried using %s." % (method)
@@ -297,7 +315,8 @@ class Manipulate(Gtk.ScrolledWindow):
                 self.sliders["bri"].grab_focus()
                 self.app["statusbar"].update_info()
                 # Create PIL image to work with
-                size = self.app["image"].imsize
+                size = self.app["image"].get_allocated_size()[0]
+                size = (size.width, size.height)
                 self.pil_image = Image.open(self.app.paths[self.app.index])
                 self.pil_thumb = Image.open(self.app.paths[self.app.index])
                 self.pil_thumb.thumbnail(size, Image.ANTIALIAS)
@@ -421,7 +440,7 @@ class Manipulate(Gtk.ScrolledWindow):
             slider.set_value(0)
         # Show the original image
         self.app["image"].fit_image = 1
-        self.app["image"].load_image()
+        self.app["image"].load()
         # Done
         self.toggle()
 

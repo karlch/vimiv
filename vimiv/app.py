@@ -74,8 +74,12 @@ class Vimiv(Gtk.Application):
         self.functions = {}
         self.running_tests = running_tests
         # Set up signals
-        GObject.signal_new("widgets-changed", self, GObject.SIGNAL_RUN_LAST,
-                           GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        try:
+            GObject.signal_new("widgets-changed", self, GObject.SIGNAL_RUN_LAST,
+                               GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+        # TODO Happens in tests, needs to be investigated
+        except RuntimeError:
+            pass
         # Set up all commandline options
         self.init_commandline_options()
 
@@ -211,7 +215,7 @@ class Vimiv(Gtk.Application):
             self.paths, self.index = populate([os.getcwd()], True, shuffle)
         # Show the image if an imagelist exists
         if self.paths:
-            self["image"].load_image()
+            self["image"].load()
             # Show library at the beginning?
             if not self["library"].show_at_start:
                 self["library"].grid.hide()
@@ -302,7 +306,7 @@ class Vimiv(Gtk.Application):
                 self["statusbar"].message(message, "warning")
                 return
         # Check if image has been edited
-        if self["image"].check_for_edit(force):
+        if self["manipulate"].check_for_edit(force):
             return
         for image in self["mark"].marked:
             print(image)

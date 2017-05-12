@@ -259,7 +259,7 @@ class CommandLine(Gtk.Entry):
             self.app.paths, self.app.index = populate(pipe_input)
             if self.app.paths:  # Images were found
                 self.app["image"].scrolled_win.show()
-                self.app["image"].load_image()
+                self.app["image"].load()
                 # Resize library and focus image if necessary
                 if self.app["library"].grid.is_visible():
                     self.app["library"].set_hexpand(False)
@@ -288,7 +288,7 @@ class CommandLine(Gtk.Entry):
                 # If it is an image open it
                 self.app.paths = []
                 self.app.paths, self.app.index = populate([path])
-                self.app["image"].load_image()
+                self.app["image"].load()
                 #  Reload library in lib mode, do not open it in image mode
                 pathdir = os.path.dirname(path)
                 if self.last_focused == "lib":

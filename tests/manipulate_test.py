@@ -264,6 +264,14 @@ class ManipulateTest(VimivTestCase):
         self.assertFalse(self.manipulate.sliders["bri"].is_focus())
         self.check_statusbar("ERROR: Argument must be of type integer")
 
+    def test_check_for_edit(self):
+        """Check if an image was edited."""
+        self.manipulate.manipulations = {"bri": 1, "con": 1, "sha": 1}
+        self.assertEqual(0, self.manipulate.check_for_edit(False))
+        self.manipulate.manipulations = {"bri": 10, "con": 0, "sha": 0}
+        self.assertEqual(1, self.manipulate.check_for_edit(False))
+        self.assertEqual(0, self.manipulate.check_for_edit(True))
+
     @classmethod
     def tearDownClass(cls):
         cls.vimiv.quit()
