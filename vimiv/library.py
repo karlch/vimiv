@@ -15,7 +15,6 @@ class Library(Gtk.TreeView):
 
     Attributes:
         app: The main vimiv application to interact with.
-        dir_pos: Dictionary that stores position in directories.
         show_at_start: If True show library at startup.
         default_width: Setting for the default width of the library.
         expand: If True expand the library to window width if no images are
@@ -30,6 +29,8 @@ class Library(Gtk.TreeView):
         files: Files in the library.
         filesize: Dictionary storing the size of files.
         grid: Gtk.Grid containing the TreeView and the border.
+
+        _positions: Dictionary that stores position in directories.
     """
 
     def __init__(self, app, settings):
@@ -44,7 +45,7 @@ class Library(Gtk.TreeView):
         library = settings["LIBRARY"]
 
         # Settings
-        self.dir_pos = {}  # Remembers positions in the library browser
+        self._positions = {}
         self.show_at_start = library["show_library"]
         self.default_width = library["library_width"]
         self.expand = library["expand_lib"]
@@ -110,8 +111,7 @@ class Library(Gtk.TreeView):
             this by itself.
         """
         if self.grid.is_visible():
-            self._remember_pos(os.getcwd(),
-                               self.app.get_pos(force_widget="lib"))
+            self[os.getcwd()] = self.app.get_pos(True, "lib")
             self.grid.hide()
             self.focus(False)
         else:
@@ -126,8 +126,7 @@ class Library(Gtk.TreeView):
                 image_path = os.path.dirname(image)
                 image_name = os.path.basename(image)
                 if image_path == os.getcwd() and image_name in self.files:
-                    self._remember_pos(os.getcwd(),
-                                       self.files.index(image_name))
+                    self[os.getcwd()] = image_name
             # Stop the slideshow
             if self.app["slideshow"].running:
                 self.app["slideshow"].toggle()
@@ -166,7 +165,7 @@ class Library(Gtk.TreeView):
             return
         count = path.get_indices()[0]
         fil = self.files[count]
-        self._remember_pos(os.getcwd(), count)
+        self[os.getcwd()] = fil
         # Tags
         if os.getcwd() == self.app["tags"].directory:
             # Close if selected twice
@@ -240,10 +239,9 @@ class Library(Gtk.TreeView):
             self.app["statusbar"].message("Directory is empty", "warning")
             return
         # Check if there is a saved position
-        if directory in self.dir_pos:
-            self.move_pos(True, self.dir_pos[directory])
+        self.move_pos(True, self[directory])
         # Check if the last directory is in the current one
-        elif os.path.basename(last_directory) in self.files:
+        if os.path.basename(last_directory) in self.files:
             self.move_pos(True,
                           self.files.index(os.path.basename(last_directory)))
 
@@ -336,8 +334,7 @@ class Library(Gtk.TreeView):
         """
         # Handle the specific keys
         if direction == "h":  # Behave like ranger
-            self._remember_pos(os.getcwd(),
-                               self.app.get_pos(force_widget="lib"))
+            self[os.getcwd()] = self.app.get_pos(True, "lib")
             self.move_up()
         elif direction == "l":
             self.file_select(self, self.get_cursor()[0],
@@ -391,15 +388,6 @@ class Library(Gtk.TreeView):
 
         return liststore
 
-    def _remember_pos(self, directory, position):
-        """Write the current position in directory to the dir_pos dictionary.
-
-        Args:
-            directory: Directory of which to remember the position.
-            position: Current position in library.
-        """
-        self.dir_pos[directory] = position
-
     def _filelist_create(self, directory="."):
         """Create a filelist from all files in directory.
 
@@ -445,7 +433,28 @@ class Library(Gtk.TreeView):
                 self.focus()
         if self.grid.is_visible():
             # Reload remembering path
-            pos = self.app.get_pos(False, "lib")
-            if pos >= 0 and pos < len(self.files):
-                self._remember_pos(os.getcwd(), pos)
+            self[os.getcwd()] = self.app.get_pos(True, "lib")
             self.reload(os.getcwd())
+
+    def __getitem__(self, directory):
+        """Convenience method to access saved positions via self[directory].
+
+        Args:
+            directory: Name of the directory to search for a saved position.
+        Return:
+            The index of the saved file if any.
+        """
+        if directory in self._positions:
+            filename = self._positions[directory]
+            if filename in self.files:
+                return self.files.index(filename)
+        return 0
+
+    def __setitem__(self, directory, filename):
+        """Convenience method to save positions in via self[directory].
+
+        Args:
+            directory: Name of the directory to search for a saved position.
+            filename: Name of the file to save.
+        """
+        self._positions[directory] = filename
