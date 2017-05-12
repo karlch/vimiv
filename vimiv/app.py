@@ -29,20 +29,21 @@ class Vimiv(Gtk.Application):
     """Main vimiv application class inheriting from Gtk.Application.
 
     Attributes:
-        settings: Settings from configfiles to use.
-        paths: List of paths for images.
-        index: Current position in paths.
-        widgets: Dictionary of vimiv widgets.
-            widgets[widget-name] = Gtk.Widget
-        debug: If True, write all messages and commands to log.
-        tmpdir: tmpfile.TemporaryDirectory used when running with --temp-basedir
+        aliases: Dictionary of aliases to commands.
+            aliases[alias-name] = command-name
         commands: Dictionary of commands.
             commands[command-name] = [function, *args]
-        aliases: Dicionary of aliases to commands.
-            aliases[alias-name] = command-name
+        debug: If True, write all messages and commands to log.
         functions: Dictionary of functions. Includes all commands and additional
             functions that cannot be called from the commandline.
-        screensize: Available screensize.
+        index: Current position in paths.
+        paths: List of paths for images.
+        settings: Settings from configfiles to use.
+
+        _tmpdir: tmpfile.TemporaryDirectory used when running with
+            --temp-basedir
+        _widgets: Dictionary of vimiv widgets.
+            widgets[widget-name] = Gtk.Widget
 
     Signals:
         widgets-changed: Emitted when the layout of the widgets changed in some
@@ -68,9 +69,9 @@ class Vimiv(Gtk.Application):
         self.settings = {}
         self.paths = []
         self.index = 0
-        self.widgets = {}
+        self._widgets = {}
         self.debug = False
-        self.tmpdir = None
+        self._tmpdir = None
         self.commands = {}
         self.aliases = {}
         self.functions = {}
@@ -85,7 +86,7 @@ class Vimiv(Gtk.Application):
         except RuntimeError:
             pass
         # Set up all commandline options
-        self.init_commandline_options()
+        self._init_commandline_options()
 
     def do_open(self, files, n_files, hint):
         """Open files by populating self.paths and self.index.
@@ -148,9 +149,9 @@ class Vimiv(Gtk.Application):
             return 0
         # Temp basedir removes all current settings and sets them to default
         if options.contains("temp-basedir"):
-            self.tmpdir = tempfile.TemporaryDirectory(prefix="vimiv-")
+            self._tmpdir = tempfile.TemporaryDirectory(prefix="vimiv-")
             self.settings = set_defaults()
-            tmp = self.tmpdir.name
+            tmp = self._tmpdir.name
             # Export environment variables for thumbnails, tags, history and
             # logs
             os.environ["XDG_CACHE_HOME"] = os.path.join(tmp, "cache")
@@ -200,8 +201,8 @@ class Vimiv(Gtk.Application):
         Args:
             app: The application itself.
         """
-        self.init_widgets()
-        self.create_window_structure()
+        self._init_widgets()
+        self._create_window_structure()
         app.add_window(self["window"])
         # Show everything and then hide whatever needs to be hidden
         self["window"].show_all()
@@ -233,64 +234,6 @@ class Vimiv(Gtk.Application):
             self["library"].focus()
             if self["library"].expand:
                 self["main_window"].hide()
-
-    def init_widgets(self):
-        """Create all the other widgets and add them to the class."""
-        self["eventhandler"] = KeyHandler(self, self.settings)
-        self["commandline"] = CommandLine(self, self.settings)
-        self["tags"] = TagHandler(self)
-        self["mark"] = Mark(self, self.settings)
-        self["fileextras"] = FileExtras(self)
-        self["statusbar"] = Statusbar(self, self.settings)
-        self["completions"] = Completion(self)
-        self["slideshow"] = Slideshow(self, self.settings)
-        self["main_window"] = MainWindow(self, self.settings)
-        self["image"] = self["main_window"].image
-        self["thumbnail"] = self["main_window"].thumbnail
-        self["library"] = Library(self, self.settings)
-        self["manipulate"] = Manipulate(self, self.settings)
-        self["information"] = Information()
-        self["window"] = Window(self, self.settings)
-        self["commands"] = Commands(self, self.settings).commands
-        # Generate completions as soon as commands exist
-        self["completions"].generate_commandlist()
-        self["log"] = Log(self)
-
-    def create_window_structure(self):
-        """Generate the structure of all the widgets and add it to the window.
-
-        There is a large Gtk.Grid() to organize the widgets packed into a
-        Gtk.Overlay(). The commandline is added as overlay.
-        """
-        main_grid = Gtk.Grid()
-        main_grid.attach(self["library"].grid, 0, 0, 1, 1)
-        main_grid.attach(self["main_window"], 1, 0, 1, 1)
-        main_grid.attach(self["manipulate"], 0, 1, 2, 1)
-        main_grid.attach(self["statusbar"].separator, 0, 2, 2, 1)
-
-        overlay_grid = Gtk.Grid()
-        overlay_grid.attach(self["statusbar"], 0, 0, 1, 1)
-        overlay_grid.attach(self["completions"].info, 0, 1, 1, 1)
-        overlay_grid.attach(self["commandline"], 0, 2, 1, 1)
-        overlay_grid.set_valign(Gtk.Align.END)
-
-        # Make it nice using CSS
-        overlay_grid.set_name("OverLay")
-        style = Gtk.Window().get_style_context()
-        bg = style.get_background_color(Gtk.StateType.NORMAL)
-        color_str = "#OverLay { background: " + bg.to_string() + "; }"
-        command_provider = Gtk.CssProvider()
-        command_css = color_str.encode()
-        command_provider.load_from_data(command_css)
-        Gtk.StyleContext.add_provider_for_screen(
-            Gdk.Screen.get_default(), command_provider,
-            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
-
-        # Overlay contains grid mainly and adds commandline as floating
-        overlay = Gtk.Overlay()
-        overlay.add(main_grid)
-        overlay.add_overlay(overlay_grid)
-        self["window"].add(overlay)
 
     def quit_wrapper(self, force=False):
         """Quit the applications, print marked files and save history.
@@ -327,8 +270,8 @@ class Vimiv(Gtk.Application):
         # Write to log
         self["log"].write_message("Exited", "time")
         # Cleanup tmpdir
-        if self.tmpdir:
-            self.tmpdir.cleanup()
+        if self._tmpdir:
+            self._tmpdir.cleanup()
         # Call Gtk.Application.quit()
         self.quit()
 
@@ -373,7 +316,10 @@ class Vimiv(Gtk.Application):
             return filelist[position] if filelist else ""
         return position
 
-    def init_commandline_options(self):
+    def populate(self, args, recursive=False, shuffle_paths=False):
+        self.paths, self.index = populate(args, recursive, shuffle_paths)
+
+    def _init_commandline_options(self):
         """Add all possible commandline options."""
         def add_option(name, short, help_str, flags=GLib.OptionFlags.NONE,
                        arg=GLib.OptionArg.NONE, value=None):
@@ -414,8 +360,63 @@ class Vimiv(Gtk.Application):
                    arg=GLib.OptionArg.STRING, value="FILE")
         add_option("debug", 0, "Run in debug mode")
 
-    def populate(self, args, recursive=False, shuffle_paths=False):
-        self.paths, self.index = populate(args, recursive, shuffle_paths)
+    def _init_widgets(self):
+        """Create all the other widgets and add them to the class."""
+        self["eventhandler"] = KeyHandler(self, self.settings)
+        self["commandline"] = CommandLine(self, self.settings)
+        self["tags"] = TagHandler(self)
+        self["mark"] = Mark(self, self.settings)
+        self["fileextras"] = FileExtras(self)
+        self["statusbar"] = Statusbar(self, self.settings)
+        self["completions"] = Completion(self)
+        self["slideshow"] = Slideshow(self, self.settings)
+        self["main_window"] = MainWindow(self, self.settings)
+        self["image"] = self["main_window"].image
+        self["thumbnail"] = self["main_window"].thumbnail
+        self["library"] = Library(self, self.settings)
+        self["manipulate"] = Manipulate(self, self.settings)
+        self["information"] = Information()
+        self["window"] = Window(self, self.settings)
+        self["commands"] = Commands(self, self.settings).commands
+        # Generate completions as soon as commands exist
+        self["completions"].generate_commandlist()
+        self["log"] = Log(self)
+
+    def _create_window_structure(self):
+        """Generate the structure of all the widgets and add it to the window.
+
+        There is a large Gtk.Grid() to organize the widgets packed into a
+        Gtk.Overlay(). The commandline is added as overlay.
+        """
+        main_grid = Gtk.Grid()
+        main_grid.attach(self["library"].grid, 0, 0, 1, 1)
+        main_grid.attach(self["main_window"], 1, 0, 1, 1)
+        main_grid.attach(self["manipulate"], 0, 1, 2, 1)
+        main_grid.attach(self["statusbar"].separator, 0, 2, 2, 1)
+
+        overlay_grid = Gtk.Grid()
+        overlay_grid.attach(self["statusbar"], 0, 0, 1, 1)
+        overlay_grid.attach(self["completions"].info, 0, 1, 1, 1)
+        overlay_grid.attach(self["commandline"], 0, 2, 1, 1)
+        overlay_grid.set_valign(Gtk.Align.END)
+
+        # Make it nice using CSS
+        overlay_grid.set_name("OverLay")
+        style = Gtk.Window().get_style_context()
+        bg = style.get_background_color(Gtk.StateType.NORMAL)
+        color_str = "#OverLay { background: " + bg.to_string() + "; }"
+        command_provider = Gtk.CssProvider()
+        command_css = color_str.encode()
+        command_provider.load_from_data(command_css)
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(), command_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+
+        # Overlay contains grid mainly and adds commandline as floating
+        overlay = Gtk.Overlay()
+        overlay.add(main_grid)
+        overlay.add_overlay(overlay_grid)
+        self["window"].add(overlay)
 
     def __getitem__(self, name):
         """Convenience method to access widgets via self[name].
@@ -425,8 +426,8 @@ class Vimiv(Gtk.Application):
         Return:
             The widget if it exists. None else.
         """
-        if name in self.widgets:
-            return self.widgets[name]
+        if name in self._widgets:
+            return self._widgets[name]
         return None
 
     def __setitem__(self, name, widget):
@@ -436,4 +437,4 @@ class Vimiv(Gtk.Application):
             name: Name of the widget to add.
             item: The actual widget to which name will refer.
         """
-        self.widgets[name] = widget
+        self._widgets[name] = widget
