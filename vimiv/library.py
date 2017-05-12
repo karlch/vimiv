@@ -134,7 +134,7 @@ class Library(Gtk.TreeView):
             self.focus(True)
             # Markings and other stuff might have changed
             self.reload(os.getcwd())
-        self.app.emit("widgets_changed", self)
+        self.app.emit("widgets-changed", self)
 
     def focus(self, focus_library=True):
         """Set or remove focus from the library.

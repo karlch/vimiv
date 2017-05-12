@@ -71,7 +71,7 @@ class Thumbnail(Gtk.IconView):
         self.thumbnail_manager = ThumbnailManager()
 
         # Connect signals
-        self.app.connect("widgets_changed", self._on_widgets_changed)
+        self.app.connect("widgets-changed", self._on_widgets_changed)
 
     def clicked(self, iconview, path):
         """Select and show image when thumbnail was activated.
