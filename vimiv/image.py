@@ -58,7 +58,7 @@ class Image(Gtk.Image):
         self._timer_id = 0
 
         # Connect signals
-        self._app.connect("widgets_changed", self._on_widgets_changed)
+        self._app.connect("widgets-changed", self._on_widgets_changed)
 
     def update(self, update_info=True):
         """Show the final image.
@@ -390,12 +390,7 @@ class Image(Gtk.Image):
                 if delay >= 0 else 0
 
     def _on_widgets_changed(self, app, widget):
-        """Rezoom the image if necessary when the layout changed.
-
-        Args:
-            app: Vimiv application that emitted the signal.
-            widget: Widget that has changed.
-        """
+        """Rezoom the image if necessary when the layout changed."""
         if self._app.paths and not self._app["thumbnail"].toggled:
             if self.fit_image:
                 self.zoom_to(0, self.fit_image)

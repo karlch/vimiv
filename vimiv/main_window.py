@@ -5,7 +5,11 @@ The ScrolledWindow can either include a Gtk.Image in IMAGE mode or a
 Gtk.IconView in THUMBNAIL mode.
 """
 
+import os
+
 from gi.repository import Gtk
+from vimiv.fileactions import populate
+from vimiv.helpers import listdir_wrapper
 from vimiv.image import Image
 from vimiv.thumbnail import Thumbnail
 
@@ -33,6 +37,9 @@ class MainWindow(Gtk.ScrolledWindow):
         self.add(self.image)
         self.connect("key_press_event", self._app["eventhandler"].key_pressed,
                      "IMAGE")
+
+        # Connect signals
+        self._app.connect("paths-changed", self._on_paths_changed)
 
     def switch_to_child(self, new_child):
         """Switch the widget displayed in the main window.
@@ -105,3 +112,28 @@ class MainWindow(Gtk.ScrolledWindow):
             h_adj.set_value(h_adj.get_value() + h_step)
         self.set_hadjustment(h_adj)
         self.set_vadjustment(v_adj)
+
+    def _on_paths_changed(self, app, widget):
+        """Reload paths image and/or thumbnail when paths have changed."""
+        if self._app.paths:
+            # Get all files in directory again
+            focused_path = self._app.get_pos(True, "im")
+            directory = os.path.dirname(focused_path)
+            files = [os.path.join(directory, fil)
+                     for fil in listdir_wrapper(directory)]
+            self._app.paths, self._app.index = populate(files)
+            # Reload thumbnail
+            if self.thumbnail.toggled:
+                for image in self._app.paths:
+                    self.thumbnail.reload(image)
+            # Refocus the path
+            if focused_path in self._app.paths:
+                index = self._app.paths.index(focused_path)
+                if self.thumbnail.toggled:
+                    self.thumbnail.move_to_pos(index)
+                else:
+                    self._app["eventhandler"].num_str = str(index + 1)
+                    self.image.move_pos()
+        # We need to check again as populate was called
+        if not self._app.paths:
+            self.hide()

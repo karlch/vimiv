@@ -129,8 +129,8 @@ class Manipulate(Gtk.ScrolledWindow):
                 self.trash_manager.delete(im)
         if message:
             self.app["statusbar"].message(message, "error")
-        # Reload stuff if needed
-        self.app["fileextras"].reload_changes(os.getcwd(), reload_path=True)
+
+        self.app.emit("paths-changed", self)
 
     def undelete(self, basename):
         """Undelete an image in the trash.
@@ -151,7 +151,7 @@ class Manipulate(Gtk.ScrolledWindow):
                 % (basename)
             self.app["statusbar"].message(message, "error")
         else:
-            self.app["fileextras"].reload_changes(os.getcwd(), reload_path=True)
+            self.app.emit("paths-changed", self)
 
     def get_manipulated_images(self, info):
         """Return the images which should be manipulated.

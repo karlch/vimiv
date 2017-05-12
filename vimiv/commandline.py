@@ -178,26 +178,19 @@ class CommandLine(Gtk.Entry):
             cmd: The command to run.
             directory: Directory which is affected by command.
         """
-        # Remember current directory for reload
-        directory = os.getcwd()
         # Get output and error and run the command
         out, err = p.communicate()
         if p.returncode:
             message = "Command exited with status " + str(p.returncode) + "\n"
             message += err.decode()
-            self.app["statusbar"].message(message, "error")
+            GLib.idle_add(self.app["statusbar"].message, message, "error")
         else:
-            # Reload everything after an external command if we haven't
-            # moved, you never know what happened ...
-            # Only reload paths if the path directory or any file was in the
-            # command
-            reload_path = False
-            if os.path.basename(os.getcwd()) in cmd or \
-                    [fil for fil in self.app.paths
-                     if os.path.basename(fil) in cmd]:
-                reload_path = True
-            GLib.idle_add(self.app["fileextras"].reload_changes,
-                          directory, reload_path, from_pipe, out)
+            # Run pipe if we have output
+            if from_pipe and out:
+                GLib.idle_add(self.pipe, out)
+            # We do not know what might have changed concerning paths
+            else:
+                GLib.idle_add(self.app.emit, "paths-changed", self)
         self.running_processes.pop()
 
     def expand_filenames(self, cmd):

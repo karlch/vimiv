@@ -48,6 +48,9 @@ class Vimiv(Gtk.Application):
         widgets-changed: Emitted when the layout of the widgets changed in some
             way. This allows other widgets to trigger an update when this
             happens, e.g. rezoom an image when the library was toggled.
+        paths-changed: Emmited when the paths have or may have changed. This
+            allows other widgets to reload their filelist and update any
+            information accordingly.
     """
 
     def __init__(self, running_tests=False):
@@ -75,6 +78,8 @@ class Vimiv(Gtk.Application):
         # Set up signals
         try:
             GObject.signal_new("widgets-changed", self, GObject.SIGNAL_RUN_LAST,
+                               GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
+            GObject.signal_new("paths-changed", self, GObject.SIGNAL_RUN_LAST,
                                GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
         # TODO Happens in tests, needs to be investigated
         except RuntimeError:
@@ -225,7 +230,7 @@ class Vimiv(Gtk.Application):
         else:
             # Slideshow without paths makes no sense
             self["slideshow"].running = False
-            self["library"].reload(os.getcwd())
+            self["library"].focus()
             if self["library"].expand:
                 self["main_window"].hide()
 

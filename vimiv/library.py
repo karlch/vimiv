@@ -94,10 +94,13 @@ class Library(Gtk.TreeView):
                 column.set_max_width(20)
             self.append_column(column)
         # Set the liststore model
-        self.set_model(self.liststore_create())
+        self.set_model(self._liststore_create())
         # Set the hexpand property if requested in the configfile
         if not self.app.paths and self.expand:
             self.set_hexpand(True)
+
+        # Connect signals
+        self.app.connect("paths-changed", self._on_paths_changed)
 
     def toggle(self, update_image=True):
         """Toggle the library.
@@ -108,8 +111,8 @@ class Library(Gtk.TreeView):
             this by itself.
         """
         if self.grid.is_visible():
-            self.remember_pos(os.getcwd(),
-                              self.app.get_pos(force_widget="lib"))
+            self._remember_pos(os.getcwd(),
+                               self.app.get_pos(force_widget="lib"))
             self.grid.hide()
             self.focus(False)
         else:
@@ -124,7 +127,8 @@ class Library(Gtk.TreeView):
                 image_path = os.path.dirname(image)
                 image_name = os.path.basename(image)
                 if image_path == os.getcwd() and image_name in self.files:
-                    self.remember_pos(os.getcwd(), self.files.index(image_name))
+                    self._remember_pos(os.getcwd(),
+                                       self.files.index(image_name))
             # Stop the slideshow
             if self.app["slideshow"].running:
                 self.app["slideshow"].toggle()
@@ -148,38 +152,6 @@ class Library(Gtk.TreeView):
         # Update info for the current mode
         self.app["statusbar"].update_info()
 
-    def liststore_create(self):
-        """Create the Gtk.ListStore containing information on supported files.
-
-        Return:
-            The created liststore containing
-            [count, filename, filesize, markup_string].
-        """
-        liststore = Gtk.ListStore(int, str, str, str)
-        self.files = self.filelist_create()
-        # Remove unsupported files if one isn't in the tags directory
-        if os.getcwd() != self.app["tags"].directory:
-            self.files = [
-                possible_file
-                for possible_file in self.files
-                if is_image(possible_file) or os.path.isdir(possible_file)]
-        # Add all supported files
-        for i, fil in enumerate(self.files):
-            markup_string = fil
-            size = self.filesize[fil]
-            marked_string = ""
-            if os.path.islink(fil):
-                markup_string += "  →  " + os.path.realpath(fil)
-            if os.path.abspath(fil) in self.app["mark"].marked:
-                marked_string = "[*]"
-            if os.path.isdir(fil):
-                markup_string = "<b>" + markup_string + "</b>"
-            if i in self.app["commandline"].search_positions:
-                markup_string = self.markup + markup_string + "</span>"
-            liststore.append([i + 1, markup_string, size, marked_string])
-
-        return liststore
-
     def file_select(self, treeview, path, column, close):
         """Show image or open directory for activated file in library.
 
@@ -195,7 +167,7 @@ class Library(Gtk.TreeView):
             return
         count = path.get_indices()[0]
         fil = self.files[count]
-        self.remember_pos(os.getcwd(), count)
+        self._remember_pos(os.getcwd(), count)
         # Tags
         if os.getcwd() == self.app["tags"].directory:
             # Close if selected twice
@@ -247,17 +219,9 @@ class Library(Gtk.TreeView):
             os.chdir(directory)
             if not start:
                 self.reload(os.getcwd(), curdir)
+                self.focus()
         except (FileNotFoundError, PermissionError):
             self.app["statusbar"].message("Directory not accessible", "error")
-
-    def remember_pos(self, directory, position):
-        """Write the current position in directory to the dir_pos dictionary.
-
-        Args:
-            directory: Directory of which to remember the position.
-            position: Current position in library.
-        """
-        self.dir_pos[directory] = position
 
     def reload(self, directory, last_directory="", search=False):
         """Reload the treeview.
@@ -271,8 +235,7 @@ class Library(Gtk.TreeView):
         if not search:
             self.app["commandline"].search_positions = []
         # Create model in new directory
-        self.set_model(self.liststore_create())
-        self.focus(True)
+        self.set_model(self._liststore_create())
         # Warn if there are no files in the directory
         if not self.files:
             self.app["statusbar"].message("Directory is empty", "warning")
@@ -363,7 +326,82 @@ class Library(Gtk.TreeView):
         self.show_hidden = not self.show_hidden
         self.reload(".")
 
-    def filelist_create(self, directory="."):
+    def scroll(self, direction):
+        """Scroll the library viewer and call file_select if necessary.
+
+        Args:
+            direction: One of 'hjkl' defining the scroll direction.
+
+        Return:
+            True to deactivate default key-bindings for arrow keys.
+        """
+        # Handle the specific keys
+        if direction == "h":  # Behave like ranger
+            self._remember_pos(os.getcwd(),
+                               self.app.get_pos(force_widget="lib"))
+            self.move_up()
+        elif direction == "l":
+            self.file_select(self, self.get_cursor()[0],
+                             None, False)
+        elif direction in ["j", "k"]:
+            # Scroll the tree checking for a user step
+            step = self.app["eventhandler"].num_receive()
+            if direction == "j":
+                new_pos = self.app.get_pos(force_widget="lib") + step
+                if new_pos >= len(self.get_model()):
+                    new_pos = len(self.get_model()) - 1
+            else:
+                new_pos = self.app.get_pos(force_widget="lib") - step
+                if new_pos < 0:
+                    new_pos = 0
+            self.move_pos(True, new_pos)
+        else:
+            self.app["statusbar"].message(
+                "Invalid scroll direction " + direction, "error")
+        return True  # Deactivates default bindings (here for Arrows)
+
+    def _liststore_create(self):
+        """Create the Gtk.ListStore containing information on supported files.
+
+        Return:
+            The created liststore containing
+            [count, filename, filesize, markup_string].
+        """
+        liststore = Gtk.ListStore(int, str, str, str)
+        self.files = self._filelist_create()
+        # Remove unsupported files if one isn't in the tags directory
+        if os.getcwd() != self.app["tags"].directory:
+            self.files = [
+                possible_file
+                for possible_file in self.files
+                if is_image(possible_file) or os.path.isdir(possible_file)]
+        # Add all supported files
+        for i, fil in enumerate(self.files):
+            markup_string = fil
+            size = self.filesize[fil]
+            marked_string = ""
+            if os.path.islink(fil):
+                markup_string += "  →  " + os.path.realpath(fil)
+            if os.path.abspath(fil) in self.app["mark"].marked:
+                marked_string = "[*]"
+            if os.path.isdir(fil):
+                markup_string = "<b>" + markup_string + "</b>"
+            if i in self.app["commandline"].search_positions:
+                markup_string = self.markup + markup_string + "</span>"
+            liststore.append([i + 1, markup_string, size, marked_string])
+
+        return liststore
+
+    def _remember_pos(self, directory, position):
+        """Write the current position in directory to the dir_pos dictionary.
+
+        Args:
+            directory: Directory of which to remember the position.
+            position: Current position in library.
+        """
+        self.dir_pos[directory] = position
+
+    def _filelist_create(self, directory="."):
         """Create a filelist from all files in directory.
 
         Args:
@@ -399,36 +437,16 @@ class Library(Gtk.TreeView):
 
         return files
 
-    def scroll(self, direction):
-        """Scroll the library viewer and call file_select if necessary.
-
-        Args:
-            direction: One of 'hjkl' defining the scroll direction.
-
-        Return:
-            True to deactivate default key-bindings for arrow keys.
-        """
-        # Handle the specific keys
-        if direction == "h":  # Behave like ranger
-            self.remember_pos(os.getcwd(),
-                              self.app.get_pos(force_widget="lib"))
-            self.move_up()
-        elif direction == "l":
-            self.file_select(self, self.get_cursor()[0],
-                             None, False)
-        elif direction in ["j", "k"]:
-            # Scroll the tree checking for a user step
-            step = self.app["eventhandler"].num_receive()
-            if direction == "j":
-                new_pos = self.app.get_pos(force_widget="lib") + step
-                if new_pos >= len(self.get_model()):
-                    new_pos = len(self.get_model()) - 1
-            else:
-                new_pos = self.app.get_pos(force_widget="lib") - step
-                if new_pos < 0:
-                    new_pos = 0
-            self.move_pos(True, new_pos)
-        else:
-            self.app["statusbar"].message(
-                "Invalid scroll direction " + direction, "error")
-        return True  # Deactivates default bindings (here for Arrows)
+    def _on_paths_changed(self, app, widget):
+        """Reload filelist on the paths-changed signal from app."""
+        # Expand library if set by user and all paths were removed
+        if not self.app.paths and self.expand:
+            self.grid.set_hexpand(True)
+            if not self.is_focus():
+                self.focus()
+        if self.grid.is_visible():
+            # Reload remembering path
+            pos = self.app.get_pos(False, "lib")
+            if pos >= 0 and pos < len(self.files):
+                self._remember_pos(os.getcwd(), pos)
+            self.reload(os.getcwd())

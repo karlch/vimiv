@@ -18,6 +18,14 @@ class CommandlineTest(VimivTestCase):
     def setUp(self):
         self.working_directory = os.getcwd()
 
+    def tearDown(self):
+        os.chdir(self.working_directory)
+        self.vimiv["library"].reload(os.getcwd())
+
+
+class FastCommandlineTest(CommandlineTest):
+    """Runs the fast command line tests which do not have long extra threads."""
+
     def test_toggling(self):
         """Open and leave the commandline."""
         # Focusing
@@ -71,40 +79,9 @@ class CommandlineTest(VimivTestCase):
         _, err_message = p.communicate()
         err_message = err_message.decode()
         self.run_command("!foo_bar_baz", True)
+        refresh_gui()  # Needed because of GLib.idle_add in command thread
         self.check_statusbar("ERROR: Command exited with status 127\n" +
                              err_message)
-
-    def test_pipe(self):
-        """Pipe a command to vimiv."""
-        # Internal command
-        before_command = self.vimiv["library"].show_hidden
-        self.run_command("!echo set show_hidden! |", True)
-        refresh_gui(0.001)
-        after_command = self.vimiv["library"].show_hidden
-        self.assertNotEqual(before_command, after_command)
-        # Directory
-        expected_dir = os.path.abspath("./vimiv/testimages/")
-        self.run_command("!echo vimiv/testimages |", True)
-        refresh_gui(0.001)
-        dir_after = os.getcwd()
-        self.assertEqual(expected_dir, dir_after)
-        # Image
-        expected_image = os.path.abspath("arch_001.jpg")
-        self.run_command("!echo arch_001.jpg |", True)
-        refresh_gui()
-        self.assertEqual(self.vimiv.paths[0], expected_image)
-
-    def test_path(self):
-        """Enter a path in the commandline."""
-        # Pass a directory
-        expected_dir = os.path.abspath("./vimiv/testimages")
-        self.run_command("./vimiv/testimages")
-        dir_after = os.getcwd()
-        self.assertEqual(expected_dir, dir_after)
-        # Pass an image
-        expected_image = os.path.abspath("arch-logo.png")
-        self.run_command("./arch-logo.png")
-        self.assertEqual(self.vimiv.paths[0], expected_image)
 
     def test_search(self):
         """Search for images, directories and navigate search results."""
@@ -112,10 +89,9 @@ class CommandlineTest(VimivTestCase):
         self.vimiv["commandline"].cmd_search()
         self.assertEqual(self.vimiv["commandline"].get_text(), "/")
         # Search should move into testimages
-        expected_dir = os.path.abspath("./vimiv")
+        expected_dir = os.path.abspath("vimiv")
         self.run_search("vimi")
-        dir_after = os.getcwd()
-        self.assertEqual(expected_dir, dir_after)
+        self.assertEqual(expected_dir, os.getcwd())
         expected_dir = os.path.abspath("./testimages")
         self.run_search("test")
         dir_after = os.getcwd()
@@ -163,7 +139,6 @@ class CommandlineTest(VimivTestCase):
         """Incsearch."""
         self.vimiv["commandline"].incsearch = True
         dir_before = os.getcwd()
-        file_before = self.vimiv.get_pos(True)
         self.vimiv["commandline"].cmd_search()
         # Search should be done automatically
         self.vimiv["commandline"].set_text("/vi")
@@ -177,7 +152,7 @@ class CommandlineTest(VimivTestCase):
         # Not accepted -> Back to the default position
         self.vimiv["commandline"].leave(True)
         self.assertEqual(os.getcwd(), dir_before)
-        self.assertEqual(self.vimiv.get_pos(True), file_before)
+        self.assertEqual(self.vimiv.get_pos(), 0)
         self.assertFalse(self.vimiv["commandline"].search_positions)
         # Move into a more interesting directory
         self.vimiv["library"].move_up("vimiv/testimages")
@@ -234,9 +209,42 @@ class CommandlineTest(VimivTestCase):
         self.check_statusbar(
             "ERROR: Called a hidden command from the command line")
 
-    def tearDown(self):
-        os.chdir(self.working_directory)
-        self.vimiv["library"].reload(os.getcwd())
+
+class SlowCommandlineTest(CommandlineTest):
+    """Runs the slow command line tests which have long extra threads."""
+
+    def test_path(self):
+        """Enter a path in the commandline."""
+        # Pass a directory
+        expected_dir = os.path.abspath("./vimiv/testimages")
+        self.run_command("./vimiv/testimages")
+        dir_after = os.getcwd()
+        self.assertEqual(expected_dir, dir_after)
+        # Pass an image
+        expected_image = os.path.abspath("arch-logo.png")
+        self.run_command("./arch-logo.png")
+        refresh_gui()
+        self.assertEqual(self.vimiv.paths[0], expected_image)
+
+    def test_pipe(self):
+        """Pipe a command to vimiv."""
+        # Internal command
+        before_command = self.vimiv["library"].show_hidden
+        self.run_command("!echo set show_hidden! |", True)
+        refresh_gui()
+        after_command = self.vimiv["library"].show_hidden
+        self.assertNotEqual(before_command, after_command)
+        # Directory
+        expected_dir = os.path.abspath("./vimiv/testimages/")
+        self.run_command("!echo vimiv/testimages |", True)
+        refresh_gui()
+        dir_after = os.getcwd()
+        self.assertEqual(expected_dir, dir_after)
+        # Image
+        expected_image = os.path.abspath("arch_001.jpg")
+        self.run_command("!echo arch_001.jpg |", True)
+        refresh_gui()
+        self.assertEqual(self.vimiv.paths[0], expected_image)
 
 
 if __name__ == "__main__":

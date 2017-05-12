@@ -171,60 +171,7 @@ class FileExtras(object):
             outstring += num + ending
             os.rename(fil, outstring)
 
-        # Reload everything
-        self.reload_changes(os.getcwd(), True)
-
-    def reload_changes(self, directory, reload_path=True, pipe=False,
-                       pipe_input=None):
-        """Reload everything that could have changed.
-
-        Reload filelist in library and image and update names accordingly.
-
-        Args:
-            directory: Directory which was affected.
-            reload_path: If True reload information that contains the current
-                path.
-            pipe: If True, input came from a pipe. Therefore run pipe.
-            pipe_input: Command that comes from pipe.
-        """
-        # TODO delete this
-        # Reload library remembering position
-        if (directory == os.getcwd() and directory != self.app["tags"].directory
-                and self.app["library"].grid.is_visible()):
-            old_pos_lib = self.app.get_pos(False, "lib")
-            if old_pos_lib >= 0 and \
-                    old_pos_lib <= len(self.app["library"].files):
-                self.app["library"].remember_pos(directory, old_pos_lib)
-            self.app["library"].reload(directory)
-            # Refocus other widgets if necessary
-            if self.app["commandline"].last_focused == "im":
-                self.app["main_window"].grab_focus()
-            elif self.app["commandline"].last_focused == "thu":
-                self.app["thumbnail"].grab_focus()
-        # Reload image/thumbnail
-        if self.app.paths and reload_path:
-            old_pos_im = self.app.get_pos(False, "im")
-            # Get all files in directory again
-            pathdir = os.path.dirname(self.app.paths[old_pos_im])
-            files = [os.path.join(pathdir, fil)
-                     for fil in sorted(os.listdir(pathdir))]
-            self.app.paths, self.app.index = populate(files)
-            # Expand library if set by user and all paths were removed
-            if self.app["library"].expand and not self.app.paths:
-                self.app["library"].set_hexpand(True)
-            # Refocus the current position
-            if self.app["thumbnail"].toggled:
-                old_pos_thu = self.app.get_pos(False, "thu")
-                for image in self.app.paths:
-                    self.app["thumbnail"].reload(image)
-                self.app["thumbnail"].move_to_pos(old_pos_thu)
-            else:
-                self.app["eventhandler"].num_str = str(old_pos_im + 1)
-                self.app["image"].move_pos()
-        # Run the pipe
-        if pipe:
-            self.app["commandline"].pipe(pipe_input)
-        return False  # To stop the timer
+        self.app.emit("paths-changed", self)
 
     def copy_name(self, abspath=False):
         """Copy image name to clipboard.

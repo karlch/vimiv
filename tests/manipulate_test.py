@@ -49,8 +49,7 @@ class ManipulateTest(VimivTestCase):
         # Undelete
         self.manipulate.undelete("arch-logo.png")
         self.assertTrue(os.path.exists("arch-logo.png"))
-        self.assertEqual(self.vimiv.paths[self.vimiv.index],
-                         os.path.abspath("arch-logo.png"))
+        self.assertIn(os.path.abspath("arch-logo.png"), self.vimiv.paths)
 
     def test_fail_delete_undelete(self):
         """Fail deleting and undeleting images."""
