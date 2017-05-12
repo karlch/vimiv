@@ -8,7 +8,6 @@ Gtk.IconView in THUMBNAIL mode.
 import os
 
 from gi.repository import Gtk
-from vimiv.fileactions import populate
 from vimiv.helpers import listdir_wrapper
 from vimiv.image import Image
 from vimiv.thumbnail import Thumbnail
@@ -121,7 +120,7 @@ class MainWindow(Gtk.ScrolledWindow):
             directory = os.path.dirname(focused_path)
             files = [os.path.join(directory, fil)
                      for fil in listdir_wrapper(directory)]
-            self._app.paths, self._app.index = populate(files)
+            self._app.populate(files)
             # Reload thumbnail
             if self.thumbnail.toggled:
                 for image in self._app.paths:

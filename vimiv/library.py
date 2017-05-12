@@ -4,7 +4,7 @@
 import os
 
 from gi.repository import Gdk, Gtk
-from vimiv.fileactions import is_image, populate
+from vimiv.fileactions import is_image
 from vimiv.helpers import listdir_wrapper, sizeof_fmt
 
 
@@ -190,7 +190,7 @@ class Library(Gtk.TreeView):
                     break
                 elif os.path.isfile(f):
                     index += 1
-            self.app.paths, self.app.index = populate(self.files)
+            self.app.populate(self.files)
             if self.app.paths:
                 self.set_hexpand(False)
                 self.app["main_window"].show()

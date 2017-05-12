@@ -106,7 +106,7 @@ class Vimiv(Gtk.Application):
         # Populate list of images
         recursive = self.settings["GENERAL"]["recursive"]
         shuffle = self.settings["GENERAL"]["shuffle"]
-        self.paths, self.index = populate(filenames, recursive, shuffle)
+        self.populate(filenames, recursive, shuffle)
 
         # Activate vimiv after opening files
         self.activate_vimiv(self)
@@ -174,7 +174,7 @@ class Vimiv(Gtk.Application):
                 tty_paths = []
                 for line in sys.stdin:
                     tty_paths.append(line.rstrip("\n"))
-                self.paths, self.index = populate(tty_paths)
+                self.populate(tty_paths)
             except TypeError:
                 pass  # DebugConsoleStdIn is not iterable
 
@@ -216,7 +216,7 @@ class Vimiv(Gtk.Application):
         # recursive is given and not paths exist
         if self.settings["GENERAL"]["recursive"] and not self.paths:
             shuffle = self.settings["GENERAL"]["shuffle"]
-            self.paths, self.index = populate([os.getcwd()], True, shuffle)
+            self.populate([os.getcwd()], True, shuffle)
         # Show the image if an imagelist exists
         if self.paths:
             self["image"].load()
@@ -413,6 +413,9 @@ class Vimiv(Gtk.Application):
         add_option("config", 0, "Use FILE as local configuration file",
                    arg=GLib.OptionArg.STRING, value="FILE")
         add_option("debug", 0, "Run in debug mode")
+
+    def populate(self, args, recursive=False, shuffle_paths=False):
+        self.paths, self.index = populate(args, recursive, shuffle_paths)
 
     def __getitem__(self, name):
         """Convenience method to access widgets via self[name].

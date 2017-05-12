@@ -8,7 +8,6 @@ from subprocess import PIPE, Popen
 from threading import Thread
 
 from gi.repository import GLib, Gtk
-from vimiv.fileactions import populate
 from vimiv.helpers import read_file, error_message
 
 
@@ -249,7 +248,7 @@ class CommandLine(Gtk.Entry):
             else:
                 old_pos = []
             # Populate filelist
-            self.app.paths, self.app.index = populate(pipe_input)
+            self.app.populate(pipe_input)
             if self.app.paths:  # Images were found
                 self.app["main_window"].show()
                 self.app["image"].load()
@@ -258,7 +257,7 @@ class CommandLine(Gtk.Entry):
                     self.app["library"].set_hexpand(False)
                     self.app["library"].focus(False)
             elif old_pos:  # Nothing found, go back
-                self.app.paths, self.app.index = populate(old_pos)
+                self.app.populate(old_pos)
                 self.app["statusbar"].message("No image found", "info")
         else:  # Run every line as an internal command
             for cmd in pipe_input:
@@ -280,7 +279,7 @@ class CommandLine(Gtk.Entry):
             else:
                 # If it is an image open it
                 self.app.paths = []
-                self.app.paths, self.app.index = populate([path])
+                self.app.populate([path])
                 self.app["image"].load()
                 #  Reload library in lib mode, do not open it in image mode
                 pathdir = os.path.dirname(path)

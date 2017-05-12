@@ -5,7 +5,6 @@ import os
 from math import floor
 
 from gi.repository import GdkPixbuf, GLib, Gtk
-from vimiv.fileactions import populate
 from vimiv.thumbnail_manager import ThumbnailManager
 
 
@@ -114,7 +113,7 @@ class Thumbnail(Gtk.IconView):
         elif self.app["library"].files \
                 and self.app["library"].is_focus():
             self.last_focused = "lib"
-            self.app.paths, self.app.index = populate(self.app["library"].files)
+            self.app.populate(self.app["library"].files)
             if self.app.paths:
                 self.app["library"].set_hexpand(False)
                 self.app["main_window"].show()

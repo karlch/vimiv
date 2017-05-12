@@ -4,7 +4,6 @@
 import os
 
 from gi.repository import Gtk, GLib
-from vimiv.fileactions import populate
 from vimiv.helpers import read_file, error_message
 
 
@@ -94,8 +93,7 @@ class TagHandler(object):
         # Read file and get all tagged images as list
         tagged_images = self.read(tagname)
         # Populate filelist
-        self.app.paths = []
-        self.app.paths = populate(tagged_images)[0]
+        self.app.populate(tagged_images)
         if self.app.paths:
             self.app["main_window"].show()
             self.app["library"].set_hexpand(False)
