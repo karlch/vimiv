@@ -30,8 +30,6 @@ class Library(Gtk.TreeView):
         files: Files in the library.
         filesize: Dictionary storing the size of files.
         grid: Gtk.Grid containing the TreeView and the border.
-        scrollable_treeview: Gtk.ScrolledWindow in which the TreeView gets
-            packed.
     """
 
     def __init__(self, app, settings):
@@ -70,12 +68,13 @@ class Library(Gtk.TreeView):
             border.set_size_request(border_width, 1)
             self.grid.attach(border, 1, 0, 1, 1)
         # Pack everything
-        self.scrollable_treeview = Gtk.ScrolledWindow()
-        self.scrollable_treeview.set_vexpand(True)
-        self.scrollable_treeview.set_size_request(self.width, 10)
-        self.grid.attach(self.scrollable_treeview, 0, 0, 1, 1)
+        self.set_size_request(self.width, 10)
+        scrolled_win = Gtk.ScrolledWindow()
+        scrolled_win.set_vexpand(True)
+        scrolled_win.add(self)
+        scrolled_win.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
+        self.grid.attach(scrolled_win, 0, 0, 1, 1)
         # Treeview
-        self.scrollable_treeview.add(self)
         self.set_enable_search(False)
         # Select file when row activated
         self.connect("row-activated", self.file_select, True)
@@ -121,7 +120,7 @@ class Library(Gtk.TreeView):
                 # Hide the non existing image and expand if necessary
                 self.app["main_window"].hide()
                 if self.expand:
-                    self.scrollable_treeview.set_hexpand(True)
+                    self.set_hexpand(True)
             else:  # Try to focus the current image in the library
                 image = self.app.paths[self.app.index]
                 image_path = os.path.dirname(image)
@@ -193,7 +192,7 @@ class Library(Gtk.TreeView):
                     index += 1
             self.app.paths, self.app.index = populate(self.files)
             if self.app.paths:
-                self.scrollable_treeview.set_hexpand(False)
+                self.set_hexpand(False)
                 self.app["main_window"].show()
                 # Close the library depending on key and repeat
                 if close:
@@ -318,7 +317,7 @@ class Library(Gtk.TreeView):
             self.width = self.app["window"].winsize[0] - 200
         elif self.width < 100:
             self.width = 100
-        self.scrollable_treeview.set_size_request(self.width, 10)
+        self.set_size_request(self.width, 10)
         self.app.emit("widgets-changed", self)
 
     def toggle_hidden(self):
@@ -441,7 +440,7 @@ class Library(Gtk.TreeView):
         """Reload filelist on the paths-changed signal from app."""
         # Expand library if set by user and all paths were removed
         if not self.app.paths and self.expand:
-            self.grid.set_hexpand(True)
+            self.set_hexpand(True)
             if not self.is_focus():
                 self.focus()
         if self.grid.is_visible():

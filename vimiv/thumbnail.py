@@ -105,7 +105,7 @@ class Thumbnail(Gtk.IconView):
                 if self.app["library"].expand and \
                         self.app["image"].pixbuf_original.get_height() == 1:
                     self.app["main_window"].hide()
-                    self.app["library"].scrollable_treeview.set_hexpand(True)
+                    self.app["library"].set_hexpand(True)
             self.toggled = False
         # Open thumbnail mode differently depending on where we come from
         elif self.app.paths and self.app["main_window"].is_focus():
@@ -116,7 +116,7 @@ class Thumbnail(Gtk.IconView):
             self.last_focused = "lib"
             self.app.paths, self.app.index = populate(self.app["library"].files)
             if self.app.paths:
-                self.app["library"].scrollable_treeview.set_hexpand(False)
+                self.app["library"].set_hexpand(False)
                 self.app["main_window"].show()
                 self.show()
             else:

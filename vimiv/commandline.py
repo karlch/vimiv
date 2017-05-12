@@ -292,7 +292,7 @@ class CommandLine(Gtk.Entry):
                     self.app["library"].set_cursor(
                         Gtk.TreePath(index), None, False)
                     # Show the image
-                    self.app["library"].scrollable_treeview.set_hexpand(False)
+                    self.app["library"].set_hexpand(False)
                     self.app["main_window"].show()
                 else:
                     self.app["library"].move_up(pathdir, True)

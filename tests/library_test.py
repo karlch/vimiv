@@ -83,32 +83,32 @@ class LibraryTest(VimivTestCase):
         # Set to 200
         self.lib.resize(None, True, "200")
         self.assertEqual(200,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Grow
         self.lib.resize(True)
         self.assertEqual(220,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         self.lib.resize(True, False, "30")
         self.assertEqual(250,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Shrink
         self.lib.resize(False, False, "50")
         self.assertEqual(200,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Grow via num_str
         self.vimiv["eventhandler"].num_str = "2"
         self.lib.resize(True)
         self.assertEqual(240,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         self.vimiv["eventhandler"].num_str = "2"
         self.lib.resize(False)
         self.assertEqual(200,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         self.assertFalse(self.vimiv["eventhandler"].num_str)
         # Too small
         self.lib.resize(False, False, "500")
         self.assertEqual(100,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Throw errors
         self.lib.resize(False, False, "hi")
         self.check_statusbar("ERROR: Library width must be an integer")
@@ -120,18 +120,18 @@ class LibraryTest(VimivTestCase):
         # Default 20
         self.run_command("grow_lib")
         self.assertEqual(120,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Value passed
         self.run_command("grow_lib 30")
         self.assertEqual(150,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Fail by passing an invalid value
         self.run_command("grow_lib value")
         self.check_statusbar("ERROR: Library width must be an integer")
         # Set width to default
         self.run_command("set library_width")
         self.assertEqual(self.lib.default_width,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Fail by passing an invalid value
         self.run_command("set library_width value")
         self.check_statusbar("ERROR: Library width must be an integer")
