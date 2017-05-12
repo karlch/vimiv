@@ -130,7 +130,7 @@ class LibraryTest(VimivTestCase):
         self.check_statusbar("ERROR: Library width must be an integer")
         # Set width to default
         self.run_command("set library_width")
-        self.assertEqual(self.lib.default_width,
+        self.assertEqual(self.vimiv.settings["LIBRARY"]["library_width"],
                          self.lib.get_size_request()[0])
         # Fail by passing an invalid value
         self.run_command("set library_width value")

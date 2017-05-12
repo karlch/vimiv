@@ -133,7 +133,7 @@ class Thumbnail(Gtk.IconView):
         """Calculate how many columns fit into the current window."""
         width = self.app["window"].winsize[0]
         if self.app["library"].grid.is_visible():
-            width -= self.app["library"].width
+            width -= self.app["library"].get_size_request()[0]
 
         self.columns = floor(
             (width - 12) / (self.get_zoom_level()[0] + 2 * self.padding))

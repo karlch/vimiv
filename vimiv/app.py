@@ -222,7 +222,7 @@ class Vimiv(Gtk.Application):
         if self.paths:
             self["image"].load()
             # Show library at the beginning?
-            if not self["library"].show_at_start:
+            if not self.settings["LIBRARY"]["show_library"]:
                 self["library"].grid.hide()
             self["main_window"].grab_focus()
             # Start in slideshow mode?

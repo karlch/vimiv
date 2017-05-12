@@ -1,5 +1,5 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
-"""Library part of self.app."""
+"""Library part of vimiv."""
 
 import os
 
@@ -11,25 +11,20 @@ from vimiv.helpers import listdir_wrapper, sizeof_fmt
 class Library(Gtk.TreeView):
     """Library of vimiv.
 
-    Includes the treeview with the library and all actions that apply to it
+    Includes the treeview with the library and all actions that apply to it.
 
     Attributes:
-        app: The main vimiv application to interact with.
-        show_at_start: If True show library at startup.
-        default_width: Setting for the default width of the library.
         expand: If True expand the library to window width if no images are
             shown.
-        width: Width of the actual library without border width.
-        markup: Markup string used to highlight search results.
         show_hidden: If True show hidden files.
-        file_check_amount: Amount of files checked in a directory to display
-            amount of images in it.
-        desktop_start_dir: Directory to start in if launched from desktop.
-        tilde_in_statusbar: If True, collapse $HOME to ~ in statusbar.
         files: Files in the library.
-        filesize: Dictionary storing the size of files.
         grid: Gtk.Grid containing the TreeView and the border.
 
+        _app: The main vimiv application to interact with.
+        _default_width: Setting for the default width of the library.
+        _file_check_amount: Amount of files checked in a directory to display
+            amount of images in it.
+        _markup: Markup string used to highlight search results.
         _positions: Dictionary that stores position in directories.
     """
 
@@ -41,25 +36,20 @@ class Library(Gtk.TreeView):
             settings: Settings from configfiles to use.
         """
         super(Library, self).__init__()
-        self.app = app
+        self._app = app
         library = settings["LIBRARY"]
 
         # Settings
         self._positions = {}
-        self.show_at_start = library["show_library"]
-        self.default_width = library["library_width"]
+        self._default_width = library["library_width"]
         self.expand = library["expand_lib"]
         border_width = library["border_width"]
-        self.width = self.default_width - border_width
-        self.markup = library["markup"]
+        self._markup = library["markup"]
         self.show_hidden = library["show_hidden"]
-        self.file_check_amount = library["file_check_amount"]
-        self.desktop_start_dir = library["desktop_start_dir"]
-        self.tilde_in_statusbar = library["tilde_in_statusbar"]
+        self._file_check_amount = library["file_check_amount"]
 
         # Defaults
         self.files = []
-        self.filesize = {}
 
         # Grid with treeview and border
         self.grid = Gtk.Grid()
@@ -69,7 +59,7 @@ class Library(Gtk.TreeView):
             border.set_size_request(border_width, 1)
             self.grid.attach(border, 1, 0, 1, 1)
         # Pack everything
-        self.set_size_request(self.width, 10)
+        self.set_size_request(self._default_width - border_width, 10)
         scrolled_win = Gtk.ScrolledWindow()
         scrolled_win.set_vexpand(True)
         scrolled_win.add(self)
@@ -82,9 +72,9 @@ class Library(Gtk.TreeView):
         # Handle key events
         self.add_events(Gdk.EventMask.KEY_PRESS_MASK)
         self.connect("key_press_event",
-                     self.app["eventhandler"].key_pressed, "LIBRARY")
+                     self._app["eventhandler"].key_pressed, "LIBRARY")
         self.connect("button_press_event",
-                     self.app["eventhandler"].clicked, "LIBRARY")
+                     self._app["eventhandler"].clicked, "LIBRARY")
         # Add the columns
         for i, name in enumerate(["Num", "Name", "Size", "M"]):
             renderer = Gtk.CellRendererText()
@@ -96,11 +86,11 @@ class Library(Gtk.TreeView):
         # Set the liststore model
         self.set_model(self._liststore_create())
         # Set the hexpand property if requested in the configfile
-        if not self.app.paths and self.expand:
+        if not self._app.paths and self.expand:
             self.set_hexpand(True)
 
         # Connect signals
-        self.app.connect("paths-changed", self._on_paths_changed)
+        self._app.connect("paths-changed", self._on_paths_changed)
 
     def toggle(self, update_image=True):
         """Toggle the library.
@@ -111,29 +101,29 @@ class Library(Gtk.TreeView):
             this by itself.
         """
         if self.grid.is_visible():
-            self[os.getcwd()] = self.app.get_pos(True, "lib")
+            self[os.getcwd()] = self._app.get_pos(True, "lib")
             self.grid.hide()
             self.focus(False)
         else:
             self.grid.show()
-            if not self.app.paths:
+            if not self._app.paths:
                 # Hide the non existing image and expand if necessary
-                self.app["main_window"].hide()
+                self._app["main_window"].hide()
                 if self.expand:
                     self.set_hexpand(True)
             else:  # Try to focus the current image in the library
-                image = self.app.paths[self.app.index]
+                image = self._app.paths[self._app.index]
                 image_path = os.path.dirname(image)
                 image_name = os.path.basename(image)
                 if image_path == os.getcwd() and image_name in self.files:
                     self[os.getcwd()] = image_name
             # Stop the slideshow
-            if self.app["slideshow"].running:
-                self.app["slideshow"].toggle()
+            if self._app["slideshow"].running:
+                self._app["slideshow"].toggle()
             self.focus(True)
             # Markings and other stuff might have changed
             self.reload(os.getcwd())
-        self.app.emit("widgets-changed", self)
+        self._app.emit("widgets-changed", self)
 
     def focus(self, focus_library=True):
         """Set or remove focus from the library.
@@ -146,9 +136,9 @@ class Library(Gtk.TreeView):
             if not self.grid.is_visible():
                 self.toggle()
         else:
-            self.app["main_window"].grab_focus()
+            self._app["main_window"].grab_focus()
         # Update info for the current mode
-        self.app["statusbar"].update_info()
+        self._app["statusbar"].update_info()
 
     def file_select(self, treeview, path, column, close):
         """Show image or open directory for activated file in library.
@@ -161,27 +151,27 @@ class Library(Gtk.TreeView):
         """
         # Empty directory
         if not path:
-            self.app["statusbar"].message("No file to select", "error")
+            self._app["statusbar"].message("No file to select", "error")
             return
         count = path.get_indices()[0]
         fil = self.files[count]
         self[os.getcwd()] = fil
         # Tags
-        if os.getcwd() == self.app["tags"].directory:
+        if os.getcwd() == self._app["tags"].directory:
             # Close if selected twice
-            if fil == self.app["tags"].last:
+            if fil == self._app["tags"].last:
                 self.toggle()
-            self.app["tags"].load(fil)
+            self._app["tags"].load(fil)
             return
         # Rest
         if os.path.isdir(fil):  # Open the directory
             self.move_up(fil)
         else:  # Focus the image and populate a new list from the dir
             # If thumbnail toggled, go out
-            if self.app["thumbnail"].toggled:
-                self.app["thumbnail"].toggle()
+            if self._app["thumbnail"].toggled:
+                self._app["thumbnail"].toggle()
                 self.grab_focus()
-            if self.app.paths and fil in self.app.paths[self.app.index]:
+            if self._app.paths and fil in self._app.paths[self._app.index]:
                 close = True  # Close if file selected twice
             index = 0  # Catch directories to focus correctly
             for f in self.files:
@@ -189,16 +179,16 @@ class Library(Gtk.TreeView):
                     break
                 elif os.path.isfile(f):
                     index += 1
-            self.app.populate(self.files)
-            if self.app.paths:
+            self._app.populate(self.files)
+            if self._app.paths:
                 self.set_hexpand(False)
-                self.app["main_window"].show()
+                self._app["main_window"].show()
                 # Close the library depending on key and repeat
                 if close:
                     # We do not need to update the image as it is done later
                     # anyway
                     self.toggle(update_image=False)
-                self.app["image"].move_index(delta=index)
+                self._app["image"].move_index(delta=index)
 
     def move_up(self, directory="..", start=False):
         """Move up a directory or to a specific one in the library.
@@ -210,7 +200,7 @@ class Library(Gtk.TreeView):
         """
         # Allow moving up multiple times if using .. as directory:
         if directory == "..":
-            repeat = self.app["eventhandler"].num_receive()
+            repeat = self._app["eventhandler"].num_receive()
             directory = "/".join(repeat * [".."])
         try:
             curdir = os.getcwd()
@@ -219,7 +209,7 @@ class Library(Gtk.TreeView):
                 self.reload(os.getcwd(), curdir)
                 self.focus()
         except (FileNotFoundError, PermissionError):
-            self.app["statusbar"].message("Directory not accessible", "error")
+            self._app["statusbar"].message("Directory not accessible", "error")
 
     def reload(self, directory, last_directory="", search=False):
         """Reload the treeview.
@@ -231,12 +221,12 @@ class Library(Gtk.TreeView):
         """
         # Reset search positions
         if not search:
-            self.app["commandline"].search_positions = []
+            self._app["commandline"].search_positions = []
         # Create model in new directory
         self.set_model(self._liststore_create())
         # Warn if there are no files in the directory
         if not self.files:
-            self.app["statusbar"].message("Directory is empty", "warning")
+            self._app["statusbar"].message("Directory is empty", "warning")
             return
         # Check if there is a saved position
         self.move_pos(True, self[directory])
@@ -254,8 +244,8 @@ class Library(Gtk.TreeView):
                 markup_string += "  →  " + os.path.realpath(name)
             if os.path.isdir(name):
                 markup_string = "<b>" + markup_string + "</b>"
-            if i in self.app["commandline"].search_positions:
-                markup_string = self.markup + markup_string + "</span>"
+            if i in self._app["commandline"].search_positions:
+                markup_string = self._markup + markup_string + "</span>"
             model[i][1] = markup_string
 
     def move_pos(self, forward=True, defined_pos=None):
@@ -269,23 +259,23 @@ class Library(Gtk.TreeView):
             defined_pos: If not empty defines the position to move to.
         """
         if not self.files:
-            self.app["statusbar"].message("No position to go to", "error")
+            self._app["statusbar"].message("No position to go to", "error")
             return
         max_pos = len(self.files)
         # Direct call from scroll
         if isinstance(defined_pos, int):
             new_pos = defined_pos
         elif forward:
-            new_pos = self.app["eventhandler"].num_receive(max_pos) - 1
+            new_pos = self._app["eventhandler"].num_receive(max_pos) - 1
         else:
-            new_pos = self.app["eventhandler"].num_receive() - 1
+            new_pos = self._app["eventhandler"].num_receive() - 1
         if new_pos < 0 or new_pos > max_pos:
-            self.app["statusbar"].message("Unsupported index", "warning")
+            self._app["statusbar"].message("Unsupported index", "warning")
             return
         self.set_cursor(Gtk.TreePath(new_pos), None, False)
         self.scroll_to_cell(Gtk.TreePath(new_pos), None, True, 0.5, 0)
         # Clear the prefix
-        self.app["eventhandler"].num_clear()
+        self._app["eventhandler"].num_clear()
 
     def resize(self, inc=True, require_val=False, val=None):
         """Resize the library and update the image if necessary.
@@ -295,28 +285,29 @@ class Library(Gtk.TreeView):
             require_val: If True require a specific value val for the size.
             val: Specific value for the new size.
         """
+        width = self.get_size_request()[0]
         # Check if val is an acceptable integer
         if val and not val.isdigit():
             message = "Library width must be an integer"
-            self.app["statusbar"].message(message, "error")
+            self._app["statusbar"].message(message, "error")
             return
         if require_val:
-            val = int(val) if val else self.default_width
-            self.width = val
+            val = int(val) if val else self._default_width
+            width = val
         else:  # Grow/shrink by value
-            step = self.app["eventhandler"].num_receive()
+            step = self._app["eventhandler"].num_receive()
             val = int(val) if val else 20 * step
             if inc:
-                self.width += val
+                width += val
             else:
-                self.width -= val
+                width -= val
         # Set some reasonable limits to the library size
-        if self.width > self.app["window"].winsize[0] - 200:
-            self.width = self.app["window"].winsize[0] - 200
-        elif self.width < 100:
-            self.width = 100
-        self.set_size_request(self.width, 10)
-        self.app.emit("widgets-changed", self)
+        if width > self._app["window"].winsize[0] - 200:
+            width = self._app["window"].winsize[0] - 200
+        elif width < 100:
+            width = 100
+        self.set_size_request(width, 10)
+        self._app.emit("widgets-changed", self)
 
     def toggle_hidden(self):
         """Toggle showing of hidden files."""
@@ -334,25 +325,25 @@ class Library(Gtk.TreeView):
         """
         # Handle the specific keys
         if direction == "h":  # Behave like ranger
-            self[os.getcwd()] = self.app.get_pos(True, "lib")
+            self[os.getcwd()] = self._app.get_pos(True, "lib")
             self.move_up()
         elif direction == "l":
             self.file_select(self, self.get_cursor()[0],
                              None, False)
         elif direction in ["j", "k"]:
             # Scroll the tree checking for a user step
-            step = self.app["eventhandler"].num_receive()
+            step = self._app["eventhandler"].num_receive()
             if direction == "j":
-                new_pos = self.app.get_pos(force_widget="lib") + step
+                new_pos = self._app.get_pos(force_widget="lib") + step
                 if new_pos >= len(self.get_model()):
                     new_pos = len(self.get_model()) - 1
             else:
-                new_pos = self.app.get_pos(force_widget="lib") - step
+                new_pos = self._app.get_pos(force_widget="lib") - step
                 if new_pos < 0:
                     new_pos = 0
             self.move_pos(True, new_pos)
         else:
-            self.app["statusbar"].message(
+            self._app["statusbar"].message(
                 "Invalid scroll direction " + direction, "error")
         return True  # Deactivates default bindings (here for Arrows)
 
@@ -364,9 +355,9 @@ class Library(Gtk.TreeView):
             [count, filename, filesize, markup_string].
         """
         liststore = Gtk.ListStore(int, str, str, str)
-        self.files = self._filelist_create()
+        self.files, filesize = self._filelist_create()
         # Remove unsupported files if one isn't in the tags directory
-        if os.getcwd() != self.app["tags"].directory:
+        if os.getcwd() != self._app["tags"].directory:
             self.files = [
                 possible_file
                 for possible_file in self.files
@@ -374,16 +365,16 @@ class Library(Gtk.TreeView):
         # Add all supported files
         for i, fil in enumerate(self.files):
             markup_string = fil
-            size = self.filesize[fil]
+            size = filesize[fil]
             marked_string = ""
             if os.path.islink(fil):
                 markup_string += "  →  " + os.path.realpath(fil)
-            if os.path.abspath(fil) in self.app["mark"].marked:
+            if os.path.abspath(fil) in self._app["mark"].marked:
                 marked_string = "[*]"
             if os.path.isdir(fil):
                 markup_string = "<b>" + markup_string + "</b>"
-            if i in self.app["commandline"].search_positions:
-                markup_string = self.markup + markup_string + "</span>"
+            if i in self._app["commandline"].search_positions:
+                markup_string = self._markup + markup_string + "</span>"
             liststore.append([i + 1, markup_string, size, marked_string])
 
         return liststore
@@ -393,10 +384,12 @@ class Library(Gtk.TreeView):
 
         Args:
             directory: Directory of which the filelist is created.
+        Return:
+            filelist, filesize: List of files, dictionary with filesize info
         """
         # Get data from ls -lh and parse it correctly
         files = listdir_wrapper(directory, self.show_hidden)
-        self.filesize = {}
+        filesize = {}
         for fil in files:
             # Catch broken symbolic links
             if os.path.islink(fil) and \
@@ -408,32 +401,32 @@ class Library(Gtk.TreeView):
                     subfiles = listdir_wrapper(fil, self.show_hidden)
                     # Necessary to keep acceptable speed in library
                     many = False
-                    if len(subfiles) > self.file_check_amount:
+                    if len(subfiles) > self._file_check_amount:
                         many = True
-                    subfiles = [subfile
-                                for subfile in subfiles[:self.file_check_amount]
-                                if is_image(os.path.join(fil, subfile))]
+                    subfiles = [sub
+                                for sub in subfiles[:self._file_check_amount]
+                                if is_image(os.path.join(fil, sub))]
                     amount = str(len(subfiles))
                     if subfiles and many:
                         amount += "+"
-                    self.filesize[fil] = amount
+                    filesize[fil] = amount
                 except PermissionError:
-                    self.filesize[fil] = "N/A"
+                    filesize[fil] = "N/A"
             else:
-                self.filesize[fil] = sizeof_fmt(os.path.getsize(fil))
+                filesize[fil] = sizeof_fmt(os.path.getsize(fil))
 
-        return files
+        return files, filesize
 
     def _on_paths_changed(self, app, widget):
         """Reload filelist on the paths-changed signal from app."""
         # Expand library if set by user and all paths were removed
-        if not self.app.paths and self.expand:
+        if not self._app.paths and self.expand:
             self.set_hexpand(True)
             if not self.is_focus():
                 self.focus()
         if self.grid.is_visible():
             # Reload remembering path
-            self[os.getcwd()] = self.app.get_pos(True, "lib")
+            self[os.getcwd()] = self._app.get_pos(True, "lib")
             self.reload(os.getcwd())
 
     def __getitem__(self, directory):

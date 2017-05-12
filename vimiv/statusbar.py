@@ -25,6 +25,8 @@ class Statusbar(Gtk.Grid):
         center_label: Gtk.Label containing mark status and slideshow info.
         separator: Gtk.Separator used as background of the statusbar. Makes sure
             the other widgets do not interfere with the overlaying bar.
+
+        _tilde_in_statusbar: If True, collapse $HOME to ~ in library statusbar.
     """
 
     def __init__(self, app, settings):
@@ -41,6 +43,7 @@ class Statusbar(Gtk.Grid):
         self.size = 0
         self.lock = False
         self.was_hidden = False
+        self._tilde_in_statusbar = settings["LIBRARY"]["tilde_in_statusbar"]
 
         # Statusbar on the bottom
         self.set_name("StatusBar")  # Name for css
@@ -138,7 +141,7 @@ class Statusbar(Gtk.Grid):
         # Directory if library is focused
         if "LIBRARY" in mode:
             cur_dir = os.getcwd()
-            if self.app["library"].tilde_in_statusbar:
+            if self._tilde_in_statusbar:
                 cur_dir = cur_dir.replace(os.getenv("HOME"), "~")
             self.left_label.set_text(cur_dir)
         # Position, name and thumbnail size in thumb mode

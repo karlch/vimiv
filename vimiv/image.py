@@ -344,7 +344,8 @@ class Image(Gtk.Image):
         """
         size = self._app["window"].get_size()
         if self._app["library"].grid.is_visible():
-            size = (size[0] - self._app["library"].width, size[1])
+            library_width = self._app["library"].get_size_request()[0]
+            size = (size[0] - library_width, size[1])
         if not self._app["statusbar"].hidden:
             size = (size[0], size[1] - self._app["statusbar"].get_bar_height())
         return size
