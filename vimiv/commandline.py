@@ -258,7 +258,7 @@ class CommandLine(Gtk.Entry):
             # Populate filelist
             self.app.paths, self.app.index = populate(pipe_input)
             if self.app.paths:  # Images were found
-                self.app["image"].scrolled_win.show()
+                self.app["main_window"].show()
                 self.app["image"].load()
                 # Resize library and focus image if necessary
                 if self.app["library"].grid.is_visible():
@@ -300,7 +300,7 @@ class CommandLine(Gtk.Entry):
                         Gtk.TreePath(index), None, False)
                     # Show the image
                     self.app["library"].scrollable_treeview.set_hexpand(False)
-                    self.app["image"].scrolled_win.show()
+                    self.app["main_window"].show()
                 else:
                     self.app["library"].move_up(pathdir, True)
         else:
@@ -437,7 +437,7 @@ class CommandLine(Gtk.Entry):
         elif self.last_focused == "thu":
             self.app["thumbnail"].grab_focus()
         else:
-            self.app["image"].scrolled_win.grab_focus()
+            self.app["main_window"].grab_focus()
         if reset_search:
             self.reset_search(leaving=True)
         self.last_index = 0

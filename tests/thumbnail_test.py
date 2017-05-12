@@ -89,9 +89,9 @@ class ThumbnailTest(VimivTestCase):
         self.thumb.move_direction("H")
         self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
         # L and H directly from the window implementation of scroll
-        self.vimiv["window"].scroll("L")
+        self.vimiv["main_window"].scroll("L")
         self.assertEqual(self.vimiv.paths[-1], self.vimiv.get_pos(True))
-        self.vimiv["window"].scroll("H")
+        self.vimiv["main_window"].scroll("H")
         self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
 
     def test_search(self):

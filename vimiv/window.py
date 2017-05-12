@@ -108,21 +108,6 @@ class Window(Gtk.ApplicationWindow):
         """
         self.app["statusbar"].update_info()
 
-    def scroll(self, direction):
-        """Scroll the correct object.
-
-        Args:
-            direction: Scroll direction to emit.
-        """
-        if direction not in "hjklHJKL":
-            self.app["statusbar"].message(
-                "Invalid scroll direction " + direction, "error")
-        elif self.app["thumbnail"].toggled:
-            self.app["thumbnail"].move_direction(direction)
-        else:
-            self.app["image"].scroll(direction)
-        return True  # Deactivates default bindings (here for Arrows)
-
     def zoom(self, zoom_in=True, step=1):
         """Zoom image or thumbnails.
 

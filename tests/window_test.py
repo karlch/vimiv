@@ -29,12 +29,6 @@ class WindowTest(VimivTestCase):
         # self.assertFalse(self.vimiv["window"].is_fullscreen)
         self.vimiv["window"].fullscreen()
 
-    def test_scroll(self):
-        """Scroll image or thumbnail."""
-        # Error message
-        self.vimiv["window"].scroll("m")
-        self.check_statusbar("ERROR: Invalid scroll direction m")
-
     @skipUnless(os.getenv("DISPLAY") == ":42", "Must run in Xvfb")
     def test_check_resize(self):
         """Resize window and check winsize."""

@@ -198,7 +198,7 @@ class FileExtras(object):
             self.app["library"].reload(directory)
             # Refocus other widgets if necessary
             if self.app["commandline"].last_focused == "im":
-                self.app["image"].scrolled_win.grab_focus()
+                self.app["main_window"].grab_focus()
             elif self.app["commandline"].last_focused == "thu":
                 self.app["thumbnail"].grab_focus()
         # Reload image/thumbnail

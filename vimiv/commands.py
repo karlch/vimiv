@@ -29,7 +29,7 @@ class Commands(object):
         self.add_command("alias", self.app["commandline"].alias,
                          positional_args=["name", "command"])
         self.add_command("autorotate", self.app["manipulate"].rotate_auto)
-        self.add_command("center", self.app["image"].center_window)
+        self.add_command("center", self.app["main_window"].center_window)
         self.add_command("copy_basename", self.app["fileextras"].copy_name,
                          default_args=[False])
         self.add_command("copy_abspath", self.app["fileextras"].copy_name,
@@ -152,7 +152,7 @@ class Commands(object):
                          default_args=[True], is_hidden=True)
         self.add_command("history_up", self.app["commandline"].history_search,
                          default_args=[False], is_hidden=True)
-        self.add_command("scroll", self.app["window"].scroll,
+        self.add_command("scroll", self.app["main_window"].scroll,
                          positional_args=["direction"], supports_count=True,
                          is_hidden=True)
         self.add_command("scroll_lib", self.app["library"].scroll,

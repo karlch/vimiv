@@ -12,8 +12,7 @@ from vimiv.fileactions import is_animation
 class Image(Gtk.Image):
     """Image class for vimiv.
 
-    Includes the scrollable window with the image and all actions that apply
-    to it.
+    Inherits from Gtk.Image and includes all actions that apply to it.
 
     Attributes:
         fit_image:
@@ -43,16 +42,6 @@ class Image(Gtk.Image):
         super(Image, self).__init__()
         self._app = app
         general = settings["GENERAL"]
-
-        # Generate window structure
-        # Scrollable window for the image
-        self.scrolled_win = Gtk.ScrolledWindow()
-        self.scrolled_win.set_hexpand(True)
-        self.scrolled_win.set_vexpand(True)
-        self.scrolled_win.add(self)
-        self.scrolled_win.connect("key_press_event",
-                                  self._app["eventhandler"].key_pressed,
-                                  "IMAGE")
 
         # Settings
         self.fit_image = 1  # Checks if the image fits the window somehow
@@ -148,52 +137,6 @@ class Image(Gtk.Image):
             self.fit_image = fit
         # Catch some unreasonable zooms
         self._catch_unreasonable_zoom_and_update(fallback_zoom)
-
-    def center_window(self):
-        """Centre the image in the current window."""
-        h_adj = self.scrolled_win.get_hadjustment()
-        h_middle = (h_adj.get_upper() - h_adj.get_lower() - self._size[0]) / 2
-        h_adj.set_value(h_middle)
-        v_adj = self.scrolled_win.get_vadjustment()
-        v_middle = (v_adj.get_upper() - v_adj.get_lower() - self._size[1]) / 2
-        v_adj.set_value(v_middle)
-        self.scrolled_win.set_hadjustment(h_adj)
-        self.scrolled_win.set_vadjustment(v_adj)
-
-    def scroll(self, direction):
-        """Scroll the image.
-
-        Args:
-            direction: Direction to scroll in.
-        """
-        steps = self._app["eventhandler"].num_receive()
-        scale = self.zoom_percent / self._get_zoom_percent_to_fit() * 2
-        h_adj = self.scrolled_win.get_hadjustment()
-        h_size = h_adj.get_upper() - h_adj.get_lower() - self._size[0]
-        h_step = h_size / scale * steps
-        v_adj = self.scrolled_win.get_vadjustment()
-        v_size = v_adj.get_upper() - v_adj.get_lower() - self._size[1]
-        v_step = v_size / scale * steps
-        # To the ends
-        if direction == "H":
-            h_adj.set_value(0)
-        elif direction == "J":
-            v_adj.set_value(v_size)
-        elif direction == "K":
-            v_adj.set_value(0)
-        elif direction == "L":
-            h_adj.set_value(h_size)
-        # By step
-        elif direction == "h":
-            h_adj.set_value(h_adj.get_value() - h_step)
-        elif direction == "j":
-            v_adj.set_value(v_adj.get_value() + v_step)
-        elif direction == "k":
-            v_adj.set_value(v_adj.get_value() - v_step)
-        elif direction == "l":
-            h_adj.set_value(h_adj.get_value() + h_step)
-        self.scrolled_win.set_hadjustment(h_adj)
-        self.scrolled_win.set_vadjustment(v_adj)
 
     def move_index(self, forward=True, key=None, delta=1, force=False):
         """Move by delta in paths.
@@ -306,6 +249,12 @@ class Image(Gtk.Image):
                 self._pause_gif()
             else:
                 self._play_gif()
+
+    def get_scroll_scale(self):
+        return self.zoom_percent / self._get_zoom_percent_to_fit() * 2
+
+    def get_zoom_percent(self):
+        return self.zoom_percent * 100
 
     def _get_zoom_percent_to_fit(self, fit=1):
         """Get the zoom factor perfectly fitting the image to the window.

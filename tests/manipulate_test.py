@@ -180,12 +180,12 @@ class ManipulateTest(VimivTestCase):
         self.manipulate.toggle()
         self.assertFalse(self.manipulate.is_visible())
         self.assertFalse(self.manipulate.sliders["bri"].is_focus())
-        self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
+        self.assertTrue(self.vimiv["main_window"].is_focus())
         # Close via button
         self.manipulate.toggle()
         self.manipulate.button_clicked(None, False)
         self.assertFalse(self.manipulate.sliders["bri"].is_focus())
-        self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
+        self.assertTrue(self.vimiv["main_window"].is_focus())
 
     def test_manipulate_image(self):
         """Test manipulate image."""

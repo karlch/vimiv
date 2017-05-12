@@ -23,11 +23,11 @@ class KeyHandlerTest(VimivTestCase):
         image_before = self.vimiv.paths[self.vimiv.index]
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("n")
-        self.vimiv["image"].scrolled_win.emit("key_press_event", event)
+        self.vimiv["main_window"].emit("key_press_event", event)
         image_after = self.vimiv.paths[self.vimiv.index]
         self.assertNotEqual(image_before, image_after)
         event.keyval = Gdk.keyval_from_name("O")
-        self.vimiv["image"].scrolled_win.emit("key_press_event", event)
+        self.vimiv["main_window"].emit("key_press_event", event)
         self.assertTrue(self.vimiv["library"].is_focus())
 
     def test_button_click(self):

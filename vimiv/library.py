@@ -116,7 +116,7 @@ class Library(Gtk.TreeView):
             self.grid.show()
             if not self.app.paths:
                 # Hide the non existing image and expand if necessary
-                self.app["image"].scrolled_win.hide()
+                self.app["main_window"].hide()
                 if self.expand:
                     self.scrollable_treeview.set_hexpand(True)
             else:  # Try to focus the current image in the library
@@ -144,7 +144,7 @@ class Library(Gtk.TreeView):
             if not self.grid.is_visible():
                 self.toggle()
         else:
-            self.app["image"].scrolled_win.grab_focus()
+            self.app["main_window"].grab_focus()
         # Update info for the current mode
         self.app["statusbar"].update_info()
 
@@ -222,7 +222,7 @@ class Library(Gtk.TreeView):
             self.app.paths, self.app.index = populate(self.files)
             if self.app.paths:
                 self.scrollable_treeview.set_hexpand(False)
-                self.app["image"].scrolled_win.show()
+                self.app["main_window"].show()
                 # Close the library depending on key and repeat
                 if close:
                     # We do not need to update the image as it is done later

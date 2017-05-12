@@ -300,7 +300,7 @@ class Manipulate(Gtk.ScrolledWindow):
         """Toggle the manipulation bar."""
         if self.is_visible():
             self.hide()
-            self.app["image"].scrolled_win.grab_focus()
+            self.app["main_window"].grab_focus()
             self.app["statusbar"].update_info()
         elif self.app.paths and not(self.app["thumbnail"].toggled or
                                     self.app["library"].is_focus()):

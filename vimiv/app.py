@@ -13,16 +13,15 @@ from vimiv.completions import Completion
 from vimiv.configparser import parse_config, set_defaults
 from vimiv.eventhandler import KeyHandler
 from vimiv.fileactions import FileExtras, populate
-from vimiv.image import Image
 from vimiv.information import Information
 from vimiv.library import Library
 from vimiv.log import Log
+from vimiv.main_window import MainWindow
 from vimiv.manipulate import Manipulate
 from vimiv.mark import Mark
 from vimiv.slideshow import Slideshow
 from vimiv.statusbar import Statusbar
 from vimiv.tags import TagHandler
-from vimiv.thumbnail import Thumbnail
 from vimiv.window import Window
 
 
@@ -219,7 +218,7 @@ class Vimiv(Gtk.Application):
             # Show library at the beginning?
             if not self["library"].show_at_start:
                 self["library"].grid.hide()
-            self["image"].scrolled_win.grab_focus()
+            self["main_window"].grab_focus()
             # Start in slideshow mode?
             if self["slideshow"].at_start:
                 self["slideshow"].toggle()
@@ -228,7 +227,7 @@ class Vimiv(Gtk.Application):
             self["slideshow"].running = False
             self["library"].reload(os.getcwd())
             if self["library"].expand:
-                self["image"].scrolled_win.hide()
+                self["main_window"].hide()
 
     def init_widgets(self):
         """Create all the other widgets and add them to the class."""
@@ -240,9 +239,10 @@ class Vimiv(Gtk.Application):
         self["statusbar"] = Statusbar(self, self.settings)
         self["completions"] = Completion(self)
         self["slideshow"] = Slideshow(self, self.settings)
-        self["image"] = Image(self, self.settings)
+        self["main_window"] = MainWindow(self, self.settings)
+        self["image"] = self["main_window"].image
+        self["thumbnail"] = self["main_window"].thumbnail
         self["library"] = Library(self, self.settings)
-        self["thumbnail"] = Thumbnail(self, self.settings)
         self["manipulate"] = Manipulate(self, self.settings)
         self["information"] = Information()
         self["window"] = Window(self, self.settings)
@@ -259,7 +259,7 @@ class Vimiv(Gtk.Application):
         """
         main_grid = Gtk.Grid()
         main_grid.attach(self["library"].grid, 0, 0, 1, 1)
-        main_grid.attach(self["image"].scrolled_win, 1, 0, 1, 1)
+        main_grid.attach(self["main_window"], 1, 0, 1, 1)
         main_grid.attach(self["manipulate"], 0, 1, 2, 1)
         main_grid.attach(self["statusbar"].separator, 0, 2, 2, 1)
 
@@ -339,7 +339,7 @@ class Vimiv(Gtk.Application):
         # Find widget to work on
         if force_widget:
             focused_widget = force_widget
-        elif self["image"].scrolled_win.is_focus() or \
+        elif self["main_window"].is_focus() or \
                 self["manipulate"].is_visible():
             focused_widget = "im"
         elif self["library"].is_focus():

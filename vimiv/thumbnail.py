@@ -45,7 +45,7 @@ class Thumbnail(Gtk.IconView):
         self.padding = general["thumb_padding"]
         self.timer_id = GLib.Timeout
         self.elements = []
-        self.markup = self.app["library"].markup.replace("fore", "back")
+        self.markup = settings["LIBRARY"]["markup"].replace("fore", "back")
 
         zoom_level = general["default_thumbsize"]
         self.zoom_levels = [(64, 64), (128, 128), (256, 256), (512, 512)]
@@ -95,21 +95,20 @@ class Thumbnail(Gtk.IconView):
         """
         # Close
         if self.toggled:
-            self.app["image"].scrolled_win.remove(self)
-            self.app["image"].scrolled_win.add(self.app["image"])
+            self.app["main_window"].switch_to_child(self.app["image"])
             if self.last_focused == "im" or select_image:
-                self.app["image"].scrolled_win.grab_focus()
+                self.app["main_window"].grab_focus()
             elif self.last_focused == "lib":
                 self.app["library"].focus()
                 # Re-expand the library if there is no image and the setting
                 # applies
                 if self.app["library"].expand and \
                         self.app["image"].pixbuf_original.get_height() == 1:
-                    self.app["image"].scrolled_win.hide()
+                    self.app["main_window"].hide()
                     self.app["library"].scrollable_treeview.set_hexpand(True)
             self.toggled = False
         # Open thumbnail mode differently depending on where we come from
-        elif self.app.paths and self.app["image"].scrolled_win.is_focus():
+        elif self.app.paths and self.app["main_window"].is_focus():
             self.last_focused = "im"
             self.show()
         elif self.app["library"].files \
@@ -118,7 +117,7 @@ class Thumbnail(Gtk.IconView):
             self.app.paths, self.app.index = populate(self.app["library"].files)
             if self.app.paths:
                 self.app["library"].scrollable_treeview.set_hexpand(False)
-                self.app["image"].scrolled_win.show()
+                self.app["main_window"].show()
                 self.show()
             else:
                 self.app["statusbar"].message("No images in directory", "error")
@@ -158,8 +157,7 @@ class Thumbnail(Gtk.IconView):
 
         # Draw the icon view instead of the image
         if not toggled:
-            self.app["image"].scrolled_win.remove(self.app["image"])
-            self.app["image"].scrolled_win.add(self)
+            self.app["main_window"].switch_to_child(self)
         # Show the window
         super(Thumbnail, self).show()
         self.toggled = True

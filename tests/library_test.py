@@ -56,7 +56,7 @@ class LibraryTest(VimivTestCase):
         # Library closed, image has focus
         self.assertFalse(self.lib.is_focus())
         self.assertFalse(self.lib.grid.is_focus())
-        self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
+        self.assertTrue(self.vimiv["main_window"].is_focus())
 
     def test_move_pos(self):
         """Move position in library."""

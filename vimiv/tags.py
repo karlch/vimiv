@@ -97,7 +97,7 @@ class TagHandler(object):
         self.app.paths = []
         self.app.paths = populate(tagged_images)[0]
         if self.app.paths:
-            self.app["image"].scrolled_win.show()
+            self.app["main_window"].show()
             self.app["library"].scrollable_treeview.set_hexpand(False)
             self.app["image"].load()
             # Focus in library if it is open
