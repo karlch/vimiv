@@ -12,7 +12,8 @@ class Log():
     """Log file handler.
 
     Attributes:
-        filename: Name of the log file.
+        _filename: Name of the log file.
+        _terminal: sys.stderr to interact with
     """
 
     def __init__(self, app):
@@ -23,17 +24,17 @@ class Log():
         """
         datadir = os.path.join(GLib.get_user_data_dir(), "vimiv")
         os.makedirs(datadir, exist_ok=True)
-        self.filename = os.path.join(datadir, "vimiv.log")
-        self.terminal = sys.stderr
+        self._filename = os.path.join(datadir, "vimiv.log")
+        self._terminal = sys.stderr
         # Redirect stderr in debug mode so it is written to the log file as well
         if app.debug:
             sys.stderr = self
         # Create a new log file at startup
-        with open(self.filename, "w") as f:
+        with open(self._filename, "w") as f:
             f.write("Vimiv log written to "
-                    + self.filename.replace(os.getenv("HOME"), "~")
+                    + self._filename.replace(os.getenv("HOME"), "~")
                     + "\n")
-        self.write_separator()
+        self._write_separator()
         # Header containing version and Gtk version
         self.write_message("Version", app["information"].get_version())
         self.write_message("Python", sys.version.split()[0])
@@ -41,23 +42,9 @@ class Log():
             + str(Gtk.get_minor_version()) + "." \
             + str(Gtk.get_micro_version())
         self.write_message("GTK", gtk_version)
-        self.write_separator()
+        self._write_separator()
         # Start time
         self.write_message("Started", "time")
-
-    def write(self, message):
-        """Write stderr message to log file and terminal."""
-        print(message, end="")
-        if "Traceback" in message:
-            self.write_message("stderr", "")
-        with open(self.filename, "a") as f:
-            f.write(message)
-
-    def flush(self):
-        self.terminal.flush()
-
-    def fileno(self):
-        return self.terminal.fileno()
 
     def write_message(self, header, message):
         """Write information to the log file.
@@ -72,10 +59,24 @@ class Log():
             message = message.replace("time", formatted_time)
         message = message.replace("\n", "\n" + " " * 16)
         formatted_message = "%-15s %s\n" % ("[" + header + "]", message)
-        with open(self.filename, "a") as f:
+        with open(self._filename, "a") as f:
             f.write(formatted_message)
 
-    def write_separator(self):
+    def write(self, message):
+        """Write stderr message to log file and terminal."""
+        print(message, end="")
+        if "Traceback" in message:
+            self.write_message("stderr", "")
+        with open(self._filename, "a") as f:
+            f.write(message)
+
+    def flush(self):
+        self._terminal.flush()
+
+    def fileno(self):
+        return self._terminal.fileno()
+
+    def _write_separator(self):
         """Write a neat 80 * # separator to the log file."""
-        with open(self.filename, "a") as f:
+        with open(self._filename, "a") as f:
             f.write("#" * 80 + "\n")

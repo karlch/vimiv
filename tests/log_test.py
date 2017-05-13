@@ -29,6 +29,7 @@ class LogTest(VimivTestCase):
         self.assertIn("[Version]", content)
         self.assertIn("[Python]", content)
         self.assertIn("[GTK]", content)
+        self.assertIn("#" * 80 + "\n", content)  # Proper separator in file
 
     def test_write(self):
         """Write message to log."""
@@ -39,12 +40,6 @@ class LogTest(VimivTestCase):
         self.vimiv["log"].write_message("Date", "time")
         last_line = self.read_log(string=False)[-1]
         self.assertNotIn("time", last_line)
-
-    def test_write_separator(self):
-        """Write separator line to log."""
-        self.vimiv["log"].write_separator()
-        last_line = self.read_log(string=False)[-1]
-        self.assertEqual(last_line, "#" * 80 + "\n")
 
     def test_write_to_stderr(self):
         """Write to stderr and therefore to log."""
