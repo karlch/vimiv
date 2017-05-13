@@ -76,15 +76,6 @@ class Vimiv(Gtk.Application):
         self.aliases = {}
         self.functions = {}
         self.running_tests = running_tests
-        # Set up signals
-        try:
-            GObject.signal_new("widgets-changed", self, GObject.SIGNAL_RUN_LAST,
-                               GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
-            GObject.signal_new("paths-changed", self, GObject.SIGNAL_RUN_LAST,
-                               GObject.TYPE_PYOBJECT, (GObject.TYPE_PYOBJECT,))
-        # TODO Happens in tests, needs to be investigated
-        except RuntimeError:
-            pass
         # Set up all commandline options
         self._init_commandline_options()
 
@@ -443,3 +434,10 @@ class Vimiv(Gtk.Application):
             item: The actual widget to which name will refer.
         """
         self._widgets[name] = widget
+
+
+# Initiate signals for the Vimiv class
+GObject.signal_new("widgets-changed", Vimiv, GObject.SIGNAL_RUN_LAST,
+                   None, (GObject.TYPE_PYOBJECT,))
+GObject.signal_new("paths-changed", Vimiv, GObject.SIGNAL_RUN_LAST,
+                   None, (GObject.TYPE_PYOBJECT,))
