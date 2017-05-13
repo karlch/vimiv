@@ -3,7 +3,7 @@
 
 from unittest import main
 
-from vimiv_testcase import VimivTestCase
+from vimiv_testcase import VimivTestCase, refresh_gui
 
 
 class StatusbarTest(VimivTestCase):
@@ -13,8 +13,6 @@ class StatusbarTest(VimivTestCase):
     def setUpClass(cls):
         cls.init_test(cls)
         cls.statusbar = cls.vimiv["statusbar"]
-        # Remove the initial library error
-        cls.statusbar.error_false()
 
     def test_toggle_statusbar(self):
         """Toggle the statusbar."""
@@ -35,13 +33,11 @@ class StatusbarTest(VimivTestCase):
         self.check_statusbar("ERROR: Test error")
         self.statusbar.message("Test warning", "warning")
         self.check_statusbar("WARNING: Test warning")
-        self.statusbar.message("Test info", "info")
+        self.statusbar.message("Test info", "info", timeout=0.01)
         self.check_statusbar("INFO: Test info")
-        # Timer is running
-        self.assertGreater(self.statusbar.timer_id, 0)
-        # Remove error message by hand
-        self.statusbar.update_info()
-        self.assertNotEqual(self.statusbar.left_label.get_text(),
+        # Remove error message
+        refresh_gui(0.015)
+        self.assertNotEqual(self.statusbar.get_message(),
                             "INFO: Test info")
 
     def test_hidden_message(self):
@@ -55,7 +51,7 @@ class StatusbarTest(VimivTestCase):
         self.assertTrue(self.statusbar.is_visible())
         # Remove error message
         self.statusbar.update_info()
-        self.assertNotEqual(self.statusbar.left_label.get_text(),
+        self.assertNotEqual(self.statusbar.get_message(),
                             "ERROR: Test error")
         self.assertFalse(self.statusbar.is_visible())
         # Show again
@@ -71,7 +67,7 @@ class StatusbarTest(VimivTestCase):
         self.statusbar.clear_status()
         self.assertEqual(self.vimiv["eventhandler"].num_str, "")
         self.assertFalse(self.vimiv["commandline"].search_positions)
-        self.assertNotEqual(self.vimiv["statusbar"].left_label.get_text(),
+        self.assertNotEqual(self.vimiv["statusbar"].get_message(),
                             "Error: Catastrophe")
 
 

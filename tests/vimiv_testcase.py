@@ -93,7 +93,7 @@ class VimivTestCase(TestCase):
 
     def check_statusbar(self, expected_text):
         """Check statusbar for text."""
-        statusbar_text = self.vimiv["statusbar"].left_label.get_text()
+        statusbar_text = self.vimiv["statusbar"].get_message()
         self.assertEqual(expected_text, statusbar_text)
 
     @classmethod

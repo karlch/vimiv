@@ -60,7 +60,7 @@ class FailingArgTest(VimivTestCase):
         expected = "ERROR: Too many arguments for command" \
             if too_many \
             else "ERROR: Missing positional arguments for command"
-        self.assertIn(expected, self.vimiv["statusbar"].left_label.get_text())
+        self.assertIn(expected, self.vimiv["statusbar"].get_message())
 
 
 if __name__ == "__main__":

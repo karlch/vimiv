@@ -64,7 +64,7 @@ class FileActionsTest(VimivTestCase):
         # File does not contain exif data
         self.vimiv.paths = [os.path.abspath("arch-logo.png")]
         self.vimiv["fileextras"].format_files("formatted_%Y_")
-        message = self.vimiv["statusbar"].left_label.get_text()
+        message = self.vimiv["statusbar"].get_message()
         self.assertIn("No exif data for", message)
 
     def test_clipboard(self):
