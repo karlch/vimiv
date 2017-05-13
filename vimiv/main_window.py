@@ -141,6 +141,8 @@ class MainWindow(Gtk.ScrolledWindow):
                 else:
                     self._app["eventhandler"].num_str = str(index + 1)
                     self.image.move_pos()
+            else:
+                self._app["statusbar"].update_info()
         # We need to check again as populate was called
         if not self._app.paths:
             self.hide()

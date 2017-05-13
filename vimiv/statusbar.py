@@ -68,9 +68,6 @@ class Statusbar(Gtk.Grid):
         self.set_margin_bottom(padding)
         self.separator = Gtk.Separator()
 
-        # Connect signals
-        self.app.connect("widgets-changed", self.update_info)
-
     def message(self, message, style="error"):
         """Push a message to the statusbar.
 
@@ -114,7 +111,7 @@ class Statusbar(Gtk.Grid):
             Gdk.Screen.get_default(), css_provider,
             Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
 
-    def update_info(self, app=None, widget=None):
+    def update_info(self):
         """Update the statusbar and the window title."""
         # Return if it is locked
         if self.lock:
