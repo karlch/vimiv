@@ -156,39 +156,45 @@ class Library(Gtk.TreeView):
         count = path.get_indices()[0]
         fil = self.files[count]
         self[os.getcwd()] = fil
-        # Tags
         if os.getcwd() == self._app["tags"].directory:
-            # Close if selected twice
-            if fil == self._app["tags"].last:
-                self.toggle()
-            self._app["tags"].load(fil)
-            return
-        # Rest
-        if os.path.isdir(fil):  # Open the directory
+            self._tag_select(fil, close)
+        elif os.path.isdir(fil):  # Open directory
             self.move_up(fil)
-        else:  # Focus the image and populate a new list from the dir
-            # If thumbnail toggled, go out
-            if self._app["thumbnail"].toggled:
-                self._app["thumbnail"].toggle()
-                self.grab_focus()
-            if self._app.paths and fil in self._app.paths[self._app.index]:
-                close = True  # Close if file selected twice
-            index = 0  # Catch directories to focus correctly
-            for f in self.files:
-                if f == fil:
-                    break
-                elif os.path.isfile(f):
-                    index += 1
-            self._app.populate(self.files)
-            if self._app.paths:
-                self.set_hexpand(False)
-                self._app["main_window"].show()
-                # Close the library depending on key and repeat
-                if close:
-                    # We do not need to update the image as it is done later
-                    # anyway
-                    self.toggle(update_image=False)
-                self._app["image"].move_index(delta=index)
+        else:
+            self._image_select(fil, close)
+
+    def _tag_select(self, tagname, close):
+        # Also close if selected twice
+        if tagname == self._app["tags"].last or close:
+            self.toggle(update_image=False)
+        self._app["tags"].load(tagname)
+
+    def _image_select(self, basename, close):
+        image = os.path.abspath(basename)
+        # Close thumbnail
+        if self._app["thumbnail"].toggled:
+            self._app["thumbnail"].toggle()
+            self.grab_focus()
+        if self._app.paths and image == self._app.paths[self._app.index]:
+            close = True  # Close if file selected twice
+        index = 0  # Catch directories to focus correctly
+        for f in self.files:
+            if f == basename:
+                break
+            elif os.path.isfile(f):
+                index += 1
+        # Repopulate
+        visible_image = self._app.get_pos(True, "im")
+        self._app.populate(self.files)
+        if self._app.paths:
+            self.set_hexpand(False)
+            # Only load a new image if needed
+            if visible_image != image:
+                self._app["image"].move_index(delta=index - self._app.index)
+            # Close the library depending on key and repeat
+            if close:
+                self.toggle(update_image=False)
+            self._app["main_window"].show()
 
     def move_up(self, directory="..", start=False):
         """Move up a directory or to a specific one in the library.

@@ -317,6 +317,11 @@ class Vimiv(Gtk.Application):
         return position
 
     def populate(self, args, recursive=False, shuffle_paths=False):
+        """Simple wrapper for helpers.populate.
+
+        Additional args:
+            update_index: If True, also update index.
+        """
         self.paths, self.index = populate(args, recursive, shuffle_paths)
 
     def _init_commandline_options(self):
