@@ -111,11 +111,12 @@ class FileExtras(object):
         """Receive and set main vimiv application.
 
         Args:
-            app: The main vimiv class to interact with.
-            clipboard: Gtk Clipboard depending on config.
+            _app: The main vimiv class to interact with.
+            _use_primary: True if operating on primary clipboard. Else clipboard
+                is used.
         """
-        self.app = app
-        self.use_primary = self.app.settings["GENERAL"]["copy_to_primary"]
+        self._app = app
+        self._use_primary = self._app.settings["GENERAL"]["copy_to_primary"]
 
     def format_files(self, string):
         """Format image names in filelist according to a formatstring.
@@ -127,29 +128,29 @@ class FileExtras(object):
             string: Formatstring to use.
         """
         # Catch problems
-        if self.app["library"].is_focus():
+        if self._app["library"].is_focus():
             message = "Format only works on opened image files"
-            self.app["statusbar"].message(message, "info")
+            self._app["statusbar"].message(message, "info")
             return
-        if not self.app.paths:
-            self.app["statusbar"].message("No files in path", "info")
+        if not self._app.paths:
+            self._app["statusbar"].message("No files in path", "info")
             return
 
         # Check if exifdata is available and needed
         tofind = ("%" in string)
         if tofind:
             try:
-                for fil in self.app.paths:
+                for fil in self._app.paths:
                     with Image.open(fil) as im:
                         exif = im._getexif()
                         if not (exif and 306 in exif):
                             raise AttributeError
             except AttributeError:
-                self.app["statusbar"].message(
+                self._app["statusbar"].message(
                     "No exif data for %s available" % (fil), "error")
                 return
 
-        for i, fil in enumerate(self.app.paths):
+        for i, fil in enumerate(self._app.paths):
             ending = os.path.splitext(fil)[1]
             num = "%03d" % (i + 1)
             # Exif stuff
@@ -171,7 +172,7 @@ class FileExtras(object):
             outstring += num + ending
             os.rename(fil, outstring)
 
-        self.app.emit("paths-changed", self)
+        self._app.emit("paths-changed", self)
 
     def copy_name(self, abspath=False):
         """Copy image name to clipboard.
@@ -180,22 +181,22 @@ class FileExtras(object):
             abspath: Use absolute path or only the basename.
         """
         # Get name to copy
-        name = self.app.get_pos(True)
+        name = self._app.get_pos(True)
         if abspath:
             name = os.path.abspath(name)
         else:
             name = os.path.basename(name)
         # Set clipboard
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY) \
-            if self.use_primary \
+            if self._use_primary \
             else Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         # Text to clipboard
         clipboard.set_text(name, -1)
         # Info message
         message = "Copied <b>" + name + "</b> to %s" % \
-            ("primary" if self.use_primary else "clipboard")
-        self.app["statusbar"].message(message, "info")
+            ("primary" if self._use_primary else "clipboard")
+        self._app["statusbar"].message(message, "info")
 
     def toggle_clipboard(self):
         """Toggle between primary and clipboard selection."""
-        self.use_primary = not self.use_primary
+        self._use_primary = not self._use_primary
