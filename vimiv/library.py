@@ -72,9 +72,9 @@ class Library(Gtk.TreeView):
         # Handle key events
         self.add_events(Gdk.EventMask.KEY_PRESS_MASK)
         self.connect("key_press_event",
-                     self._app["eventhandler"].key_pressed, "LIBRARY")
+                     self._app["eventhandler"].on_key_press, "LIBRARY")
         self.connect("button_press_event",
-                     self._app["eventhandler"].clicked, "LIBRARY")
+                     self._app["eventhandler"].on_click, "LIBRARY")
         # Add the columns
         for i, name in enumerate(["Num", "Name", "Size", "M"]):
             renderer = Gtk.CellRendererText()

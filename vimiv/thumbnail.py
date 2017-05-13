@@ -52,9 +52,9 @@ class Thumbnail(Gtk.IconView):
         self._liststore = Gtk.ListStore(GdkPixbuf.Pixbuf, str)
         self.connect("item-activated", self._on_activated)
         self.connect("key_press_event",
-                     self._app["eventhandler"].key_pressed, "THUMBNAIL")
+                     self._app["eventhandler"].on_key_press, "THUMBNAIL")
         self.connect("button_press_event",
-                     self._app["eventhandler"].clicked, "THUMBNAIL")
+                     self._app["eventhandler"].on_click, "THUMBNAIL")
         self.set_model(self._liststore)
         self.set_pixbuf_column(0)
         self.set_markup_column(1)

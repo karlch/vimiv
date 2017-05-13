@@ -34,7 +34,7 @@ class MainWindow(Gtk.ScrolledWindow):
         self.set_vexpand(True)
         # Image is default
         self.add(self.image)
-        self.connect("key_press_event", self._app["eventhandler"].key_pressed,
+        self.connect("key_press_event", self._app["eventhandler"].on_key_press,
                      "IMAGE")
 
         # Connect signals

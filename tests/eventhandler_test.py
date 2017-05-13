@@ -57,16 +57,12 @@ class KeyHandlerTest(VimivTestCase):
         self.vimiv["eventhandler"].num_append("2")
         self.assertEqual(self.vimiv["eventhandler"].num_str, "2")
         # Add another number, should change the timer_id
-        id_before = self.vimiv["eventhandler"].timer_id
         self.vimiv["eventhandler"].num_append("3")
-        id_after = self.vimiv["eventhandler"].timer_id
-        self.assertNotEqual(id_before, id_after)
         self.assertEqual(self.vimiv["eventhandler"].num_str, "23")
         # Clear manually, GLib timeout should definitely work as well if the
         # code runs without errors
         self.vimiv["eventhandler"].num_clear()
         self.assertFalse(self.vimiv["eventhandler"].num_str)
-        self.assertFalse(self.vimiv["eventhandler"].timer_id)
 
     def test_receive_number(self):
         """Get a number from numstr and clear it."""

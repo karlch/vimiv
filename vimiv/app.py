@@ -11,7 +11,7 @@ from vimiv.commandline import CommandLine
 from vimiv.commands import Commands
 from vimiv.completions import Completion
 from vimiv.configparser import parse_config, set_defaults
-from vimiv.eventhandler import KeyHandler
+from vimiv.eventhandler import EventHandler
 from vimiv.fileactions import FileExtras, populate
 from vimiv.information import Information
 from vimiv.library import Library
@@ -358,7 +358,7 @@ class Vimiv(Gtk.Application):
 
     def _init_widgets(self):
         """Create all the other widgets and add them to the class."""
-        self["eventhandler"] = KeyHandler(self, self.settings)
+        self["eventhandler"] = EventHandler(self)
         self["commandline"] = CommandLine(self, self.settings)
         self["tags"] = TagHandler(self)
         self["mark"] = Mark(self, self.settings)
