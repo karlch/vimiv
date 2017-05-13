@@ -64,6 +64,9 @@ class Thumbnail(Gtk.IconView):
         self.last_focused = ""
         self._thumbnail_manager = ThumbnailManager()
 
+        # Signals
+        self._app["mark"].connect("marks-changed", self._on_marks_changed)
+
     def _on_activated(self, iconview, path):
         """Select and show image when thumbnail was activated.
 
@@ -307,3 +310,10 @@ class Thumbnail(Gtk.IconView):
 
     def get_cache_directory(self):
         return self._thumbnail_manager.thumbnail_store.base_dir
+
+    def _on_marks_changed(self, mark, changed):
+        """Reload names if marks changed."""
+        if self.toggled:
+            for name in changed:
+                self.reload(name, False)
+        self._app["statusbar"].update_info()  # Do this once from here

@@ -91,6 +91,7 @@ class Library(Gtk.TreeView):
 
         # Connect signals
         self._app.connect("paths-changed", self._on_paths_changed)
+        self._app["mark"].connect("marks-changed", self._on_marks_changed)
 
     def toggle(self, update_image=True):
         """Toggle the library.
@@ -434,6 +435,14 @@ class Library(Gtk.TreeView):
             # Reload remembering path
             self[os.getcwd()] = self._app.get_pos(True, "lib")
             self.reload(os.getcwd())
+
+    def _on_marks_changed(self, mark, changed):
+        """Reload names if marks changed."""
+        if self.grid.is_visible():
+            model = self.get_model()
+            for i, name in enumerate(self.files):
+                model[i][3] = "[*]" \
+                    if os.path.abspath(name) in mark.marked else ""
 
     def __getitem__(self, directory):
         """Convenience method to access saved positions via self[directory].

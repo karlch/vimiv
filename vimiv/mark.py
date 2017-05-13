@@ -3,34 +3,38 @@
 
 import os
 
+from gi.repository import GObject
 
-class Mark(object):
+
+class Mark(GObject.Object):
     """Handle marking of images.
 
     Attributes:
-        app: The main vimiv application to interact with.
         marked: List of currently marked images.
-        marked_bak: List of last marked images to be able to toggle mark status.
+
+        _app: The main vimiv application to interact with.
+        _marked_bak: List of last marked images to be able to toggle marks.
     """
 
     def __init__(self, app, settings):
-        self.app = app
+        super(Mark, self).__init__()
+        self._app = app
         self.marked = []
-        self.marked_bak = []
+        self._marked_bak = []
 
     def mark(self):
         """Mark the current image."""
         # Check which image
-        current = os.path.abspath(os.path.basename(self.app.get_pos(True)))
+        current = os.path.abspath(os.path.basename(self._app.get_pos(True)))
         # Toggle the mark
         if os.path.isfile(current):
             if current in self.marked:
                 self.marked.remove(current)
             else:
                 self.marked.append(current)
-            self.mark_reload(False, [current])
+            self.emit("marks-changed", [current])
         else:
-            self.app["statusbar"].message(
+            self._app["statusbar"].message(
                 "Marking directories is not supported", "warning")
 
     def toggle_mark(self):
@@ -40,48 +44,48 @@ class Mark(object):
         images are re-marked.
         """
         if self.marked:
-            self.marked_bak = self.marked
+            self._marked_bak = self.marked
             self.marked = []
         else:
-            self.marked, self.marked_bak = self.marked_bak, self.marked
-        to_reload = self.marked + self.marked_bak
-        self.mark_reload(False, to_reload)
+            self.marked, self._marked_bak = self._marked_bak, self.marked
+        to_reload = self.marked + self._marked_bak
+        self.emit("marks-changed", to_reload)
 
     def mark_all(self):
         """Mark all images."""
         # Get the correct filelist
-        if self.app["library"].is_focus():
+        if self._app["library"].is_focus():
             files = []
-            for fil in self.app["library"].files:
+            for fil in self._app["library"].files:
                 files.append(os.path.abspath(fil))
-        elif self.app.paths:
-            files = self.app.paths
+        elif self._app.paths:
+            files = self._app.paths
         else:
-            self.app["statusbar"].message("No image to mark", "error")
+            self._app["statusbar"].message("No image to mark", "error")
         # Add all to the marks
         for fil in files:
             if os.path.isfile(fil) and fil not in self.marked:
                 self.marked.append(fil)
-        self.mark_reload()
+        self.emit("marks-changed", files)
 
     def mark_between(self):
         """Mark all images between the two last marks."""
         # Check if there are enough marks
         if len(self.marked) < 2:
-            self.app["statusbar"].message("Not enough marks", "error")
+            self._app["statusbar"].message("Not enough marks", "error")
             return
         start = self.marked[-2]
         end = self.marked[-1]
         # Get the correct filelist
-        if self.app["library"].is_focus():
+        if self._app["library"].is_focus():
             files = []
-            for fil in self.app["library"].files:
+            for fil in self._app["library"].files:
                 if not os.path.isdir(fil):
                     files.append(os.path.abspath(fil))
-        elif self.app.paths:
-            files = self.app.paths
+        elif self._app.paths:
+            files = self._app.paths
         else:
-            self.app["statusbar"].message("No image to mark", "error")
+            self._app["statusbar"].message("No image to mark", "error")
         # Find the images to mark
         for i, image in enumerate(files):
             if image == start:
@@ -90,21 +94,8 @@ class Mark(object):
                 end = i
         for i in range(start + 1, end):
             self.marked.insert(-1, files[i])
-        self.mark_reload()
+        self.emit("marks-changed", self.marked)
 
-    def mark_reload(self, reload_all=True, current=None):
-        """Reload all information which contains marks."""
-        # Update lib
-        if self.app["library"].grid.is_visible():
-            model = self.app["library"].get_model()
-            for i, name in enumerate(self.app["library"].files):
-                model[i][3] = "[*]" \
-                    if os.path.abspath(name) in self.marked \
-                    else ""
-        # Reload thumb names
-        if self.app["thumbnail"].toggled:
-            reload_list = self.app.paths if reload_all else current
-            for image in reload_list:
-                self.app["thumbnail"].reload(image, False)
 
-        self.app["statusbar"].update_info()
+GObject.signal_new("marks-changed", Mark, GObject.SIGNAL_RUN_LAST, None,
+                   (GObject.TYPE_PYOBJECT,))
