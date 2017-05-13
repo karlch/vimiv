@@ -89,9 +89,7 @@ class CommandLine(Gtk.Entry):
             entry: The Gtk.Entry from which the command comes.
         """
         # Only close completions if currently tabbing through results
-        if self.app["completions"].tab_presses != 0:
-            self.app["completions"].activate(None, None, None)
-            self.app["completions"].reset()
+        if self.app["completions"].activate_tab_completion():
             return
         # cmd from input
         command = entry.get_text()

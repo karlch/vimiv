@@ -18,14 +18,6 @@ class CompletionsTest(VimivTestCase):
         cls.init_test(cls)
         cls.completions = cls.vimiv["completions"]
 
-    def test_reset(self):
-        """Reset the internal completion values."""
-        self.completions.tab_presses = 42
-        self.completions.tab_position = 42
-        self.completions.reset()
-        self.assertEqual(self.completions.tab_presses, 0)
-        self.assertEqual(self.completions.tab_position, 0)
-
     def test_internal_completion(self):
         """Completion of internal commands."""
         self.vimiv["commandline"].set_text(":a")
@@ -156,7 +148,8 @@ class CompletionsTest(VimivTestCase):
         selected_text = liststore[selected_index][0]
         self.assertEqual(expected_text, selected_text)
         # Now activate the completion
-        self.completions.activate(None, None, None)
+        self.completions.emit("row-activated",
+                              self.completions.get_cursor()[0], None)
         entry_text = self.vimiv["commandline"].get_text()
         expected_text = ":copy_abspath"
         self.assertEqual(expected_text, entry_text)
