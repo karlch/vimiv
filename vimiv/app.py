@@ -217,7 +217,7 @@ class Vimiv(Gtk.Application):
                 self["library"].grid.hide()
             self["main_window"].grab_focus()
             # Start in slideshow mode?
-            if self["slideshow"].at_start:
+            if self.settings["GENERAL"]["start_slideshow"]:
                 self["slideshow"].toggle()
         else:
             # Slideshow without paths makes no sense

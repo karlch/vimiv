@@ -49,36 +49,37 @@ class SlideshowTest(VimivTestCase):
 
     def test_set_delay(self):
         """Set slideshow delay."""
-        self.assertEqual(self.slideshow.delay, 2.0)
+        self.assertEqual(self.slideshow.get_delay(), 2.0)
         self.slideshow.set_delay("3.0")
-        self.assertEqual(self.slideshow.delay, 3.0)
+        self.assertEqual(self.slideshow.get_delay(), 3.0)
         self.slideshow.set_delay(None, "-0.2")
-        self.assertEqual(self.slideshow.delay, 2.8)
+        self.assertEqual(self.slideshow.get_delay(), 2.8)
         self.slideshow.set_delay(None, "+0.4")
-        self.assertAlmostEqual(self.slideshow.delay, 3.2)
+        self.assertAlmostEqual(self.slideshow.get_delay(), 3.2)
         # Shrink with num_str
         self.vimiv["eventhandler"].num_str = "2"
         self.slideshow.set_delay(None, "-0.2")
-        self.assertAlmostEqual(self.slideshow.delay, 2.8)
+        self.assertAlmostEqual(self.slideshow.get_delay(), 2.8)
         # Set via toggle
         self.vimiv["eventhandler"].num_str = "2"
         self.slideshow.toggle()
-        self.assertEqual(self.slideshow.delay, 2.0)
+        self.assertEqual(self.slideshow.get_delay(), 2.0)
         # Set to a too small value
         self.slideshow.set_delay("0.1")
-        self.assertEqual(self.slideshow.delay, 0.5)
+        self.assertEqual(self.slideshow.get_delay(), 0.5)
         ##################
         #  Command line  #
         ##################
         # Increase by value
         self.run_command("slideshow_delay 03")
-        self.assertEqual(self.slideshow.delay, 0.8)
+        self.assertEqual(self.slideshow.get_delay(), 0.8)
         # Fail because of invalid argument
         self.run_command("slideshow_delay value")
         self.check_statusbar("ERROR: Argument for delay must be of type float")
         # Set to default
         self.run_command("set slideshow_delay")
-        self.assertEqual(self.slideshow.delay, self.slideshow.default_delay)
+        self.assertEqual(self.slideshow.get_delay(),
+                         self.slideshow.get_default_delay())
         # Fail because of invalid argument
         self.run_command("set slideshow_delay value")
         self.check_statusbar("ERROR: Argument for delay must be of type float")
@@ -89,16 +90,20 @@ class SlideshowTest(VimivTestCase):
         self.slideshow.toggle()
         # Set delay when running
         self.slideshow.set_delay("0.5")
-        self.assertEqual(self.slideshow.delay, 0.5)
         for i in range(1, 3):
             refresh_gui(self.vimiv)
             self.assertEqual(self.vimiv.index, i)
         refresh_gui(self.vimiv)
 
+    def test_get_formatted_delay(self):
+        """Read out the formated delay from the slideshow."""
+        output = self.slideshow.get_formatted_delay()
+        self.assertIn("2.0s", output)
+
     def tearDown(self):
         if self.slideshow.running:
             self.slideshow.toggle()
-        self.slideshow.delay = 2.0
+        self.slideshow.set_delay(2.0)
 
 
 if __name__ == "__main__":

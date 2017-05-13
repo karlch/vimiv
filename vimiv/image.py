@@ -165,17 +165,6 @@ class Image(Gtk.Image):
         # Load the image at path into self.pixbuf_* and show it
         self.load()
 
-        # Info if slideshow returns to beginning
-        if self._app["slideshow"].running:
-            if self._app.index is self._app["slideshow"].start_index:
-                message = "Back at beginning of slideshow"
-                self._app["statusbar"].lock = True
-                self._app["statusbar"].message(message, "info")
-            else:
-                self._app["statusbar"].lock = False
-
-        return True  # for the slideshow
-
     def load(self):
         """Load an image using GdkPixbufLoader."""
         path = self._app.paths[self._app.index]

@@ -162,8 +162,7 @@ class Statusbar(Gtk.Grid):
             if ("IMAGE" in mode or "MANIPULATE" in mode) and self._app.paths \
             and self._app.paths[self._app.index] in self._app["mark"].marked \
             else ""
-        slideshow = \
-            "[slideshow - {0:.1f}s]".format(self._app["slideshow"].delay) \
+        slideshow = self._app["slideshow"].get_formatted_delay() \
             if self._app["slideshow"].running else ""
         message = "{0}  {1}".format(mark, slideshow)
         self._center_label.set_text(message)
