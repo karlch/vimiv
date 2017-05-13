@@ -205,11 +205,7 @@ class Manipulate(Gtk.ScrolledWindow):
                     self.app["image"].pixbuf_original.rotate_simple(
                         (90 * cwise))
                 if self.app["image"].fit_image:
-                    # TODO private accessed
-                    self.app["image"].zoom_percent = \
-                        self.app["image"]._get_zoom_percent_to_fit(
-                            self.app["image"].fit_image)
-                self.app["image"].update(False)
+                    self.app["image"].zoom_to(0, self.app["image"].fit_image)
             if rotate_file:
                 for fil in images:
                     if fil in self.simple_manipulations:
