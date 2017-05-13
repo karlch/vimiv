@@ -57,9 +57,6 @@ class Image(Gtk.Image):
         self._size = (0, 0)
         self._timer_id = 0
 
-        # Connect signals
-        self._app.connect("widgets-changed", self._on_widgets_changed)
-
     def update(self, update_info=True):
         """Show the final image.
 
@@ -389,11 +386,3 @@ class Image(Gtk.Image):
             delay = self.pixbuf_iter.get_delay_time()
             self._timer_id = GLib.timeout_add(delay, self._play_gif) \
                 if delay >= 0 else 0
-
-    def _on_widgets_changed(self, app, widget):
-        """Rezoom the image if necessary when the layout changed."""
-        if self._app.paths and not self._app["thumbnail"].toggled:
-            if self.fit_image:
-                self.zoom_to(0, self.fit_image)
-            else:
-                self.update()

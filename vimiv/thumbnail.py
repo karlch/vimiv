@@ -69,9 +69,6 @@ class Thumbnail(Gtk.IconView):
         self.last_focused = ""
         self.thumbnail_manager = ThumbnailManager()
 
-        # Connect signals
-        self.app.connect("widgets-changed", self._on_widgets_changed)
-
     def clicked(self, iconview, path):
         """Select and show image when thumbnail was activated.
 
@@ -313,13 +310,3 @@ class Thumbnail(Gtk.IconView):
 
     def get_zoom_level(self):
         return self.zoom_levels[self.zoom_level_index]
-
-    def _on_widgets_changed(self, app, widget):
-        """Recalculate thumbnails if necessary when the layout changed.
-
-        Args:
-            app: Vimiv application that emitted the signal.
-            widget: Widget that has changed.
-        """
-        if self.toggled:
-            self.calculate_columns()

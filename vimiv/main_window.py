@@ -38,6 +38,7 @@ class MainWindow(Gtk.ScrolledWindow):
                      "IMAGE")
 
         # Connect signals
+        self._app.connect("widgets-changed", self._on_widgets_changed)
         self._app.connect("paths-changed", self._on_paths_changed)
 
     def switch_to_child(self, new_child):
@@ -111,6 +112,13 @@ class MainWindow(Gtk.ScrolledWindow):
             h_adj.set_value(h_adj.get_value() + h_step)
         self.set_hadjustment(h_adj)
         self.set_vadjustment(v_adj)
+
+    def _on_widgets_changed(self, app, widget):
+        """Recalculate thumbnails or rezoom image when the layout changed."""
+        if self.thumbnail.toggled:
+            self.thumbnail.calculate_columns()
+        elif self._app.paths and self.image.fit_image:
+            self.image.zoom_to(0, self.image.fit_image)
 
     def _on_paths_changed(self, app, widget):
         """Reload paths image and/or thumbnail when paths have changed."""
