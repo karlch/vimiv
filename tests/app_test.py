@@ -57,9 +57,7 @@ class AppTest(VimivTestCase):
         self.assertIn("/tmp/vimiv-", os.getenv("XDG_CONFIG_HOME"))
         self.assertIn("/tmp/vimiv-", os.getenv("XDG_DATA_HOME"))
         # Thumbnail, Tag and Trash directory should contain tmp
-        self.assertIn(
-            "/tmp/",
-            self.vimiv["thumbnail"].thumbnail_manager.thumbnail_store.base_dir)
+        self.assertIn("/tmp/", self.vimiv["thumbnail"].get_cache_directory())
         self.assertIn("/tmp/", self.vimiv["tags"].directory)
         trash_dir = self.vimiv["manipulate"].trash_manager.get_files_directory()
         info_dir = self.vimiv["manipulate"].trash_manager.get_info_directory()

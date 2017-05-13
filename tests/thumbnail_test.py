@@ -45,7 +45,7 @@ class ThumbnailTest(VimivTestCase):
     def test_iconview_clicked(self):
         """Select thumbnail."""
         path = Gtk.TreePath([1])
-        self.thumb.clicked(None, path)
+        self.thumb.emit("item-activated", path)
         self.assertFalse(self.thumb.toggled)
         self.assertFalse(self.thumb.is_focus())
         expected_image = os.path.abspath("arch_001.jpg")
@@ -60,13 +60,11 @@ class ThumbnailTest(VimivTestCase):
 
     def test_reload(self):
         """Reload and name thumbnails."""
-        liststore_iter = self.thumb.liststore.get_iter(0)
-        name = self.thumb.liststore.get_value(liststore_iter, 1)
+        name = self._get_thumbnail_name(0)
         self.assertEqual(name, "arch-logo")
         self.vimiv["mark"].mark()
         self.thumb.reload(self.vimiv.paths[0])
-        new_liststore_iter = self.thumb.liststore.get_iter(0)
-        name = self.thumb.liststore.get_value(new_liststore_iter, 1)
+        name = self._get_thumbnail_name(0)
         self.assertEqual(name, "arch-logo [*]")
 
     def test_move(self):
@@ -119,7 +117,7 @@ class ThumbnailTest(VimivTestCase):
         self.thumb.zoom(True)
         refresh_gui()
         self.assertEqual(self.thumb.get_zoom_level(), (256, 256))
-        pixbuf = self.thumb.liststore[0][0]
+        pixbuf = self._get_thumbnail_pixbuf(0)
         width = pixbuf.get_width()
         height = pixbuf.get_height()
         scale = max(width, height)
@@ -137,6 +135,14 @@ class ThumbnailTest(VimivTestCase):
         self.assertEqual(self.thumb.get_zoom_level(), (256, 256))
         self.vimiv["window"].zoom(False)
         self.assertEqual(self.thumb.get_zoom_level(), (128, 128))
+
+    def _get_thumbnail_name(self, index):
+        model = self.thumb.get_model()
+        return model.get_value(model.get_iter(index), 1)
+
+    def _get_thumbnail_pixbuf(self, index):
+        model = self.thumb.get_model()
+        return model.get_value(model.get_iter(index), 0)
 
     def tearDown(self):
         if self.thumb.toggled:

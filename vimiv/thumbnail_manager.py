@@ -28,8 +28,9 @@ class ThumbnailManager:
     """Provides an asynchronous mechanism to load thumbnails.
 
     Attributes:
-        large: the thumbnail managing standard specifies two thumbnail sizes
-               256x256 (large) and 128x128 (normal)
+        thumbnail_store: ThumbnailStore class with the loading mechanism.
+        large: The thumbnail managing standard specifies two thumbnail sizes.
+            256x256 (large) and 128x128 (normal)
         default_icon: Default icon if thumbnails are not yet loaded.
         error_icon: The path to the icon which is used, when thumbnail creation
                     fails.
