@@ -11,9 +11,10 @@ class TagHandler(object):
     """Handle tags.
 
     Attributes:
-        app: The main vimiv application to interact with.
         directory: Directory in which tags are stored.
         last: Last tag that was loaded.
+
+        _app: The main vimiv application to interact with.
     """
 
     def __init__(self, app):
@@ -22,7 +23,7 @@ class TagHandler(object):
         Args:
             app: The main vimiv application to interact with.
         """
-        self.app = app
+        self._app = app
         # Create tags directory
         self.directory = os.path.join(GLib.get_user_data_dir(), "vimiv", "Tags")
         os.makedirs(self.directory, exist_ok=True)
@@ -37,22 +38,9 @@ class TagHandler(object):
                 os.rename(old_path, new_path)
             message = "Moved tags from the old directory %s " \
                 "to the new location %s." % (old_directory, self.directory)
-            error_message(message, running_tests=self.app.running_tests)
+            error_message(message, running_tests=self._app.running_tests)
             os.rmdir(old_directory)
         self.last = ""
-
-    def read(self, tagname):
-        """Read a tag and return the images in it.
-
-        Args:
-            tagname: Name of tag to operate on.
-
-        Return:
-            List of images in the tag called tagname.
-        """
-        tagfile_name = os.path.join(self.directory, tagname)
-        tagged_images = read_file(tagfile_name)
-        return tagged_images
 
     def write(self, imagelist, tagname):
         """Add a list of images to a tag.
@@ -62,9 +50,9 @@ class TagHandler(object):
             tagname: Name of tag to operate on.
         """
         # Backup required for tests
-        imagelist = imagelist if imagelist else self.app["mark"].marked
+        imagelist = imagelist if imagelist else self._app["mark"].marked
         tagfile_name = os.path.join(self.directory, tagname)
-        tagged_images = self.read(tagname)
+        tagged_images = self._read(tagname)
         with open(tagfile_name, "a") as tagfile:
             for image in imagelist:
                 if image not in tagged_images:
@@ -81,7 +69,7 @@ class TagHandler(object):
             os.remove(tagfile_name)
         else:
             err = "Tagfile '%s' does not exist" % (tagname)
-            self.app["statusbar"].message(err, "error")
+            self._app["statusbar"].message(err, "error")
 
     def load(self, tagname):
         """Load all images in a tag as current filelist.
@@ -91,22 +79,35 @@ class TagHandler(object):
         """
         os.chdir(self.directory)
         # Read file and get all tagged images as list
-        tagged_images = self.read(tagname)
+        tagged_images = self._read(tagname)
         # Populate filelist
-        self.app.populate(tagged_images)
-        if self.app.paths:
-            self.app["main_window"].show()
-            self.app["library"].set_hexpand(False)
-            self.app["image"].load()
+        self._app.populate(tagged_images)
+        if self._app.paths:
+            self._app["main_window"].show()
+            self._app["library"].set_hexpand(False)
+            self._app["image"].load()
             # Focus in library if it is open
-            if self.app["library"].grid.is_visible():
-                self.app["library"].reload(self.directory)
-                tag_pos = self.app["library"].files.index(tagname)
-                self.app["library"].set_cursor(Gtk.TreePath(tag_pos),
-                                               None, False)
+            if self._app["library"].grid.is_visible():
+                self._app["library"].reload(self.directory)
+                tag_pos = self._app["library"].files.index(tagname)
+                self._app["library"].set_cursor(Gtk.TreePath(tag_pos),
+                                                None, False)
             # Remember last tag selected
             self.last = tagname
         else:
             message = "Tagfile '%s' has no valid images" % (tagname)
-            self.app["statusbar"].message(message, "error")
+            self._app["statusbar"].message(message, "error")
             self.last = ""
+
+    def _read(self, tagname):
+        """Read a tag and return the images in it.
+
+        Args:
+            tagname: Name of tag to operate on.
+
+        Return:
+            List of images in the tag called tagname.
+        """
+        tagfile_name = os.path.join(self.directory, tagname)
+        tagged_images = read_file(tagfile_name)
+        return tagged_images
