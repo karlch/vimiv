@@ -143,6 +143,8 @@ class MainWindow(Gtk.ScrolledWindow):
                     self.image.move_pos()
             else:
                 self._app["statusbar"].update_info()
+                if not self.thumbnail.toggled:
+                    self.image.move_pos(forward=False)
         # We need to check again as populate was called
         if not self._app.paths:
             self.hide()
