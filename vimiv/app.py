@@ -250,7 +250,7 @@ class Vimiv(Gtk.Application):
         for image in self["mark"].marked:
             print(image)
         # Run remaining rotate and flip threads
-        self["manipulate"].thread_for_simple_manipulations()
+        self["manipulate"].run_simple_manipulations()
         # Save the history
         histfile = os.path.join(GLib.get_user_data_dir(), "vimiv", "history")
         histfile = open(histfile, "w")

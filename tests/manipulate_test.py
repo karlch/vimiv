@@ -94,10 +94,8 @@ class ManipulateTest(VimivTestCase):
         # Rotate the file
         with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
             self.assertFalse(im.width < im.height)
-        self.assertIn(self.vimiv.paths[self.vimiv.index],
-                      self.manipulate.simple_manipulations.keys())
-        self.manipulate.thread_for_simple_manipulations()
-        while self.manipulate.simple_manipulations.keys():
+        self.manipulate.run_simple_manipulations()
+        while self.manipulate.threads_running():
             sleep(0.05)
         with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
             self.assertTrue(im.width < im.height)
@@ -107,10 +105,8 @@ class ManipulateTest(VimivTestCase):
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertFalse(is_portrait)
         # Rotate the file
-        self.assertIn(self.vimiv.paths[self.vimiv.index],
-                      self.manipulate.simple_manipulations.keys())
-        self.manipulate.thread_for_simple_manipulations()
-        while self.manipulate.simple_manipulations.keys():
+        self.manipulate.run_simple_manipulations()
+        while self.manipulate.threads_running():
             sleep(0.05)
         with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
             self.assertFalse(im.width < im.height)
@@ -180,9 +176,9 @@ class ManipulateTest(VimivTestCase):
         self.assertFalse(self.manipulate.is_visible())
         self.assertFalse(self.manipulate.sliders["bri"].is_focus())
         self.assertTrue(self.vimiv["main_window"].is_focus())
-        # Close via button
+        # Close
         self.manipulate.toggle()
-        self.manipulate.button_clicked(None, False)
+        self.manipulate.finish(False)
         self.assertFalse(self.manipulate.sliders["bri"].is_focus())
         self.assertTrue(self.vimiv["main_window"].is_focus())
 
@@ -196,13 +192,13 @@ class ManipulateTest(VimivTestCase):
         # Leaving with False should not change the image
         self.manipulate.toggle()
         self.manipulate.manipulations = {"bri": 20, "con": 20, "sha": 20}
-        self.manipulate.button_clicked(None, False)
+        self.manipulate.finish(False)
         self.assertTrue(compare_images(tmpfile,
                                        self.vimiv.paths[self.vimiv.index]))
         # Image is different to copied backup after manipulations
         self.manipulate.toggle()
         self.manipulate.manipulations = {"bri": 20, "con": 20, "sha": 20}
-        self.manipulate.button_clicked(None, True)
+        self.manipulate.finish(True)
         self.assertFalse(compare_images(tmpfile,
                                         self.vimiv.paths[self.vimiv.index]))
 
@@ -220,7 +216,7 @@ class ManipulateTest(VimivTestCase):
         self.manipulate.focus_slider("val")
         self.check_statusbar("ERROR: No slider called val")
         # Leave
-        self.manipulate.button_clicked(None, False)
+        self.manipulate.finish(False)
 
     def test_change_slider_value(self):
         """Change slider value in manipulate."""
@@ -265,9 +261,9 @@ class ManipulateTest(VimivTestCase):
 
     def test_check_for_edit(self):
         """Check if an image was edited."""
-        self.manipulate.manipulations = {"bri": 1, "con": 1, "sha": 1}
+        self.manipulate.finish(False)
         self.assertEqual(0, self.manipulate.check_for_edit(False))
-        self.manipulate.manipulations = {"bri": 10, "con": 0, "sha": 0}
+        self.manipulate.cmd_edit("bri", "10")
         self.assertEqual(1, self.manipulate.check_for_edit(False))
         self.assertEqual(0, self.manipulate.check_for_edit(True))
 

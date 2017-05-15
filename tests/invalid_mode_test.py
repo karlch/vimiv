@@ -22,7 +22,7 @@ class FailingModeTest(VimivTestCase):
 
     def test_fail_button_clicked(self):
         """Fail exiting manipulate via button_clicked."""
-        self.vimiv["manipulate"].button_clicked(None, False)
+        self.vimiv["manipulate"].finish(False)
         self.check_statusbar(
             "ERROR: Finishing manipulate only makes sense in manipulate")
 

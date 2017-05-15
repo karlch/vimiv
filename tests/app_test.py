@@ -110,14 +110,11 @@ class QuitTest(VimivTestCase):
     def test_quit_with_edited_image(self):
         """Quit vimiv with an edited image."""
         # Fake a manipulation
-        self.vimiv["manipulate"].manipulations = {}
+        self.vimiv["manipulate"]._manipulations = {}
         self.vimiv.quit_wrapper()
-        self.check_statusbar(
-            "WARNING: Image has been edited, add ! to force")
+        self.check_statusbar("WARNING: Image has been edited, add ! to force")
         # Force quit
         self.vimiv.quit_wrapper(force=True)
-        self.assertEqual(self.vimiv["manipulate"].manipulations,
-                         {"bri": 1, "con": 1, "sha": 1})
         refresh_gui()
 
 

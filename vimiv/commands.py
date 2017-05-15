@@ -24,8 +24,8 @@ class Commands(object):
         self.app["tag_handler"] = TagHandler(app)
         # Add all commands
         self.add_command("accept_changes",
-                         self.app["manipulate"].button_clicked,
-                         default_args=[None, True])
+                         self.app["manipulate"].finish,
+                         default_args=[True])
         self.add_command("alias", self.app["commandline"].alias,
                          positional_args=["name", "command"])
         self.add_command("autorotate", self.app["manipulate"].rotate_auto)
@@ -38,8 +38,8 @@ class Commands(object):
         self.add_command("undelete", self.app["manipulate"].undelete,
                          positional_args=["basename"])
         self.add_command("discard_changes",
-                         self.app["manipulate"].button_clicked,
-                         default_args=[None, False])
+                         self.app["manipulate"].finish,
+                         default_args=[False])
         self.add_command("first", self.app["image"].move_pos,
                          default_args=[False], supports_count=True)
         self.add_command("first_lib", self.app["library"].move_pos,
