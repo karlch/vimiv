@@ -37,14 +37,14 @@ class Vimiv(Gtk.Application):
         debug: If True, write all messages and commands to log.
         functions: Dictionary of functions. Includes all commands and additional
             functions that cannot be called from the commandline.
-        index: Current position in paths.
-        paths: List of paths for images.
         settings: Settings from configfiles to use.
 
         _tmpdir: tmpfile.TemporaryDirectory used when running with
             --temp-basedir
         _widgets: Dictionary of vimiv widgets.
             widgets[widget-name] = Gtk.Widget
+        _paths: List of paths for images.
+        _index: Current position in paths.
 
     Signals:
         widgets-changed: Emitted when the layout of the widgets changed in some
@@ -68,8 +68,8 @@ class Vimiv(Gtk.Application):
         self.set_flags(Gio.ApplicationFlags.HANDLES_OPEN)
         self.connect("activate", self.activate_vimiv)
         self.settings = {}
-        self.paths = []
-        self.index = 0
+        self._paths = []
+        self._index = 0
         self._widgets = {}
         self.debug = False
         self._tmpdir = None
@@ -81,7 +81,7 @@ class Vimiv(Gtk.Application):
         self._init_commandline_options()
 
     def do_open(self, files, n_files, hint):
-        """Open files by populating self.paths and self.index.
+        """Open files by populating self._paths and self._index.
 
         Args:
             files: List of Gio.Files.
@@ -207,11 +207,11 @@ class Vimiv(Gtk.Application):
         self["statusbar"].set_separator_height()
         # Try to generate imagelist recursively from the current directory if
         # recursive is given and not paths exist
-        if self.settings["GENERAL"]["recursive"] and not self.paths:
+        if self.settings["GENERAL"]["recursive"] and not self._paths:
             shuffle = self.settings["GENERAL"]["shuffle"]
             self.populate([os.getcwd()], True, shuffle)
         # Show the image if an imagelist exists
-        if self.paths:
+        if self._paths:
             self["image"].load()
             # Show library at the beginning?
             if not self.settings["LIBRARY"]["show_library"]:
@@ -290,8 +290,8 @@ class Vimiv(Gtk.Application):
         focused_widget = self.get_focused_widget()
 
         # Get position and name
-        filelist = self.paths
-        position = self.index
+        filelist = self._paths
+        position = self._index
         if focused_widget == "lib":
             position = self["library"].get_position()
             filelist = self["library"].files
@@ -302,13 +302,28 @@ class Vimiv(Gtk.Application):
             return filelist[position] if filelist else ""
         return position
 
+    def get_paths(self):
+        return self._paths
+
+    def get_index(self):
+        return self._index
+
+    def get_path(self):
+        return self._paths[self._index]
+
+    def update_index(self, diff):
+        self._index = (self._index + diff) % len(self._paths)
+
+    def remove_path(self, path):
+        self._paths.remove(path)
+
     def populate(self, args, recursive=False, shuffle_paths=False):
         """Simple wrapper for helpers.populate.
 
         Additional args:
             update_index: If True, also update index.
         """
-        self.paths, self.index = populate(args, recursive, shuffle_paths)
+        self._paths, self._index = populate(args, recursive, shuffle_paths)
 
     def _init_commandline_options(self):
         """Add all possible commandline options."""

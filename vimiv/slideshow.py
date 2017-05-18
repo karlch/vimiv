@@ -38,7 +38,7 @@ class Slideshow(GObject.Object):
 
     def toggle(self):
         """Toggle the slideshow or update the delay."""
-        if not self._app.paths:
+        if not self._app.get_paths():
             message = "No valid paths, starting slideshow failed"
             self._app["statusbar"].message(message, "error")
             return
@@ -53,7 +53,7 @@ class Slideshow(GObject.Object):
         else:
             self.running = not self.running
             if self.running:
-                self._start_index = self._app.index
+                self._start_index = self._app.get_index()
                 self._timer_id = GLib.timeout_add(1000 * self._delay,
                                                   self._next)
             else:
@@ -65,7 +65,7 @@ class Slideshow(GObject.Object):
         """Command to run in the GLib.timeout moving to the next image."""
         self._app["image"].move_index()
         # Info if slidesohw returns to beginning
-        if self._app.index == self._start_index:
+        if self._app.get_index() == self._start_index:
             message = "Back at beginning of slideshow"
             self._app["statusbar"].lock = True
             self._app["statusbar"].message(message, "info")

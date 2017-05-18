@@ -83,7 +83,7 @@ class Transform(GObject.Object):
                 images.append(
                     os.path.abspath(self._app.get_pos(True)))
             else:
-                images.append(self._app.paths[self._app.index])
+                images.append(self._app.get_path())
         # Add all marked images
         else:
             images = self._app["mark"].marked
@@ -101,12 +101,12 @@ class Transform(GObject.Object):
             cwise: Rotate image 90 * cwise degrees.
             rotate_file: If True call thread to rotate files.
         """
-        if not self._app.paths:
+        if not self._app.get_paths():
             self._app["statusbar"].message(
                 "No image to rotate", "error")
             return
         # Do not rotate animations
-        elif is_animation(self._app.paths[self._app.index]):
+        elif is_animation(self._app.get_path()):
             self._app["statusbar"].message(
                 "Animations cannot be rotated", "warning")
             return
@@ -115,7 +115,7 @@ class Transform(GObject.Object):
             images = self.get_images("Rotated")
             cwise = cwise % 4
             # Rotate the image shown
-            if self._app.paths[self._app.index] in images:
+            if self._app.get_path() in images:
                 self._app["image"].pixbuf_original = \
                     self._app["image"].pixbuf_original.rotate_simple(
                         (90 * cwise))
@@ -163,12 +163,12 @@ class Transform(GObject.Object):
             horizontal: If 1 flip horizontally. Else vertically.
             rotate_file: If True call thread to rotate files.
         """
-        if not self._app.paths:
+        if not self._app.get_paths():
             self._app["statusbar"].message(
                 "No image to flip", "error")
             return
         # Do not flip animations
-        elif is_animation(self._app.paths[self._app.index]):
+        elif is_animation(self._app.get_path()):
             self._app["statusbar"].message(
                 "Animations cannot be flipped", "warning")
             return
@@ -176,7 +176,7 @@ class Transform(GObject.Object):
             horizontal = int(horizontal)
             images = self.get_images("Flipped")
             # Flip the image shown
-            if self._app.paths[self._app.index] in images:
+            if self._app.get_path() in images:
                 self._app["image"].pixbuf_original = \
                     self._app["image"].pixbuf_original.flip(horizontal)
                 self._app["image"].update(False)
@@ -199,7 +199,7 @@ class Transform(GObject.Object):
 
     def rotate_auto(self):
         """Autorotate all pictures in the current pathlist."""
-        amount, method = imageactions.autorotate(self._app.paths)
+        amount, method = imageactions.autorotate(self._app.get_paths())
         if amount:
             self._app["image"].load()
             message = "Autorotated %d image(s) using %s." % (amount, method)

@@ -102,13 +102,13 @@ class Thumbnail(Gtk.IconView):
                     self._app["library"].set_hexpand(True)
             self.toggled = False
         # Open thumbnail mode differently depending on where we come from
-        elif self._app.paths and self._app.get_focused_widget() == "im":
+        elif self._app.get_paths() and self._app.get_focused_widget() == "im":
             self.last_focused = "im"
             self._show()
         elif self._app.get_focused_widget() == "lib":
             self.last_focused = "lib"
             self._app.populate(self._app["library"].files)
-            if self._app.paths:
+            if self._app.get_paths():
                 self._app["library"].set_hexpand(False)
                 self._app["main_window"].show()
                 self._show()
@@ -147,7 +147,7 @@ class Thumbnail(Gtk.IconView):
         size = self.get_zoom_level()[0]
         default_pixbuf = self._thumbnail_manager.scale_pixbuf(
             default_pixbuf_max, size)
-        for path in self._app.paths:
+        for path in self._app.get_paths():
             name = self._get_name(path)
             self._liststore.append([default_pixbuf, name])
 
@@ -159,7 +159,7 @@ class Thumbnail(Gtk.IconView):
 
         # Focus the current image
         self.grab_focus()
-        pos = self._app.index % len(self._app.paths)
+        pos = self._app.get_index()
         self.move_to_pos(pos)
 
     def calculate_columns(self):
@@ -179,7 +179,7 @@ class Thumbnail(Gtk.IconView):
 
     def reload_all(self, ignore_cache=False):
         size = self.get_zoom_level()[0]
-        for i, path in enumerate(self._app.paths):
+        for i, path in enumerate(self._app.get_paths()):
             self._thumbnail_manager.get_thumbnail_at_scale_async(
                 path, size, self._on_thumbnail_created, i,
                 ignore_cache=ignore_cache)
@@ -205,7 +205,7 @@ class Thumbnail(Gtk.IconView):
             reload_image: If True reload the image of the thumbnail. Else only
                 the name (useful for marking).
         """
-        index = self._app.paths.index(filename)
+        index = self._app.get_paths().index(filename)
         name = self._get_name(filename)
         if index in self._app["commandline"].search_positions:
             name = self._markup + "<b>" + name + "</b></span>"
@@ -229,7 +229,7 @@ class Thumbnail(Gtk.IconView):
         # Check for a user prefixed step
         step = self._app["eventhandler"].num_receive()
         # Get variables used for calculation of limits
-        last = len(self._app.paths)
+        last = len(self._app.get_paths())
         rows = self.get_item_row(Gtk.TreePath(last - 1))
         columns = self.get_columns()
         elem_last_row = last - rows * columns

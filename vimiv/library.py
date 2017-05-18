@@ -86,7 +86,7 @@ class Library(Gtk.TreeView):
         # Set the liststore model
         self.set_model(self._liststore_create())
         # Set the hexpand property if requested in the configfile
-        if not self._app.paths and self.expand:
+        if not self._app.get_paths() and self.expand:
             self.set_hexpand(True)
 
         # Connect signals
@@ -107,13 +107,13 @@ class Library(Gtk.TreeView):
             self.focus(False)
         else:
             self.grid.show()
-            if not self._app.paths:
+            if not self._app.get_paths():
                 # Hide the non existing image and expand if necessary
                 self._app["main_window"].hide()
                 if self.expand:
                     self.set_hexpand(True)
             else:  # Try to focus the current image in the library
-                image = self._app.paths[self._app.index]
+                image = self._app.get_path()
                 image_path = os.path.dirname(image)
                 image_name = os.path.basename(image)
                 if image_path == os.getcwd() and image_name in self.files:
@@ -176,7 +176,7 @@ class Library(Gtk.TreeView):
         if self._app["thumbnail"].toggled:
             self._app["thumbnail"].toggle()
             self.grab_focus()
-        if self._app.paths and image == self._app.paths[self._app.index]:
+        if self._app.get_paths() and image == self._app.get_path():
             close = True  # Close if file selected twice
         index = 0  # Catch directories to focus correctly
         for f in self.files:
@@ -185,14 +185,14 @@ class Library(Gtk.TreeView):
             elif os.path.isfile(f):
                 index += 1
         # Repopulate
-        visible_image = self._app.paths[self._app.index] \
-            if self._app.paths else ""
+        visible_image = self._app.get_path() if self._app.get_paths() else ""
         self._app.populate([basename])
-        if self._app.paths:
+        if self._app.get_paths():
             self.set_hexpand(False)
             # Only load a new image if needed
             if visible_image != image:
-                self._app["image"].move_index(delta=index - self._app.index)
+                self._app["image"].move_index(
+                    delta=index - self._app.get_index())
             # Close the library depending on key and repeat
             if close:
                 self.toggle(update_image=False)
@@ -433,7 +433,7 @@ class Library(Gtk.TreeView):
     def _on_paths_changed(self, app, widget):
         """Reload filelist on the paths-changed signal from app."""
         # Expand library if set by user and all paths were removed
-        if not self._app.paths and self.expand:
+        if not self._app.get_paths() and self.expand:
             self.set_hexpand(True)
             if not self.is_focus():
                 self.focus()

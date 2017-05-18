@@ -26,7 +26,7 @@ class TransformTest(VimivTestCase):
     def test_get_images(self):
         """Get images to transform."""
         # Nothing marked -> current image
-        expected_images = [self.vimiv.paths[self.vimiv.index]]
+        expected_images = [self.vimiv.get_path()]
         received_images = self.transform.get_images("test")
         self.assertEqual(expected_images, received_images)
         # Marked images
@@ -44,12 +44,12 @@ class TransformTest(VimivTestCase):
         self.assertTrue(os.path.exists("arch-logo.png"))
         self.transform.delete()
         self.assertFalse(os.path.exists("arch-logo.png"))
-        self.assertEqual(self.vimiv.paths[self.vimiv.index],
+        self.assertEqual(self.vimiv.get_path(),
                          os.path.abspath("arch_001.jpg"))
         # Undelete
         self.transform.undelete("arch-logo.png")
         self.assertTrue(os.path.exists("arch-logo.png"))
-        self.assertIn(os.path.abspath("arch-logo.png"), self.vimiv.paths)
+        self.assertIn(os.path.abspath("arch-logo.png"), self.vimiv.get_paths())
 
     def test_fail_delete_undelete(self):
         """Fail deleting and undeleting images."""
@@ -92,12 +92,12 @@ class TransformTest(VimivTestCase):
         is_portrait = pixbuf.get_width() < pixbuf.get_height()
         self.assertTrue(is_portrait)
         # Rotate the file
-        with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
+        with Image.open(self.vimiv.get_path()) as im:
             self.assertFalse(im.width < im.height)
         self.transform.apply()
         while self.transform.threads_running():
             sleep(0.05)
-        with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
+        with Image.open(self.vimiv.get_path()) as im:
             self.assertTrue(im.width < im.height)
         # Rotate back
         self.transform.rotate(1, True)
@@ -108,14 +108,14 @@ class TransformTest(VimivTestCase):
         self.transform.apply()
         while self.transform.threads_running():
             sleep(0.05)
-        with Image.open(self.vimiv.paths[self.vimiv.index]) as im:
+        with Image.open(self.vimiv.get_path()) as im:
             self.assertFalse(im.width < im.height)
         # Fail because of no paths
-        backup = list(self.vimiv.paths)
-        self.vimiv.paths = []
+        backup = list(self.vimiv.get_paths())
+        self.vimiv.populate([])
         self.transform.rotate(1, False)
         self.check_statusbar("ERROR: No image to rotate")
-        self.vimiv.paths = backup
+        self.vimiv.populate(backup)
         ##################
         #  Command line  #
         ##################
@@ -146,11 +146,11 @@ class TransformTest(VimivTestCase):
         pixbuf_after_2 = self.vimiv["image"].get_pixbuf()
         self.assertNotEqual(pixbuf_after, pixbuf_after_2)
         # Fail because of no paths
-        backup = list(self.vimiv.paths)
-        self.vimiv.paths = []
+        backup = list(self.vimiv.get_paths())
+        self.vimiv.populate([])
         self.transform.flip(1, False)
         self.check_statusbar("ERROR: No image to flip")
-        self.vimiv.paths = backup
+        self.vimiv.populate(backup)
         ##################
         #  Command line  #
         ##################

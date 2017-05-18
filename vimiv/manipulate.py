@@ -115,12 +115,12 @@ class Manipulate(Gtk.ScrolledWindow):
             self.hide()
             self._app["main_window"].grab_focus()
             self._app["statusbar"].update_info()
-        elif self._app.paths and not(self._app["thumbnail"].toggled or
-                                     self._app["library"].is_focus()):
-            if os.path.islink(self._app.paths[self._app.index]):
+        elif self._app.get_paths() and \
+                self._app.get_focused_widget() not in ["lib", "thu"]:
+            if os.path.islink(self._app.get_path()):
                 self._app["statusbar"].message(
                     "Manipulating symbolic links is not supported", "warning")
-            elif is_animation(self._app.paths[self._app.index]):
+            elif is_animation(self._app.get_path()):
                 self._app["statusbar"].message(
                     "Manipulating Gifs is not supported", "warning")
             else:
@@ -130,8 +130,8 @@ class Manipulate(Gtk.ScrolledWindow):
                 # Create PIL image to work with
                 size = self._app["image"].get_allocated_size()[0]
                 size = (size.width, size.height)
-                self._pil_image = Image.open(self._app.paths[self._app.index])
-                self._pil_thumb = Image.open(self._app.paths[self._app.index])
+                self._pil_image = Image.open(self._app.get_path())
+                self._pil_thumb = Image.open(self._app.get_path())
                 self._pil_thumb.thumbnail(size, Image.ANTIALIAS)
         else:
             if self._app["thumbnail"].toggled:
@@ -168,7 +168,7 @@ class Manipulate(Gtk.ScrolledWindow):
         # On real file save data to file
         if apply_to_file:
             imageactions.save_image(enhanced_im,
-                                    self._app.paths[self._app.index])
+                                    self._app.get_path())
         # Load Pixbuf from PIL data
         data = enhanced_im.tobytes()
         g_data = GLib.Bytes.new(data)
@@ -273,7 +273,7 @@ class Manipulate(Gtk.ScrolledWindow):
                 "Argument must be of type integer", "error")
             return
         if not self.is_visible():
-            if not self._app.paths:
+            if not self._app.get_paths():
                 self._app["statusbar"].message(
                     "No image to manipulate", "error")
                 return

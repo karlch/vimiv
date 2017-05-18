@@ -117,12 +117,12 @@ class MainWindow(Gtk.ScrolledWindow):
         """Recalculate thumbnails or rezoom image when the layout changed."""
         if self.thumbnail.toggled:
             self.thumbnail.calculate_columns()
-        elif self._app.paths and self.image.fit_image:
+        elif self._app.get_paths() and self.image.fit_image:
             self.image.zoom_to(0, self.image.fit_image)
 
     def _on_paths_changed(self, app, widget):
         """Reload paths image and/or thumbnail when paths have changed."""
-        if self._app.paths:
+        if self._app.get_paths():
             # Get all files in directory again
             focused_path = self._app.get_pos(True)
             directory = os.path.dirname(focused_path)
@@ -131,11 +131,11 @@ class MainWindow(Gtk.ScrolledWindow):
             self._app.populate(files)
             # Reload thumbnail
             if self.thumbnail.toggled:
-                for image in self._app.paths:
+                for image in self._app.get_paths():
                     self.thumbnail.reload(image)
             # Refocus the path
-            if focused_path in self._app.paths:
-                index = self._app.paths.index(focused_path)
+            if focused_path in self._app.get_paths():
+                index = self._app.get_paths().index(focused_path)
                 if self.thumbnail.toggled:
                     self.thumbnail.move_to_pos(index)
                 else:
@@ -146,5 +146,5 @@ class MainWindow(Gtk.ScrolledWindow):
                 if not self.thumbnail.toggled:
                     self.image.move_pos(forward=False)
         # We need to check again as populate was called
-        if not self._app.paths:
+        if not self._app.get_paths():
             self.hide()

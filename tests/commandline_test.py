@@ -224,7 +224,7 @@ class SlowCommandlineTest(CommandlineTest):
         expected_image = os.path.abspath("arch-logo.png")
         self.run_command("./arch-logo.png")
         refresh_gui()
-        self.assertEqual(self.vimiv.paths[0], expected_image)
+        self.assertEqual(self.vimiv.get_path(), expected_image)
 
     def test_pipe(self):
         """Pipe a command to vimiv."""
@@ -244,7 +244,7 @@ class SlowCommandlineTest(CommandlineTest):
         expected_image = os.path.abspath("arch_001.jpg")
         self.run_command("!echo arch_001.jpg |", True)
         refresh_gui()
-        self.assertEqual(self.vimiv.paths[self.vimiv.index], expected_image)
+        self.assertEqual(self.vimiv.get_path(), expected_image)
 
 
 if __name__ == "__main__":

@@ -58,8 +58,8 @@ class Mark(GObject.Object):
             files = []
             for fil in self._app["library"].files:
                 files.append(os.path.abspath(fil))
-        elif self._app.paths:
-            files = self._app.paths
+        elif self._app.get_paths():
+            files = self._app.get_paths()
         else:
             self._app["statusbar"].message("No image to mark", "error")
         # Add all to the marks
@@ -82,8 +82,8 @@ class Mark(GObject.Object):
             for fil in self._app["library"].files:
                 if not os.path.isdir(fil):
                     files.append(os.path.abspath(fil))
-        elif self._app.paths:
-            files = self._app.paths
+        elif self._app.get_paths():
+            files = self._app.get_paths()
         else:
             self._app["statusbar"].message("No image to mark", "error")
         # Find the images to mark

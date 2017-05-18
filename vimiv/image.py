@@ -63,7 +63,7 @@ class Image(Gtk.Image):
         Args:
             update_info: If True update the statusbar with new information.
         """
-        if not self._app.paths:
+        if not self._app.get_paths():
             return
         # Scale image
         pbo_width = self.pixbuf_original.get_width()
@@ -71,11 +71,11 @@ class Image(Gtk.Image):
         pbf_width = int(pbo_width * self.zoom_percent)
         pbf_height = int(pbo_height * self.zoom_percent)
         # Rescaling of svg
-        name = self._app.paths[self._app.index]
+        name = self._app.get_path()
         info = GdkPixbuf.Pixbuf.get_file_info(name)[0]
         if info and "svg" in info.get_extensions():
             pixbuf_final = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                self._app.paths[self._app.index], -1, pbf_height, True)
+                name, -1, pbf_height, True)
         else:
             pixbuf_final = self.pixbuf_original.scale_simple(
                 pbf_width, pbf_height, GdkPixbuf.InterpType.BILINEAR)
@@ -145,7 +145,7 @@ class Image(Gtk.Image):
             force: If True, move regardless of editing image.
         """
         # Check if an image is opened or if it has been edited
-        if not self._app.paths or self._app["thumbnail"].toggled or \
+        if not self._app.get_paths() or self._app["thumbnail"].toggled or \
                 self._app["manipulate"].check_for_edit(force):
             return
         # Apply done rotations and flips to file
@@ -155,19 +155,19 @@ class Image(Gtk.Image):
             delta *= self._app["eventhandler"].num_receive()
         if not forward:
             delta *= -1
-        self._app.index = (self._app.index + delta) % len(self._app.paths)
+        self._app.update_index(delta)
         self.fit_image = 1
 
         # Reshuffle on wrap-around
-        if self._shuffle and self._app.index is 0 and delta > 0:
-            shuffle(self._app.paths)
+        if self._shuffle and self._app.get_index() is 0 and delta > 0:
+            shuffle(self._app.get_paths())
 
         # Load the image at path into self.pixbuf_* and show it
         self.load()
 
     def load(self):
         """Load an image using GdkPixbufLoader."""
-        path = self._app.paths[self._app.index]
+        path = self._app.get_path()
         # Remove old timers and reset scale
         if self._timer_id:
             self.zoom_percent = 1
@@ -176,7 +176,7 @@ class Image(Gtk.Image):
         try:
             self._load(path)
         except (PermissionError, FileNotFoundError):
-            self._app.paths.remove(path)
+            self._app.remove_path(path)
             self.move_pos(False)
             self._app["statusbar"].message("File not accessible", "error")
 
@@ -190,8 +190,8 @@ class Image(Gtk.Image):
         # Check if image has been edited
         if self._app["manipulate"].check_for_edit(force):
             return
-        max_pos = len(self._app.paths)
-        current = self._app.index
+        max_pos = len(self._app.get_paths())
+        current = self._app.get_index()
         # Move to definition by keys or end/beg
         if forward:
             pos = self._app["eventhandler"].num_receive(max_pos)
@@ -200,15 +200,12 @@ class Image(Gtk.Image):
         # Catch range
         if pos < 0 or pos > max_pos:
             self._app["statusbar"].message("Unsupported index", "warning")
-            return False
+            return
         # Do the maths and move
-        dif = pos - current - 1
         if self._app["thumbnail"].toggled:
-            pos -= 1
-            self._app["thumbnail"].move_to_pos(pos)
+            self._app["thumbnail"].move_to_pos(pos - 1)
         else:
-            self.move_index(True, False, dif)
-        return True
+            self.move_index(True, False, pos - current - 1)
 
     def toggle_rescale_svg(self):
         """Toggle rescale state of vector images."""
@@ -229,7 +226,7 @@ class Image(Gtk.Image):
 
     def toggle_animation(self):
         """Toggle animation status of Gifs."""
-        if self._app.paths and is_animation(self._app.paths[self._app.index]) \
+        if self._app.get_paths() and is_animation(self._app.get_path()) \
                 and not self._app["thumbnail"].toggled:
             if self._animation_toggled:
                 self._pause_gif()

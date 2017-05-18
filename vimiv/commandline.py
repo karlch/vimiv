@@ -204,7 +204,7 @@ class CommandLine(Gtk.Entry):
         elif self.last_focused == "lib":
             filelist = list(self.app["library"].files)
         elif self.last_focused in ["thu", "im"]:
-            filelist = list(self.app.paths)
+            filelist = list(self.app.get_paths())
         else:  # Empty filelist as a fallback
             filelist = []
         # Only do substitution if a filelist exists
@@ -241,14 +241,13 @@ class CommandLine(Gtk.Entry):
             self.app["library"].move_up(startout)
         elif os.path.isfile(startout):
             # Remember old file if no image was in filelist
-            if self.app.paths:
-                old_pos = [self.app.paths[self.app.index]]
-                self.app.paths = []
+            if self.app.get_paths():
+                old_pos = self.app.get_index()
             else:
                 old_pos = []
             # Populate filelist
             self.app.populate(pipe_input)
-            if self.app.paths:  # Images were found
+            if self.app.get_paths():  # Images were found
                 self.app["main_window"].show()
                 self.app["image"].load()
                 # Resize library and focus image if necessary
@@ -277,7 +276,6 @@ class CommandLine(Gtk.Entry):
                 self.last_focused = "lib"
             else:
                 # If it is an image open it
-                self.app.paths = []
                 self.app.populate([path])
                 self.app["image"].load()
                 #  Reload library in lib mode, do not open it in image mode
@@ -455,7 +453,7 @@ class CommandLine(Gtk.Entry):
         if self.last_focused == "lib":
             paths = self.app["library"].files
         else:
-            paths = [os.path.basename(path) for path in self.app.paths]
+            paths = [os.path.basename(path) for path in self.app.get_paths()]
 
         # Fill search_positions with matching files depending on search_case
         self.search_positions = \
@@ -471,11 +469,12 @@ class CommandLine(Gtk.Entry):
             # Reload all thumbnails in incsearch, only some otherwise
             if incsearch:
                 self.app["thumbnail"].grab_focus()
-                for image in self.app.paths:
+                for image in self.app.get_paths():
                     self.app["thumbnail"].reload(image, False)
             else:
                 for index in self.search_positions:
-                    self.app["thumbnail"].reload(self.app.paths[index], False)
+                    self.app["thumbnail"].reload(self.app.get_paths()[index],
+                                                 False)
 
         # Move to first result or throw an error
         if self.search_positions:
@@ -563,7 +562,7 @@ class CommandLine(Gtk.Entry):
                 self.app["library"].scroll_to_cell(
                     Gtk.TreePath(self.last_index), None, True, 0.5, 0)
         elif self.last_focused == "thu":
-            for image in self.app.paths:
+            for image in self.app.get_paths():
                 self.app["thumbnail"].reload(image, False)
             if leaving:
                 self.app["thumbnail"].move_to_pos(self.last_index)

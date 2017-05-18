@@ -52,7 +52,7 @@ class TagsTest(VimivTestCase):
         taglist = [os.path.abspath(image) for image in taglist]
         self.vimiv["tags"].write(taglist, "arch_test_tag")
         self.vimiv["tags"].load("arch_test_tag")
-        self.assertEqual(self.vimiv.paths, taglist)
+        self.assertEqual(self.vimiv.get_paths(), taglist)
         self.vimiv["tags"].remove("arch_test_tag")
 
     def test_tag_errors(self):
@@ -78,7 +78,7 @@ class TagsTest(VimivTestCase):
         self.assertEqual(taglist, file_content)
         # Load a tag
         self.run_command("tag_load new_test_tag")
-        self.assertEqual(self.vimiv.paths, taglist)
+        self.assertEqual(self.vimiv.get_paths(), taglist)
         # Delete a tag
         self.run_command("tag_remove new_test_tag")
         self.assertFalse(os.path.isfile(created_file))

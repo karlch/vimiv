@@ -21,7 +21,7 @@ class ExpansionTest(VimivTestCase):
         expected_cmd = "!echo " + self.vimiv.get_pos(True)
         received_cmd = self.vimiv["commandline"].expand_filenames(":!echo %")
         self.assertEqual(expected_cmd, received_cmd)
-        expected_cmd = "!echo " + " ".join(self.vimiv.paths)
+        expected_cmd = "!echo " + " ".join(self.vimiv.get_paths())
         received_cmd = self.vimiv["commandline"].expand_filenames(":!echo *")
         self.assertEqual(expected_cmd, received_cmd)
 
@@ -43,7 +43,7 @@ class ExpansionTest(VimivTestCase):
         expected_cmd = "!echo " + self.vimiv.get_pos(True)
         received_cmd = self.vimiv["commandline"].expand_filenames(":!echo %")
         self.assertEqual(expected_cmd, received_cmd)
-        expected_cmd = "!echo " + " ".join(self.vimiv.paths)
+        expected_cmd = "!echo " + " ".join(self.vimiv.get_paths())
         received_cmd = self.vimiv["commandline"].expand_filenames(":!echo *")
         self.assertEqual(expected_cmd, received_cmd)
 

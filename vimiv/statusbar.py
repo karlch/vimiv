@@ -139,7 +139,7 @@ class Statusbar(Gtk.Grid):
             pos = self._app.get_pos()
             name = os.path.basename(self._app.get_pos(True))
             message = "{0}/{1}  {2}  {3}".format(
-                pos + 1, len(self._app.paths), name,
+                pos + 1, len(self._app.get_paths()), name,
                 self._app["thumbnail"].get_zoom_level())
 
             self._left_label.set_text(message)
@@ -147,10 +147,10 @@ class Statusbar(Gtk.Grid):
         elif "COMMAND" in mode:
             # TODO useful information in the commandline
             self._left_label.set_text("")
-        elif self._app.paths:
-            name = os.path.basename(self._app.paths[self._app.index])
+        elif self._app.get_paths():
+            name = os.path.basename(self._app.get_path())
             message = "{0}/{1}  {2}  [{3:.0f}%]".format(
-                self._app.index + 1, len(self._app.paths), name,
+                self._app.get_index() + 1, len(self._app.get_paths()), name,
                 self._app["image"].zoom_percent * 100)
             self._left_label.set_text(message)
         else:
@@ -159,8 +159,9 @@ class Statusbar(Gtk.Grid):
     def _set_center_status(self, mode):
         """Set the centre of the statusbar depending on mode."""
         mark = "[*]" \
-            if ("IMAGE" in mode or "MANIPULATE" in mode) and self._app.paths \
-            and self._app.paths[self._app.index] in self._app["mark"].marked \
+            if ("IMAGE" in mode or "MANIPULATE" in mode) \
+            and self._app.get_paths() \
+            and self._app.get_path() in self._app["mark"].marked \
             else ""
         slideshow = self._app["slideshow"].get_formatted_delay() \
             if self._app["slideshow"].running else ""
@@ -175,8 +176,8 @@ class Statusbar(Gtk.Grid):
 
     def _set_window_title(self):
         """Set window title depending on whether there are valid paths."""
-        if self._app.paths:
-            name = os.path.basename(self._app.paths[self._app.index])
+        if self._app.get_paths():
+            name = os.path.basename(self._app.get_path())
             self._app["window"].set_title("vimiv - " + name)
         else:
             self._app["window"].set_title("vimiv")

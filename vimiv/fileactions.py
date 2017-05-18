@@ -129,7 +129,7 @@ class FileExtras(object):
             message = "Format only works on opened image files"
             self._app["statusbar"].message(message, "info")
             return
-        if not self._app.paths:
+        if not self._app.get_paths():
             self._app["statusbar"].message("No files in path", "info")
             return
 
@@ -137,7 +137,7 @@ class FileExtras(object):
         tofind = ("%" in string)
         if tofind:
             try:
-                for fil in self._app.paths:
+                for fil in self._app.get_paths():
                     with Image.open(fil) as im:
                         exif = im._getexif()
                         if not (exif and 306 in exif):
@@ -147,7 +147,7 @@ class FileExtras(object):
                     "No exif data for %s available" % (fil), "error")
                 return
 
-        for i, fil in enumerate(self._app.paths):
+        for i, fil in enumerate(self._app.get_paths()):
             ending = os.path.splitext(fil)[1]
             num = "%03d" % (i + 1)
             # Exif stuff

@@ -82,7 +82,7 @@ class TagHandler(object):
         tagged_images = self._read(tagname)
         # Populate filelist
         self._app.populate(tagged_images)
-        if self._app.paths:
+        if self._app.get_paths():
             self._app["main_window"].show()
             self._app["library"].set_hexpand(False)
             self._app["image"].load()

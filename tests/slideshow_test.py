@@ -16,8 +16,8 @@ def refresh_gui(vimiv=None):
     Args:
         vimiv: Vimiv class to receive slideshow index.
     """
-    current_pos = vimiv.index
-    while current_pos == vimiv.index:
+    current_pos = vimiv.get_index()
+    while current_pos == vimiv.get_index():
         Gtk.main_iteration_do(False)
 
 
@@ -41,8 +41,8 @@ class SlideshowTest(VimivTestCase):
         self.slideshow.toggle()
         self.assertFalse(self.slideshow.running)
         self.vimiv["thumbnail"].toggled = False
-        paths_before = self.vimiv.paths
-        self.vimiv.paths = []
+        paths_before = self.vimiv.get_paths()
+        self.vimiv.populate([])
         self.slideshow.toggle()
         self.assertFalse(self.slideshow.running)
         self.vimiv.paths = paths_before
@@ -86,13 +86,13 @@ class SlideshowTest(VimivTestCase):
 
     def test_running(self):
         """Check if slideshow runs correctly."""
-        self.assertEqual(self.vimiv.index, 1)
+        self.assertEqual(self.vimiv.get_index(), 1)
         self.slideshow.toggle()
         # Set delay when running
         self.slideshow.set_delay("0.5")
         for i in range(2, 4):
             refresh_gui(self.vimiv)
-            self.assertEqual(self.vimiv.index, i)
+            self.assertEqual(self.vimiv.get_index(), i)
         refresh_gui(self.vimiv)
 
     def test_get_formatted_delay(self):

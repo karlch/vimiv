@@ -49,7 +49,7 @@ class ThumbnailTest(VimivTestCase):
         self.assertFalse(self.thumb.toggled)
         self.assertFalse(self.thumb.is_focus())
         expected_image = os.path.abspath("arch_001.jpg")
-        received_image = self.vimiv.paths[self.vimiv.index]
+        received_image = self.vimiv.get_path()
         self.assertEqual(expected_image, received_image)
 
     def test_calculate_columns(self):
@@ -60,37 +60,47 @@ class ThumbnailTest(VimivTestCase):
 
     def test_reload(self):
         """Reload and name thumbnails."""
-        name = self._get_thumbnail_name(0)
-        self.assertEqual(name, "arch-logo")
+        path = self.vimiv.get_pos(True)
+        expected_name, _ = os.path.splitext(path)
+        expected_name = os.path.basename(expected_name)
+        name = self._get_thumbnail_name()
+        self.assertEqual(expected_name, name)
         self.vimiv["mark"].mark()
-        self.thumb.reload(self.vimiv.paths[0])
-        name = self._get_thumbnail_name(0)
-        self.assertEqual(name, "arch-logo [*]")
+        self.thumb.reload(path)
+        name = self._get_thumbnail_name()
+        self.assertEqual(name, expected_name + " [*]")
 
     def test_move(self):
         """Move in thumbnail mode."""
+        start = self.vimiv.get_pos()
+        self.assertGreaterEqual(self.thumb.get_columns(), 6)
         # All items are in the same row
         # l moves 1 to the right
         self.thumb.move_direction("l")
-        self.assertEqual(self.vimiv.paths[1], self.vimiv.get_pos(True))
+        self.assertEqual(self.vimiv.get_paths()[start + 1],
+                         self.vimiv.get_pos(True))
         # h moves 1 to the left
         self.thumb.move_direction("h")
-        self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
+        self.assertEqual(self.vimiv.get_paths()[start],
+                         self.vimiv.get_pos(True))
         # j/k/J/K do not do anything as there is only 1 row
         for direction in "jkJK":
             self.thumb.move_direction(direction)
-            self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
+            self.assertEqual(self.vimiv.get_paths()[start],
+                             self.vimiv.get_pos(True))
         # L moves to the last element
         self.thumb.move_direction("L")
-        self.assertEqual(self.vimiv.paths[-1], self.vimiv.get_pos(True))
+        self.assertEqual(self.vimiv.get_paths()[-1], self.vimiv.get_pos(True))
         # H moves back to the first element
         self.thumb.move_direction("H")
-        self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
+        self.assertEqual(self.vimiv.get_paths()[0],
+                         self.vimiv.get_pos(True))
         # L and H directly from the window implementation of scroll
         self.vimiv["main_window"].scroll("L")
-        self.assertEqual(self.vimiv.paths[-1], self.vimiv.get_pos(True))
+        self.assertEqual(self.vimiv.get_paths()[-1], self.vimiv.get_pos(True))
         self.vimiv["main_window"].scroll("H")
-        self.assertEqual(self.vimiv.paths[0], self.vimiv.get_pos(True))
+        self.assertEqual(self.vimiv.get_paths()[0],
+                         self.vimiv.get_pos(True))
 
     def test_search(self):
         """Search in thumbnail mode."""
@@ -99,7 +109,7 @@ class ThumbnailTest(VimivTestCase):
         self.vimiv["commandline"].cmd_search()
         self.vimiv["commandline"].set_text("/symlink")
         self.assertIn("symlink_to_image",
-                      self.vimiv.paths[self.thumb.get_position()])
+                      self.vimiv.get_paths()[self.thumb.get_position()])
         self.vimiv["commandline"].leave()
         # Normal search
         self.vimiv["commandline"].incsearch = False
@@ -139,8 +149,9 @@ class ThumbnailTest(VimivTestCase):
         self.vimiv["window"].zoom(False)
         self.assertEqual(self.thumb.get_zoom_level(), (128, 128))
 
-    def _get_thumbnail_name(self, index):
+    def _get_thumbnail_name(self):
         model = self.thumb.get_model()
+        index = self.thumb.get_position()
         return model.get_value(model.get_iter(index), 1)
 
     def _get_thumbnail_pixbuf(self, index):

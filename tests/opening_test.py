@@ -35,7 +35,7 @@ class OpeningTest(VimivTestCase):
         expected_images = ["arch_001.jpg", "symlink_to_image", "vimiv.bmp",
                            "vimiv.svg", "vimiv.tiff", "arch-logo.png"]
         for image in [os.path.abspath(im) for im in expected_images]:
-            self.assertIn(image, self.vimiv.paths)
+            self.assertIn(image, self.vimiv.get_paths())
 
     def test_opening_with_symlink(self):
         """Open with a symlink to an image."""
@@ -47,7 +47,7 @@ class OpeningTest(VimivTestCase):
                            "vimiv.tiff", "arch-logo.png", "arch_001.jpg"]
         expected_images = [os.path.abspath(image) for image in expected_images]
         for image in [os.path.abspath(im) for im in expected_images]:
-            self.assertIn(image, self.vimiv.paths)
+            self.assertIn(image, self.vimiv.get_paths())
 
     def test_opening_with_whitespace(self):
         """Open an image with whitespace and symlink in directory."""
@@ -57,7 +57,7 @@ class OpeningTest(VimivTestCase):
         self.assertEqual(expected_dir, os.getcwd())
         expected_images = ["symlink with spaces .jpg"]
         expected_images = [os.path.abspath(image) for image in expected_images]
-        self.assertEqual(expected_images, self.vimiv.paths)
+        self.assertEqual(expected_images, self.vimiv.get_paths())
 
     def test_opening_recursively(self):
         """Open all images recursively."""
@@ -65,7 +65,7 @@ class OpeningTest(VimivTestCase):
         working_dir = self.working_directory
         os.chdir("vimiv/testimages")
         self.init_test(["."], ["GENERAL"], ["recursive"], [True])
-        self.assertEqual(8, len(self.vimiv.paths))
+        self.assertEqual(8, len(self.vimiv.get_paths()))
         self.working_directory = working_dir
 
     def tearDown(self):

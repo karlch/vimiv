@@ -98,17 +98,18 @@ class ImageTest(VimivTestCase):
 
     def test_move(self):
         """Move from image to image."""
-        self.assertEqual(1, self.vimiv.index)
+        self.assertEqual(1, self.vimiv.get_index())
         self.image.move_index()
-        self.assertEqual(2, self.vimiv.index)
+        self.assertEqual(2, self.vimiv.get_index())
         self.image.move_index(forward=False)
-        self.assertEqual(1, self.vimiv.index)
+        self.assertEqual(1, self.vimiv.get_index())
         self.image.move_index(delta=2)
-        self.assertEqual(3, self.vimiv.index)
+        self.assertEqual(3, self.vimiv.get_index())
         self.image.move_pos()
-        self.assertEqual(len(self.vimiv.paths) - 1, self.vimiv.index)
+        self.assertEqual(len(self.vimiv.get_paths()) - 1,
+                         self.vimiv.get_index())
         self.image.move_pos(forward=False)
-        self.assertEqual(0, self.vimiv.index)
+        self.assertEqual(0, self.vimiv.get_index())
 
     def test_settings(self):
         """Change image.py settings."""

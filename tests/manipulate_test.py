@@ -41,19 +41,17 @@ class ManipulateTest(VimivTestCase):
         tmpfile = "tmp.jpg"
         if os.path.exists(tmpfile):
             os.remove(tmpfile)
-        shutil.copyfile(self.vimiv.paths[self.vimiv.index], tmpfile)
+        shutil.copyfile(self.vimiv.get_path(), tmpfile)
         # Leaving with False should not change the image
         self.manipulate.toggle()
         self.manipulate.manipulations = {"bri": 20, "con": 20, "sha": 20}
         self.manipulate.finish(False)
-        self.assertTrue(compare_images(tmpfile,
-                                       self.vimiv.paths[self.vimiv.index]))
+        self.assertTrue(compare_images(tmpfile, self.vimiv.get_path()))
         # Image is different to copied backup after manipulations
         self.manipulate.toggle()
         self.manipulate.manipulations = {"bri": 20, "con": 20, "sha": 20}
         self.manipulate.finish(True)
-        self.assertFalse(compare_images(tmpfile,
-                                        self.vimiv.paths[self.vimiv.index]))
+        self.assertFalse(compare_images(tmpfile, self.vimiv.get_path()))
 
     def test_focus_sliders(self):
         """Focusing sliders in manipulate."""

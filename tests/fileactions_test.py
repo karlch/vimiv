@@ -44,7 +44,7 @@ class FileActionsTest(VimivTestCase):
             self.assertIn(fil, files)
         os.chdir("..")
         # Should not work without a path
-        self.vimiv.paths = []
+        self.vimiv.populate([])
         self.vimiv["fileextras"].format_files("formatted_")
         self.check_statusbar("INFO: No files in path")
         # Should not work in library

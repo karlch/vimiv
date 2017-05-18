@@ -49,8 +49,8 @@ class LibraryTest(VimivTestCase):
         expected_images = ["arch-logo.png", "arch_001.jpg", "symlink_to_image",
                            "vimiv.bmp", "vimiv.svg", "vimiv.tiff"]
         expected_images = [os.path.abspath(image) for image in expected_images]
-        self.assertEqual(self.vimiv.paths, expected_images)
-        open_image = self.vimiv.paths[self.vimiv.index]
+        self.assertEqual(self.vimiv.get_paths(), expected_images)
+        open_image = self.vimiv.get_path()
         expected_image = os.path.abspath("arch_001.jpg")
         self.assertEqual(expected_image, open_image)
         # Library closed, image has focus

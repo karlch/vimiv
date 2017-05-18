@@ -20,11 +20,11 @@ class KeyHandlerTest(VimivTestCase):
     def test_key_press(self):
         """Press key."""
         self.vimiv["library"].file_select(None, Gtk.TreePath(1), None, True)
-        image_before = self.vimiv.paths[self.vimiv.index]
+        image_before = self.vimiv.get_path()
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("n")
         self.vimiv["main_window"].emit("key_press_event", event)
-        image_after = self.vimiv.paths[self.vimiv.index]
+        image_after = self.vimiv.get_path()
         self.assertNotEqual(image_before, image_after)
         event.keyval = Gdk.keyval_from_name("O")
         self.vimiv["main_window"].emit("key_press_event", event)
@@ -33,17 +33,17 @@ class KeyHandlerTest(VimivTestCase):
     def test_button_click(self):
         """Click mouse button."""
         self.vimiv["library"].file_select(None, Gtk.TreePath(1), None, True)
-        image_before = self.vimiv.paths[self.vimiv.index]
+        image_before = self.vimiv.get_path()
         event = Gdk.Event().new(Gdk.EventType.BUTTON_PRESS)
         event.button = 1
         self.vimiv["window"].emit("button_press_event", event)
-        image_after = self.vimiv.paths[self.vimiv.index]
+        image_after = self.vimiv.get_path()
         self.assertNotEqual(image_before, image_after)
         # Double click should not work
         event = Gdk.Event().new(Gdk.EventType._2BUTTON_PRESS)
         event.button = 1
         self.vimiv["window"].emit("button_press_event", event)
-        self.assertEqual(image_after, self.vimiv.paths[self.vimiv.index])
+        self.assertEqual(image_after, self.vimiv.get_path())
         # Focus library via mouse click
         event = Gdk.Event().new(Gdk.EventType.BUTTON_PRESS)
         event.button = 2
