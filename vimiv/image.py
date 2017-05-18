@@ -148,8 +148,8 @@ class Image(Gtk.Image):
         if not self._app.paths or self._app["thumbnail"].toggled or \
                 self._app["manipulate"].check_for_edit(force):
             return
-        # Run the simple manipulations
-        self._app["manipulate"].run_simple_manipulations()
+        # Apply done rotations and flips to file
+        self._app["transform"].apply()
         # Check for prepended numbers and direction
         if key:
             delta *= self._app["eventhandler"].num_receive()

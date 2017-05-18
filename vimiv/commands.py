@@ -28,14 +28,14 @@ class Commands(object):
                          default_args=[True])
         self.add_command("alias", self.app["commandline"].alias,
                          positional_args=["name", "command"])
-        self.add_command("autorotate", self.app["manipulate"].rotate_auto)
+        self.add_command("autorotate", self.app["transform"].rotate_auto)
         self.add_command("center", self.app["main_window"].center_window)
         self.add_command("copy_basename", self.app["fileextras"].copy_name,
                          default_args=[False])
         self.add_command("copy_abspath", self.app["fileextras"].copy_name,
                          default_args=[True])
-        self.add_command("delete", self.app["manipulate"].delete)
-        self.add_command("undelete", self.app["manipulate"].undelete,
+        self.add_command("delete", self.app["transform"].delete)
+        self.add_command("undelete", self.app["transform"].undelete,
                          positional_args=["basename"])
         self.add_command("discard_changes",
                          self.app["manipulate"].finish,
@@ -50,7 +50,7 @@ class Commands(object):
                          default_args=[0, 2])
         self.add_command("fit_vert", self.app["image"].zoom_to,
                          default_args=[0, 3])
-        self.add_command("flip", self.app["manipulate"].flip,
+        self.add_command("flip", self.app["transform"].flip,
                          positional_args=["direction"])
         self.add_command("format", self.app["fileextras"].format_files,
                          positional_args=["formatstring"])
@@ -89,7 +89,7 @@ class Commands(object):
                          default_args=[True])
         self.add_command("reload_lib", self.app["library"].reload,
                          default_args=["."])
-        self.add_command("rotate", self.app["manipulate"].rotate,
+        self.add_command("rotate", self.app["transform"].rotate,
                          positional_args=["value"], supports_count=True)
         self.add_command("set animation!", self.app["image"].toggle_animation)
         self.add_command("set brightness", self.app["manipulate"].cmd_edit,

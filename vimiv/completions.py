@@ -297,7 +297,7 @@ class Completion(Gtk.TreeView):
         # Get files in trash directory
         self._liststores["trash"][0].clear()
         trash_directory = \
-            self._app["manipulate"].trash_manager.get_files_directory()
+            self._app["transform"].trash_manager.get_files_directory()
         trash_files = sorted(os.listdir(trash_directory))
         # Add them to completion formatted to 'undelete $FILE'
         for fil in trash_files:

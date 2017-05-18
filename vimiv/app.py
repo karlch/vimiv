@@ -22,6 +22,7 @@ from vimiv.mark import Mark
 from vimiv.slideshow import Slideshow
 from vimiv.statusbar import Statusbar
 from vimiv.tags import TagHandler
+from vimiv.transform import Transform
 from vimiv.window import Window
 
 
@@ -250,7 +251,7 @@ class Vimiv(Gtk.Application):
         for image in self["mark"].marked:
             print(image)
         # Run remaining rotate and flip threads
-        self["manipulate"].run_simple_manipulations()
+        self["transform"].apply()
         # Save the history
         histfile = os.path.join(GLib.get_user_data_dir(), "vimiv", "history")
         histfile = open(histfile, "w")
@@ -359,6 +360,7 @@ class Vimiv(Gtk.Application):
     def _init_widgets(self):
         """Create all the other widgets and add them to the class."""
         self["eventhandler"] = EventHandler(self)
+        self["transform"] = Transform(self)
         self["commandline"] = CommandLine(self, self.settings)
         self["tags"] = TagHandler(self)
         self["mark"] = Mark(self, self.settings)

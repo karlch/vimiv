@@ -59,8 +59,8 @@ class AppTest(VimivTestCase):
         # Thumbnail, Tag and Trash directory should contain tmp
         self.assertIn("/tmp/", self.vimiv["thumbnail"].get_cache_directory())
         self.assertIn("/tmp/", self.vimiv["tags"].directory)
-        trash_dir = self.vimiv["manipulate"].trash_manager.get_files_directory()
-        info_dir = self.vimiv["manipulate"].trash_manager.get_info_directory()
+        trash_dir = self.vimiv["transform"].trash_manager.get_files_directory()
+        info_dir = self.vimiv["transform"].trash_manager.get_info_directory()
         self.assertIn("/tmp/", trash_dir)
         self.assertIn("/tmp/", info_dir)
         # Create a tag in tmp as a simple test
