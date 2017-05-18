@@ -244,7 +244,7 @@ class SlowCommandlineTest(CommandlineTest):
         expected_image = os.path.abspath("arch_001.jpg")
         self.run_command("!echo arch_001.jpg |", True)
         refresh_gui()
-        self.assertEqual(self.vimiv.paths[0], expected_image)
+        self.assertEqual(self.vimiv.paths[self.vimiv.index], expected_image)
 
 
 if __name__ == "__main__":

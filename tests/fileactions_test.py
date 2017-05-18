@@ -37,10 +37,11 @@ class FileActionsTest(VimivTestCase):
         self.vimiv["fileextras"].format_files("formatted_")
         files = [fil for fil in os.listdir() if "formatted_" in fil]
         files = sorted(files)
-        expected_files = ["formatted_001.jpg", "formatted_002",
-                          "formatted_003.bmp", "formatted_004.svg",
-                          "formatted_005.tiff", "formatted_006.png"]
-        self.assertEqual(files, expected_files)
+        expected_files = ["formatted_001.png", "formatted_002.jpg",
+                          "formatted_003", "formatted_004.bmp",
+                          "formatted_005.svg", "formatted_006.tiff"]
+        for fil in expected_files:
+            self.assertIn(fil, files)
         os.chdir("..")
         # Should not work without a path
         self.vimiv.paths = []

@@ -86,11 +86,11 @@ class SlideshowTest(VimivTestCase):
 
     def test_running(self):
         """Check if slideshow runs correctly."""
-        self.assertEqual(self.vimiv.index, 0)
+        self.assertEqual(self.vimiv.index, 1)
         self.slideshow.toggle()
         # Set delay when running
         self.slideshow.set_delay("0.5")
-        for i in range(1, 3):
+        for i in range(2, 4):
             refresh_gui(self.vimiv)
             self.assertEqual(self.vimiv.index, i)
         refresh_gui(self.vimiv)

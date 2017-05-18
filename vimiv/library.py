@@ -186,7 +186,7 @@ class Library(Gtk.TreeView):
                 index += 1
         # Repopulate
         visible_image = self._app.get_pos(True, "im")
-        self._app.populate(self.files)
+        self._app.populate([basename])
         if self._app.paths:
             self.set_hexpand(False)
             # Only load a new image if needed

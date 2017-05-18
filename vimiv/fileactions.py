@@ -37,12 +37,8 @@ def populate_single(arg, recursive):
         directory = os.path.dirname(arg)
         if not directory:  # Default to current directory
             directory = "./"
-        basename = os.path.basename(arg)
         paths = listdir_wrapper(directory)
         # Set the argument to the beginning of the list
-        pos = paths.index(basename)
-        paths = [os.path.join(directory, path)
-                 for path in paths[pos:] + paths[:pos]]
     elif os.path.isdir(arg) and recursive:
         paths = sorted(recursive_search(arg))
     return paths
@@ -59,11 +55,11 @@ def populate(args, recursive=False, shuffle_paths=False):
         Found paths, position of first given path.
     """
     paths = []
+    index = 0
     # If only one path is passed do special stuff
-    single = None
+    first_path = os.path.abspath(args[0]) if args else None
     if len(args) == 1:
-        single = args[0]
-        args = populate_single(single, recursive)
+        args = populate_single(first_path, recursive)
 
     # Add everything
     for arg in args:
@@ -75,12 +71,13 @@ def populate(args, recursive=False, shuffle_paths=False):
     # Remove unsupported files
     paths = [possible_path for possible_path in paths
              if is_image(possible_path)]
+    index = paths.index(first_path) if first_path in paths else 0
 
     # Shuffle
     if shuffle_paths:
         shuffle(paths)
 
-    return paths, 0
+    return paths, index
 
 
 def is_image(filename):
