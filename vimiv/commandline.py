@@ -127,6 +127,7 @@ class CommandLine(Gtk.Entry):
             # Auto select single file in the library
             elif self.incsearch and len(self.search_positions) == 1 and \
                     self.app["library"].is_focus():
+                # TODO!!!
                 self.app["library"].file_select(
                     self.app["library"],
                     Gtk.TreePath(self.app.get_pos()), None, False)
@@ -378,16 +379,7 @@ class CommandLine(Gtk.Entry):
         self.show()
         self.app["completions"].show()
         # Remember what widget was focused before
-        if self.app["library"].is_focus():
-            # In the library remember current file to refocus if incsearch was
-            # not applied
-            self.last_focused = "lib"
-        elif self.app["manipulate"].is_visible():
-            self.last_focused = "man"
-        elif self.app["thumbnail"].toggled:
-            self.last_focused = "thu"
-        else:
-            self.last_focused = "im"
+        self.last_focused = self.app.get_focused_widget()
         self.reset_search(leaving=False)
         self.grab_focus()
         self.set_position(-1)

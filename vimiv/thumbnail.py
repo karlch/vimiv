@@ -102,11 +102,10 @@ class Thumbnail(Gtk.IconView):
                     self._app["library"].set_hexpand(True)
             self.toggled = False
         # Open thumbnail mode differently depending on where we come from
-        elif self._app.paths and self._app["main_window"].is_focus():
+        elif self._app.paths and self._app.get_focused_widget() == "im":
             self.last_focused = "im"
             self._show()
-        elif self._app["library"].files \
-                and self._app["library"].is_focus():
+        elif self._app.get_focused_widget() == "lib":
             self.last_focused = "lib"
             self._app.populate(self._app["library"].files)
             if self._app.paths:
@@ -189,7 +188,7 @@ class Thumbnail(Gtk.IconView):
         # Subsctipting the liststore directly works fine
         # pylint: disable=unsubscriptable-object
         self._liststore[position][0] = pixbuf
-        self.move_to_pos(self._app.get_pos(force_widget="thu"))
+        self.move_to_pos(self.get_position())
 
     def _get_name(self, filename):
         name = os.path.splitext(os.path.basename(filename))[0]
@@ -226,7 +225,7 @@ class Thumbnail(Gtk.IconView):
             direction: Direction to scroll in. One of "hjkl".
         """
         # Start at current position
-        new_pos = self._app.get_pos(force_widget="thu")
+        new_pos = self.get_position()
         # Check for a user prefixed step
         step = self._app["eventhandler"].num_receive()
         # Get variables used for calculation of limits
@@ -303,13 +302,17 @@ class Thumbnail(Gtk.IconView):
             self.reload_all()
         # Set columns and refocus current image
         self.calculate_columns()
-        self.move_to_pos(self._app.get_pos(force_widget="thu"))
+        self.move_to_pos(self.get_position())
 
     def get_zoom_level(self):
         return self._zoom_levels[self._zoom_level_index]
 
     def get_cache_directory(self):
         return self._thumbnail_manager.thumbnail_store.base_dir
+
+    def get_position(self):
+        path = self.get_cursor()[1]
+        return path.get_indices()[0] if path else 0
 
     def _on_marks_changed(self, mark, changed):
         """Reload names if marks changed."""

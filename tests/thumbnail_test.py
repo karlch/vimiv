@@ -98,7 +98,8 @@ class ThumbnailTest(VimivTestCase):
         self.vimiv["commandline"].incsearch = True
         self.vimiv["commandline"].cmd_search()
         self.vimiv["commandline"].set_text("/symlink")
-        self.assertIn("symlink_to_image", self.vimiv.get_pos(True, "thu"))
+        self.assertIn("symlink_to_image",
+                      self.vimiv.paths[self.thumb.get_position()])
         self.vimiv["commandline"].leave()
         # Normal search
         self.vimiv["commandline"].incsearch = False

@@ -159,10 +159,10 @@ class FastCommandlineTest(CommandlineTest):
         # First search should stay at animation
         self.vimiv["commandline"].cmd_search()
         self.vimiv["commandline"].set_text("/a")
-        self.assertEqual(self.vimiv.get_pos(True, "lib"), "animation")
+        self.assertEqual(self.vimiv["library"].files[self.vimiv["library"].get_position()], "animation")
         # Now move to arch-logo
         self.vimiv["commandline"].set_text("/arch")
-        self.assertEqual(self.vimiv.get_pos(True, "lib"), "arch-logo.png")
+        self.assertEqual(self.vimiv["library"].files[self.vimiv["library"].get_position()], "arch-logo.png")
         # Accept
         self.vimiv["commandline"].handler(self.vimiv["commandline"])
         self.assertEqual(self.vimiv.get_pos(True), "arch-logo.png")

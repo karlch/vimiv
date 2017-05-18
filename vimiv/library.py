@@ -102,7 +102,7 @@ class Library(Gtk.TreeView):
             this by itself.
         """
         if self.grid.is_visible():
-            self[os.getcwd()] = self._app.get_pos(True, "lib")
+            self[os.getcwd()] = self.files[self.get_position()]
             self.grid.hide()
             self.focus(False)
         else:
@@ -185,7 +185,8 @@ class Library(Gtk.TreeView):
             elif os.path.isfile(f):
                 index += 1
         # Repopulate
-        visible_image = self._app.get_pos(True, "im")
+        visible_image = self._app.paths[self._app.index] \
+            if self._app.paths else ""
         self._app.populate([basename])
         if self._app.paths:
             self.set_hexpand(False)
@@ -332,7 +333,7 @@ class Library(Gtk.TreeView):
         """
         # Handle the specific keys
         if direction == "h":  # Behave like ranger
-            self[os.getcwd()] = self._app.get_pos(True, "lib")
+            self[os.getcwd()] = self.files[self.get_position()]
             self.move_up()
         elif direction == "l":
             self.file_select(self, self.get_cursor()[0],
@@ -341,11 +342,11 @@ class Library(Gtk.TreeView):
             # Scroll the tree checking for a user step
             step = self._app["eventhandler"].num_receive()
             if direction == "j":
-                new_pos = self._app.get_pos(force_widget="lib") + step
+                new_pos = self.get_position() + step
                 if new_pos >= len(self.get_model()):
                     new_pos = len(self.get_model()) - 1
             else:
-                new_pos = self._app.get_pos(force_widget="lib") - step
+                new_pos = self.get_position() - step
                 if new_pos < 0:
                     new_pos = 0
             self.move_pos(True, new_pos)
@@ -353,6 +354,11 @@ class Library(Gtk.TreeView):
             self._app["statusbar"].message(
                 "Invalid scroll direction " + direction, "error")
         return True  # Deactivates default bindings (here for Arrows)
+
+    def get_position(self):
+        """Return focused position as integer."""
+        path = self.get_cursor()[0]
+        return path.get_indices()[0] if path else 0
 
     def _liststore_create(self):
         """Create the Gtk.ListStore containing information on supported files.
@@ -433,7 +439,7 @@ class Library(Gtk.TreeView):
                 self.focus()
         if self.grid.is_visible():
             # Reload remembering path
-            self[os.getcwd()] = self._app.get_pos(True, "lib")
+            self[os.getcwd()] = self.files[self.get_position()]
             self.reload(os.getcwd())
 
     def _on_marks_changed(self, mark, changed):

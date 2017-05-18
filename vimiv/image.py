@@ -191,7 +191,7 @@ class Image(Gtk.Image):
         if self._app["manipulate"].check_for_edit(force):
             return
         max_pos = len(self._app.paths)
-        current = self._app.get_pos(force_widget="im")
+        current = self._app.index
         # Move to definition by keys or end/beg
         if forward:
             pos = self._app["eventhandler"].num_receive(max_pos)

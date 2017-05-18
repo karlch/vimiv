@@ -267,7 +267,18 @@ class Vimiv(Gtk.Application):
         # Call Gtk.Application.quit()
         self.quit()
 
-    def get_pos(self, get_filename=False, force_widget=""):
+    def get_focused_widget(self):
+        """Return the currently focused widget as string."""
+        if self["library"].is_focus():
+            return "lib"
+        elif self["thumbnail"].is_focus():
+            return "thu"
+        elif self["manipulate"].is_visible():
+            return "man"
+        else:
+            return "im"
+
+    def get_pos(self, get_filename=False):
         """Get the current position in the focused widget.
 
         get_filename: If True return filename instead of position.
@@ -276,33 +287,16 @@ class Vimiv(Gtk.Application):
         Return:
             Current position as number or filename.
         """
-        # Find widget to work on
-        if force_widget:
-            focused_widget = force_widget
-        elif self["main_window"].is_focus() or \
-                self["manipulate"].is_visible():
-            focused_widget = "im"
-        elif self["library"].is_focus():
-            focused_widget = "lib"
-        elif self["thumbnail"].is_focus():
-            focused_widget = "thu"
+        focused_widget = self.get_focused_widget()
 
         # Get position and name
-        if focused_widget != "im":
-            if focused_widget == "lib":
-                path = self["library"].get_cursor()[0]
-                filelist = self["library"].files
-            elif focused_widget == "thu":
-                path = self["thumbnail"].get_cursor()[1]
-                filelist = self.paths
-            if path:
-                position = path.get_indices()[0]
-            else:
-                position = 0
-                filelist = [""]
-        else:
-            filelist = self.paths
-            position = self.index
+        filelist = self.paths
+        position = self.index
+        if focused_widget == "lib":
+            position = self["library"].get_position()
+            filelist = self["library"].files
+        elif focused_widget == "thu":
+            position = self["thumbnail"].get_position()
 
         if get_filename:
             return filelist[position] if filelist else ""

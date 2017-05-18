@@ -124,7 +124,7 @@ class MainWindow(Gtk.ScrolledWindow):
         """Reload paths image and/or thumbnail when paths have changed."""
         if self._app.paths:
             # Get all files in directory again
-            focused_path = self._app.get_pos(True, "im")
+            focused_path = self._app.get_pos(True)
             directory = os.path.dirname(focused_path)
             files = [os.path.join(directory, fil)
                      for fil in listdir_wrapper(directory)]

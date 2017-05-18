@@ -54,16 +54,23 @@ class FileActionsTest(VimivTestCase):
 
     def test_format_files_with_exif(self):
         """Format files according to a formatstring with EXIF data."""
-        # File contains exif data
-        shutil.copytree("testimages/", "testimages_to_format/")
+        os.mkdir("testimages_to_format")
+        shutil.copyfile("testimages/arch_001.jpg",
+                        "testimages_to_format/arch_001.jpg")
         os.chdir("testimages_to_format")
         self.vimiv.quit()
         self.init_test(["arch_001.jpg"])
-        self.vimiv.paths = [os.path.abspath("arch_001.jpg")]
         self.vimiv["fileextras"].format_files("formatted_%Y_")
         self.assertIn("formatted_2016_001.jpg", os.listdir())
-        # File does not contain exif data
-        self.vimiv.paths = [os.path.abspath("arch-logo.png")]
+
+    def test_fail_format_files_with_exif(self):
+        """Run format with exif on a file that has no exif data."""
+        os.mkdir("testimages_to_format")
+        shutil.copyfile("testimages/arch-logo.png",
+                        "testimages_to_format/arch-logo.png")
+        os.chdir("testimages_to_format")
+        self.vimiv.quit()
+        self.init_test(["arch-logo.png"])
         self.vimiv["fileextras"].format_files("formatted_%Y_")
         message = self.vimiv["statusbar"].get_message()
         self.assertIn("No exif data for", message)
