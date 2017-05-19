@@ -15,11 +15,16 @@ class Transform(GObject.Object):
     """Deals with transformations like rotate/flip and deleting files.
 
     Attributes:
+        threads_running: If True, a thread is running to apply to files.
         trash_manager: Class to handle a shared trash directory.
 
         _app: The main vimiv application to interact with.
         _changes: Dictionary for rotate and flip.
             Key: Filename; Item: [Int, Bool, Bool]
+
+    Signals:
+        changed: Emitted when an image was transformed so Image can update.
+        applied-to-file: Emitted when the file was successfully transformed.
     """
 
     def __init__(self, app):
@@ -27,6 +32,7 @@ class Transform(GObject.Object):
         self._app = app
         self._changes = {}
         self.trash_manager = TrashManager()
+        self.threads_running = False
 
     def delete(self):
         """Delete all marked images or the current one."""
@@ -76,30 +82,24 @@ class Transform(GObject.Object):
         Args:
             info: Info to display when acting on marked images.
         """
-        images = []
-        # Add the image shown
-        if not self._app["mark"].marked and not self._app["thumbnail"].toggled:
-            if self._app["library"].is_focus():
-                images.append(
-                    os.path.abspath(self._app.get_pos(True)))
-            else:
-                images.append(self._app.get_path())
         # Add all marked images
-        else:
+        if self._app["mark"].marked:
             images = self._app["mark"].marked
             if len(images) == 1:
                 message = "%s %d marked image" % (info, len(images))
             else:
                 message = "%s %d marked images" % (info, len(images))
             self._app["statusbar"].message(message, "info")
+        # Add the image shown
+        else:
+            images = [os.path.abspath(self._app.get_pos(True))]
         return images
 
-    def rotate(self, cwise, rotate_file=True):
+    def rotate(self, cwise):
         """Rotate the displayed image and call thread to rotate files.
 
         Args:
             cwise: Rotate image 90 * cwise degrees.
-            rotate_file: If True call thread to rotate files.
         """
         if not self._app.get_paths():
             self._app["statusbar"].message(
@@ -114,34 +114,35 @@ class Transform(GObject.Object):
             cwise = int(cwise)
             images = self.get_images("Rotated")
             cwise = cwise % 4
+            # Update properties
+            for fil in images:
+                if fil in self._changes:
+                    self._changes[fil][0] = \
+                        (self._changes[fil][0] + cwise) % 4
+                else:
+                    self._changes[fil] = [cwise, 0, 0]
             # Rotate the image shown
             if self._app.get_path() in images:
-                self._app["image"].pixbuf_original = \
-                    self._app["image"].pixbuf_original.rotate_simple(
-                        (90 * cwise))
-                if self._app["image"].fit_image:
-                    self._app["image"].zoom_to(0, self._app["image"].fit_image)
-            if rotate_file:
-                for fil in images:
-                    if fil in self._changes:
-                        self._changes[fil][0] = \
-                            (self._changes[fil][0] + cwise) % 4
-                    else:
-                        self._changes[fil] = [cwise, 0, 0]
-                # Reload thumbnails of rotated images immediately
-                if self._app["thumbnail"].toggled:
-                    self.apply()
+                self.emit("changed", "rotate", cwise)
+            # Reload thumbnails of rotated images immediately
+            if self._app["thumbnail"].toggled:
+                self.apply()
         except ValueError:
             self._app["statusbar"].message(
                 "Argument for rotate must be of type integer", "error")
 
     def apply(self):
         """Start thread for rotate and flip."""
+        # TODO improve this, it is currently not possible to find out what is
+        # being changed and what should still be done
+        if self.threads_running:
+            return
         t = Thread(target=self._thread_for_apply)
         t.start()
 
     def _thread_for_apply(self):
         """Rotate and flip image file in an extra thread."""
+        self.threads_running = True
         to_remove = list(self._changes.keys())
         for f in self._changes:
             if self._changes[f][0]:
@@ -151,12 +152,12 @@ class Transform(GObject.Object):
                 imageactions.flip_file([f], True)
             if self._changes[f][2]:
                 imageactions.flip_file([f], False)
-            if self._app["thumbnail"].toggled:
-                self._app["thumbnail"].reload(f)
         for key in to_remove:
             del self._changes[key]
+        self.emit("applied-to-file", to_remove)
+        self.threads_running = False
 
-    def flip(self, horizontal, flip_file=True):
+    def flip(self, horizontal):
         """Flip the displayed image and call thread to flip files.
 
         Args:
@@ -175,24 +176,22 @@ class Transform(GObject.Object):
         try:
             horizontal = int(horizontal)
             images = self.get_images("Flipped")
+            # Apply changes
+            for fil in images:
+                if fil not in self._changes:
+                    self._changes[fil] = [0, 0, 0]
+                if horizontal:
+                    self._changes[fil][1] = \
+                        (self._changes[fil][1] + 1) % 2
+                else:
+                    self._changes[fil][2] = \
+                        (self._changes[fil][2] + 1) % 2
             # Flip the image shown
             if self._app.get_path() in images:
-                self._app["image"].pixbuf_original = \
-                    self._app["image"].pixbuf_original.flip(horizontal)
-                self._app["image"].update(False)
-            if flip_file:
-                for fil in images:
-                    if fil not in self._changes:
-                        self._changes[fil] = [0, 0, 0]
-                    if horizontal:
-                        self._changes[fil][1] = \
-                            (self._changes[fil][1] + 1) % 2
-                    else:
-                        self._changes[fil][2] = \
-                            (self._changes[fil][2] + 1) % 2
-                # Reload thumbnails of flipped images immediately
-                if self._app["thumbnail"].toggled:
-                    self.apply()
+                self.emit("changed", "flip", horizontal)
+            # Reload thumbnails of flipped images immediately
+            if self._app["thumbnail"].toggled:
+                self.apply()
         except ValueError:
             self._app["statusbar"].message(
                 "Argument for flip must be of type integer", "error")
@@ -207,6 +206,8 @@ class Transform(GObject.Object):
             message = "No image rotated. Tried using %s." % (method)
         self._app["statusbar"].message(message, "info")
 
-    def threads_running(self):
-        """Return True or False depending on whether threads are running."""
-        return True if self._changes else False
+
+GObject.signal_new("changed", Transform, GObject.SIGNAL_RUN_LAST, None,
+                   (GObject.TYPE_PYOBJECT, GObject.TYPE_PYOBJECT))
+GObject.signal_new("applied-to-file", Transform, GObject.SIGNAL_RUN_LAST, None,
+                   (GObject.TYPE_PYOBJECT,))

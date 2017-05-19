@@ -299,7 +299,7 @@ class Vimiv(Gtk.Application):
             position = self["thumbnail"].get_position()
 
         if get_filename:
-            return filelist[position] if filelist else ""
+            return filelist[position] if position < len(filelist) else ""
         return position
 
     def get_paths(self):

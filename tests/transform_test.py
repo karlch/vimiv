@@ -84,36 +84,29 @@ class TransformTest(VimivTestCase):
         """Rotate image."""
         # Before
         pixbuf = self.vimiv["image"].get_pixbuf()
-        is_portrait = pixbuf.get_width() < pixbuf.get_height()
-        self.assertFalse(is_portrait)
+        self.assertLess(pixbuf.get_height(), pixbuf.get_width())
         # Rotate
-        self.transform.rotate(1, True)
-        pixbuf = self.vimiv["image"].get_pixbuf()
-        is_portrait = pixbuf.get_width() < pixbuf.get_height()
-        self.assertTrue(is_portrait)
-        # Rotate the file
-        with Image.open(self.vimiv.get_path()) as im:
-            self.assertFalse(im.width < im.height)
+        self.transform.rotate(1)
         self.transform.apply()
-        while self.transform.threads_running():
+        pixbuf = self.vimiv["image"].get_pixbuf()
+        self.assertGreater(pixbuf.get_height(), pixbuf.get_width())
+        while self.transform.threads_running:
             sleep(0.05)
         with Image.open(self.vimiv.get_path()) as im:
-            self.assertTrue(im.width < im.height)
+            self.assertGreater(im.height, im.width)
         # Rotate back
-        self.transform.rotate(1, True)
-        pixbuf = self.vimiv["image"].get_pixbuf()
-        is_portrait = pixbuf.get_width() < pixbuf.get_height()
-        self.assertFalse(is_portrait)
-        # Rotate the file
+        self.transform.rotate(-1)
         self.transform.apply()
-        while self.transform.threads_running():
+        pixbuf = self.vimiv["image"].get_pixbuf()
+        self.assertLess(pixbuf.get_height(), pixbuf.get_width())
+        while self.transform.threads_running:
             sleep(0.05)
         with Image.open(self.vimiv.get_path()) as im:
-            self.assertFalse(im.width < im.height)
+            self.assertLess(im.height, im.width)
         # Fail because of no paths
         backup = list(self.vimiv.get_paths())
         self.vimiv.populate([])
-        self.transform.rotate(1, False)
+        self.transform.rotate(1)
         self.check_statusbar("ERROR: No image to rotate")
         self.vimiv.populate(backup)
         ##################
@@ -122,13 +115,11 @@ class TransformTest(VimivTestCase):
         # Rotate
         self.run_command("rotate 1")
         pixbuf = self.vimiv["image"].get_pixbuf()
-        is_portrait = pixbuf.get_width() < pixbuf.get_height()
-        self.assertTrue(is_portrait)
+        self.assertGreater(pixbuf.get_height(), pixbuf.get_width())
         # Rotate back
         self.run_command("rotate -1")
         pixbuf = self.vimiv["image"].get_pixbuf()
-        is_portrait = pixbuf.get_width() < pixbuf.get_height()
-        self.assertFalse(is_portrait)
+        self.assertLess(pixbuf.get_height(), pixbuf.get_width())
         # Fail because of invalid argument
         self.run_command("rotate value")
         self.check_statusbar(
@@ -138,17 +129,17 @@ class TransformTest(VimivTestCase):
         """Flip image."""
         # Flip
         pixbuf_before = self.vimiv["image"].get_pixbuf()
-        self.transform.flip(1, False)
+        self.transform.flip(1)
         pixbuf_after = self.vimiv["image"].get_pixbuf()
         self.assertNotEqual(pixbuf_before, pixbuf_after)
         # Flip back
-        self.transform.flip(1, False)
+        self.transform.flip(1)
         pixbuf_after_2 = self.vimiv["image"].get_pixbuf()
         self.assertNotEqual(pixbuf_after, pixbuf_after_2)
         # Fail because of no paths
         backup = list(self.vimiv.get_paths())
         self.vimiv.populate([])
-        self.transform.flip(1, False)
+        self.transform.flip(1)
         self.check_statusbar("ERROR: No image to flip")
         self.vimiv.populate(backup)
         ##################

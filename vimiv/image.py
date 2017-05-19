@@ -57,6 +57,9 @@ class Image(Gtk.Image):
         self._size = (0, 0)
         self._timer_id = 0
 
+        # Connect signals
+        self._app["transform"].connect("changed", self._on_image_changed)
+
     def update(self, update_info=True):
         """Show the final image.
 
@@ -372,3 +375,20 @@ class Image(Gtk.Image):
             delay = self.pixbuf_iter.get_delay_time()
             self._timer_id = GLib.timeout_add(delay, self._play_gif) \
                 if delay >= 0 else 0
+
+    def _on_image_changed(self, transform, change, arg):
+        """Update image after a transformation.
+
+        Args:
+            transform: The transform object that emitted the signal.
+            change: The type of transformation.
+            arg: Argument for the transformation, e.g. cwise for rotate.
+        """
+        if change == "rotate":
+            self.pixbuf_original = self.pixbuf_original.rotate_simple(90 * arg)
+        elif change == "flip":
+            self.pixbuf_original = self.pixbuf_original.flip(arg)
+        if self.fit_image:
+            self.zoom_to(0, self.fit_image)
+        else:
+            self.update()

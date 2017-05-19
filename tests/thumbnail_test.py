@@ -131,7 +131,6 @@ class ThumbnailTest(VimivTestCase):
         self.thumb.zoom(True)
         refresh_gui()
         self.thumb.zoom(True)
-        refresh_gui()
         self.assertEqual(self.thumb.get_zoom_level(), (512, 512))
         # We check the pixbuf here as well
         pixbuf = self._get_thumbnail_pixbuf(0)

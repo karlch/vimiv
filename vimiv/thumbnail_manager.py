@@ -67,7 +67,8 @@ class ThumbnailManager:
         if not ignore_cache and source_file in self._cache:
             pixbuf = self._cache[source_file]
         else:
-            thumbnail_path = self.thumbnail_store.get_thumbnail(source_file)
+            thumbnail_path = self.thumbnail_store.get_thumbnail(source_file,
+                                                                ignore_cache)
             if thumbnail_path is None:
                 thumbnail_path = self.error_icon
             pixbuf = Pixbuf.new_from_file(thumbnail_path)
@@ -170,7 +171,7 @@ class ThumbnailStore(object):
             self.thumbnail_dir = os.path.join(self.base_dir, "normal")
             self.thumb_size = 128
 
-    def get_thumbnail(self, filename):
+    def get_thumbnail(self, filename, ignore_current=False):
         """Get the path of the thumbnail of the given filename.
 
         If the requested thumbnail does not yet exist, it will first be created
@@ -178,6 +179,9 @@ class ThumbnailStore(object):
 
         Args:
             filename: The filename to get the thumbnail for.
+            ignore_current: If True, ignore saved thumbnails and force a
+                recreation. Needed as transforming images from within thumbnail
+                mode may happen faster than in 1s.
 
         Returns:
             The path of the thumbnail file or None if thumbnail creation failed.
@@ -189,7 +193,8 @@ class ThumbnailStore(object):
         thumbnail_filename = self._get_thumbnail_filename(filename)
         thumbnail_path = self._get_thumbnail_path(thumbnail_filename)
         if os.access(thumbnail_path, os.R_OK) \
-                and self._is_current(filename, thumbnail_path):
+                and self._is_current(filename, thumbnail_path) \
+                and not ignore_current:
             return thumbnail_path
 
         fail_path = self._get_fail_path(thumbnail_filename)

@@ -66,6 +66,8 @@ class Thumbnail(Gtk.IconView):
 
         # Signals
         self._app["mark"].connect("marks-changed", self._on_marks_changed)
+        self._app["transform"].connect("applied-to-file",
+                                       self._on_transformations_applied_to_file)
 
     def _on_activated(self, iconview, path):
         """Select and show image when thumbnail was activated.
@@ -320,3 +322,8 @@ class Thumbnail(Gtk.IconView):
             for name in changed:
                 self.reload(name, False)
         self._app["statusbar"].update_info()  # Do this once from here
+
+    def _on_transformations_applied_to_file(self, transform, files):
+        if self.toggled:
+            for name in files:
+                self.reload(name)
