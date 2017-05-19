@@ -143,12 +143,7 @@ class Thumbnail(Gtk.IconView):
         self.toggled = True
 
         # Add initial placeholder for all thumbnails
-        default_pixbuf_max = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-            self._thumbnail_manager.default_icon,
-            *self.get_zoom_level(), True)
-        size = self.get_zoom_level()[0]
-        default_pixbuf = self._thumbnail_manager.scale_pixbuf(
-            default_pixbuf_max, size)
+        default_pixbuf = self._get_default_pixbuf()
         for path in self._app.get_paths():
             name = self._get_name(path)
             self._liststore.append([default_pixbuf, name])
@@ -178,6 +173,12 @@ class Thumbnail(Gtk.IconView):
         padding = floor(free_space / columns)
         self.set_column_spacing(padding)
         self.set_columns(columns)
+
+    def _get_default_pixbuf(self):
+        default_pixbuf_max = GdkPixbuf.Pixbuf.new_from_file_at_scale(
+            self._thumbnail_manager.default_icon, *self.get_zoom_level(), True)
+        size = self.get_zoom_level()[0]
+        return self._thumbnail_manager.scale_pixbuf(default_pixbuf_max, size)
 
     def reload_all(self, ignore_cache=False):
         size = self.get_zoom_level()[0]
@@ -315,6 +316,22 @@ class Thumbnail(Gtk.IconView):
     def get_position(self):
         path = self.get_cursor()[1]
         return path.get_indices()[0] if path else 0
+
+    def on_paths_changed(self):
+        """Reload thumbnails properly when paths have changed."""
+        diff = len(self._liststore) - len(self._app.get_paths())
+        # Delete extra elements
+        while diff > 0:
+            self._liststore.remove(self._liststore[-1].iter)
+            diff -= 1
+        # Insert dummy elements to override
+        default_pixbuf = self._get_default_pixbuf() if diff < 0 else None
+        while diff < 0:
+            name = self._get_name(self._app.get_paths()[diff])
+            self._liststore.append([default_pixbuf, name])
+            diff += 1
+        for path in self._app.get_paths():
+            self.reload(path)
 
     def _on_marks_changed(self, mark, changed):
         """Reload names if marks changed."""

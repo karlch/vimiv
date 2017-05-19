@@ -120,7 +120,7 @@ class MainWindow(Gtk.ScrolledWindow):
         elif self._app.get_paths() and self.image.fit_image:
             self.image.zoom_to(0, self.image.fit_image)
 
-    def _on_paths_changed(self, app, paths):
+    def _on_paths_changed(self, app, transform):
         """Reload paths image and/or thumbnail when paths have changed."""
         if self._app.get_paths():
             # Get all files in directory again
@@ -131,7 +131,7 @@ class MainWindow(Gtk.ScrolledWindow):
             self._app.populate(files)
             # Reload thumbnail
             if self.thumbnail.toggled:
-                self.thumbnail.reload_all(ignore_cache=True)
+                self.thumbnail.on_paths_changed()
             # Refocus the path
             if focused_path in self._app.get_paths():
                 index = self._app.get_paths().index(focused_path)
