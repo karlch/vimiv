@@ -322,6 +322,7 @@ class Thumbnail(Gtk.IconView):
         diff = len(self._liststore) - len(self._app.get_paths())
         # Delete extra elements
         while diff > 0:
+            # pylint: disable=unsubscriptable-object
             self._liststore.remove(self._liststore[-1].iter)
             diff -= 1
         # Insert dummy elements to override

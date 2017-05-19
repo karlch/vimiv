@@ -275,8 +275,7 @@ class Vimiv(Gtk.Application):
             return "thu"
         elif self["manipulate"].is_visible():
             return "man"
-        else:
-            return "im"
+        return "im"
 
     def get_pos(self, get_filename=False):
         """Get the current position in the focused widget.
