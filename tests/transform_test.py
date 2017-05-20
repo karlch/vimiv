@@ -50,6 +50,8 @@ class TransformTest(VimivTestCase):
         self.transform.undelete("arch-logo.png")
         self.assertTrue(os.path.exists("arch-logo.png"))
         self.assertIn(os.path.abspath("arch-logo.png"), self.vimiv.get_paths())
+        # Move back to beginning
+        self.vimiv["image"].move_pos(forward=False)
 
     def test_fail_delete_undelete(self):
         """Fail deleting and undeleting images."""
@@ -156,6 +158,15 @@ class TransformTest(VimivTestCase):
         # Fail because of invalid argument
         self.run_command("flip value")
         self.check_statusbar("ERROR: Argument for flip must be of type integer")
+
+    def test_auto_rotate(self):
+        """Auto rotate images from transform checking messages."""
+        self.transform.rotate_auto()
+        statusbar_text = self.vimiv["statusbar"].get_message()
+        self.assertIn("Autorotated 1", statusbar_text)
+        self.transform.rotate_auto()
+        statusbar_text = self.vimiv["statusbar"].get_message()
+        self.assertIn("No image rotated.", statusbar_text)
 
     @classmethod
     def tearDownClass(cls):
