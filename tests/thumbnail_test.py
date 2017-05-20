@@ -61,7 +61,6 @@ class ThumbnailTest(VimivTestCase):
     def test_move(self):
         """Move in thumbnail mode."""
         start = self.vimiv.get_pos()
-        self.assertGreaterEqual(self.thumb.get_columns(), 6)
         # All items are in the same row
         # l moves 1 to the right
         self.thumb.move_direction("l")
@@ -71,11 +70,6 @@ class ThumbnailTest(VimivTestCase):
         self.thumb.move_direction("h")
         self.assertEqual(self.vimiv.get_paths()[start],
                          self.vimiv.get_pos(True))
-        # j/k/J/K do not do anything as there is only 1 row
-        for direction in "jkJK":
-            self.thumb.move_direction(direction)
-            self.assertEqual(self.vimiv.get_paths()[start],
-                             self.vimiv.get_pos(True))
         # L moves to the last element
         self.thumb.move_direction("L")
         self.assertEqual(self.vimiv.get_paths()[-1], self.vimiv.get_pos(True))
@@ -89,6 +83,15 @@ class ThumbnailTest(VimivTestCase):
         self.vimiv["main_window"].scroll("H")
         self.assertEqual(self.vimiv.get_paths()[0],
                          self.vimiv.get_pos(True))
+        # Get amount of rows for vertical scrolling
+        last = len(self.vimiv.get_paths()) - 1
+        rows = self.thumb.get_item_row(Gtk.TreePath(last)) + 1
+        if rows > 1:
+            self.fail("Implementation not done for more than one row.")
+        for direction in "jkJK":
+            self.thumb.move_direction(direction)
+            self.assertEqual(self.vimiv.get_paths()[0],
+                             self.vimiv.get_pos(True))
 
     def test_search(self):
         """Search in thumbnail mode."""
@@ -108,27 +111,31 @@ class ThumbnailTest(VimivTestCase):
         """Zoom in thumbnail mode."""
         # Zoom to the value of 128
         while self.thumb.get_zoom_level()[0] > 128:
-            self.thumb.zoom(False)
+            self._zoom_wrapper(False)
         while self.thumb.get_zoom_level()[0] < 128:
-            self.thumb.zoom(True)
+            self._zoom_wrapper(True)
         self.assertEqual(self.thumb.get_zoom_level(), (128, 128))
         # Zoom in and check thumbnail size and pixbuf
-        self.thumb.zoom(True)
+        self._zoom_wrapper(True)
         self.assertEqual(self.thumb.get_zoom_level(), (256, 256))
         # Zoom in twice should end at (512, 512)
-        self.thumb.zoom(True)
+        self._zoom_wrapper(True)
         refresh_gui()
-        self.thumb.zoom(True)
+        self._zoom_wrapper(True)
         self.assertEqual(self.thumb.get_zoom_level(), (512, 512))
         # We check the pixbuf here as well
-        pixbuf = self._get_thumbnail_pixbuf(0)
-        width = pixbuf.get_width()
-        height = pixbuf.get_height()
-        scale = max(width, height)
-        self.assertEqual(scale, 512)
+        scale = self._get_pixbuf_scale()
+        # This might take a while, repeat until it works setting a limit
+        count = 0
+        while scale != 512:
+            if count > 10:
+                self.fail("Pixbuf not updated")
+            scale = self._get_pixbuf_scale()
+            refresh_gui(0.1)
+            count += 1
         # Zoom out
-        self.thumb.zoom(False)
-        self.thumb.zoom(False)
+        self._zoom_wrapper(False)
+        self._zoom_wrapper(False)
         self.assertEqual(self.thumb.get_zoom_level(), (128, 128))
         # Zoom directly with the window implementation of zoom
         self.vimiv["window"].zoom(True)
@@ -144,6 +151,14 @@ class ThumbnailTest(VimivTestCase):
     def _get_thumbnail_pixbuf(self, index):
         model = self.thumb.get_model()
         return model.get_value(model.get_iter(index), 0)
+
+    def _get_pixbuf_scale(self):
+        pixbuf = self._get_thumbnail_pixbuf(0)
+        return max(pixbuf.get_width(), pixbuf.get_height())
+
+    def _zoom_wrapper(self, zoom_in):
+        self.thumb.zoom(zoom_in)
+        refresh_gui()
 
     def tearDown(self):
         if self.thumb.toggled:
