@@ -11,18 +11,6 @@ from gi.repository import Gtk
 from vimiv_testcase import VimivTestCase, refresh_gui
 
 
-def create_tuples(max_val, insert=None):
-    """Create tuples for thumbnail sizes as powers of two starting from 64."""
-    tuples = []
-    value = 64
-    while value <= max_val:
-        tuples.append((value, value))
-        value *= 2
-    if insert:
-        tuples.append((insert, insert))
-    return sorted(tuples)
-
-
 class ThumbnailTest(VimivTestCase):
     """Test thumbnail."""
 
