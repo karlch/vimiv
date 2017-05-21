@@ -47,8 +47,8 @@ class Vimiv(Gtk.Application):
         _index: Current position in paths.
 
     Signals:
-        widgets-changed: Emitted when the layout of the widgets changed in some
-            way. This allows other widgets to trigger an update when this
+        widget-layout-changed: Emitted when the layout of the widgets changed in
+            some way. This allows other widgets to trigger an update when this
             happens, e.g. rezoom an image when the library was toggled.
         paths-changed: Emmited when the paths have or may have changed. This
             allows other widgets to reload their filelist and update any
@@ -447,7 +447,7 @@ class Vimiv(Gtk.Application):
 
 
 # Initiate signals for the Vimiv class
-GObject.signal_new("widgets-changed", Vimiv, GObject.SIGNAL_RUN_LAST,
+GObject.signal_new("widget-layout-changed", Vimiv, GObject.SIGNAL_RUN_LAST,
                    None, (GObject.TYPE_PYOBJECT,))
 GObject.signal_new("paths-changed", Vimiv, GObject.SIGNAL_RUN_LAST,
                    None, (GObject.TYPE_PYOBJECT,))

@@ -124,7 +124,7 @@ class Thumbnail(Gtk.IconView):
         # Manipulate bar is useless in thumbnail mode
         if self._app["manipulate"].is_visible():
             self._app["manipulate"].toggle()
-        self._app.emit("widgets-changed", self)
+        self._app.emit("widget-layout-changed", self)
 
     def _show(self, toggled=False):
         """Show thumbnails when called from toggle.

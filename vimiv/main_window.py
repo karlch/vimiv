@@ -38,7 +38,7 @@ class MainWindow(Gtk.ScrolledWindow):
                      "IMAGE")
 
         # Connect signals
-        self._app.connect("widgets-changed", self._on_widgets_changed)
+        self._app.connect("widget-layout-changed", self._on_widgets_changed)
         self._app.connect("paths-changed", self._on_paths_changed)
 
     def switch_to_child(self, new_child):

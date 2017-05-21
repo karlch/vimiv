@@ -124,7 +124,7 @@ class Library(Gtk.TreeView):
             self.focus(True)
             # Markings and other stuff might have changed
             self.reload(os.getcwd())
-        self._app.emit("widgets-changed", self)
+        self._app.emit("widget-layout-changed", self)
 
     def focus(self, focus_library=True):
         """Set or remove focus from the library.
@@ -315,7 +315,7 @@ class Library(Gtk.TreeView):
         elif width < 100:
             width = 100
         self.set_size_request(width, 10)
-        self._app.emit("widgets-changed", self)
+        self._app.emit("widget-layout-changed", self)
 
     def toggle_hidden(self):
         """Toggle showing of hidden files."""

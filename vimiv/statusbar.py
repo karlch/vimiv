@@ -203,7 +203,7 @@ class Statusbar(Gtk.Grid):
             self.show()
             self.separator.show()
         self.hidden = not self.hidden
-        self._app.emit("widgets-changed", self)
+        self._app.emit("widget-layout-changed", self)
 
     def clear_status(self):
         """Clear num_str, search and error messages from the statusbar."""

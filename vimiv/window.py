@@ -86,7 +86,7 @@ class Window(Gtk.ApplicationWindow):
         """
         if self.get_size() != self.winsize:
             self.winsize = self.get_size()
-            self._app.emit("widgets-changed", self)
+            self._app.emit("widget-layout-changed", self)
 
     def _on_click(self, widget, event_button):
         """Update statusbar with the currently focused widget after mouse click.
