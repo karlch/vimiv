@@ -22,7 +22,6 @@ class Image(Gtk.Image):
             3: Image is zoomed to fit vertically.
         pixbuf_iter: Iter of displayed animation.
         pixbuf_original: Original image.
-        scrolled_win: Gtk.ScrollableWindow for the image.
         zoom_percent: Percentage to zoom to compared to the original size.
 
         _animation_toggled: If True, animation is playing.
