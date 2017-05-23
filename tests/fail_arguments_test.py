@@ -56,7 +56,7 @@ class FailingArgTest(VimivTestCase):
         """
         text = ":" + command + " arg" * n_args
         self.cmdline.set_text(text)
-        self.cmdline.handler(self.cmdline)
+        self.cmdline.emit("activate")
         expected = "ERROR: Too many arguments for command" \
             if too_many \
             else "ERROR: Missing positional arguments for command"

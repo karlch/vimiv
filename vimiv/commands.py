@@ -26,7 +26,7 @@ class Commands(object):
         self.add_command("accept_changes",
                          self.app["manipulate"].finish,
                          default_args=[True])
-        self.add_command("alias", self.app["commandline"].alias,
+        self.add_command("alias", self.app["commandline"].add_alias,
                          positional_args=["name", "command"])
         self.add_command("autorotate", self.app["transform"].rotate_auto)
         self.add_command("center", self.app["main_window"].center_window)

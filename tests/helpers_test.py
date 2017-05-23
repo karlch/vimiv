@@ -5,7 +5,7 @@ import os
 import shutil
 from unittest import TestCase, main
 
-import vimiv.helpers as helpers
+from vimiv import helpers
 
 
 class HelpersTest(TestCase):
@@ -69,6 +69,17 @@ class HelpersTest(TestCase):
         # More than one sentence
         flip_info = infodict["flip"]
         self.assertEqual(flip_info, "Flip the current image")
+
+    def test_expansion(self):
+        """Expand % and * in a command."""
+        filename = "first"
+        filelist = ["first", "second.txt"]
+        command1 = "echo %"
+        result1 = helpers.expand_filenames(filename, filelist, command1)
+        self.assertEqual(result1, "echo first")
+        command2 = "echo * > ~/test.txt"
+        result2 = helpers.expand_filenames(filename, filelist, command2)
+        self.assertEqual(result2, "echo first second.txt > ~/test.txt")
 
     def tearDown(self):
         shutil.rmtree("tmp_testdir")

@@ -3,6 +3,7 @@
 
 import gzip
 import os
+import re
 
 from gi.repository import Gtk
 
@@ -137,3 +138,15 @@ def get_float_from_str(float_str):
         return num, 0
     except ValueError:
         return None, 1
+
+
+def expand_filenames(filename, filelist, command):
+    """Expand % to filename and * to filelist in command."""
+    # Escape spaces for the shell
+    filename = filename.replace(" ", "\\\\\\\\ ")
+    filelist = [f.replace(" ", "\\\\\\\\ ") for f in filelist]
+    # Substitute % and * with escaping
+    command = re.sub(r'(?<!\\)(%)', filename, command)
+    command = re.sub(r'(?<!\\)(\*)', " ".join(filelist), command)
+    command = re.sub(r'(\\)(?!\\)', "", command)
+    return command

@@ -97,7 +97,7 @@ class FastCommandlineTest(CommandlineTest):
         dir_after = os.getcwd()
         self.assertEqual(expected_dir, dir_after)
         # Search should have these results
-        self.vimiv["commandline"].search_case = False
+        self.vimiv["commandline"].toggle_search_case()
         self.run_search("Ar")
         expected_search_results = [1, 2]
         search_results = self.vimiv["commandline"].search_positions
@@ -128,7 +128,7 @@ class FastCommandlineTest(CommandlineTest):
         self.vimiv["commandline"].search_move(forward=True)
         self.assertEqual(self.vimiv.get_pos(), 1)
         # Searching case sensitively should have no results here
-        self.vimiv["commandline"].search_case = True
+        self.vimiv["commandline"].toggle_search_case()
         self.run_search("Ar")
         self.assertFalse(self.vimiv["commandline"].search_positions)
         # Search move should give an error message without any results
@@ -168,7 +168,7 @@ class FastCommandlineTest(CommandlineTest):
             self.vimiv["library"].files[self.vimiv["library"].get_position()],
             "arch-logo.png")
         # Accept
-        self.vimiv["commandline"].handler(self.vimiv["commandline"])
+        self.vimiv["commandline"].emit("activate")
         self.assertEqual(self.vimiv.get_pos(True), "arch-logo.png")
         # Move to the next result as a final check
         self.vimiv["commandline"].search_move(forward=True)
@@ -176,24 +176,22 @@ class FastCommandlineTest(CommandlineTest):
 
     def test_alias(self):
         """Add an alias."""
-        self.vimiv["commandline"].alias("testalias")
+        self.vimiv["commandline"].add_alias("testalias")
         self.assertTrue("testalias" in self.vimiv.aliases)
 
     def test_history_search(self):
         """Search through history."""
-        # Clear history so the commands are not here from previous sessions
-        self.vimiv["commandline"].history = []
-        self.assertFalse(self.vimiv["commandline"].history)
         # First run some very fast commands
         self.run_command("!ls > /dev/null", True)
         self.run_command("!echo foo_bar > /dev/null", True)
         self.run_command("!echo baz > /dev/null", True)
         # Check if they were added to the history correctly
-        self.assertIn(":!ls > /dev/null", self.vimiv["commandline"].history)
+        self.assertIn(":!ls > /dev/null",
+                      self.vimiv["commandline"].get_history())
         self.assertIn(":!echo foo_bar > /dev/null",
-                      self.vimiv["commandline"].history)
+                      self.vimiv["commandline"].get_history())
         self.assertIn(":!echo baz > /dev/null",
-                      self.vimiv["commandline"].history)
+                      self.vimiv["commandline"].get_history())
         # Set the text to :!e and search, should give the last two echos as
         # first results
         self.vimiv["commandline"].set_text(":!e")

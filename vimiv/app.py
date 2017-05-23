@@ -253,12 +253,7 @@ class Vimiv(Gtk.Application):
         # Run remaining rotate and flip threads
         self["transform"].apply()
         # Save the history
-        histfile = os.path.join(GLib.get_user_data_dir(), "vimiv", "history")
-        histfile = open(histfile, "w")
-        for cmd in self["commandline"].history:
-            cmd += "\n"
-            histfile.write(cmd)
-        histfile.close()
+        self["commandline"].write_history()
         # Write to log
         self["log"].write_message("Exited", "time")
         # Cleanup tmpdir
