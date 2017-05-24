@@ -14,6 +14,7 @@ class CommandlineTest(VimivTestCase):
     @classmethod
     def setUpClass(cls):
         cls.init_test(cls)
+        cls.search = cls.vimiv["commandline"].search
 
     def setUp(self):
         self.working_directory = os.getcwd()
@@ -82,97 +83,6 @@ class FastCommandlineTest(CommandlineTest):
         refresh_gui()  # Needed because of GLib.idle_add in command thread
         self.check_statusbar("ERROR: Command exited with status 127\n" +
                              err_message)
-
-    def test_search(self):
-        """Search for images, directories and navigate search results."""
-        self.vimiv["commandline"].incsearch = False
-        self.vimiv["commandline"].cmd_search()
-        self.assertEqual(self.vimiv["commandline"].get_text(), "/")
-        # Search should move into testimages
-        expected_dir = os.path.abspath("vimiv")
-        self.run_search("vimi")
-        self.assertEqual(expected_dir, os.getcwd())
-        expected_dir = os.path.abspath("./testimages")
-        self.run_search("test")
-        dir_after = os.getcwd()
-        self.assertEqual(expected_dir, dir_after)
-        # Search should have these results
-        self.vimiv["commandline"].toggle_search_case()
-        self.run_search("Ar")
-        expected_search_results = [1, 2]
-        search_results = self.vimiv["commandline"].search_positions
-        self.assertEqual(search_results, expected_search_results)
-        # Moving forward to next result should work
-        self.assertEqual(self.vimiv.get_pos(), 1)
-        self.vimiv["commandline"].search_move(forward=True)
-        self.assertEqual(self.vimiv.get_pos(), 2)
-        # Forward should wrap
-        self.vimiv["commandline"].search_move(forward=True)
-        self.assertEqual(self.vimiv.get_pos(), 1)
-        # Backward should wrap again
-        self.vimiv["commandline"].search_move(forward=False)
-        self.assertEqual(self.vimiv.get_pos(), 2)
-        # Backward to one again
-        self.vimiv["commandline"].search_move(forward=False)
-        self.assertEqual(self.vimiv.get_pos(), 1)
-        # Deliberately move to last element in library
-        self.vimiv["library"].move_pos()
-        self.assertNotEqual(self.vimiv.get_pos(), 1)
-        # Moving forward should wrap to 1
-        self.vimiv["commandline"].search_move(forward=True)
-        self.assertEqual(self.vimiv.get_pos(), 1)
-        # Deliberately move to first element in library
-        self.vimiv["library"].move_pos(forward=False)
-        self.assertEqual(self.vimiv.get_pos(), 0)
-        # Moving forward should go to 1
-        self.vimiv["commandline"].search_move(forward=True)
-        self.assertEqual(self.vimiv.get_pos(), 1)
-        # Searching case sensitively should have no results here
-        self.vimiv["commandline"].toggle_search_case()
-        self.run_search("Ar")
-        self.assertFalse(self.vimiv["commandline"].search_positions)
-        # Search move should give an error message without any results
-        self.vimiv["commandline"].search_move()
-        self.check_statusbar("WARNING: No search results")
-
-    def test_incsearch(self):
-        """Incsearch."""
-        self.vimiv["commandline"].incsearch = True
-        dir_before = os.getcwd()
-        self.vimiv["commandline"].cmd_search()
-        # Search should be done automatically
-        self.vimiv["commandline"].set_text("/vi")
-        expected_pos = self.vimiv["library"].files.index("vimiv")
-        self.assertEqual(self.vimiv["commandline"].search_positions,
-                         [expected_pos])
-        focused_path = self.vimiv["library"].get_cursor()[0]
-        position = focused_path.get_indices()[0]
-        focused_file = self.vimiv["library"].files[position]
-        self.assertEqual(focused_file, "vimiv")
-        # Not accepted -> Back to the default position
-        self.vimiv["commandline"].leave(True)
-        self.assertEqual(os.getcwd(), dir_before)
-        self.assertEqual(self.vimiv.get_pos(), 0)
-        self.assertFalse(self.vimiv["commandline"].search_positions)
-        # Move into a more interesting directory
-        self.vimiv["library"].move_up("vimiv/testimages")
-        # First search should stay at animation
-        self.vimiv["commandline"].cmd_search()
-        self.vimiv["commandline"].set_text("/a")
-        self.assertEqual(
-            self.vimiv["library"].files[self.vimiv["library"].get_position()],
-            "animation")
-        # Now move to arch-logo
-        self.vimiv["commandline"].set_text("/arch")
-        self.assertEqual(
-            self.vimiv["library"].files[self.vimiv["library"].get_position()],
-            "arch-logo.png")
-        # Accept
-        self.vimiv["commandline"].emit("activate")
-        self.assertEqual(self.vimiv.get_pos(True), "arch-logo.png")
-        # Move to the next result as a final check
-        self.vimiv["commandline"].search_move(forward=True)
-        self.assertEqual(self.vimiv.get_pos(True), "arch_001.jpg")
 
     def test_alias(self):
         """Add an alias."""
@@ -247,6 +157,95 @@ class SlowCommandlineTest(CommandlineTest):
         self.run_command("!echo arch_001.jpg |", True)
         refresh_gui()
         self.assertEqual(self.vimiv.get_path(), expected_image)
+
+
+class SearchTest(CommandlineTest):
+    """Test the integration of search with the rest of vimiv."""
+
+    def test_search(self):
+        """Search for images, directories and navigate search results."""
+        # Search should move into testimages
+        expected_dir = os.path.abspath("vimiv")
+        self.run_search("vimi")
+        self.assertEqual(expected_dir, os.getcwd())
+        expected_dir = os.path.abspath("testimages")
+        self.run_search("test")
+        self.assertEqual(expected_dir, os.getcwd())
+        # Search should have these results
+        self.search.toggle_search_case()
+        self.run_search("Ar")
+        expected_search_results = ["arch-logo.png", "arch_001.jpg"]
+        self.assertEqual(self.search.results, expected_search_results)
+        # Moving forward to next result should work
+        self.assertEqual(self.vimiv.get_pos(), 1)
+        self.vimiv["commandline"].search_move(forward=True)
+        self.assertEqual(self.vimiv.get_pos(), 2)
+        # Forward should wrap
+        self.vimiv["commandline"].search_move(forward=True)
+        self.assertEqual(self.vimiv.get_pos(), 1)
+        # Backward should wrap again
+        self.vimiv["commandline"].search_move(forward=False)
+        self.assertEqual(self.vimiv.get_pos(), 2)
+        # Backward to one again
+        self.vimiv["commandline"].search_move(forward=False)
+        self.assertEqual(self.vimiv.get_pos(), 1)
+        # Deliberately move to last element in library
+        self.vimiv["library"].move_pos()
+        self.assertNotEqual(self.vimiv.get_pos(), 1)
+        # Moving forward should wrap to 1
+        self.vimiv["commandline"].search_move(forward=True)
+        self.assertEqual(self.vimiv.get_pos(), 1)
+        # Deliberately move to first element in library
+        self.vimiv["library"].move_pos(forward=False)
+        self.assertEqual(self.vimiv.get_pos(), 0)
+        # Moving forward should go to 1
+        self.vimiv["commandline"].search_move(forward=True)
+        self.assertEqual(self.vimiv.get_pos(), 1)
+        # Searching case sensitively should have no results here
+        self.search.toggle_search_case()
+        self.run_search("Ar")
+        self.assertFalse(self.search.results)
+        # Search move should give an error message without any results
+        self.vimiv["commandline"].search_move()
+        self.check_statusbar('INFO: No file matching "Ar"')
+
+    def test_incsearch(self):
+        """Incsearch."""
+        self.search.toggle_incsearch()
+        dir_before = os.getcwd()
+        self.vimiv["commandline"].cmd_search()
+        # Search should be done automatically
+        self.vimiv["commandline"].set_text("/vi")
+        self.assertEqual(self.search.results, ["vimiv"])
+        self.search.toggle_incsearch()
+        position = self.vimiv["library"].get_position()
+        focused_file = self.vimiv["library"].files[position]
+        self.assertEqual(focused_file, "vimiv")
+        self.search.toggle_incsearch()
+        # Not accepted -> Back to the default position
+        self.vimiv["commandline"].leave(True)
+        self.assertEqual(os.getcwd(), dir_before)
+        self.assertEqual(self.vimiv.get_pos(), 0)
+        self.assertFalse(self.search.results)
+        # Move into a more interesting directory
+        self.vimiv["library"].move_up("vimiv/testimages")
+        # First search should move to arch-logo
+        self.vimiv["commandline"].cmd_search()
+        self.vimiv["commandline"].set_text("/a")
+        self.assertEqual(
+            self.vimiv["library"].files[self.vimiv["library"].get_position()],
+            "arch-logo.png")
+        # Should stay there upon longer typing
+        self.vimiv["commandline"].set_text("/arch")
+        self.assertEqual(
+            self.vimiv["library"].files[self.vimiv["library"].get_position()],
+            "arch-logo.png")
+        # Accept
+        self.vimiv["commandline"].emit("activate")
+        self.assertEqual(self.vimiv.get_pos(True), "arch-logo.png")
+        # Move to the next result as a final check
+        self.vimiv["commandline"].search_move(forward=True)
+        self.assertEqual(self.vimiv.get_pos(True), "arch_001.jpg")
 
 
 if __name__ == "__main__":

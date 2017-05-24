@@ -160,9 +160,12 @@ class Commands(object):
                          is_hidden=True)
         self.add_command("search", self.app["commandline"].cmd_search,
                          is_hidden=True)
-        self.add_command("search_next", self.app["commandline"].search_move,
-                         supports_count=True, is_hidden=True)
-        self.add_command("search_prev", self.app["commandline"].search_move,
+        self.add_command("search_next",
+                         self.app["commandline"].search_move,
+                         default_args=[True], supports_count=True,
+                         is_hidden=True)
+        self.add_command("search_prev",
+                         self.app["commandline"].search_move,
                          default_args=[False], supports_count=True,
                          is_hidden=True)
         self.add_command("slider", self.app["manipulate"].change_slider,

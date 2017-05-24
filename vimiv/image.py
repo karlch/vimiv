@@ -58,6 +58,8 @@ class Image(Gtk.Image):
 
         # Connect signals
         self._app["transform"].connect("changed", self._on_image_changed)
+        self._app["commandline"].search.connect("search-completed",
+                                                self._on_search_completed)
 
     def update(self, update_info=True):
         """Show the final image.
@@ -391,3 +393,8 @@ class Image(Gtk.Image):
             self.zoom_to(0, self.fit_image)
         else:
             self.update()
+
+    def _on_search_completed(self, search, new_pos, last_focused):
+        if last_focused == "im":
+            self._app["eventhandler"].num_str = str(new_pos + 1)
+            self.move_pos()

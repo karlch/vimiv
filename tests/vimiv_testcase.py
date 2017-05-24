@@ -88,6 +88,7 @@ class VimivTestCase(TestCase):
 
     def run_search(self, string):
         """Search for string from the command line."""
+        self.vimiv["commandline"].cmd_search()
         self.vimiv["commandline"].set_text("/" + string)
         self.vimiv["commandline"].emit("activate")
 

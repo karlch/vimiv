@@ -62,6 +62,10 @@ class Statusbar(Gtk.Grid):
         self.set_margin_bottom(padding)
         self.separator = Gtk.Separator()
 
+        # Connect signals
+        self._app["commandline"].search.connect("no-search-results",
+                                                self._on_no_search_results)
+
     def message(self, message, style="error", timeout=5):
         """Push a message to the statusbar.
 
@@ -207,7 +211,7 @@ class Statusbar(Gtk.Grid):
 
     def clear_status(self):
         """Clear num_str, search and error messages from the statusbar."""
-        self._app["commandline"].reset_search(leaving=False)
+        self._app["commandline"].search.reset()
         self._app["eventhandler"].num_clear()
 
     def set_separator_height(self):
@@ -222,3 +226,6 @@ class Statusbar(Gtk.Grid):
 
     def get_message(self):
         return self._left_label.get_text()
+
+    def _on_no_search_results(self, search, searchstr):
+        self.message('No file matching "%s"' % (searchstr), "info")

@@ -68,6 +68,8 @@ class Thumbnail(Gtk.IconView):
         self._app["mark"].connect("marks-changed", self._on_marks_changed)
         self._app["transform"].connect("applied-to-file",
                                        self._on_transformations_applied_to_file)
+        self._app["commandline"].search.connect("search-completed",
+                                                self._on_search_completed)
 
     def _on_activated(self, iconview, path):
         """Select and show image when thumbnail was activated.
@@ -210,7 +212,8 @@ class Thumbnail(Gtk.IconView):
         """
         index = self._app.get_paths().index(filename)
         name = self._get_name(filename)
-        if index in self._app["commandline"].search_positions:
+        if os.path.basename(filename) \
+                in self._app["commandline"].search.results:
             name = self._markup + "<b>" + name + "</b></span>"
 
         # pylint: disable=unsubscriptable-object
@@ -345,3 +348,10 @@ class Thumbnail(Gtk.IconView):
         if self.toggled:
             for name in files:
                 self.reload(name)
+
+    def _on_search_completed(self, search, new_pos, last_focused):
+        if self.toggled:
+            for path in self._app.get_paths():
+                self.reload(path, False)
+        if last_focused == "thu":
+            self.move_to_pos(new_pos)

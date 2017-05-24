@@ -92,6 +92,8 @@ class Library(Gtk.TreeView):
         # Connect signals
         self._app.connect("paths-changed", self._on_paths_changed)
         self._app["mark"].connect("marks-changed", self._on_marks_changed)
+        self._app["commandline"].search.connect("search-completed",
+                                                self._on_search_completed)
 
     def toggle(self, update_image=True):
         """Toggle the library.
@@ -229,7 +231,7 @@ class Library(Gtk.TreeView):
         """
         # Reset search positions
         if not search:
-            self._app["commandline"].search_positions = []
+            self._app["commandline"].search.reset()
         # Create model in new directory
         self.set_model(self._liststore_create())
         # Warn if there are no files in the directory
@@ -252,7 +254,7 @@ class Library(Gtk.TreeView):
                 markup_string += "  →  " + os.path.realpath(name)
             if os.path.isdir(name):
                 markup_string = "<b>" + markup_string + "</b>"
-            if i in self._app["commandline"].search_positions:
+            if name in self._app["commandline"].search.results:
                 markup_string = self._markup + markup_string + "</span>"
             model[i][1] = markup_string
 
@@ -386,7 +388,7 @@ class Library(Gtk.TreeView):
                 marked_string = "[*]"
             if os.path.isdir(fil):
                 markup_string = "<b>" + markup_string + "</b>"
-            if i in self._app["commandline"].search_positions:
+            if fil in self._app["commandline"].search.results:
                 markup_string = self._markup + markup_string + "</span>"
             liststore.append([i + 1, markup_string, size, marked_string])
 
@@ -449,6 +451,16 @@ class Library(Gtk.TreeView):
             for i, name in enumerate(self.files):
                 model[i][3] = "[*]" \
                     if os.path.abspath(name) in mark.marked else ""
+
+    def _on_search_completed(self, search, new_pos, last_focused):
+        self.reload_names()
+        # Move to next result
+        if last_focused == "lib":
+            self.move_pos(defined_pos=new_pos)
+            if len(search.results) == 1 \
+                    and not self._app["commandline"].is_visible():
+                path = Gtk.TreePath(new_pos)
+                self.file_select(self, path, None, False)
 
     def __getitem__(self, directory):
         """Convenience method to access saved positions via self[directory].

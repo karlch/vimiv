@@ -61,12 +61,12 @@ class StatusbarTest(VimivTestCase):
     def test_clear_status(self):
         """Clear num_str, search and error message."""
         self.vimiv["eventhandler"].num_str = "42"
-        self.vimiv["commandline"].search_positions = [1, 2, 3]
+        self.vimiv["commandline"].search.results = ["Something"]
         self.statusbar.message("Catastrophe", "error")
         self.check_statusbar("ERROR: Catastrophe")
         self.statusbar.clear_status()
         self.assertEqual(self.vimiv["eventhandler"].num_str, "")
-        self.assertFalse(self.vimiv["commandline"].search_positions)
+        self.assertFalse(self.vimiv["commandline"].search.results)
         self.assertNotEqual(self.vimiv["statusbar"].get_message(),
                             "Error: Catastrophe")
 

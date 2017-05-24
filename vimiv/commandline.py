@@ -3,11 +3,10 @@
 
 import os
 import re
-from bisect import bisect_left, bisect_right
 from subprocess import PIPE, Popen
 from threading import Thread
 
-from gi.repository import GLib, Gtk
+from gi.repository import GLib, Gtk, GObject
 from vimiv.helpers import read_file, error_message, expand_filenames
 
 
@@ -15,17 +14,15 @@ class CommandLine(Gtk.Entry):
     """Commandline of vimiv.
 
     Attributes:
-        search_positions: Search results as positions.
+        search: Search class defined below.
         running_processes: List of all running external processes.
 
         _app: The main vimiv application to interact with.
         _history: List of commandline history to save.
-        _incsearch: If True, enable incremental search in the library.
         _last_focused: Widget that was focused before the command line.
         _last_index: Index that was last selected in the library, if any.
         _matching_history: Parts of the history that match entered text.
-        _pos: Position in history completion.
-        _search_case: If True, search case sensitively.
+        _pos: Index in _history list.
     """
 
     def __init__(self, app, settings):
@@ -37,7 +34,6 @@ class CommandLine(Gtk.Entry):
         """
         super(CommandLine, self).__init__()
         self._app = app
-        general = settings["GENERAL"]
 
         # Command line
         self.connect("activate", self._on_activate)
@@ -45,6 +41,9 @@ class CommandLine(Gtk.Entry):
                      self._app["eventhandler"].on_key_press, "COMMAND")
         self.connect("changed", self._on_text_changed)
         self.set_hexpand(True)
+
+        # Initialize search
+        self.search = Search(self, settings)
 
         # Cmd history from file
         datadir = os.path.join(GLib.get_user_data_dir(), "vimiv")
@@ -69,14 +68,9 @@ class CommandLine(Gtk.Entry):
         self._history = read_file(os.path.join(datadir, "history"))
 
         # Defaults
-        self._pos = 0
         self._matching_history = []
-        self.search_positions = []
-        self._search_case = general["search_case_sensitive"]
-        self._incsearch = general["incsearch"]
-        if self._incsearch:
-            self.connect("changed", self._do_incsearch)
         self._last_index = 0
+        self._pos = 0
         self.running_processes = []
         self._last_focused = ""
 
@@ -120,17 +114,7 @@ class CommandLine(Gtk.Entry):
             command: The command to operate on.
         """
         if command[0] == "/":  # Search
-            # Do not search again if incsearch was running
-            if not (self._app["library"].is_focus() or
-                    self._app["thumbnail"].is_focus()) or \
-                    not self._incsearch:
-                self._run_search(command.lstrip("/"))
-            # Auto select single file in the library
-            elif self._incsearch and len(self.search_positions) == 1 and \
-                    self._app["library"].is_focus():
-                self._app["library"].file_select(
-                    self._app["library"],
-                    Gtk.TreePath(self._app.get_pos()), None, False)
+            self.search.run(command[1:])  # Strip /
         else:  # Run a command
             cmd = command.lstrip(":")
             # If there was no command just leave
@@ -363,7 +347,7 @@ class CommandLine(Gtk.Entry):
         self._app["completions"].show()
         # Remember what widget was focused before
         self._last_focused = self._app.get_focused_widget()
-        self.reset_search(leaving=False)
+        self.search.reset()
         self.grab_focus()
         self.set_position(-1)
         # Update info for command mode
@@ -397,71 +381,21 @@ class CommandLine(Gtk.Entry):
         else:
             self._app["main_window"].grab_focus()
         if reset_search:
-            self.reset_search(leaving=True)
+            self.search.reset()
         self._last_index = 0
         self._app["statusbar"].update_info()
 
-    def _do_incsearch(self, entry):
-        """Run a search for every entered character.
-
-        Args:
-            entry: The Gtk.Entry to check.
-        """
-        text = entry.get_text()
-        if (not self._last_focused == "lib"
-                and not self._last_focused == "thu") \
-                or len(text) < 2:
-            return
-        elif text[0] == "/":
-            self._run_search(text.lstrip("/"), True)
-
     def cmd_search(self):
         """Prepend search character '/' to the cmd_line and open it."""
+        focused_file = self._app.get_pos(True)
         self.focus()
         self.set_text("/")
         self.set_position(-1)
-
-    def _run_search(self, searchstr, incsearch=False):
-        """Run a search on the appropriate filelist.
-
-        Args:
-            searchstr: The search string to parse.
-            incsearch: Do incremental search or not.
-        """
         if self._last_focused == "lib":
             paths = self._app["library"].files
         else:
             paths = [os.path.basename(path) for path in self._app.get_paths()]
-
-        # Fill search_positions with matching files depending on search_case
-        self.search_positions = \
-            [paths.index(fil) for fil in paths
-             if searchstr in fil
-             or not self._search_case and searchstr.lower() in fil.lower()]
-
-        # Reload library and thumbnails to show search results
-        if self._last_focused == "lib":
-            self._app["library"].focus(True)
-            self._app["library"].reload_names()
-        elif self._last_focused == "thu":
-            # Reload all thumbnails in incsearch, only some otherwise
-            if incsearch:
-                self._app["thumbnail"].grab_focus()
-                for image in self._app.get_paths():
-                    self._app["thumbnail"].reload(image, False)
-            else:
-                for index in self.search_positions:
-                    self._app["thumbnail"].reload(self._app.get_paths()[index],
-                                                  False)
-
-        # Move to first result or throw an error
-        if self.search_positions:
-            self._search_move_internal(incsearch)
-        elif incsearch:
-            self.grab_focus()
-            self.set_position(-1)
-        else:
-            self._app["statusbar"].message("No matching file", "info")
+        self.search.init(paths, focused_file, self._last_focused)
 
     def search_move(self, forward=True):
         """Move to the next or previous search.
@@ -469,81 +403,14 @@ class CommandLine(Gtk.Entry):
         Args:
             forward: If true, move forwards. Else move backwards.
         """
-        if not self.search_positions:
-            self._app["statusbar"].message("No search results", "warning")
-            return
-        # Correct handling of prefixed numbers
-        add_on = self._app["eventhandler"].num_receive() - 1
-        # Next position depending on current position and direction
-        pos = self._app.get_pos()
-        if forward:
-            index = bisect_right(self.search_positions, pos) + add_on
+        repeat = self._app["eventhandler"].num_receive()
+        focused_file = self._app.get_pos(True)
+        if self._last_focused == "lib":
+            paths = self._app["library"].files
         else:
-            index = bisect_left(self.search_positions, pos) - 1 - add_on
-        next_pos = self.search_positions[index % len(self.search_positions)]
-        self._file_select(next_pos, incsearch=False)
-
-    def _search_move_internal(self, incsearch=False):
-        """Select the first search match when called from search internally.
-
-        Args:
-            incsearch: Do incremental search or not.
-        """
-        pos = self._app.get_pos()
-        index = bisect_left(self.search_positions, pos)
-        next_pos = self.search_positions[index % len(self.search_positions)]
-        self._file_select(next_pos, incsearch)
-
-    def _file_select(self, position, incsearch):
-        """Select next file from search in library, image or thumbnail.
-
-        Args:
-            position: Position of the file to select.
-            incsearch: Do incremental search or not.
-        """
-        # Select new file in library, image or thumbnail
-        if self._last_focused == "lib":
-            self._app["library"].set_cursor(Gtk.TreePath(position), None, False)
-            self._app["library"].scroll_to_cell(Gtk.TreePath(position),
-                                                None, True, 0.5, 0)
-            # Auto select single file
-            if len(self.search_positions) == 1 and not self._incsearch:
-                self._app["library"].file_select(
-                    self._app["library"], Gtk.TreePath(position), None,
-                    False)
-        elif self._last_focused == "im":
-            self._app["eventhandler"].num_str = str(position + 1)
-            self._app["image"].move_pos()
-        elif self._last_focused == "thu":
-            self._app["thumbnail"].move_to_pos(position)
-        # Refocus entry if incsearch is appropriate
-        if incsearch and not self._last_focused == "im":
-            self.grab_focus()
-            self.set_position(-1)
-
-    def reset_search(self, leaving):
-        """Reset all search parameters to null.
-
-        Args:
-            leaving: If True, leaving the commandline. Else entering.
-        """
-        self.search_positions = []
-        # Remember position when entering
-        if not leaving:
-            self._last_index = self._app.get_pos()
-        # Reload library or thumbnail
-        if self._last_focused == "lib":
-            self._app["library"].reload_names()
-            if leaving:
-                self._app["library"].set_cursor(
-                    Gtk.TreePath(self._last_index), None, False)
-                self._app["library"].scroll_to_cell(
-                    Gtk.TreePath(self._last_index), None, True, 0.5, 0)
-        elif self._last_focused == "thu":
-            for image in self._app.get_paths():
-                self._app["thumbnail"].reload(image, False)
-            if leaving:
-                self._app["thumbnail"].move_to_pos(self._last_index)
+            paths = [os.path.basename(path) for path in self._app.get_paths()]
+        self.search.init(paths, focused_file, self._last_focused)
+        self.search.next_result(forward, repeat)
 
     def add_alias(self, alias, *command):
         """Add an alias.
@@ -564,5 +431,119 @@ class CommandLine(Gtk.Entry):
             for cmd in self._history:
                 f.write(cmd + "\n")
 
+
+class Search(GObject.Object):
+    """Handle search for vimiv.
+
+    Filelist gets set upon commandline entry. When search through filelist was
+    completed, the "search-completed" signal gets emitted.
+
+    Attributes:
+        results: List of files in search results.
+
+        _incsearch: If True, enable incremental search.
+        _entry: Commandline entry to interact with.
+        _filelist: List of files to operate search on.
+        _last_pos: Filename that was focused before search.
+        _search_case: If True, search case sensitively.
+
+    Signals:
+        search-completed: Emitted when a search was completed so the widgets can
+            react accordingly (focus new path, show search results, ...).
+        no-search-results: Emitted when a search was resultless to show a
+            warning.
+    """
+
+    def __init__(self, commandline, settings):
+        """Create necessary objects and settings.
+
+        Args:
+            commanline: Commandline to interact with.
+            settings: Settings from configfiles to use.
+        """
+        super(Search, self).__init__()
+
+        self._filelist = []
+        self._last_pos = ""
+        self.results = []
+        general = settings["GENERAL"]
+        self._incsearch = general["incsearch"]
+        self._search_case = general["search_case_sensitive"]
+        self._last_focused = ""
+
+        if self._incsearch:
+            commandline.connect("changed", self._do_incsearch)
+
+    def _do_incsearch(self, entry):
+        """Run a search for every entered character.
+
+        Args:
+            entry: The Gtk.Entry to check.
+        """
+        text = entry.get_text()
+        if text[1:] and text[0] == "/" and self._last_focused != "im":
+            self.run(text[1:])
+
+    def init(self, filelist, focused_file, last_focused):
+        """Initialize values needed for search.
+
+        Called when entering the command line.
+        """
+        self._filelist = filelist
+        self._last_pos = os.path.basename(focused_file)
+        self._last_focused = last_focused
+
+    def run(self, searchstr):
+        """Start a search through filelist and emit search-completed signal."""
+        self.results = \
+            [fil for fil in self._filelist
+             if searchstr in fil
+             or not self._search_case and searchstr.lower() in fil.lower()]
+        if self.results:
+            self.next_result(forward=True)
+        else:
+            self.emit("no-search-results", searchstr)
+
+    def next_result(self, forward=True, repeat=1):
+        """Move to next search result by emitting search-completed.
+
+        Args:
+            forward: If True, search forward in list. Else backwards.
+        """
+        count = 0
+        # Order filelist according to last position
+        filelist = list(self._filelist)
+        if not forward:
+            filelist.reverse()
+        index = filelist.index(self._last_pos) + 1
+        filelist = filelist[index:] + filelist[:index]
+        # Find next match
+        for i, f in enumerate(filelist):
+            if f in self.results:
+                count += 1
+                if repeat == count:
+                    new_pos = (index + i) if forward \
+                        else len(self._filelist) - 1 - (index + i)
+                    new_pos %= len(self._filelist)
+                    self.emit("search-completed", new_pos, self._last_focused)
+                    break
+
+    def reset(self):
+        """Reset search and trigger reload of widgets."""
+        last_pos = self._filelist.index(self._last_pos) \
+            if self._last_pos in self._filelist else None
+        self.results = []
+        self.emit("search-completed", last_pos, self._last_focused)
+
     def toggle_search_case(self):
         self._search_case = not self._search_case
+
+    def toggle_incsearch(self):
+        self._incsearch = not self._incsearch
+
+
+# Initiate signals for the Search class
+GObject.signal_new("search-completed", Search, GObject.SIGNAL_RUN_LAST,
+                   None, (GObject.TYPE_PYOBJECT, GObject.TYPE_STRING))
+GObject.signal_new("no-search-results", Search, GObject.SIGNAL_RUN_LAST,
+                   None, (GObject.TYPE_PYOBJECT,))
