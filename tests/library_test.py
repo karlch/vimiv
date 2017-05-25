@@ -2,6 +2,7 @@
 """Test library.py for vimiv's test suite."""
 
 import os
+import tempfile
 from unittest import main
 
 from gi import require_version
@@ -18,6 +19,9 @@ class LibraryTest(VimivTestCase):
     def setUpClass(cls):
         cls.init_test(cls, ["vimiv/testimages/"])
         cls.lib = cls.vimiv["library"]
+
+    def setUp(self):
+        self.directory = os.getcwd()
 
     def test_toggle(self):
         """Toggle the library."""
@@ -198,19 +202,27 @@ class LibraryTest(VimivTestCase):
 
     def test_move_up(self):
         """Move up into directory."""
-        before = os.getcwd()
-        expected = "/".join(before.split("/")[:-2])
+        expected = "/".join(os.getcwd().split("/")[:-2])
         self.vimiv["eventhandler"].num_str = "2"
         self.lib.move_up()
         self.assertEqual(os.getcwd(), expected)
-        self.lib.move_up(before)
-        self.assertEqual(os.getcwd(), before)
+
+    def test_empty_directory(self):
+        """Move in and out of an empty directory."""
+        tmpdir = tempfile.TemporaryDirectory(prefix="vimiv-")
+        self.lib.move_up(tmpdir.name)
+        self.assertEqual(os.getcwd(), tmpdir.name)
+        self.lib.scroll("h")
+        self.assertEqual(os.getcwd(), os.path.dirname(tmpdir.name))
+        tmpdir.cleanup()
 
     def tearDown(self):
         # Reopen and back to beginning
+        self.lib.move_up(self.directory)
         if not self.lib.is_visible():
             self.lib.toggle()
         self.lib.set_cursor([Gtk.TreePath(0)], None, False)
+        self.assertEqual(os.getcwd(), self.directory)
 
 
 if __name__ == "__main__":

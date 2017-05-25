@@ -104,7 +104,7 @@ class Library(Gtk.TreeView):
             this by itself.
         """
         if self.grid.is_visible():
-            self[os.getcwd()] = self.files[self.get_position()]
+            self._remember_pos()
             self.grid.hide()
             self.focus(False)
         else:
@@ -335,7 +335,7 @@ class Library(Gtk.TreeView):
         """
         # Handle the specific keys
         if direction == "h":  # Behave like ranger
-            self[os.getcwd()] = self.files[self.get_position()]
+            self._remember_pos()
             self.move_up()
         elif direction == "l":
             self.file_select(self, self.get_cursor()[0],
@@ -432,6 +432,10 @@ class Library(Gtk.TreeView):
 
         return files, filesize
 
+    def _remember_pos(self):
+        if self.files:
+            self[os.getcwd()] = self.files[self.get_position()]
+
     def _on_paths_changed(self, app, widget):
         """Reload filelist on the paths-changed signal from app."""
         # Expand library if set by user and all paths were removed
@@ -441,7 +445,7 @@ class Library(Gtk.TreeView):
                 self.focus()
         if self.grid.is_visible():
             # Reload remembering path
-            self[os.getcwd()] = self.files[self.get_position()]
+            self._remember_pos()
             self.reload(os.getcwd())
 
     def _on_marks_changed(self, mark, changed):
