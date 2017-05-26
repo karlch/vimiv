@@ -79,7 +79,7 @@ class VimivTestCase(TestCase):
             external: If True, run an external command and wait for it to
                 finish.
         """
-        self.vimiv["commandline"].focus(command)
+        self.vimiv["commandline"].enter(command)
         self.vimiv["commandline"].emit("activate")
         if external:
             while self.vimiv["commandline"].running_processes:
@@ -88,7 +88,7 @@ class VimivTestCase(TestCase):
 
     def run_search(self, string):
         """Search for string from the command line."""
-        self.vimiv["commandline"].cmd_search()
+        self.vimiv["commandline"].enter_search()
         self.vimiv["commandline"].set_text("/" + string)
         self.vimiv["commandline"].emit("activate")
 

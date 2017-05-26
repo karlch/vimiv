@@ -30,7 +30,7 @@ class FastCommandlineTest(CommandlineTest):
     def test_toggling(self):
         """Open and leave the commandline."""
         # Focusing
-        self.vimiv["commandline"].focus()
+        self.vimiv["commandline"].enter()
         self.assertEqual(self.vimiv["commandline"].get_text(), ":")
         self.assertTrue(self.vimiv["commandline"].is_focus())
         self.assertTrue(self.vimiv["commandline"].is_visible())
@@ -39,7 +39,7 @@ class FastCommandlineTest(CommandlineTest):
         self.assertFalse(self.vimiv["commandline"].is_visible())
         self.assertFalse(self.vimiv["commandline"].is_focus())
         # Focusing with text
-        self.vimiv["commandline"].focus("test")
+        self.vimiv["commandline"].enter("test")
         self.assertEqual(self.vimiv["commandline"].get_text(), ":test")
         self.assertTrue(self.vimiv["commandline"].is_focus())
         self.assertTrue(self.vimiv["commandline"].is_visible())
@@ -213,7 +213,7 @@ class SearchTest(CommandlineTest):
         """Incsearch."""
         self.search.toggle_incsearch()
         dir_before = os.getcwd()
-        self.vimiv["commandline"].cmd_search()
+        self.vimiv["commandline"].enter_search()
         # Search should be done automatically
         self.vimiv["commandline"].set_text("/vi")
         self.assertEqual(self.search.results, ["vimiv"])
@@ -230,7 +230,7 @@ class SearchTest(CommandlineTest):
         # Move into a more interesting directory
         self.vimiv["library"].move_up("vimiv/testimages")
         # First search should move to arch-logo
-        self.vimiv["commandline"].cmd_search()
+        self.vimiv["commandline"].enter_search()
         self.vimiv["commandline"].set_text("/a")
         self.assertEqual(
             self.vimiv["library"].files[self.vimiv["library"].get_position()],

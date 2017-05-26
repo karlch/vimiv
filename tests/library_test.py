@@ -182,7 +182,7 @@ class LibraryTest(VimivTestCase):
             + os.path.realpath("symlink_to_image")
         self.assertEqual(markup_string, expected_string)
         # Also after a search
-        self.vimiv["commandline"].cmd_search()
+        self.vimiv["commandline"].enter_search()
         self.vimiv["commandline"].set_text("")
         markup_string = model[index][1]
         expected_string = "symlink_to_image  →  " \

@@ -338,16 +338,34 @@ class CommandLine(Gtk.Entry):
         # Reconnect when done
         self.connect("changed", self._on_text_changed)
 
-    def focus(self, text=""):
-        """Open and focus the command line."""
-        # Colon for text
+    def enter(self, text=""):
+        """Prepend ':' to the cmd_line and open it.
+
+        Args:
+            text: Additionally add this to the command line.
+        """
         self.set_text(":" + text)
+        self._focus()
+
+    def enter_search(self):
+        """Prepend search character '/' to the cmd_line and open it."""
+        focused_file = self._app.get_pos(True)
+        self.set_text("/")
+        self._focus()
+        self.set_position(-1)
+        if self._last_focused == "lib":
+            paths = self._app["library"].files
+        else:
+            paths = [os.path.basename(path) for path in self._app.get_paths()]
+        self.search.init(paths, focused_file, self._last_focused)
+
+    def _focus(self):
+        """Open and focus the command line."""
         # Show/hide the relevant stuff
         self.show()
         self._app["completions"].show()
         # Remember what widget was focused before
         self._last_focused = self._app.get_focused_widget()
-        self.search.reset()
         self.grab_focus()
         self.set_position(-1)
         # Update info for command mode
@@ -385,18 +403,6 @@ class CommandLine(Gtk.Entry):
         self._last_index = 0
         self._app["statusbar"].update_info()
 
-    def cmd_search(self):
-        """Prepend search character '/' to the cmd_line and open it."""
-        focused_file = self._app.get_pos(True)
-        self.focus()
-        self.set_text("/")
-        self.set_position(-1)
-        if self._last_focused == "lib":
-            paths = self._app["library"].files
-        else:
-            paths = [os.path.basename(path) for path in self._app.get_paths()]
-        self.search.init(paths, focused_file, self._last_focused)
-
     def search_move(self, forward=True):
         """Move to the next or previous search.
 
@@ -405,12 +411,7 @@ class CommandLine(Gtk.Entry):
         """
         repeat = self._app["eventhandler"].num_receive()
         focused_file = self._app.get_pos(True)
-        if self._last_focused == "lib":
-            paths = self._app["library"].files
-        else:
-            paths = [os.path.basename(path) for path in self._app.get_paths()]
-        self.search.init(paths, focused_file, self._last_focused)
-        self.search.next_result(forward, repeat)
+        self.search.next_result(forward, repeat, focused_file)
 
     def add_alias(self, alias, *command):
         """Add an alias.
@@ -492,6 +493,7 @@ class Search(GObject.Object):
         self._filelist = filelist
         self._last_pos = os.path.basename(focused_file)
         self._last_focused = last_focused
+        self.reset()
 
     def run(self, searchstr):
         """Start a search through filelist and emit search-completed signal."""
@@ -504,12 +506,17 @@ class Search(GObject.Object):
         else:
             self.emit("no-search-results", searchstr)
 
-    def next_result(self, forward=True, repeat=1):
+    def next_result(self, forward=True, repeat=1, focused_file=""):
         """Move to next search result by emitting search-completed.
 
         Args:
             forward: If True, search forward in list. Else backwards.
+            repeat: Steps coming from eventhandler.
+            focused_file: File that is focused before calling this. Required as
+                this may be called with keybindings.
         """
+        if focused_file:
+            self._last_pos = focused_file
         count = 0
         # Order filelist according to last position
         filelist = list(self._filelist)

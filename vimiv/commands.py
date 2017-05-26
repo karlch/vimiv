@@ -138,7 +138,7 @@ class Commands(object):
         # Hidden commands
         self.add_command("clear_status", self.app["statusbar"].clear_status,
                          is_hidden=True)
-        self.add_command("command", self.app["commandline"].focus,
+        self.add_command("command", self.app["commandline"].enter,
                          optional_args=["text"], is_hidden=True)
         self.add_command("complete", self.app["completions"].complete,
                          default_args=[False], is_hidden=True)
@@ -158,7 +158,7 @@ class Commands(object):
         self.add_command("scroll_lib", self.app["library"].scroll,
                          positional_args=["direction"], supports_count=True,
                          is_hidden=True)
-        self.add_command("search", self.app["commandline"].cmd_search,
+        self.add_command("search", self.app["commandline"].enter_search,
                          is_hidden=True)
         self.add_command("search_next",
                          self.app["commandline"].search_move,
