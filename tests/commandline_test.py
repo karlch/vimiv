@@ -55,6 +55,18 @@ class FastCommandlineTest(CommandlineTest):
         after_command = self.vimiv["library"].show_hidden
         self.assertNotEqual(before_command, after_command)
 
+    def test_run_command_with_prefix(self):
+        """Run an internal vimiv command with [COUNT] prefix."""
+        self.run_command("2first_lib")
+        self.assertEqual(self.vimiv.get_pos(), 1)
+        self.run_command("first_lib")
+        self.assertEqual(self.vimiv.get_pos(), 0)
+
+    def test_run_empty_command(self):
+        """Run an empty command."""
+        self.run_command("")
+        self.assertFalse(self.vimiv["commandline"].is_focus())
+
     def test_run_alias(self):
         """Run an alias."""
         self.vimiv.aliases = {"test_alias": "set show_hidden!"}
@@ -120,6 +132,20 @@ class FastCommandlineTest(CommandlineTest):
         self.run_command("command")
         self.check_statusbar(
             "ERROR: Called a hidden command from the command line")
+
+    def test_fail_path_command(self):
+        """Try accessing an invalid path."""
+        self.run_command("./foo_bar_baz/baz_bar_foo/vimiv")
+        self.check_statusbar("ERROR: Not a valid path")
+
+    def test_fail_pipe(self):
+        """Run invalid pipes."""
+        self.run_command("!echo |")
+        refresh_gui()
+        self.check_statusbar("INFO: No input from pipe")
+        self.run_command("!find . -type f -maxdepth 1 |")
+        refresh_gui()
+        self.check_statusbar("INFO: No image found")
 
 
 class SlowCommandlineTest(CommandlineTest):

@@ -226,7 +226,7 @@ class CommandLine(Gtk.Entry):
             GLib.idle_add(self._app["statusbar"].message, message, "error")
         else:
             # Run pipe if we have output
-            if from_pipe and out:
+            if from_pipe:
                 GLib.idle_add(self._run_pipe, out)
             # We do not know what might have changed concerning paths
             else:
@@ -241,15 +241,14 @@ class CommandLine(Gtk.Entry):
         Args:
             pipe_input: Command that comes from pipe.
         """
+        # List of commands without empty line
+        pipe_input = pipe_input.decode("utf-8")
+        pipe_input = pipe_input.split("\n")[:-1]
+        startout = pipe_input[0] if pipe_input else ""
         # Leave if no pipe_input came
-        if not pipe_input:
+        if not startout or startout.isspace():
             self._app["statusbar"].message("No input from pipe", "info")
             return
-        # Make the pipe_input a file
-        pipe_input = pipe_input.decode("utf-8")
-        # List of commands without empty line
-        pipe_input = pipe_input.split("\n")[:-1]
-        startout = pipe_input[0]
         # Do different stuff depending on the first line of pipe_input
         if os.path.isdir(startout):
             self._app["library"].move_up(startout)
@@ -268,8 +267,9 @@ class CommandLine(Gtk.Entry):
                 if self._app["library"].grid.is_visible():
                     self._app["library"].set_hexpand(False)
                     self._app["library"].focus(False)
-            elif old_pos:  # Nothing found, go back
-                self._app.populate(old_pos)
+            else:
+                if old_pos:  # Back again if there is a remembered image
+                    self._app.populate(old_pos)
                 self._app["statusbar"].message("No image found", "info")
         else:  # Run every line as an internal command
             for cmd in pipe_input:
