@@ -7,7 +7,7 @@ from gi import require_version
 require_version("Gtk", "3.0")
 from gi.repository import Gdk, Gtk
 
-from vimiv_testcase import VimivTestCase
+from vimiv_testcase import VimivTestCase, refresh_gui
 
 
 class KeyHandlerTest(VimivTestCase):
@@ -101,6 +101,22 @@ class KeyHandlerTest(VimivTestCase):
         self.vimiv["library"].emit("key_press_event", event)
         after = self.vimiv["library"].show_hidden
         self.assertNotEqual(before, after)
+
+    def test_touch(self):
+        """Touch event."""
+        self.vimiv["library"].file_select(None, Gtk.TreePath(1), None, True)
+        image_before = self.vimiv.get_path()
+        event = Gdk.Event().new(Gdk.EventType.TOUCH_BEGIN)
+        # Twice to check for exception
+        self.vimiv["window"].emit("touch-event", event)
+        self.vimiv["window"].emit("touch-event", event)
+        image_after = self.vimiv.get_path()
+        self.assertEqual(image_before, image_after)  # Touch only disables
+        self.vimiv["library"].toggle()
+        self.assertTrue(self.vimiv["library"].is_focus())
+        refresh_gui()
+        # Test again to see if it was re-activated properly
+        self.test_button_click()
 
 
 if __name__ == "__main__":
