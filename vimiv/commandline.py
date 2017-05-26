@@ -19,7 +19,7 @@ class CommandLine(Gtk.Entry):
 
         _app: The main vimiv application to interact with.
         _history: List of commandline history to save.
-        _last_focused: Widget that was focused before the command line.
+        _last_widget: Widget that was focused before the command line.
         _last_index: Index that was last selected in the library, if any.
         _matching_history: Parts of the history that match entered text.
         _pos: Index in _history list.
@@ -72,7 +72,7 @@ class CommandLine(Gtk.Entry):
         self._last_index = 0
         self._pos = 0
         self.running_processes = []
-        self._last_focused = ""
+        self._last_widget = ""
 
     def _on_activate(self, entry):
         """Handle input from the entry when activated.
@@ -188,9 +188,9 @@ class CommandLine(Gtk.Entry):
         fil = self._app.get_pos(True)
         if self._app["mark"].marked:  # Always use marked files if they exist
             filelist = list(self._app["mark"].marked)
-        elif self._last_focused == "lib":
+        elif self._last_widget == "lib":
             filelist = list(self._app["library"].files)
-        elif self._last_focused in ["thu", "im"]:
+        elif self._last_widget in ["thu", "im"]:
             filelist = list(self._app.get_paths())
         else:  # Empty filelist as a fallback
             filelist = []
@@ -287,14 +287,14 @@ class CommandLine(Gtk.Entry):
             if os.path.isdir(path):
                 # Focus directory in the library
                 self._app["library"].move_up(path)
-                self._last_focused = "lib"
+                self._last_widget = "lib"
             else:
                 # If it is an image open it
                 self._app.populate([path])
                 self._app["image"].load()
                 #  Reload library in lib mode, do not open it in image mode
                 pathdir = os.path.dirname(path)
-                if self._last_focused == "lib":
+                if self._last_widget == "lib":
                     self._app["library"].move_up(pathdir)
                     # Focus it in the treeview so it can be accessed via "l"
                     index = \
@@ -353,11 +353,11 @@ class CommandLine(Gtk.Entry):
         self.set_text("/")
         self._focus()
         self.set_position(-1)
-        if self._last_focused == "lib":
+        if self._last_widget == "lib":
             paths = self._app["library"].files
         else:
             paths = [os.path.basename(path) for path in self._app.get_paths()]
-        self.search.init(paths, focused_file, self._last_focused)
+        self.search.init(paths, focused_file, self._last_widget)
 
     def _focus(self):
         """Open and focus the command line."""
@@ -365,7 +365,7 @@ class CommandLine(Gtk.Entry):
         self.show()
         self._app["completions"].show()
         # Remember what widget was focused before
-        self._last_focused = self._app.get_focused_widget()
+        self._last_widget = self._app.get_focused_widget()
         self.grab_focus()
         self.set_position(-1)
         # Update info for command mode
@@ -390,11 +390,11 @@ class CommandLine(Gtk.Entry):
         self._app["completions"].hide()
         self._app["completions"].reset()
         # Refocus the remembered widget
-        if self._last_focused == "lib":
+        if self._last_widget == "lib":
             self._app["library"].focus(True)
-        elif self._last_focused == "man":
+        elif self._last_widget == "man":
             self._app["manipulate"].sliders["bri"].grab_focus()
-        elif self._last_focused == "thu":
+        elif self._last_widget == "thu":
             self._app["thumbnail"].grab_focus()
         else:
             self._app["main_window"].grab_focus()
@@ -443,9 +443,9 @@ class Search(GObject.Object):
         results: List of files in search results.
 
         _incsearch: If True, enable incremental search.
-        _entry: Commandline entry to interact with.
         _filelist: List of files to operate search on.
-        _last_pos: Filename that was focused before search.
+        _last_file: Filename that was focused before search.
+        _last_widget: Widget that was focused before saerch.
         _search_case: If True, search case sensitively.
 
     Signals:
@@ -465,12 +465,12 @@ class Search(GObject.Object):
         super(Search, self).__init__()
 
         self._filelist = []
-        self._last_pos = ""
+        self._last_file = ""
         self.results = []
         general = settings["GENERAL"]
         self._incsearch = general["incsearch"]
         self._search_case = general["search_case_sensitive"]
-        self._last_focused = ""
+        self._last_widget = ""
 
         if self._incsearch:
             commandline.connect("changed", self._do_incsearch)
@@ -482,7 +482,7 @@ class Search(GObject.Object):
             entry: The Gtk.Entry to check.
         """
         text = entry.get_text()
-        if text[1:] and text[0] == "/" and self._last_focused != "im":
+        if text[1:] and text[0] == "/" and self._last_widget != "im":
             self.run(text[1:])
 
     def init(self, filelist, focused_file, last_focused):
@@ -491,8 +491,8 @@ class Search(GObject.Object):
         Called when entering the command line.
         """
         self._filelist = filelist
-        self._last_pos = os.path.basename(focused_file)
-        self._last_focused = last_focused
+        self._last_file = os.path.basename(focused_file)
+        self._last_widget = last_focused
         self.reset()
 
     def run(self, searchstr):
@@ -516,13 +516,13 @@ class Search(GObject.Object):
                 this may be called with keybindings.
         """
         if focused_file:
-            self._last_pos = focused_file
+            self._last_file = focused_file
         count = 0
         # Order filelist according to last position
         filelist = list(self._filelist)
         if not forward:
             filelist.reverse()
-        index = filelist.index(self._last_pos) + 1
+        index = filelist.index(self._last_file) + 1
         filelist = filelist[index:] + filelist[:index]
         # Find next match
         for i, f in enumerate(filelist):
@@ -532,15 +532,15 @@ class Search(GObject.Object):
                     new_pos = (index + i) if forward \
                         else len(self._filelist) - 1 - (index + i)
                     new_pos %= len(self._filelist)
-                    self.emit("search-completed", new_pos, self._last_focused)
+                    self.emit("search-completed", new_pos, self._last_widget)
                     break
 
     def reset(self):
         """Reset search and trigger reload of widgets."""
-        last_pos = self._filelist.index(self._last_pos) \
-            if self._last_pos in self._filelist else None
+        last_pos = self._filelist.index(self._last_file) \
+            if self._last_file in self._filelist else None
         self.results = []
-        self.emit("search-completed", last_pos, self._last_focused)
+        self.emit("search-completed", last_pos, self._last_widget)
 
     def toggle_search_case(self):
         self._search_case = not self._search_case
