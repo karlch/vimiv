@@ -40,7 +40,7 @@ class KeyHandlerTest(VimivTestCase):
         image_after = self.vimiv.get_path()
         self.assertNotEqual(image_before, image_after)
         # Double click should not work
-        event = Gdk.Event().new(Gdk.EventType._2BUTTON_PRESS)
+        event = Gdk.Event().new(Gdk.EventType.DOUBLE_BUTTON_PRESS)
         event.button = 1
         self.vimiv["window"].emit("button_press_event", event)
         self.assertEqual(image_after, self.vimiv.get_path())

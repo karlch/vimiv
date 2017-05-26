@@ -44,12 +44,12 @@ class ManipulateTest(VimivTestCase):
         shutil.copyfile(self.vimiv.get_path(), tmpfile)
         # Leaving with False should not change the image
         self.manipulate.toggle()
-        self.manipulate.manipulations = {"bri": 20, "con": 20, "sha": 20}
+        self.manipulate.cmd_edit("bri", "20")
         self.manipulate.finish(False)
         self.assertTrue(compare_images(tmpfile, self.vimiv.get_path()))
         # Image is different to copied backup after manipulations
         self.manipulate.toggle()
-        self.manipulate.manipulations = {"bri": 20, "con": 20, "sha": 20}
+        self.manipulate.cmd_edit("bri", "20")
         self.manipulate.finish(True)
         self.assertFalse(compare_images(tmpfile, self.vimiv.get_path()))
 
@@ -117,6 +117,13 @@ class ManipulateTest(VimivTestCase):
         self.manipulate.cmd_edit("bri", "10")
         self.assertEqual(1, self.manipulate.check_for_edit(False))
         self.assertEqual(0, self.manipulate.check_for_edit(True))
+
+    def test_quit_with_edited_image(self):
+        """Quit vimiv with an edited image."""
+        self.manipulate.cmd_edit("bri", "10")
+        self.vimiv.quit_wrapper()
+        self.check_statusbar("WARNING: Image has been edited, add ! to force")
+        self.manipulate.finish(False)
 
     @classmethod
     def tearDownClass(cls):

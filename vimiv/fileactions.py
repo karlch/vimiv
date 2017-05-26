@@ -139,6 +139,8 @@ class FileExtras(object):
             try:
                 for fil in self._app.get_paths():
                     with Image.open(fil) as im:
+                        # This will be removed once PIL is deprecated
+                        # pylint: disable=protected-access
                         exif = im._getexif()
                         if not (exif and 306 in exif):
                             raise AttributeError
@@ -153,6 +155,8 @@ class FileExtras(object):
             # Exif stuff
             if tofind:
                 with Image.open(fil) as im:
+                    # This will be removed once PIL is deprecated
+                    # pylint: disable=protected-access
                     exif = im._getexif()
                     date = exif[306]
                     time = date.split()[1].split(":")

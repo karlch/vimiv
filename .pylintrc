@@ -17,7 +17,6 @@ disable=no-self-use,
         suppressed-message,
         too-many-return-statements,
         unused-argument,
-        protected-access,
         arguments-differ,
 
 [BASIC]

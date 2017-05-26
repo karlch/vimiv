@@ -18,9 +18,9 @@ class ImageTest(VimivTestCase):
         """Test getting the fitting image zoom."""
         # Panorama image
         width = 1920
-        im_width = self.image._size[0]
-        perc = self.image._get_zoom_percent_to_fit()
-        self.assertEqual(im_width / width, perc)
+        window_width = self.vimiv["window"].get_size()[0]
+        perc = self.image.get_zoom_percent_to_fit()
+        self.assertAlmostEqual(window_width / width, perc)
 
     def test_zooming(self):
         """Zooming of images."""
@@ -53,15 +53,15 @@ class ImageTest(VimivTestCase):
         # Zoom back to fit
         self.image.zoom_to(0)
         self.assertEqual(self.image.zoom_percent,
-                         self.image._get_zoom_percent_to_fit())
+                         self.image.get_zoom_percent_to_fit())
         pixbuf = self.image.get_pixbuf()
-        self.assertEqual(width * self.image._get_zoom_percent_to_fit(),
+        self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
         # Unreasonable zoom
         self.image.zoom_to(1000)
         self.check_statusbar("WARNING: Image cannot be zoomed this far")
         pixbuf = self.image.get_pixbuf()
-        self.assertEqual(width * self.image._get_zoom_percent_to_fit(),
+        self.assertEqual(width * self.image.get_zoom_percent_to_fit(),
                          pixbuf.get_width())
 
     def test_zoom_from_commandline(self):
@@ -80,15 +80,15 @@ class ImageTest(VimivTestCase):
         # Zoom to fit
         self.run_command("fit")
         self.assertEqual(self.image.zoom_percent,
-                         self.image._get_zoom_percent_to_fit())
+                         self.image.get_zoom_percent_to_fit())
         # Fit horizontally
         self.run_command("fiz_horiz")
         self.assertEqual(self.image.zoom_percent,
-                         self.image._get_zoom_percent_to_fit())
+                         self.image.get_zoom_percent_to_fit())
         # Fit vertically
         self.run_command("fit_vert")
         self.assertEqual(self.image.zoom_percent,
-                         self.image._get_zoom_percent_to_fit(3))
+                         self.image.get_zoom_percent_to_fit(3))
         # Zoom_to 0.5
         self.run_command("zoom_to 05")
         self.assertEqual(self.image.zoom_percent, 0.5)
@@ -114,14 +114,14 @@ class ImageTest(VimivTestCase):
     def test_settings(self):
         """Change image.py settings."""
         # Rescale svg
-        before = self.image._rescale_svg
+        before = self.image.get_rescale_svg()
         self.image.toggle_rescale_svg()
-        self.assertFalse(before == self.image._rescale_svg)
+        self.assertNotEqual(before, self.image.get_rescale_svg())
         self.image.toggle_rescale_svg()
-        self.assertTrue(before == self.image._rescale_svg)
+        self.assertEqual(before, self.image.get_rescale_svg())
         # Overzoom
         self.image.set_overzoom("1.66")
-        self.assertEqual(self.image._overzoom, 1.66)
+        self.assertEqual(self.image.get_overzoom(), 1.66)
         # Animations should be tested in animation_test.py
 
     def test_auto_rezoom_on_changes(self):

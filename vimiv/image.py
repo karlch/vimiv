@@ -134,7 +134,7 @@ class Image(Gtk.Image):
             self.zoom_percent = percent
             self.fit_image = 0
         else:
-            self.zoom_percent = self._get_zoom_percent_to_fit(fit)
+            self.zoom_percent = self.get_zoom_percent_to_fit(fit)
             self.fit_image = fit
         # Catch some unreasonable zooms
         self._catch_unreasonable_zoom_and_update(fallback_zoom)
@@ -225,7 +225,7 @@ class Image(Gtk.Image):
         self._overzoom = new_value
         # Update image if it makes sense
         if self.fit_image:
-            self.zoom_percent = self._get_zoom_percent_to_fit(self.fit_image)
+            self.zoom_percent = self.get_zoom_percent_to_fit(self.fit_image)
             self.update()
 
     def toggle_animation(self):
@@ -238,12 +238,12 @@ class Image(Gtk.Image):
                 self._play_gif()
 
     def get_scroll_scale(self):
-        return self.zoom_percent / self._get_zoom_percent_to_fit() * 2
+        return self.zoom_percent / self.get_zoom_percent_to_fit() * 2
 
     def get_zoom_percent(self):
         return self.zoom_percent * 100
 
-    def _get_zoom_percent_to_fit(self, fit=1):
+    def get_zoom_percent_to_fit(self, fit=1):
         """Get the zoom factor perfectly fitting the image to the window.
 
         Args:
@@ -361,7 +361,7 @@ class Image(Gtk.Image):
     def _set_image_pixbuf(self, loader):
         self.pixbuf_original = loader.get_pixbuf()
         self._size = self._get_available_size()
-        self.zoom_percent = self._get_zoom_percent_to_fit()
+        self.zoom_percent = self.get_zoom_percent_to_fit()
 
     def _finish_image_pixbuf(self, loader, image_id):
         if self._identifier == image_id:
@@ -371,11 +371,18 @@ class Image(Gtk.Image):
         self.pixbuf_iter = loader.get_animation().get_iter()
         self.pixbuf_original = self.pixbuf_iter.get_pixbuf()
         self._size = self._get_available_size()
-        self.zoom_percent = self._get_zoom_percent_to_fit()
+        self.zoom_percent = self.get_zoom_percent_to_fit()
         if self._autoplay_gifs:
             delay = self.pixbuf_iter.get_delay_time()
             self._timer_id = GLib.timeout_add(delay, self._play_gif) \
                 if delay >= 0 else 0
+
+    # Needed for test suite
+    def get_rescale_svg(self):
+        return self._rescale_svg
+
+    def get_overzoom(self):
+        return self._overzoom
 
     def _on_image_changed(self, transform, change, arg):
         """Update image after a transformation.
