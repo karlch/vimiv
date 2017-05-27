@@ -14,6 +14,10 @@ class Mark(GObject.Object):
 
         _app: The main vimiv application to interact with.
         _marked_bak: List of last marked images to be able to toggle marks.
+
+    Signals:
+        marks-changed: Emitted when new images were marked so other widgets can
+            update their display.
     """
 
     def __init__(self, app, settings):
