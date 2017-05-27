@@ -384,6 +384,9 @@ class Image(Gtk.Image):
     def get_overzoom(self):
         return self._overzoom
 
+    def get_animation_toggled(self):
+        return self._animation_toggled
+
     def _on_image_changed(self, transform, change, arg):
         """Update image after a transformation.
 
