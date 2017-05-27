@@ -323,7 +323,7 @@ class Image(Gtk.Image):
     def _get_available_size(self):
         """Receive size not occupied by other Widgets.
 
-        Substracts other widgets (manipulate, statusbar, library) from window
+        Subtracts other widgets (manipulate, statusbar, library) from window
         size and returns the available size.
 
         Return:

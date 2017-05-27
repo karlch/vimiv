@@ -445,13 +445,13 @@ class Search(GObject.Object):
         _incsearch: If True, enable incremental search.
         _filelist: List of files to operate search on.
         _last_file: Filename that was focused before search.
-        _last_widget: Widget that was focused before saerch.
+        _last_widget: Widget that was focused before search.
         _search_case: If True, search case sensitively.
 
     Signals:
         search-completed: Emitted when a search was completed so the widgets can
             react accordingly (focus new path, show search results, ...).
-        no-search-results: Emitted when a search was resultless to show a
+        no-search-results: Emitted when a search was result-less to show a
             warning.
     """
 
@@ -459,7 +459,7 @@ class Search(GObject.Object):
         """Create necessary objects and settings.
 
         Args:
-            commanline: Commandline to interact with.
+            commandline: Commandline to interact with.
             settings: Settings from configfiles to use.
         """
         super(Search, self).__init__()

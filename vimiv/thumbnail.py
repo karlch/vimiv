@@ -11,7 +11,7 @@ from vimiv.thumbnail_manager import ThumbnailManager
 class Thumbnail(Gtk.IconView):
     """Thumbnail class for vimiv.
 
-    Includes the iconview with the thumnbails and all actions that apply to it.
+    Includes the iconview with the thumbnails and all actions that apply to it.
 
     Attributes:
         toggled: If True, thumbnail mode is open.
@@ -190,7 +190,7 @@ class Thumbnail(Gtk.IconView):
                 ignore_cache=ignore_cache)
 
     def _on_thumbnail_created(self, pixbuf, position):
-        # Subsctipting the liststore directly works fine
+        # Subscripting the liststore directly works fine
         # pylint: disable=unsubscriptable-object
         self._liststore[position][0] = pixbuf
         self.move_to_pos(self.get_position())

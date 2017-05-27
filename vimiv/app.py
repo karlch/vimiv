@@ -50,7 +50,7 @@ class Vimiv(Gtk.Application):
         widget-layout-changed: Emitted when the layout of the widgets changed in
             some way. This allows other widgets to trigger an update when this
             happens, e.g. rezoom an image when the library was toggled.
-        paths-changed: Emmited when the paths have or may have changed. This
+        paths-changed: Emitted when the paths have or may have changed. This
             allows other widgets to reload their filelist and update any
             information accordingly.
     """
@@ -111,7 +111,7 @@ class Vimiv(Gtk.Application):
             options: The dictionary containing all options given to the
                 commandline.
         Return:
-            Exitcode or -1 to continue
+            Exit-code or -1 to continue
         """
         def set_option(name, section, setting, value=0):
             """Set a setting in self.settings according to commandline option.

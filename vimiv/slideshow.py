@@ -64,7 +64,7 @@ class Slideshow(GObject.Object):
     def _next(self):
         """Command to run in the GLib.timeout moving to the next image."""
         self._app["image"].move_index()
-        # Info if slidesohw returns to beginning
+        # Info if slideshow returns to beginning
         if self._app.get_index() == self._start_index:
             message = "Back at beginning of slideshow"
             self._app["statusbar"].lock = True

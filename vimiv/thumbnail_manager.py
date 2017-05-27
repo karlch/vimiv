@@ -131,7 +131,7 @@ class ThumbnailManager:
 
 
 class ThumbnailStore(object):
-    """Implements freedestop.org's Thumbnail Managing Standard."""
+    """Implements freedesktop.org's Thumbnail Managing Standard."""
 
     KEY_URI = "Thumb::URI"
     KEY_MTIME = "Thumb::MTime"

@@ -9,7 +9,7 @@ from gi.repository import Gtk
 
 
 def listdir_wrapper(path, show_hidden=False):
-    """Reimplementation of os.listdir which mustn't show hidden files.
+    """Re-implementation of os.listdir which mustn't show hidden files.
 
     Args:
         path: Path of the directory in which os.listdir is called.

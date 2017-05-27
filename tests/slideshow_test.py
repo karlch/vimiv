@@ -96,7 +96,7 @@ class SlideshowTest(VimivTestCase):
         refresh_gui(self.vimiv)
 
     def test_get_formatted_delay(self):
-        """Read out the formated delay from the slideshow."""
+        """Read out the formatted delay from the slideshow."""
         output = self.slideshow.get_formatted_delay()
         self.assertIn("2.0s", output)
 

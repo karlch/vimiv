@@ -68,7 +68,7 @@ class TrashTest(TestCase):
     def test_delete_file_with_same_name(self):
         """Delete a file with the same name more than twice."""
         def run_one_round(suffix=""):
-            """Tet if self.testfile + suffix exists in trash."""
+            """Test if self.testfile + suffix exists in trash."""
             self.trash_manager.delete(self.testfile)
             self.assertFalse(os.path.exists(self.testfile))
             expected_trashfile = \
