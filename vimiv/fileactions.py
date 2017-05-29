@@ -38,6 +38,7 @@ def populate_single(arg, recursive):
         if not directory:  # Default to current directory
             directory = "./"
         paths = listdir_wrapper(directory)
+        paths = [os.path.join(directory, path) for path in paths]
         # Set the argument to the beginning of the list
     elif os.path.isdir(arg) and recursive:
         paths = sorted(recursive_search(arg))

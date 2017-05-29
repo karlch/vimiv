@@ -2,6 +2,8 @@
 """Command line tests for vimiv's test suite."""
 
 import os
+import tempfile
+import shutil
 from subprocess import Popen, PIPE
 from unittest import main
 
@@ -163,6 +165,13 @@ class SlowCommandlineTest(CommandlineTest):
         self.run_command("./arch-logo.png")
         refresh_gui()
         self.assertEqual(self.vimiv.get_path(), expected_image)
+        # Pass an image in another directory
+        testimage = tempfile.NamedTemporaryFile()
+        shutil.copyfile(expected_image, testimage.name)
+        self.run_command(testimage.name)
+        refresh_gui()
+        self.assertEqual(self.vimiv.get_path(), testimage.name)
+        self.assertEqual(os.getcwd(), os.path.dirname(testimage.name))
 
     def test_pipe(self):
         """Pipe a command to vimiv."""
