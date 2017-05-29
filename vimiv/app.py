@@ -312,10 +312,12 @@ class Vimiv(Gtk.Application):
         self._paths.remove(path)
 
     def populate(self, args, recursive=False, shuffle_paths=False):
-        """Simple wrapper for helpers.populate.
+        """Simple wrapper for fileactions.populate.
 
-        Additional args:
-            update_index: If True, also update index.
+        Args:
+            args: Paths given.
+            recursive: If True search path recursively for images.
+            shuffle_paths: If True shuffle found paths randomly.
         """
         self._paths, self._index = populate(args, recursive, shuffle_paths)
 
