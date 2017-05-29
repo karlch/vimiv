@@ -3,7 +3,7 @@
 
 from unittest import main
 
-from vimiv_testcase import VimivTestCase, refresh_gui
+from vimiv_testcase import VimivTestCase, refresh_gui, compare_pixbufs
 
 
 class AnimationTest(VimivTestCase):
@@ -17,18 +17,20 @@ class AnimationTest(VimivTestCase):
     def test_toggle_animation(self):
         """Pause and play an animated gif."""
         self._update_gif(True)
-        # Frames should be updated which means delay changes
-        first_delay = self.image.pixbuf_iter.get_delay_time()
-        refresh_gui((first_delay + 50) / 1000)
-        second_delay = self.image.pixbuf_iter.get_delay_time()
-        self.assertNotEqual(first_delay, second_delay)
-        # # Frames should no longer be updated
+        # Frames should be updated
+        first_pb = self.image.pixbuf_original.copy()
+        delay = self.image.pixbuf_iter.get_delay_time()
+        refresh_gui((delay + 50) / 1000)
+        second_pb = self.image.pixbuf_original.copy()
+        self.assertFalse(compare_pixbufs(first_pb, second_pb))
+        # Frames should no longer be updated
         self.image.toggle_animation()
         self._update_gif(False)
-        first_delay = self.image.pixbuf_iter.get_delay_time()
-        refresh_gui((first_delay + 50) / 1000)
-        second_delay = self.image.pixbuf_iter.get_delay_time()
-        self.assertEqual(first_delay, second_delay)
+        first_pb = self.image.pixbuf_original.copy()
+        delay = self.image.pixbuf_iter.get_delay_time()
+        refresh_gui((delay + 50) / 1000)
+        second_pb = self.image.pixbuf_original.copy()
+        self.assertTrue(compare_pixbufs(first_pb, second_pb))
         # Back to standard state
         self.image.toggle_animation()
         self._update_gif(True)

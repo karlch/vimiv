@@ -7,8 +7,7 @@ from unittest import TestCase, main
 
 from gi import require_version
 require_version("Gtk", "3.0")
-from gi.repository import Gio, GLib, Gtk
-from PIL import Image
+from gi.repository import Gio, GLib, Gtk, Gdk, GdkPixbuf
 from vimiv.app import Vimiv
 
 
@@ -23,11 +22,18 @@ def refresh_gui(delay=0):
         Gtk.main_iteration_do(False)
 
 
-def compare_images(file1, file2):
-    """Directly compare two images using PIL."""
-    image1 = Image.open(file1)
-    image2 = Image.open(file2)
-    return image1 == image2
+def compare_pixbufs(pb1, pb2):
+    """Compare to pixbufs."""
+    s1 = Gdk.cairo_surface_create_from_pixbuf(pb1, 1, None)
+    s2 = Gdk.cairo_surface_create_from_pixbuf(pb2, 1, None)
+    return s1.get_data() == s2.get_data()
+
+
+def compare_files(file1, file2):
+    """Directly compare two image files using PIL."""
+    pb1 = GdkPixbuf.Pixbuf.new_from_file(file1)
+    pb2 = GdkPixbuf.Pixbuf.new_from_file(file2)
+    return compare_pixbufs(pb1, pb2)
 
 
 class VimivTestCase(TestCase):

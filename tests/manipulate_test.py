@@ -5,7 +5,7 @@ import os
 import shutil
 from unittest import main
 
-from vimiv_testcase import VimivTestCase, compare_images
+from vimiv_testcase import VimivTestCase, compare_files
 
 
 class ManipulateTest(VimivTestCase):
@@ -46,12 +46,12 @@ class ManipulateTest(VimivTestCase):
         self.manipulate.toggle()
         self.manipulate.cmd_edit("bri", "20")
         self.manipulate.finish(False)
-        self.assertTrue(compare_images(tmpfile, self.vimiv.get_path()))
+        self.assertTrue(compare_files(tmpfile, self.vimiv.get_path()))
         # Image is different to copied backup after manipulations
         self.manipulate.toggle()
         self.manipulate.cmd_edit("bri", "20")
         self.manipulate.finish(True)
-        self.assertFalse(compare_images(tmpfile, self.vimiv.get_path()))
+        self.assertFalse(compare_files(tmpfile, self.vimiv.get_path()))
 
     def test_focus_sliders(self):
         """Focusing sliders in manipulate."""
