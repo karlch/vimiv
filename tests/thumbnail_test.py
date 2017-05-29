@@ -104,8 +104,13 @@ class ThumbnailTest(VimivTestCase):
         self.vimiv["commandline"].leave()
         # Normal search
         self.vimiv["commandline"].incsearch = False
-        self.run_search("logo")
-        self.assertIn("arch-logo", self.vimiv.get_pos(True))
+        self.run_search("arch")
+        self.assertIn("arch-logo", self._get_thumbnail_name())
+        # Moving
+        self.vimiv["commandline"].search_move(forward=True)
+        self.assertIn("arch_001", self._get_thumbnail_name())
+        self.vimiv["commandline"].search_move(forward=False)
+        self.assertIn("arch-logo", self._get_thumbnail_name())
 
     def test_zoom(self):
         """Zoom in thumbnail mode."""

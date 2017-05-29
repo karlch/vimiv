@@ -410,7 +410,7 @@ class CommandLine(Gtk.Entry):
             forward: If true, move forwards. Else move backwards.
         """
         repeat = self._app["eventhandler"].num_receive()
-        focused_file = self._app.get_pos(True)
+        focused_file = os.path.basename(self._app.get_pos(True))
         self.search.next_result(forward, repeat, focused_file)
 
     def add_alias(self, alias, *command):

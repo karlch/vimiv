@@ -1,6 +1,8 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Test image mode for vimiv's testsuite."""
 
+import os
+
 from unittest import main
 
 from vimiv_testcase import VimivTestCase, refresh_gui
@@ -152,6 +154,15 @@ class ImageTest(VimivTestCase):
         self.vimiv["library"].toggle()
         after = self.image.zoom_percent
         self.assertEqual(after, before)
+
+    def test_search(self):
+        """Search in image mode."""
+        self.run_search("arch")
+        self.assertEqual(self.vimiv.get_path(), os.path.abspath("arch_001.jpg"))
+        self.vimiv["commandline"].search_move(forward=False)
+        self.assertEqual(self.vimiv.get_path(),
+                         os.path.abspath("arch-logo.png"))
+        self.vimiv["commandline"].search.reset()
 
 
 if __name__ == "__main__":
