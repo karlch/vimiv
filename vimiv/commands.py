@@ -104,8 +104,8 @@ class Commands(object):
                          optional_args=["value"])
         self.add_command("set rescale_svg!",
                          self.app["image"].toggle_rescale_svg)
-        self.add_command("set sharpness", self.app["manipulate"].cmd_edit,
-                         default_args=["sha"], optional_args=["value"])
+        self.add_command("set saturation", self.app["manipulate"].cmd_edit,
+                         default_args=["sat"], optional_args=["value"])
         self.add_command("set show_hidden!", self.app["library"].toggle_hidden)
         self.add_command("set slideshow_delay", self.app["slideshow"].set_delay,
                          optional_args=["value"], supports_count=True)

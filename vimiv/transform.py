@@ -146,12 +146,11 @@ class Transform(GObject.Object):
         to_remove = list(self._changes.keys())
         for f in self._changes:
             if self._changes[f][0]:
-                imageactions.rotate_file([f],
-                                         self._changes[f][0])
+                imageactions.rotate_file(f, self._changes[f][0])
             if self._changes[f][1]:
-                imageactions.flip_file([f], True)
+                imageactions.flip_file(f, True)
             if self._changes[f][2]:
-                imageactions.flip_file([f], False)
+                imageactions.flip_file(f, False)
         for key in to_remove:
             del self._changes[key]
         self.emit("applied-to-file", to_remove)
@@ -161,8 +160,7 @@ class Transform(GObject.Object):
         """Flip the displayed image and call thread to flip files.
 
         Args:
-            horizontal: If 1 flip horizontally. Else vertically.
-            rotate_file: If True call thread to rotate files.
+            horizontal: If True, flip horizontally. Else vertically.
         """
         if not self._app.get_paths():
             self._app["statusbar"].message(

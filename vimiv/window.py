@@ -56,7 +56,7 @@ class Window(Gtk.ApplicationWindow):
                        self._app["thumbnail"],
                        self._app["manipulate"].sliders["bri"],
                        self._app["manipulate"].sliders["con"],
-                       self._app["manipulate"].sliders["sha"],
+                       self._app["manipulate"].sliders["sat"],
                        self._app["image"]]:
             widget.connect("button-release-event", self._on_click)
 

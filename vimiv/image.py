@@ -387,6 +387,13 @@ class Image(Gtk.Image):
     def get_animation_toggled(self):
         return self._animation_toggled
 
+    def get_pixbuf_original(self):
+        return self.pixbuf_original.copy()
+
+    def set_pixbuf(self, pixbuf):
+        self.pixbuf_original = pixbuf
+        self.update()
+
     def _on_image_changed(self, transform, change, arg):
         """Update image after a transformation.
 

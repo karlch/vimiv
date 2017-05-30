@@ -3,26 +3,27 @@
 
 import os
 
-from gi.repository import GdkPixbuf, GLib, Gtk
-from PIL import Image, ImageEnhance
-from vimiv import imageactions
+from gi.repository import Gtk, GdkPixbuf
+from vimiv import image_enhance
 from vimiv.fileactions import is_animation
+from vimiv.imageactions import save_pixbuf
 
 
 class Manipulate(Gtk.ScrolledWindow):
     """Manipulate class for vimiv.
 
-    Includes the manipulation toolbar, all the actions that apply to it and all
-    the other image manipulations like rotate, flip, and so on.
+    Includes the manipulation toolbar and all the actions that apply to it.
 
     Attributes:
-        sliders: Dictionary containing bri, con and sha sliders.
+        sliders: Dictionary containing bri, con and sat sliders.
 
         _app: The main vimiv application to interact with.
         _manipulations: Dictionary of possible manipulations. Includes
-            brightness, contrast and sharpness.
-        _pil_image: PIL Image of the original size for accepted manipulations.
-        _pil_thumb: Thumbnail of PIL image to work on temporarily.
+            brightness, contrast and saturation.
+        _pixbuf: Shrinked GdkPixbuf.Pixbuf to work on. Received from Image on
+            entry.
+        _pixbuf_original: Original GdkPixbuf.Pixbuf to write to file if
+            manipulations are accepted. Received from Image on entry.
     """
 
     def __init__(self, app, settings):
@@ -35,10 +36,10 @@ class Manipulate(Gtk.ScrolledWindow):
         super(Manipulate, self).__init__()
         self._app = app
 
-        # Settings
-        self._manipulations = {"bri": 1, "con": 1, "sha": 1}
-        self._pil_image = Image
-        self._pil_thumb = Image
+        # Defaults
+        self._manipulations = {"bri": 1, "con": 1, "sat": 1}
+        self._pixbuf = GdkPixbuf.Pixbuf()
+        self._pixbuf_original = GdkPixbuf.Pixbuf()
 
         # A scrollable window so all tools are always accessible
         self.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
@@ -55,9 +56,9 @@ class Manipulate(Gtk.ScrolledWindow):
         bri_slider.connect("value-changed", self._set_slider_value, "bri")
         con_slider = Gtk.Scale()
         con_slider.connect("value-changed", self._set_slider_value, "con")
-        sha_slider = Gtk.Scale()
-        sha_slider.connect("value-changed", self._set_slider_value, "sha")
-        self.sliders = {"bri": bri_slider, "con": con_slider, "sha": sha_slider}
+        sat_slider = Gtk.Scale()
+        sat_slider.connect("value-changed", self._set_slider_value, "sat")
+        self.sliders = {"bri": bri_slider, "con": con_slider, "sat": sat_slider}
 
         # Set some properties
         for slider in self.sliders.values():
@@ -71,8 +72,8 @@ class Manipulate(Gtk.ScrolledWindow):
         bri_label.set_markup("\n<b>Bri</b>")
         con_label = Gtk.Label()
         con_label.set_markup("\n<b>Con</b>")
-        sha_label = Gtk.Label()
-        sha_label.set_markup("\n<b>Sha</b>")
+        sat_label = Gtk.Label()
+        sat_label.set_markup("\n<b>Sat</b>")
 
         # Dummy grid as separator
         separator = Gtk.Grid()
@@ -88,7 +89,7 @@ class Manipulate(Gtk.ScrolledWindow):
 
         # Pack everything into the grid
         for item in [bri_label, bri_slider, con_label, con_slider,
-                     sha_label, sha_slider, separator, button_yes,
+                     sat_label, sat_slider, separator, button_yes,
                      button_no]:
             grid.add(item)
 
@@ -101,9 +102,9 @@ class Manipulate(Gtk.ScrolledWindow):
             0 if no edits were done or force, 1 else.
         """
         if force:
-            self._manipulations = {"bri": 1, "con": 1, "sha": 1}
+            self._manipulations = {"bri": 1, "con": 1, "sat": 1}
             return 0
-        elif self._manipulations != {"bri": 1, "con": 1, "sha": 1}:
+        elif self._manipulations != {"bri": 1, "con": 1, "sat": 1}:
             self._app["statusbar"].message(
                 "Image has been edited, add ! to force", "warning")
             return 1
@@ -125,14 +126,10 @@ class Manipulate(Gtk.ScrolledWindow):
                     "Manipulating Gifs is not supported", "warning")
             else:
                 self.show()
+                self._pixbuf = self._app["image"].get_pixbuf()
+                self._pixbuf_original = self._app["image"].get_pixbuf_original()
                 self.sliders["bri"].grab_focus()
                 self._app["statusbar"].update_info()
-                # Create PIL image to work with
-                size = self._app["image"].get_allocation()
-                size = (size.width, size.height)
-                self._pil_image = Image.open(self._app.get_path())
-                self._pil_thumb = Image.open(self._app.get_path())
-                self._pil_thumb.thumbnail(size, Image.ANTIALIAS)
         else:
             if self._app["thumbnail"].toggled:
                 self._app["statusbar"].message(
@@ -144,45 +141,27 @@ class Manipulate(Gtk.ScrolledWindow):
                 self._app["statusbar"].message("No image open to edit",
                                                "warning")
 
-    def _apply(self, apply_to_file=False):
+    def _apply(self, real=False):
         """Apply manipulations to image.
 
         Manipulations are the three sliders for brightness, contrast and
-        sharpness. They are applied to a thumbnail by default and can act on the
+        saturation. They are applied to a thumbnail by default and can act on the
         real image.
 
         Args:
-            real: If True, apply manipulations to the real image.
+            real: If True, apply manipulations to the real image and save it.
         """
-        if apply_to_file:
-            imfile = self._pil_image
-        else:
-            imfile = self._pil_thumb
-        # Apply Brightness, Contrast and Sharpness
-        enhanced_im = ImageEnhance.Brightness(imfile).enhance(
-            self._manipulations["bri"])
-        enhanced_im = ImageEnhance.Contrast(enhanced_im).enhance(
-            self._manipulations["con"])
-        enhanced_im = ImageEnhance.Sharpness(enhanced_im).enhance(
-            self._manipulations["sha"])
-        # On real file save data to file
-        if apply_to_file:
-            imageactions.save_image(enhanced_im,
-                                    self._app.get_path())
-        # Load Pixbuf from PIL data
-        data = enhanced_im.tobytes()
-        g_data = GLib.Bytes.new(data)
-        w, h = imfile.size
-        if imfile.mode == "RGBA":
-            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
-                g_data, GdkPixbuf.Colorspace.RGB, True, 8, w, h, 4 * w)
-        else:
-            pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
-                g_data, GdkPixbuf.Colorspace.RGB, False, 8, w, h, 3 * w)
+        pixbuf = self._pixbuf_original if real else self._pixbuf.copy()
+        # Apply brightness, contrast and saturation
+        pixbuf = image_enhance.enhance_bc(pixbuf, self._manipulations["bri"],
+                                          self._manipulations["con"])
+        pixbuf.saturate_and_pixelate(pixbuf, self._manipulations["sat"], False)
         # Show the edited pixbuf
-        self._app["image"].pixbuf_original = pixbuf
-        self._app["image"].update()
+        self._app["image"].set_pixbuf(pixbuf)
         self._app["image"].zoom_to(0)
+        # Save file if needed
+        if real:
+            save_pixbuf(pixbuf, self._app.get_path())
 
     def _set_slider_value(self, slider, name):
         """Set value of self._manipulations according to slider value.
@@ -193,7 +172,7 @@ class Manipulate(Gtk.ScrolledWindow):
         """
         val = slider.get_value()
         val = (val + 127) / 127
-        # Change brightness, contrast or sharpness
+        # Change brightness, contrast or saturation
         self._manipulations[name] = val
         # Run the manipulation function
         self._apply()
@@ -249,9 +228,9 @@ class Manipulate(Gtk.ScrolledWindow):
             return
         # Apply changes
         if accept:
-            self._apply(True)
+            self._apply(real=True)
         # Reset all the manipulations
-        self._manipulations = {"bri": 1, "con": 1, "sha": 1}
+        self._manipulations = {"bri": 1, "con": 1, "sat": 1}
         for slider in self.sliders.values():
             slider.set_value(0)
         # Show the original image
