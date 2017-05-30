@@ -7,4 +7,8 @@ tests/htmlcov
 *__pycache__*
 *.coverage
 coverage.xml
+# These are the images used for testing
 tests/vimiv/
+# I symlink this to the file in ../build/lib.linux-*/vimiv/ so I can run vimiv
+# via ./vimiv.py without having to re-install
+vimiv/*.so
