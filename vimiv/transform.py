@@ -196,12 +196,14 @@ class Transform(GObject.Object):
 
     def rotate_auto(self):
         """Autorotate all pictures in the current pathlist."""
-        amount, method = imageactions.autorotate(self._app.get_paths())
-        if amount:
-            self._app["image"].load()
-            message = "Autorotated %d image(s) using %s." % (amount, method)
-        else:
-            message = "No image rotated. Tried using %s." % (method)
+        autorotate = imageactions.Autorotate(self._app.get_paths())
+        self.threads_running = True
+        autorotate.connect("completed", self._on_autorotate_completed)
+        autorotate.run()
+
+    def _on_autorotate_completed(self, autorotate, amount):
+        message = "Completed autorotate for %d files" % (amount)
+        self.threads_running = False
         self._app["statusbar"].message(message, "info")
 
 

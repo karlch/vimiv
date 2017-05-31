@@ -3,6 +3,7 @@
 
 import os
 import shutil
+import time
 from unittest import TestCase, main
 
 from gi import require_version
@@ -23,6 +24,7 @@ class ImageActionsTest(TestCase):
         self.orig = os.path.abspath("arch_001.jpg")
         self.filename = os.path.abspath("image_to_edit.jpg")
         self.filename_2 = os.path.abspath("image_to_edit_2.jpg")
+        self._waiting = False  # Used to wait for autorotate
         shutil.copyfile(self.orig, self.filename)
         shutil.copyfile(self.orig, self.filename_2)
 
@@ -76,12 +78,21 @@ class ImageActionsTest(TestCase):
 
     def test_autorotate(self):
         """Autorotate files."""
-        # Method jhead
-        if not shutil.which("jhead"):
-            self.fail("jhead is not installed.")
-        n_rotated, method = imageactions.autorotate([self.filename])
-        self.assertEqual(method, "jhead")
-        self.assertEqual(n_rotated, 1)
+        pb = GdkPixbuf.Pixbuf.new_from_file(self.filename)
+        orientation_before = pb.get_width() < pb.get_height()
+        autorotate = imageactions.Autorotate([self.filename])
+        autorotate.connect("completed", self._on_autorotate_completed)
+        autorotate.run()
+        # Wait for it to complete
+        self._waiting = True
+        while self._waiting:
+            time.sleep(0.05)
+        pb = GdkPixbuf.Pixbuf.new_from_file(self.filename)
+        orientation_after = pb.get_width() < pb.get_height()
+        self.assertNotEqual(orientation_before, orientation_after)
+
+    def _on_autorotate_completed(self, autorotate, amount):
+        self._waiting = False
 
     def tearDown(self):
         os.chdir(self.working_directory)

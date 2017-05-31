@@ -11,7 +11,7 @@ from gi import require_version
 require_version('GdkPixbuf', '2.0')
 from gi.repository import GdkPixbuf
 
-from vimiv_testcase import VimivTestCase
+from vimiv_testcase import VimivTestCase, refresh_gui
 
 
 class TransformTest(VimivTestCase):
@@ -24,6 +24,7 @@ class TransformTest(VimivTestCase):
         shutil.copytree("vimiv/testimages", "vimiv/testimages_man")
         cls.init_test(cls, ["vimiv/testimages_man/arch-logo.png"])
         cls.transform = cls.vimiv["transform"]
+        cls._waiting = False  # Used to wait for autorotate
 
     def test_get_images(self):
         """Get images to transform."""
@@ -167,11 +168,10 @@ class TransformTest(VimivTestCase):
     def test_auto_rotate(self):
         """Auto rotate images from transform checking messages."""
         self.transform.rotate_auto()
-        statusbar_text = self.vimiv["statusbar"].get_message()
-        self.assertIn("Autorotated 1", statusbar_text)
-        self.transform.rotate_auto()
-        statusbar_text = self.vimiv["statusbar"].get_message()
-        self.assertIn("No image rotated.", statusbar_text)
+        # Wait for it to complete
+        while self.transform.threads_running:
+            refresh_gui(0.1)
+            print(self.vimiv["statusbar"].get_message())
 
     @classmethod
     def tearDownClass(cls):
