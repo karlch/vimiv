@@ -38,8 +38,10 @@ class MainWindowTest(VimivTestCase):
         refresh_gui()
         # First zoom so something can happen
         size = self.window.get_allocation()
-        w_scale = size.width / self.vimiv["image"].pixbuf_original.get_width()
-        h_scale = size.height / self.vimiv["image"].pixbuf_original.get_height()
+        w_scale = \
+            size.width / self.vimiv["image"].get_pixbuf_original().get_width()
+        h_scale = \
+            size.height / self.vimiv["image"].get_pixbuf_original().get_height()
         needed_scale = max(w_scale, h_scale) * 1.5
         self.vimiv["image"].zoom_to(needed_scale)
         refresh_gui()

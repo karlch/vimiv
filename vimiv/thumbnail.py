@@ -101,7 +101,7 @@ class Thumbnail(Gtk.IconView):
                 # Re-expand the library if there is no image and the setting
                 # applies
                 if self._app["library"].expand and \
-                        self._app["image"].pixbuf_original.get_height() == 1:
+                        not self._app["image"].get_pixbuf():
                     self._app["main_window"].hide()
                     self._app["library"].set_hexpand(True)
             self.toggled = False

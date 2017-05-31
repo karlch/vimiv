@@ -20,8 +20,6 @@ class Image(Gtk.Image):
             1: Image is zoomed to fit.
             2: Image is zoomed to fit horizontally.
             3: Image is zoomed to fit vertically.
-        pixbuf_iter: Iter of displayed animation.
-        pixbuf_original: Original image.
         zoom_percent: Percentage to zoom to compared to the original size.
 
         _animation_toggled: If True, animation is playing.
@@ -30,6 +28,8 @@ class Image(Gtk.Image):
         _identifier: Used so GUI callbacks are only done if the image is equal
         _overzoom: Float describing the maximum amount to zoom images above
             their default size.
+        _pixbuf_iter: Iter of displayed animation.
+        _pixbuf_original: Original image.
         _rescale_svg: If True rescale vector graphics when zooming.
         _shuffle: If True randomly shuffle paths.
         _size: Size of the displayed image as a tuple.
@@ -44,8 +44,8 @@ class Image(Gtk.Image):
 
         # Settings
         self.fit_image = 1  # Checks if the image fits the window somehow
-        self.pixbuf_iter = GdkPixbuf.PixbufAnimationIter()
-        self.pixbuf_original = GdkPixbuf.Pixbuf()
+        self._pixbuf_iter = GdkPixbuf.PixbufAnimationIter()
+        self._pixbuf_original = GdkPixbuf.Pixbuf()
         self.zoom_percent = 1
         self._animation_toggled = False
         self._autoplay_gifs = general["autoplay_gifs"]
@@ -70,8 +70,8 @@ class Image(Gtk.Image):
         if not self._app.get_paths():
             return
         # Scale image
-        pbo_width = self.pixbuf_original.get_width()
-        pbo_height = self.pixbuf_original.get_height()
+        pbo_width = self._pixbuf_original.get_width()
+        pbo_height = self._pixbuf_original.get_height()
         pbf_width = int(pbo_width * self.zoom_percent)
         pbf_height = int(pbo_height * self.zoom_percent)
         # Rescaling of svg
@@ -81,7 +81,7 @@ class Image(Gtk.Image):
             pixbuf_final = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                 name, -1, pbf_height, True)
         else:
-            pixbuf_final = self.pixbuf_original.scale_simple(
+            pixbuf_final = self._pixbuf_original.scale_simple(
                 pbf_width, pbf_height, GdkPixbuf.InterpType.BILINEAR)
         self.set_from_pixbuf(pixbuf_final)
         # Update the statusbar if required
@@ -166,7 +166,7 @@ class Image(Gtk.Image):
         if self._shuffle and self._app.get_index() is 0 and delta > 0:
             shuffle(self._app.get_paths())
 
-        # Load the image at path into self.pixbuf_* and show it
+        # Load the image at path into self._pixbuf_* and show it
         self.load()
 
     def load(self):
@@ -252,8 +252,8 @@ class Image(Gtk.Image):
             Zoom percentage.
         """
         # Size of the file
-        pbo_width = self.pixbuf_original.get_width()
-        pbo_height = self.pixbuf_original.get_height()
+        pbo_width = self._pixbuf_original.get_width()
+        pbo_height = self._pixbuf_original.get_height()
         # Maximum size respecting overzoom
         max_width = pbo_width * self._overzoom
         max_height = pbo_height * self._overzoom
@@ -277,16 +277,16 @@ class Image(Gtk.Image):
             fallback_zoom: Zoom percentage to fall back to if the zoom
                 percentage is unreasonable.
         """
-        orig_width = self.pixbuf_original.get_width()
-        orig_height = self.pixbuf_original.get_height()
+        orig_width = self._pixbuf_original.get_width()
+        orig_height = self._pixbuf_original.get_height()
         new_width = orig_width * self.zoom_percent
         new_height = orig_height * self.zoom_percent
         min_width = max(16, orig_width * 0.05)
         min_height = max(16, orig_height * 0.05)
         max_width = min(self._app["window"].get_size()[0] * 10,
-                        self.pixbuf_original.get_width() * 20)
+                        self._pixbuf_original.get_width() * 20)
         max_height = min(self._app["window"].get_size()[1] * 10,
-                         self.pixbuf_original.get_height() * 20)
+                         self._pixbuf_original.get_height() * 20)
         # Image too small or too large
         if new_height < min_height or new_width < min_width \
                 or new_height > max_height or new_width > max_width:
@@ -299,14 +299,14 @@ class Image(Gtk.Image):
     def _play_gif(self):
         """Run the animation of a gif."""
         self._animation_toggled = True
-        self.pixbuf_original = self.pixbuf_iter.get_pixbuf()
+        self._pixbuf_original = self._pixbuf_iter.get_pixbuf()
         GLib.idle_add(self.update)
-        if self.pixbuf_iter.advance():
+        if self._pixbuf_iter.advance():
             # Clear old timer
             if self._timer_id:
                 GLib.source_remove(self._timer_id)
             # Add new timer if the gif is not static
-            delay = self.pixbuf_iter.get_delay_time()
+            delay = self._pixbuf_iter.get_delay_time()
             self._timer_id = GLib.timeout_add(delay, self._play_gif) \
                 if delay >= 0 else 0
 
@@ -317,7 +317,7 @@ class Image(Gtk.Image):
             GLib.source_remove(self._timer_id)
             self._timer_id = 0
         else:
-            image = self.pixbuf_iter.get_pixbuf()
+            image = self._pixbuf_iter.get_pixbuf()
             self.set_from_pixbuf(image)
 
     def _get_available_size(self):
@@ -359,7 +359,7 @@ class Image(Gtk.Image):
         loader.close()
 
     def _set_image_pixbuf(self, loader):
-        self.pixbuf_original = loader.get_pixbuf()
+        self._pixbuf_original = loader.get_pixbuf()
         self._size = self._get_available_size()
         self.zoom_percent = self.get_zoom_percent_to_fit()
 
@@ -368,12 +368,12 @@ class Image(Gtk.Image):
             GLib.idle_add(self.update)
 
     def _set_image_anim(self, loader):
-        self.pixbuf_iter = loader.get_animation().get_iter()
-        self.pixbuf_original = self.pixbuf_iter.get_pixbuf()
+        self._pixbuf_iter = loader.get_animation().get_iter()
+        self._pixbuf_original = self._pixbuf_iter.get_pixbuf()
         self._size = self._get_available_size()
         self.zoom_percent = self.get_zoom_percent_to_fit()
         if self._autoplay_gifs:
-            delay = self.pixbuf_iter.get_delay_time()
+            delay = self._pixbuf_iter.get_delay_time()
             self._timer_id = GLib.timeout_add(delay, self._play_gif) \
                 if delay >= 0 else 0
 
@@ -388,10 +388,10 @@ class Image(Gtk.Image):
         return self._animation_toggled
 
     def get_pixbuf_original(self):
-        return self.pixbuf_original.copy()
+        return self._pixbuf_original.copy()
 
     def set_pixbuf(self, pixbuf):
-        self.pixbuf_original = pixbuf
+        self._pixbuf_original = pixbuf
         self.update()
 
     def _on_image_changed(self, transform, change, arg):
@@ -403,9 +403,10 @@ class Image(Gtk.Image):
             arg: Argument for the transformation, e.g. cwise for rotate.
         """
         if change == "rotate":
-            self.pixbuf_original = self.pixbuf_original.rotate_simple(90 * arg)
+            self._pixbuf_original = \
+                self._pixbuf_original.rotate_simple(90 * arg)
         elif change == "flip":
-            self.pixbuf_original = self.pixbuf_original.flip(arg)
+            self._pixbuf_original = self._pixbuf_original.flip(arg)
         if self.fit_image:
             self.zoom_to(0, self.fit_image)
         else:

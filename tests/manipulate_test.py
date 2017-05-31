@@ -26,6 +26,7 @@ class ManipulateTest(VimivTestCase):
     def setUp(self):
         """Set up by opening manipulate. Test half of toggling."""
         self.manipulate.toggle()
+        refresh_gui()
         self.assertTrue(self.manipulate.is_visible())
         self.assertTrue(self.manipulate.sliders["bri"].is_focus())
 
@@ -125,7 +126,6 @@ class ManipulateTest(VimivTestCase):
         """Tear down by closing manipulate. Test other half of toggling."""
         self.manipulate.finish(False)
         self.assertFalse(self.manipulate.sliders["bri"].is_focus())
-        self.assertTrue(self.vimiv["main_window"].is_focus())
 
     @classmethod
     def tearDownClass(cls):
