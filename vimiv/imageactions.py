@@ -8,6 +8,8 @@ from gi.repository import GdkPixbuf, GObject
 
 from vimiv.fileactions import edit_supported
 
+# We need the try ... except wrapper here
+# pylint: disable=ungrouped-imports
 try:
     from gi.repository import GExiv2
     _has_exif = True
@@ -119,6 +121,7 @@ class Autorotate(GObject.Object):
         self._processed_count += 1
         if self._processed_count == len(self._filelist):
             self.emit("completed", self._rotated_count)
+
 
 GObject.signal_new("completed", Autorotate, GObject.SIGNAL_RUN_LAST, None,
                    (GObject.TYPE_PYOBJECT,))

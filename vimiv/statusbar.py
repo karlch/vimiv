@@ -66,7 +66,6 @@ class Statusbar(Gtk.Grid):
         self._app["commandline"].search.connect("no-search-results",
                                                 self._on_no_search_results)
 
-
     def message(self, message, style="error", timeout=5):
         """Push a message to the statusbar.
 
