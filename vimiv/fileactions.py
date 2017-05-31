@@ -7,6 +7,8 @@ from random import shuffle
 from gi.repository import Gdk, GdkPixbuf, Gtk
 from vimiv.helpers import listdir_wrapper
 
+# We need the try ... except wrapper here
+# pylint: disable=ungrouped-imports
 try:
     from gi.repository import GExiv2
     _has_exif = True

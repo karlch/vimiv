@@ -145,8 +145,8 @@ class Manipulate(Gtk.ScrolledWindow):
         """Apply manipulations to image.
 
         Manipulations are the three sliders for brightness, contrast and
-        saturation. They are applied to a thumbnail by default and can act on the
-        real image.
+        saturation. They are applied to a thumbnail by default and can act on
+        the real image.
 
         Args:
             real: If True, apply manipulations to the real image and save it.

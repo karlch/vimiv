@@ -8,6 +8,7 @@ from unittest import main
 from vimiv_testcase import (VimivTestCase, compare_files, compare_pixbufs,
                             refresh_gui)
 
+
 class ManipulateTest(VimivTestCase):
     """Manipulate Tests."""
 
