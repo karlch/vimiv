@@ -7,7 +7,9 @@ import tempfile
 from time import sleep
 from unittest import main
 
-from PIL import Image
+from gi import require_version
+require_version('GdkPixbuf', '2.0')
+from gi.repository import GdkPixbuf
 
 from vimiv_testcase import VimivTestCase
 
@@ -94,8 +96,10 @@ class TransformTest(VimivTestCase):
         self.assertGreater(pixbuf.get_height(), pixbuf.get_width())
         while self.transform.threads_running:
             sleep(0.05)
-        with Image.open(self.vimiv.get_path()) as im:
-            self.assertGreater(im.height, im.width)
+        # Check file
+        updated_pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.vimiv.get_path())
+        self.assertGreater(updated_pixbuf.get_height(),
+                           updated_pixbuf.get_width())
         # Rotate back
         self.transform.rotate(-1)
         self.transform.apply()
@@ -103,8 +107,9 @@ class TransformTest(VimivTestCase):
         self.assertLess(pixbuf.get_height(), pixbuf.get_width())
         while self.transform.threads_running:
             sleep(0.05)
-        with Image.open(self.vimiv.get_path()) as im:
-            self.assertLess(im.height, im.width)
+        # Check file
+        updated_pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.vimiv.get_path())
+        self.assertLess(updated_pixbuf.get_height(), updated_pixbuf.get_width())
         # Fail because of no paths
         backup = list(self.vimiv.get_paths())
         self.vimiv.populate([])
