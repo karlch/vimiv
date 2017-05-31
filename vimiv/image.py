@@ -6,7 +6,7 @@ from threading import Thread
 
 from gi.repository import GdkPixbuf, GLib, Gtk
 from vimiv.helpers import get_float_from_str
-from vimiv.fileactions import is_animation
+from vimiv.fileactions import is_animation, is_svg
 
 
 class Image(Gtk.Image):
@@ -75,11 +75,9 @@ class Image(Gtk.Image):
         pbf_width = int(pbo_width * self.zoom_percent)
         pbf_height = int(pbo_height * self.zoom_percent)
         # Rescaling of svg
-        name = self._app.get_path()
-        info = GdkPixbuf.Pixbuf.get_file_info(name)[0]
-        if info and "svg" in info.get_extensions():
+        if is_svg(self._app.get_path()):
             pixbuf_final = GdkPixbuf.Pixbuf.new_from_file_at_scale(
-                name, -1, pbf_height, True)
+                self._app.get_path(), -1, pbf_height, True)
         else:
             pixbuf_final = self._pixbuf_original.scale_simple(
                 pbf_width, pbf_height, GdkPixbuf.InterpType.BILINEAR)

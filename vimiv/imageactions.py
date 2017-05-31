@@ -6,6 +6,8 @@ from multiprocessing.pool import ThreadPool as Pool
 
 from gi.repository import GdkPixbuf, GObject
 
+from vimiv.fileactions import edit_supported
+
 try:
     from gi.repository import GExiv2
     _has_exif = True
@@ -33,7 +35,7 @@ def save_pixbuf(pixbuf, filename):
         exif = GExiv2.Metadata(filename)
     # Save
     pixbuf.savev(filename, extension, [], [])
-    if _has_exif:
+    if _has_exif and exif.get_supports_exif():
         exif.save_file()
 
 
@@ -94,9 +96,10 @@ class Autorotate(GObject.Object):
 
     def _rotate(self, filename):
         """Rotate filename using pixbuf.apply_embedded_orientation()."""
-        pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
-        pixbuf = pixbuf.apply_embedded_orientation()
-        save_pixbuf(pixbuf, filename)
+        if edit_supported(filename):
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+            pixbuf = pixbuf.apply_embedded_orientation()
+            save_pixbuf(pixbuf, filename)
 
     def _on_rotated(self, thread_pool_result):
         self._rotated_count += 1

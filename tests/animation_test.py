@@ -36,9 +36,9 @@ class AnimationTest(VimivTestCase):
     def test_fail_transform_animation(self):
         """Fail transforming an animation."""
         self.vimiv["transform"].rotate(3)
-        self.check_statusbar("WARNING: Animations cannot be rotated")
+        self.check_statusbar("WARNING: This filetype cannot be rotated")
         self.vimiv["transform"].flip(True)
-        self.check_statusbar("WARNING: Animations cannot be flipped")
+        self.check_statusbar("WARNING: This filetype cannot be flipped")
 
     def test_zoom_animation(self):
         """Zoom an animation."""

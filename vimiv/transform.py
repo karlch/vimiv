@@ -7,7 +7,7 @@ from threading import Thread
 
 from gi.repository import GObject
 from vimiv import imageactions
-from vimiv.fileactions import is_animation
+from vimiv.fileactions import edit_supported
 from vimiv.trash_manager import TrashManager
 
 
@@ -105,10 +105,10 @@ class Transform(GObject.Object):
             self._app["statusbar"].message(
                 "No image to rotate", "error")
             return
-        # Do not rotate animations
-        elif is_animation(self._app.get_path()):
+        # Do not rotate animations or vector graphics
+        elif not edit_supported(self._app.get_path()):
             self._app["statusbar"].message(
-                "Animations cannot be rotated", "warning")
+                "This filetype cannot be rotated", "warning")
             return
         try:
             cwise = int(cwise)
@@ -166,10 +166,10 @@ class Transform(GObject.Object):
             self._app["statusbar"].message(
                 "No image to flip", "error")
             return
-        # Do not flip animations
-        elif is_animation(self._app.get_path()):
+        # Do not flip animations or vector graphics
+        elif not edit_supported(self._app.get_path()):
             self._app["statusbar"].message(
-                "Animations cannot be flipped", "warning")
+                "This filetype cannot be flipped", "warning")
             return
         try:
             horizontal = int(horizontal)

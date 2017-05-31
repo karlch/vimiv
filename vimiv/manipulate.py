@@ -5,7 +5,7 @@ import os
 
 from gi.repository import Gtk, GdkPixbuf
 from vimiv import image_enhance
-from vimiv.fileactions import is_animation
+from vimiv.fileactions import edit_supported
 from vimiv.imageactions import save_pixbuf
 
 
@@ -121,9 +121,9 @@ class Manipulate(Gtk.ScrolledWindow):
             if os.path.islink(self._app.get_path()):
                 self._app["statusbar"].message(
                     "Manipulating symbolic links is not supported", "warning")
-            elif is_animation(self._app.get_path()):
+            elif not edit_supported(self._app.get_path()):
                 self._app["statusbar"].message(
-                    "Manipulating Gifs is not supported", "warning")
+                    "This filetype is not supported", "warning")
             else:
                 self.show()
                 self._pixbuf = self._app["image"].get_pixbuf()

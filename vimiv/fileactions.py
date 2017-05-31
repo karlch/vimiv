@@ -111,6 +111,31 @@ def is_animation(filename):
     return "gif" in info.get_extensions()
 
 
+def is_svg(filename):
+    """Check whether a file is a vector graphic.
+
+    Args:
+        filename: Name of file to check.
+    """
+    complete_name = os.path.abspath(os.path.expanduser(filename))
+    info = GdkPixbuf.Pixbuf.get_file_info(complete_name)[0]
+    return "svg" in info.get_extensions()
+
+
+def edit_supported(filename):
+    """Check whether a file is editable for vimiv.
+
+    Args:
+        filename: Name of file to check.
+    """
+    complete_name = os.path.abspath(os.path.expanduser(filename))
+    info = GdkPixbuf.Pixbuf.get_file_info(complete_name)[0]
+    extension = info.get_extensions()[0]
+    if extension in ["jpeg", "png", "tiff", "ico", "bmp"]:
+        return True
+    return False
+
+
 class FileExtras(object):
     """Extra fileactions for vimiv."""
 
