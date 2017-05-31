@@ -11,7 +11,7 @@ from gi import require_version
 require_version('GdkPixbuf', '2.0')
 from gi.repository import GdkPixbuf
 
-from vimiv_testcase import VimivTestCase, refresh_gui
+from vimiv_testcase import VimivTestCase
 
 
 class TransformTest(VimivTestCase):
@@ -170,8 +170,9 @@ class TransformTest(VimivTestCase):
         self.transform.rotate_auto()
         # Wait for it to complete
         while self.transform.threads_running:
-            refresh_gui(0.1)
-            print(self.vimiv["statusbar"].get_message())
+            sleep(0.05)
+        self.assertIn("autorotate, 1 file",
+                      self.vimiv["statusbar"].get_message())
 
     @classmethod
     def tearDownClass(cls):

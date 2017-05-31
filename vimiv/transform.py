@@ -202,7 +202,7 @@ class Transform(GObject.Object):
         autorotate.run()
 
     def _on_autorotate_completed(self, autorotate, amount):
-        message = "Completed autorotate for %d files" % (amount)
+        message = "Completed autorotate, %d files rotated" % (amount)
         self.threads_running = False
         self._app["statusbar"].message(message, "info")
 

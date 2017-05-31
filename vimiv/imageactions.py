@@ -15,7 +15,7 @@ except ImportError:
     _has_exif = False
 
 
-def save_pixbuf(pixbuf, filename):
+def save_pixbuf(pixbuf, filename, update_orientation_tag=False):
     """Save the image with all the exif keys that exist if we have exif support.
 
     NOTE: This is used to override edited images, not to save images to new
@@ -25,6 +25,7 @@ def save_pixbuf(pixbuf, filename):
     Args:
         pixbuf: GdkPixbuf.Pixbuf image to act on.
         filename: Name of the image to save.
+        update_orientation_tag: If True, set orientation tag to NORMAL.
     """
     if not os.path.isfile(filename):
         raise FileNotFoundError("Original file to retrieve data from not found")
@@ -36,6 +37,8 @@ def save_pixbuf(pixbuf, filename):
     # Save
     pixbuf.savev(filename, extension, [], [])
     if _has_exif and exif.get_supports_exif():
+        if update_orientation_tag:
+            exif.set_orientation(GExiv2.Orientation.NORMAL)
         exif.save_file()
 
 
@@ -48,7 +51,7 @@ def rotate_file(filename, cwise):
     """
     pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
     pixbuf = pixbuf.rotate_simple(90 * cwise)
-    save_pixbuf(pixbuf, filename)
+    save_pixbuf(pixbuf, filename, update_orientation_tag=True)
 
 
 def flip_file(filename, horizontal):
@@ -69,6 +72,8 @@ class Autorotate(GObject.Object):
     Attributes:
         _filelist: List of files to rotate.
         _rotated_count: Int to count the amount of files that have been rotated.
+        _processed_count: Int to count the amount of files that have been
+            processed.
         _thread_pool: ThreadPool to use when rotating all images.
 
     Signals:
@@ -80,6 +85,7 @@ class Autorotate(GObject.Object):
         super(Autorotate, self).__init__()
         self._filelist = filelist
         self._rotated_count = 0
+        self._processed_count = 0
 
         _cpu_count = os.cpu_count()
         if _cpu_count is None:
@@ -96,16 +102,23 @@ class Autorotate(GObject.Object):
 
     def _rotate(self, filename):
         """Rotate filename using pixbuf.apply_embedded_orientation()."""
-        if edit_supported(filename):
+        if not edit_supported(filename):
+            return
+        exif = GExiv2.Metadata(filename)
+        if not exif.get_supports_exif():
+            return
+        orientation = exif.get_orientation()
+        if orientation not in [GExiv2.Orientation.NORMAL,
+                               GExiv2.Orientation.UNSPECIFIED]:
             pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
             pixbuf = pixbuf.apply_embedded_orientation()
-            save_pixbuf(pixbuf, filename)
+            save_pixbuf(pixbuf, filename, update_orientation_tag=True)
+            self._rotated_count += 1
 
     def _on_rotated(self, thread_pool_result):
-        self._rotated_count += 1
-        if self._rotated_count == len(self._filelist):
+        self._processed_count += 1
+        if self._processed_count == len(self._filelist):
             self.emit("completed", self._rotated_count)
-
 
 GObject.signal_new("completed", Autorotate, GObject.SIGNAL_RUN_LAST, None,
                    (GObject.TYPE_PYOBJECT,))
