@@ -58,9 +58,9 @@ for the development branch.
 * python3
 * python-gobject
 * gtk3
-* python-pillow
 * python-setuptools (for installation)
-* jhead (optional for much better autorotation depending on EXIF data)
+* libgexiv2 (optional for EXIF support; needed for saving without deleting EXIF
+  tags and for the autorotate command)
 
 ## Thanks to
 * James Campos, author of [Pim](https://github.com/Narrat/Pim) which was the
