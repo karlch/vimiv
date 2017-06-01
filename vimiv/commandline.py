@@ -411,7 +411,9 @@ class CommandLine(Gtk.Entry):
         """
         repeat = self._app["eventhandler"].num_receive()
         focused_file = os.path.basename(self._app.get_pos(True))
-        self.search.next_result(forward, repeat, focused_file)
+        if self.search.next_result(forward, repeat, focused_file):
+            self._app["statusbar"].message("No search results to navigate",
+                                           "error")
 
     def add_alias(self, alias, *command):
         """Add an alias.
@@ -514,6 +516,7 @@ class Search(GObject.Object):
             repeat: Steps coming from eventhandler.
             focused_file: File that is focused before calling this. Required as
                 this may be called with keybindings.
+        Return: 1 if failed, 0 if successfull
         """
         if focused_file:
             self._last_file = focused_file
@@ -522,7 +525,11 @@ class Search(GObject.Object):
         filelist = list(self._filelist)
         if not forward:
             filelist.reverse()
-        index = filelist.index(self._last_file) + 1
+        try:
+            index = filelist.index(self._last_file) + 1
+        # Search move called in a directory without search
+        except ValueError:
+            return 1
         filelist = filelist[index:] + filelist[:index]
         # Find next match
         for i, f in enumerate(filelist):
@@ -534,6 +541,7 @@ class Search(GObject.Object):
                     new_pos %= len(self._filelist)
                     self.emit("search-completed", new_pos, self._last_widget)
                     break
+        return 0
 
     def reset(self):
         """Reset search and trigger reload of widgets."""

@@ -282,6 +282,12 @@ class SearchTest(CommandlineTest):
         self.vimiv["commandline"].search_move(forward=True)
         self.assertEqual(self.vimiv.get_pos(True), "arch_001.jpg")
 
+    def test_fail_search_move(self):
+        """Fail moving in search as there is no search."""
+        self.vimiv["library"].reload(".")  # Reset
+        self.vimiv["commandline"].search_move(forward=True)
+        self.check_statusbar("ERROR: No search results to navigate")
+
 
 if __name__ == "__main__":
     main()
