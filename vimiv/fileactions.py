@@ -119,7 +119,7 @@ def is_svg(filename):
     """
     complete_name = os.path.abspath(os.path.expanduser(filename))
     info = GdkPixbuf.Pixbuf.get_file_info(complete_name)[0]
-    return "svg" in info.get_extensions()
+    return "svg" in info.get_extensions() if info else False
 
 
 def edit_supported(filename):
