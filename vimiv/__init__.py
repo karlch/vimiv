@@ -17,7 +17,6 @@ try:
     except ValueError:
         pass
     from gi.repository import GLib, Gtk, Gdk, GdkPixbuf, Pango
-    from PIL import Image
 
 except ImportError as import_error:
     message = import_error.msg + "\n" + "Are all dependencies installed?"
