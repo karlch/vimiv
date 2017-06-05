@@ -45,13 +45,15 @@ def populate_single(arg, recursive):
     return paths
 
 
-def populate(args, recursive=False, shuffle_paths=False):
+def populate(args, recursive=False, shuffle_paths=False, expand_single=True):
     """Populate a list of files out given paths.
 
     Args:
         args: Paths given.
         recursive: If True search path recursively for images.
         shuffle_paths: If True shuffle found paths randomly.
+        expand_single: If True, populate a complete filelist with images from
+            the same directory as the single argument given.
     Return:
         Found paths, position of first given path.
     """
@@ -59,7 +61,7 @@ def populate(args, recursive=False, shuffle_paths=False):
     index = 0
     # If only one path is passed do special stuff
     first_path = os.path.abspath(args[0]) if args else None
-    if len(args) == 1:
+    if len(args) == 1 and expand_single:
         args = populate_single(first_path, recursive)
 
     # Add everything

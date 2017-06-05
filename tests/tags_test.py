@@ -55,6 +55,15 @@ class TagsTest(VimivTestCase):
         self.assertEqual(self.vimiv.get_paths(), taglist)
         self.vimiv["tags"].remove("arch_test_tag")
 
+    def test_tag_load_single(self):
+        """Load a tag with only one file."""
+        taglist = ["vimiv/testimages/arch-logo.png"]
+        taglist = [os.path.abspath(image) for image in taglist]
+        self.vimiv["tags"].write(taglist, "arch_test_tag")
+        self.vimiv["tags"].load("arch_test_tag")
+        self.assertEqual(self.vimiv.get_paths(), taglist)
+        self.vimiv["tags"].remove("arch_test_tag")
+
     def test_tag_errors(self):
         """Error messages with tags."""
         unavailable_file = os.path.join(self.tagdir, "foo_is_real")

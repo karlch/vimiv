@@ -99,7 +99,7 @@ class Vimiv(Gtk.Application):
         # Populate list of images
         recursive = self.settings["GENERAL"]["recursive"]
         shuffle = self.settings["GENERAL"]["shuffle"]
-        self.populate(filenames, recursive, shuffle)
+        self.populate(filenames, recursive=recursive, shuffle_paths=shuffle)
 
         # Activate vimiv after opening files
         self.activate_vimiv(self)
@@ -311,15 +311,20 @@ class Vimiv(Gtk.Application):
     def remove_path(self, path):
         self._paths.remove(path)
 
-    def populate(self, args, recursive=False, shuffle_paths=False):
+    def populate(self, args, recursive=False, shuffle_paths=False,
+                 expand_single=True):
         """Simple wrapper for fileactions.populate.
 
         Args:
             args: Paths given.
             recursive: If True search path recursively for images.
             shuffle_paths: If True shuffle found paths randomly.
+            expand_single: If True, populate a complete filelist with images
+                from the same directory as the single argument given.
         """
-        self._paths, self._index = populate(args, recursive, shuffle_paths)
+        self._paths, self._index = populate(
+            args, recursive=recursive, shuffle_paths=shuffle_paths,
+            expand_single=expand_single)
 
     def _init_commandline_options(self):
         """Add all possible commandline options."""
