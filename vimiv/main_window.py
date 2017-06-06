@@ -53,7 +53,7 @@ class MainWindow(Gtk.ScrolledWindow):
     def center_window(self):
         """Center the widget in the current window."""
         h_adj = self.get_hadjustment()
-        size = self.get_allocated_size()[0]
+        size = self.get_allocation()
         h_middle = (h_adj.get_upper() - h_adj.get_lower() - size.width) / 2
         h_adj.set_value(h_middle)
         v_adj = self.get_vadjustment()
@@ -86,7 +86,7 @@ class MainWindow(Gtk.ScrolledWindow):
         steps = self._app["eventhandler"].num_receive()
         scale = self.image.get_scroll_scale()
         h_adj = self.get_hadjustment()
-        size = self.get_allocated_size()[0]
+        size = self.get_allocation()
         h_size = h_adj.get_upper() - h_adj.get_lower() - size.width
         h_step = h_size / scale * steps
         v_adj = self.get_vadjustment()

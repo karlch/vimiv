@@ -128,7 +128,7 @@ class Manipulate(Gtk.ScrolledWindow):
                 self.sliders["bri"].grab_focus()
                 self._app["statusbar"].update_info()
                 # Create PIL image to work with
-                size = self._app["image"].get_allocated_size()[0]
+                size = self._app["image"].get_allocation()
                 size = (size.width, size.height)
                 self._pil_image = Image.open(self._app.get_path())
                 self._pil_thumb = Image.open(self._app.get_path())
