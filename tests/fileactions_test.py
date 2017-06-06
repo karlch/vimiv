@@ -64,7 +64,8 @@ class FormatTest(VimivTestCase):
         if os.path.basename(os.getcwd()) != "vimiv":
             self.vimiv["library"].move_up()
             self.vimiv["fileextras"].format_files("formatted_")
-            self.check_statusbar("INFO: Format only works on opened image files")
+            self.check_statusbar(
+                "INFO: Format only works on opened image files")
         # Remove generated paths
         if os.path.isdir("testimages_to_format"):
             shutil.rmtree("testimages_to_format")
