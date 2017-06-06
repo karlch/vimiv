@@ -32,11 +32,13 @@ enhance_bc(PyObject *self, PyObject *args)
     const int size = PyBytes_Size(py_data);
 
     /* Run the C function to enhance brightness and contrast */
-    char *updated_data = malloc(size);
+    char *updated_data = PyMem_Malloc(size);
     enhance_bc_c(data, size, brightness, contrast, updated_data);
 
-    /* Return python memoryview of updated data */
-    return PyMemoryView_FromMemory(updated_data, size, PyBUF_WRITE);
+    /* Return python bytes of updated data and free memory */
+    PyObject *py_updated_data = PyBytes_FromStringAndSize(updated_data, size);
+    PyMem_Free(updated_data);
+    return py_updated_data;
 }
 
 /*****************************

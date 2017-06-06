@@ -25,6 +25,6 @@ def enhance_bc(pixbuf, brightness, contrast):
     # Pylint does not read this properly
     # pylint: disable=no-member
     data = _image_enhance.enhance_bc(data, brightness, contrast)
-    gdata = GLib.Bytes.new(data.tobytes())
+    gdata = GLib.Bytes.new(data)
     return GdkPixbuf.Pixbuf.new_from_bytes(
         gdata, GdkPixbuf.Colorspace.RGB, has_alpha, 8, width, height, rowstride)
