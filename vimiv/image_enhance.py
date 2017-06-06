@@ -11,8 +11,8 @@ def enhance_bc(pixbuf, brightness, contrast):
 
     Args:
         pixbuf: Original GdkPixbuf.Pixbuf to work with.
-        brightness: Integer value between -127 and 127 to change brightness.
-        contrast: Integer value between -127 and 127 to change contrast.
+        brightness: Float between 0.0 and 2.0 to change brightness.
+        contrast: Float between 0.0 and 2.0 to change contrast.
     Return:
         The enhanced GdkPixbuf.Pixbuf
     """
