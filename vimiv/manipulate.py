@@ -20,10 +20,7 @@ class Manipulate(Gtk.ScrolledWindow):
         _app: The main vimiv application to interact with.
         _manipulations: Dictionary of possible manipulations. Includes
             brightness, contrast and saturation.
-        _pixbuf: Shrinked GdkPixbuf.Pixbuf to work on. Received from Image on
-            entry.
-        _pixbuf_original: Original GdkPixbuf.Pixbuf to write to file if
-            manipulations are accepted. Received from Image on entry.
+        _pixbuf: Full sized GdkPixbuf displayed in Image.
     """
 
     def __init__(self, app, settings):
@@ -39,7 +36,6 @@ class Manipulate(Gtk.ScrolledWindow):
         # Defaults
         self._manipulations = {"bri": 1, "con": 1, "sat": 1}
         self._pixbuf = GdkPixbuf.Pixbuf()
-        self._pixbuf_original = GdkPixbuf.Pixbuf()
 
         # A scrollable window so all tools are always accessible
         self.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
@@ -126,8 +122,7 @@ class Manipulate(Gtk.ScrolledWindow):
                     "This filetype is not supported", "warning")
             else:
                 self.show()
-                self._pixbuf = self._app["image"].get_pixbuf()
-                self._pixbuf_original = self._app["image"].get_pixbuf_original()
+                self._pixbuf = self._app["image"].get_pixbuf_original()
                 self.sliders["bri"].grab_focus()
                 self._app["statusbar"].update_info()
         else:
@@ -151,14 +146,13 @@ class Manipulate(Gtk.ScrolledWindow):
         Args:
             real: If True, apply manipulations to the real image and save it.
         """
-        pixbuf = self._pixbuf_original if real else self._pixbuf.copy()
+        pixbuf = self._pixbuf if real else self._pixbuf.copy()
         # Apply brightness, contrast and saturation
         pixbuf = image_enhance.enhance_bc(pixbuf, self._manipulations["bri"],
                                           self._manipulations["con"])
         pixbuf.saturate_and_pixelate(pixbuf, self._manipulations["sat"], False)
         # Show the edited pixbuf
         self._app["image"].set_pixbuf(pixbuf)
-        self._app["image"].zoom_to(0)
         # Save file if needed
         if real:
             save_pixbuf(pixbuf, self._app.get_path())
@@ -234,7 +228,6 @@ class Manipulate(Gtk.ScrolledWindow):
         for slider in self.sliders.values():
             slider.set_value(0)
         # Show the original image
-        self._app["image"].fit_image = 1
         self._app["image"].load()
         # Done
         self.toggle()

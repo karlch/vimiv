@@ -1,7 +1,7 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Wrapper functions for the _image_enhance C extension."""
 
-from gi.repository import Gdk
+from gi.repository import GdkPixbuf, GLib
 
 from vimiv import _image_enhance
 
@@ -16,17 +16,15 @@ def enhance_bc(pixbuf, brightness, contrast):
     Return:
         The enhanced GdkPixbuf.Pixbuf
     """
-    # Work with Cairo surface as this can be transformed from and to bytes
-    # quickly
-    surface = Gdk.cairo_surface_create_from_pixbuf(pixbuf, 1, None)
-    width = surface.get_width()
-    height = surface.get_height()
-    data = surface.get_data().tobytes()
+    width = pixbuf.get_width()
+    height = pixbuf.get_height()
+    data = pixbuf.get_pixels()
+    has_alpha = pixbuf.get_has_alpha()
+    rowstride = 4 * width if has_alpha else 3 * width
     # Update plain bytes using C extension
     # Pylint does not read this properly
     # pylint: disable=no-member
     data = _image_enhance.enhance_bc(data, brightness, contrast)
-    surface = surface.create_for_data(data, surface.get_format(), width,
-                                      height, surface.get_stride())
-    # Create pixbuf from updated surface
-    return Gdk.pixbuf_get_from_surface(surface, 0, 0, width, height)
+    gdata = GLib.Bytes.new(data.tobytes())
+    return GdkPixbuf.Pixbuf.new_from_bytes(
+        gdata, GdkPixbuf.Colorspace.RGB, has_alpha, 8, width, height, rowstride)
