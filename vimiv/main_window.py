@@ -49,6 +49,7 @@ class MainWindow(Gtk.ScrolledWindow):
         """
         self.remove(self.get_child())
         self.add(new_child)
+        self.show_all()
 
     def center_window(self):
         """Center the widget in the current window."""
