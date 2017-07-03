@@ -190,10 +190,13 @@ class Thumbnail(Gtk.IconView):
                 ignore_cache=ignore_cache)
 
     def _on_thumbnail_created(self, pixbuf, position):
-        # Subscripting the liststore directly works fine
-        # pylint: disable=unsubscriptable-object
-        self._liststore[position][0] = pixbuf
-        self.move_to_pos(self.get_position())
+        # Happens if files are deleted while we are trying to create thumbnails
+        # for them
+        if len(self._liststore) > position:
+            # Subscripting the liststore directly works fine
+            # pylint: disable=unsubscriptable-object
+            self._liststore[position][0] = pixbuf
+            self.move_to_pos(self.get_position())
 
     def _get_name(self, filename):
         name = os.path.splitext(os.path.basename(filename))[0]

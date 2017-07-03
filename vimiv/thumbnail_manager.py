@@ -62,7 +62,7 @@ class ThumbnailManager:
         self.default_icon = icon_theme.lookup_icon("image-x-generic", 256,
                                                    0).get_filename()
 
-    def _do_get_thumbnail_at_scale(self, source_file, size, callback, args,
+    def _do_get_thumbnail_at_scale(self, source_file, size, callback, index,
                                    ignore_cache=False):
         if not ignore_cache and source_file in self._cache:
             pixbuf = self._cache[source_file]
@@ -77,7 +77,7 @@ class ThumbnailManager:
         if pixbuf.get_height() != size and pixbuf.get_width != size:
             pixbuf = self.scale_pixbuf(pixbuf, size)
 
-        return callback, pixbuf, args
+        return callback, pixbuf, index
 
     @staticmethod
     def scale_pixbuf(pixbuf, size):
@@ -109,7 +109,7 @@ class ThumbnailManager:
     def _do_callback(result):
         GLib.idle_add(*result)
 
-    def get_thumbnail_at_scale_async(self, filename, size, callback, *args,
+    def get_thumbnail_at_scale_async(self, filename, size, callback, index,
                                      ignore_cache=False):
         """Create the thumbnail for 'filename' and return it via 'callback'.
 
@@ -125,7 +125,7 @@ class ThumbnailManager:
                           the thumbnail file is loaded from disk
         """
         self._thread_pool.apply_async(self._do_get_thumbnail_at_scale,
-                                      (filename, size, callback, args,
+                                      (filename, size, callback, index,
                                        ignore_cache),
                                       callback=self._do_callback)
 
