@@ -276,7 +276,6 @@ class Vimiv(Gtk.Application):
         """Get the current position in the focused widget.
 
         get_filename: If True return filename instead of position.
-        force_widget: String to force getting the position of a widget
 
         Return:
             Current position as number or filename.
