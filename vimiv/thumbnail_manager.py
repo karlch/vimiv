@@ -183,7 +183,7 @@ class ThumbnailStore(object):
                 recreation. Needed as transforming images from within thumbnail
                 mode may happen faster than in 1s.
 
-        Returns:
+        Return:
             The path of the thumbnail file or None if thumbnail creation failed.
         """
         # Don't create thumbnails for thumbnail cache
