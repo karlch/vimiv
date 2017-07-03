@@ -126,6 +126,7 @@ class MainWindow(Gtk.ScrolledWindow):
         if self._app.get_paths():
             # Get all files in directory again
             focused_path = self._app.get_pos(True)
+            decremented_index = max(0, self._app.get_pos() - 1)
             directory = os.path.dirname(focused_path)
             files = [os.path.join(directory, fil)
                      for fil in listdir_wrapper(directory)]
@@ -136,15 +137,15 @@ class MainWindow(Gtk.ScrolledWindow):
             # Refocus the path
             if focused_path in self._app.get_paths():
                 index = self._app.get_paths().index(focused_path)
-                if self.thumbnail.toggled:
-                    self.thumbnail.move_to_pos(index)
-                else:
-                    self._app["eventhandler"].num_str = str(index + 1)
-                    self.image.move_pos()
+            # Stay as close as possible
             else:
-                self._app["statusbar"].update_info()
-                if not self.thumbnail.toggled:
-                    self.image.move_pos(forward=False)
+                index = min(decremented_index, len(self._app.get_paths()) - 1)
+            if self.thumbnail.toggled:
+                self.thumbnail.move_to_pos(index)
+            else:
+                self._app["eventhandler"].num_str = str(index + 1)
+                self.image.move_pos()
+            self._app["statusbar"].update_info()
         # We need to check again as populate was called
         if not self._app.get_paths():
             self.hide()

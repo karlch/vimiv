@@ -216,6 +216,20 @@ class LibraryTest(VimivTestCase):
         self.assertEqual(os.getcwd(), os.path.dirname(tmpdir.name))
         tmpdir.cleanup()
 
+    def test_delete_undelete_library(self):
+        """Delete and undelete a file from the library."""
+        # Delete
+        self.lib.move_pos(defined_pos=5)
+        path = os.path.abspath(self.vimiv.get_pos(True))
+        self.assertTrue(os.path.exists(path))
+        self.vimiv["transform"].delete()
+        self.assertFalse(os.path.exists(path))
+        # Undelete
+        self.vimiv["transform"].undelete(os.path.basename(path))
+        self.assertTrue(os.path.exists(path))
+        # Test index here so undelete is always called
+        self.assertEqual(self.vimiv.get_pos(), 4)
+
     def tearDown(self):
         # Reopen and back to beginning
         self.lib.move_up(self.directory)

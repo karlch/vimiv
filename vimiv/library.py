@@ -444,9 +444,15 @@ class Library(Gtk.TreeView):
             if not self.is_focus():
                 self.focus()
         if self.grid.is_visible():
-            # Reload remembering path
-            self._remember_pos()
+            # Reload remembering path or staying as close as possible
+            decremented_index = max(0, self.get_position() - 1)
+            filename = self.files[self.get_position()]
             self.reload(os.getcwd())
+            if filename in self.files:
+                index = self.files.index(filename)
+            else:
+                index = min(decremented_index, len(self.files) - 1)
+            self.move_pos(defined_pos=index)
 
     def _on_marks_changed(self, mark, changed):
         """Reload names if marks changed."""

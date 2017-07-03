@@ -40,16 +40,19 @@ class TransformTest(VimivTestCase):
 
     def test_delete_undelete(self):
         """Delete and undelete images."""
-        # Delete
-        self.assertTrue(os.path.exists("arch-logo.png"))
+        # Delete from a higher index confirming we stay next to the deleted
+        # index
+        self.vimiv["image"].move_index(delta=2)
+        path = self.vimiv.get_path()
+        index = self.vimiv.get_index()
+        self.assertTrue(os.path.exists(path))
         self.transform.delete()
-        self.assertFalse(os.path.exists("arch-logo.png"))
-        self.assertEqual(self.vimiv.get_path(),
-                         os.path.abspath("arch_001.jpg"))
+        self.assertFalse(os.path.exists(path))
         # Undelete
-        self.transform.undelete("arch-logo.png")
-        self.assertTrue(os.path.exists("arch-logo.png"))
-        self.assertIn(os.path.abspath("arch-logo.png"), self.vimiv.get_paths())
+        self.transform.undelete(os.path.basename(path))
+        self.assertTrue(os.path.exists(path))
+        # Test index here so undelete is always called
+        self.assertEqual(self.vimiv.get_index(), index - 1)
         # Move back to beginning
         self.vimiv["image"].move_pos(forward=False)
 
