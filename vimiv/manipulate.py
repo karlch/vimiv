@@ -37,8 +37,8 @@ class Manipulate(Gtk.ScrolledWindow):
 
         # Settings
         self._manipulations = {"bri": 1, "con": 1, "sha": 1}
-        self._pil_image = Image
-        self._pil_thumb = Image
+        self._pil_image = Image.Image
+        self._pil_thumb = Image.Image
 
         # A scrollable window so all tools are always accessible
         self.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
