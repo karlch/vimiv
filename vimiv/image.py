@@ -374,7 +374,7 @@ class Image(Gtk.Image):
         self.pixbuf_iter = loader.get_animation().get_iter()
         self.pixbuf_original = self.pixbuf_iter.get_pixbuf()
         self._size = self._get_available_size()
-        self.zoom_percent = self.get_zoom_percent_to_fit()
+        self.zoom_percent = self.get_zoom_percent_to_fit(self.fit_image)
         if self._autoplay_gifs:
             delay = self.pixbuf_iter.get_delay_time()
             self._timer_id = GLib.timeout_add(delay, self._play_gif) \
