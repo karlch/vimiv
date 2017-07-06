@@ -45,11 +45,11 @@ class Commands(object):
         self.add_command("first_lib", self.app["library"].move_pos,
                          default_args=[False], supports_count=True)
         self.add_command("fit", self.app["image"].zoom_to,
-                         default_args=[0])
+                         default_args=[0, "fit"])
         self.add_command("fit_horiz", self.app["image"].zoom_to,
-                         default_args=[0, 2])
+                         default_args=[0, "horizontal"])
         self.add_command("fit_vert", self.app["image"].zoom_to,
-                         default_args=[0, 3])
+                         default_args=[0, "vertical"])
         self.add_command("flip", self.app["transform"].flip,
                          positional_args=["direction"])
         self.add_command("format", self.app["fileextras"].format_files,

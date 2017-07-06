@@ -40,7 +40,7 @@ class ImageTest(VimivTestCase):
         # zoom out by eventhandler to same level
         self.vimiv["eventhandler"].num_str = "2"
         self.image.zoom_delta(zoom_in=False)
-        self.assertEqual(self.image.zoom_percent, perc_before)
+        self.assertAlmostEqual(self.image.zoom_percent, perc_before)
         # Zoom to a size representing half the image size
         self.image.zoom_to(0.5)
         self.assertEqual(self.image.zoom_percent, 0.5)
@@ -90,7 +90,7 @@ class ImageTest(VimivTestCase):
         # Fit vertically
         self.run_command("fit_vert")
         self.assertEqual(self.image.zoom_percent,
-                         self.image.get_zoom_percent_to_fit(3))
+                         self.image.get_zoom_percent_to_fit("vertical"))
         # Zoom_to 0.5
         self.run_command("zoom_to 05")
         self.assertEqual(self.image.zoom_percent, 0.5)
@@ -133,7 +133,7 @@ class ImageTest(VimivTestCase):
             self.vimiv["statusbar"].toggle()
         # Zoom to fit vertically so something happens
         refresh_gui()
-        self.image.zoom_to(0, 3)
+        self.image.zoom_to(0, "vertical")
         before = self.image.zoom_percent
         # Hide statusbar -> larger image
         self.vimiv["statusbar"].toggle()
@@ -144,7 +144,7 @@ class ImageTest(VimivTestCase):
         after = self.image.zoom_percent
         self.assertEqual(after, before)
         # Zoom to fit horizontally so something happens
-        self.image.zoom_to(0, 2)
+        self.image.zoom_to(0, "horizontal")
         before = self.image.zoom_percent
         # Show library -> smaller image
         self.vimiv["library"].toggle()

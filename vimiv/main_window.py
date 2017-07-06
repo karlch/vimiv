@@ -118,7 +118,7 @@ class MainWindow(Gtk.ScrolledWindow):
         """Recalculate thumbnails or rezoom image when the layout changed."""
         if self.thumbnail.toggled:
             self.thumbnail.calculate_columns()
-        elif self._app.get_paths() and self.image.fit_image:
+        elif self._app.get_paths() and self.image.fit_image != "user":
             self.image.zoom_to(0, self.image.fit_image)
 
     def _on_paths_changed(self, app, transform):
