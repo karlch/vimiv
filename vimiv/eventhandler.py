@@ -2,7 +2,7 @@
 """Handles the keyboard for vimiv."""
 
 from gi.repository import Gdk, GLib, GObject
-from vimiv.configparser import parse_keys
+from vimiv.config_parser import parse_keys
 from vimiv.helpers import get_float_from_str
 
 

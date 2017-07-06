@@ -10,7 +10,7 @@ from gi.repository import Gdk, Gio, GLib, Gtk, GObject
 from vimiv.commandline import CommandLine
 from vimiv.commands import Commands
 from vimiv.completions import Completion
-from vimiv.configparser import parse_config, set_defaults
+from vimiv.config_parser import parse_config, set_defaults
 from vimiv.eventhandler import EventHandler
 from vimiv.fileactions import FileExtras, populate
 from vimiv.information import Information

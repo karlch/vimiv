@@ -7,7 +7,7 @@ import sys
 import tempfile
 from unittest import TestCase, main
 
-import vimiv.configparser as parser
+import vimiv.config_parser as parser
 
 
 class ConfigparserTest(TestCase):
