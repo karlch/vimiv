@@ -37,33 +37,32 @@ def populate_single(arg, recursive):
         directory = os.path.dirname(arg)
         if not directory:  # Default to current directory
             directory = "./"
-        basename = os.path.basename(arg)
         paths = listdir_wrapper(directory)
+        paths = [os.path.join(directory, path) for path in paths]
         # Set the argument to the beginning of the list
-        pos = paths.index(basename)
-        paths = [os.path.join(directory, path)
-                 for path in paths[pos:] + paths[:pos]]
     elif os.path.isdir(arg) and recursive:
         paths = sorted(recursive_search(arg))
     return paths
 
 
-def populate(args, recursive=False, shuffle_paths=False):
+def populate(args, recursive=False, shuffle_paths=False, expand_single=True):
     """Populate a list of files out given paths.
 
     Args:
         args: Paths given.
         recursive: If True search path recursively for images.
         shuffle_paths: If True shuffle found paths randomly.
+        expand_single: If True, populate a complete filelist with images from
+            the same directory as the single argument given.
     Return:
         Found paths, position of first given path.
     """
     paths = []
+    index = 0
     # If only one path is passed do special stuff
-    single = None
-    if len(args) == 1:
-        single = args[0]
-        args = populate_single(single, recursive)
+    first_path = os.path.abspath(args[0]) if args else None
+    if len(args) == 1 and expand_single:
+        args = populate_single(first_path, recursive)
 
     # Add everything
     for arg in args:
@@ -75,12 +74,13 @@ def populate(args, recursive=False, shuffle_paths=False):
     # Remove unsupported files
     paths = [possible_path for possible_path in paths
              if is_image(possible_path)]
+    index = paths.index(first_path) if first_path in paths else 0
 
     # Shuffle
     if shuffle_paths:
         shuffle(paths)
 
-    return paths, 0
+    return paths, index
 
 
 def is_image(filename):
@@ -111,11 +111,12 @@ class FileExtras(object):
         """Receive and set main vimiv application.
 
         Args:
-            app: The main vimiv class to interact with.
-            clipboard: Gtk Clipboard depending on config.
+            _app: The main vimiv class to interact with.
+            _use_primary: True if operating on primary clipboard. Else clipboard
+                is used.
         """
-        self.app = app
-        self.use_primary = self.app.settings["GENERAL"]["copy_to_primary"]
+        self._app = app
+        self._use_primary = self._app.settings["GENERAL"]["copy_to_primary"]
 
     def format_files(self, string):
         """Format image names in filelist according to a formatstring.
@@ -127,34 +128,38 @@ class FileExtras(object):
             string: Formatstring to use.
         """
         # Catch problems
-        if self.app["library"].treeview.is_focus():
+        if self._app["library"].is_focus():
             message = "Format only works on opened image files"
-            self.app["statusbar"].message(message, "info")
+            self._app["statusbar"].message(message, "info")
             return
-        if not self.app.paths:
-            self.app["statusbar"].message("No files in path", "info")
+        if not self._app.get_paths():
+            self._app["statusbar"].message("No files in path", "info")
             return
 
         # Check if exifdata is available and needed
         tofind = ("%" in string)
         if tofind:
             try:
-                for fil in self.app.paths:
+                for fil in self._app.get_paths():
                     with Image.open(fil) as im:
+                        # This will be removed once PIL is deprecated
+                        # pylint: disable=protected-access
                         exif = im._getexif()
                         if not (exif and 306 in exif):
                             raise AttributeError
             except AttributeError:
-                self.app["statusbar"].message(
+                self._app["statusbar"].message(
                     "No exif data for %s available" % (fil), "error")
                 return
 
-        for i, fil in enumerate(self.app.paths):
+        for i, fil in enumerate(self._app.get_paths()):
             ending = os.path.splitext(fil)[1]
             num = "%03d" % (i + 1)
             # Exif stuff
             if tofind:
                 with Image.open(fil) as im:
+                    # This will be removed once PIL is deprecated
+                    # pylint: disable=protected-access
                     exif = im._getexif()
                     date = exif[306]
                     time = date.split()[1].split(":")
@@ -171,59 +176,7 @@ class FileExtras(object):
             outstring += num + ending
             os.rename(fil, outstring)
 
-        # Reload everything
-        self.reload_changes(os.getcwd(), True)
-
-    def reload_changes(self, directory, reload_path=True, pipe=False,
-                       pipe_input=None):
-        """Reload everything that could have changed.
-
-        Reload filelist in library and image and update names accordingly.
-
-        Args:
-            directory: Directory which was affected.
-            reload_path: If True reload information that contains the current
-                path.
-            pipe: If True, input came from a pipe. Therefore run pipe.
-            pipe_input: Command that comes from pipe.
-        """
-        # Reload library remembering position
-        if (directory == os.getcwd() and directory != self.app["tags"].directory
-                and self.app["library"].grid.is_visible()):
-            old_pos_lib = self.app.get_pos(False, "lib")
-            if old_pos_lib >= 0 and \
-                    old_pos_lib <= len(self.app["library"].files):
-                self.app["library"].remember_pos(directory, old_pos_lib)
-            self.app["library"].reload(directory)
-            # Refocus other widgets if necessary
-            if self.app["commandline"].last_focused == "im":
-                self.app["image"].scrolled_win.grab_focus()
-            elif self.app["commandline"].last_focused == "thu":
-                self.app["thumbnail"].iconview.grab_focus()
-        # Reload image/thumbnail
-        if self.app.paths and reload_path:
-            old_pos_im = self.app.get_pos(False, "im")
-            # Get all files in directory again
-            pathdir = os.path.dirname(self.app.paths[old_pos_im])
-            files = [os.path.join(pathdir, fil)
-                     for fil in sorted(os.listdir(pathdir))]
-            self.app.paths, self.app.index = populate(files)
-            # Expand library if set by user and all paths were removed
-            if self.app["library"].expand and not self.app.paths:
-                self.app["library"].treeview.set_hexpand(True)
-            # Refocus the current position
-            if self.app["thumbnail"].toggled:
-                old_pos_thu = self.app.get_pos(False, "thu")
-                for image in self.app.paths:
-                    self.app["thumbnail"].reload(image)
-                self.app["thumbnail"].move_to_pos(old_pos_thu)
-            else:
-                self.app["eventhandler"].num_str = str(old_pos_im + 1)
-                self.app["image"].move_pos()
-        # Run the pipe
-        if pipe:
-            self.app["commandline"].pipe(pipe_input)
-        return False  # To stop the timer
+        self._app.emit("paths-changed", self)
 
     def copy_name(self, abspath=False):
         """Copy image name to clipboard.
@@ -232,22 +185,22 @@ class FileExtras(object):
             abspath: Use absolute path or only the basename.
         """
         # Get name to copy
-        name = self.app.get_pos(True)
+        name = self._app.get_pos(True)
         if abspath:
             name = os.path.abspath(name)
         else:
             name = os.path.basename(name)
         # Set clipboard
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY) \
-            if self.use_primary \
+            if self._use_primary \
             else Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         # Text to clipboard
         clipboard.set_text(name, -1)
         # Info message
         message = "Copied <b>" + name + "</b> to %s" % \
-            ("primary" if self.use_primary else "clipboard")
-        self.app["statusbar"].message(message, "info")
+            ("primary" if self._use_primary else "clipboard")
+        self._app["statusbar"].message(message, "info")
 
     def toggle_clipboard(self):
         """Toggle between primary and clipboard selection."""
-        self.use_primary = not self.use_primary
+        self._use_primary = not self._use_primary

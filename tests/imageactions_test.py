@@ -8,7 +8,7 @@ from unittest import TestCase, main
 import vimiv.imageactions as imageactions
 from PIL import Image
 
-from vimiv_testcase import compare_images
+from vimiv_testcase import compare_files
 
 
 class ImageActionsTest(TestCase):
@@ -46,31 +46,31 @@ class ImageActionsTest(TestCase):
         # Rotate clockwise
         do_rotate_test(3)
         # Images are now equal again
-        self.assertTrue(compare_images(self.orig, self.filename))
+        self.assertTrue(compare_files(self.orig, self.filename))
         # Rotate 180
         do_rotate_test(2)
         # Images are not equal
-        self.assertFalse(compare_images(self.orig, self.filename))
+        self.assertFalse(compare_files(self.orig, self.filename))
 
     def test_flip(self):
         """Flipping of files."""
         # Images equal before the flip
-        self.assertTrue(compare_images(self.orig, self.filename))
+        self.assertTrue(compare_files(self.orig, self.filename))
         # Images differ after the flip
         imageactions.flip_file(self.files, False)
-        self.assertFalse(compare_images(self.orig, self.filename))
+        self.assertFalse(compare_files(self.orig, self.filename))
         # Images equal after flipping again
         imageactions.flip_file(self.files, False)
-        self.assertTrue(compare_images(self.orig, self.filename))
+        self.assertTrue(compare_files(self.orig, self.filename))
         # Same for horizontal flip
         # Images equal before the flip
-        self.assertTrue(compare_images(self.orig, self.filename))
+        self.assertTrue(compare_files(self.orig, self.filename))
         # Images differ after the flip
         imageactions.flip_file(self.files, True)
-        self.assertFalse(compare_images(self.orig, self.filename))
+        self.assertFalse(compare_files(self.orig, self.filename))
         # Images equal after flipping again
         imageactions.flip_file(self.files, True)
-        self.assertTrue(compare_images(self.orig, self.filename))
+        self.assertTrue(compare_files(self.orig, self.filename))
 
     def test_autorotate(self):
         """Autorotate files."""

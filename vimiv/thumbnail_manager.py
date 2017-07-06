@@ -28,8 +28,9 @@ class ThumbnailManager:
     """Provides an asynchronous mechanism to load thumbnails.
 
     Attributes:
-        large: the thumbnail managing standard specifies two thumbnail sizes
-               256x256 (large) and 128x128 (normal)
+        thumbnail_store: ThumbnailStore class with the loading mechanism.
+        large: The thumbnail managing standard specifies two thumbnail sizes.
+            256x256 (large) and 128x128 (normal)
         default_icon: Default icon if thumbnails are not yet loaded.
         error_icon: The path to the icon which is used, when thumbnail creation
                     fails.
@@ -61,12 +62,13 @@ class ThumbnailManager:
         self.default_icon = icon_theme.lookup_icon("image-x-generic", 256,
                                                    0).get_filename()
 
-    def _do_get_thumbnail_at_scale(self, source_file, size, callback, args,
+    def _do_get_thumbnail_at_scale(self, source_file, size, callback, index,
                                    ignore_cache=False):
         if not ignore_cache and source_file in self._cache:
             pixbuf = self._cache[source_file]
         else:
-            thumbnail_path = self.thumbnail_store.get_thumbnail(source_file)
+            thumbnail_path = self.thumbnail_store.get_thumbnail(source_file,
+                                                                ignore_cache)
             if thumbnail_path is None:
                 thumbnail_path = self.error_icon
             pixbuf = Pixbuf.new_from_file(thumbnail_path)
@@ -75,7 +77,7 @@ class ThumbnailManager:
         if pixbuf.get_height() != size and pixbuf.get_width != size:
             pixbuf = self.scale_pixbuf(pixbuf, size)
 
-        return callback, pixbuf, args
+        return callback, pixbuf, index
 
     @staticmethod
     def scale_pixbuf(pixbuf, size):
@@ -107,7 +109,7 @@ class ThumbnailManager:
     def _do_callback(result):
         GLib.idle_add(*result)
 
-    def get_thumbnail_at_scale_async(self, filename, size, callback, *args,
+    def get_thumbnail_at_scale_async(self, filename, size, callback, index,
                                      ignore_cache=False):
         """Create the thumbnail for 'filename' and return it via 'callback'.
 
@@ -123,13 +125,13 @@ class ThumbnailManager:
                           the thumbnail file is loaded from disk
         """
         self._thread_pool.apply_async(self._do_get_thumbnail_at_scale,
-                                      (filename, size, callback, args,
+                                      (filename, size, callback, index,
                                        ignore_cache),
                                       callback=self._do_callback)
 
 
 class ThumbnailStore(object):
-    """Implements freedestop.org's Thumbnail Managing Standard."""
+    """Implements freedesktop.org's Thumbnail Managing Standard."""
 
     KEY_URI = "Thumb::URI"
     KEY_MTIME = "Thumb::MTime"
@@ -169,7 +171,7 @@ class ThumbnailStore(object):
             self.thumbnail_dir = os.path.join(self.base_dir, "normal")
             self.thumb_size = 128
 
-    def get_thumbnail(self, filename):
+    def get_thumbnail(self, filename, ignore_current=False):
         """Get the path of the thumbnail of the given filename.
 
         If the requested thumbnail does not yet exist, it will first be created
@@ -177,8 +179,11 @@ class ThumbnailStore(object):
 
         Args:
             filename: The filename to get the thumbnail for.
+            ignore_current: If True, ignore saved thumbnails and force a
+                recreation. Needed as transforming images from within thumbnail
+                mode may happen faster than in 1s.
 
-        Returns:
+        Return:
             The path of the thumbnail file or None if thumbnail creation failed.
         """
         # Don't create thumbnails for thumbnail cache
@@ -188,7 +193,8 @@ class ThumbnailStore(object):
         thumbnail_filename = self._get_thumbnail_filename(filename)
         thumbnail_path = self._get_thumbnail_path(thumbnail_filename)
         if os.access(thumbnail_path, os.R_OK) \
-                and self._is_current(filename, thumbnail_path):
+                and self._is_current(filename, thumbnail_path) \
+                and not ignore_current:
             return thumbnail_path
 
         fail_path = self._get_fail_path(thumbnail_filename)

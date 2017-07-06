@@ -7,8 +7,7 @@ from unittest import TestCase, main
 
 from gi import require_version
 require_version("Gtk", "3.0")
-from gi.repository import Gio, GLib, Gtk
-from PIL import Image
+from gi.repository import Gio, GLib, Gtk, GdkPixbuf
 from vimiv.app import Vimiv
 
 
@@ -23,11 +22,16 @@ def refresh_gui(delay=0):
         Gtk.main_iteration_do(False)
 
 
-def compare_images(file1, file2):
-    """Directly compare two images using PIL."""
-    image1 = Image.open(file1)
-    image2 = Image.open(file2)
-    return image1 == image2
+def compare_pixbufs(pb1, pb2):
+    """Compare to pixbufs."""
+    return pb1.get_pixels() == pb2.get_pixels()
+
+
+def compare_files(file1, file2):
+    """Directly compare two image files using GdkPixbuf."""
+    pb1 = GdkPixbuf.Pixbuf.new_from_file(file1)
+    pb2 = GdkPixbuf.Pixbuf.new_from_file(file2)
+    return compare_pixbufs(pb1, pb2)
 
 
 class VimivTestCase(TestCase):
@@ -79,8 +83,8 @@ class VimivTestCase(TestCase):
             external: If True, run an external command and wait for it to
                 finish.
         """
-        self.vimiv["commandline"].focus(command)
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.vimiv["commandline"].enter(command)
+        self.vimiv["commandline"].emit("activate")
         if external:
             while self.vimiv["commandline"].running_processes:
                 self.vimiv["commandline"].running_processes[0].wait()
@@ -88,12 +92,13 @@ class VimivTestCase(TestCase):
 
     def run_search(self, string):
         """Search for string from the command line."""
-        self.vimiv["commandline"].entry.set_text("/" + string)
-        self.vimiv["commandline"].handler(self.vimiv["commandline"].entry)
+        self.vimiv["commandline"].enter_search()
+        self.vimiv["commandline"].set_text("/" + string)
+        self.vimiv["commandline"].emit("activate")
 
     def check_statusbar(self, expected_text):
         """Check statusbar for text."""
-        statusbar_text = self.vimiv["statusbar"].left_label.get_text()
+        statusbar_text = self.vimiv["statusbar"].get_message()
         self.assertEqual(expected_text, statusbar_text)
 
     @classmethod

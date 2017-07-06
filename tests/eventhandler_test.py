@@ -7,7 +7,7 @@ from gi import require_version
 require_version("Gtk", "3.0")
 from gi.repository import Gdk, Gtk
 
-from vimiv_testcase import VimivTestCase
+from vimiv_testcase import VimivTestCase, refresh_gui
 
 
 class KeyHandlerTest(VimivTestCase):
@@ -20,35 +20,35 @@ class KeyHandlerTest(VimivTestCase):
     def test_key_press(self):
         """Press key."""
         self.vimiv["library"].file_select(None, Gtk.TreePath(1), None, True)
-        image_before = self.vimiv.paths[self.vimiv.index]
+        image_before = self.vimiv.get_path()
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("n")
-        self.vimiv["image"].scrolled_win.emit("key_press_event", event)
-        image_after = self.vimiv.paths[self.vimiv.index]
+        self.vimiv["main_window"].emit("key_press_event", event)
+        image_after = self.vimiv.get_path()
         self.assertNotEqual(image_before, image_after)
         event.keyval = Gdk.keyval_from_name("O")
-        self.vimiv["image"].scrolled_win.emit("key_press_event", event)
-        self.assertTrue(self.vimiv["library"].treeview.is_focus())
+        self.vimiv["main_window"].emit("key_press_event", event)
+        self.assertTrue(self.vimiv["library"].is_focus())
 
     def test_button_click(self):
         """Click mouse button."""
         self.vimiv["library"].file_select(None, Gtk.TreePath(1), None, True)
-        image_before = self.vimiv.paths[self.vimiv.index]
+        image_before = self.vimiv.get_path()
         event = Gdk.Event().new(Gdk.EventType.BUTTON_PRESS)
         event.button = 1
         self.vimiv["window"].emit("button_press_event", event)
-        image_after = self.vimiv.paths[self.vimiv.index]
+        image_after = self.vimiv.get_path()
         self.assertNotEqual(image_before, image_after)
         # Double click should not work
-        event = Gdk.Event().new(Gdk.EventType._2BUTTON_PRESS)
+        event = Gdk.Event().new(Gdk.EventType.DOUBLE_BUTTON_PRESS)
         event.button = 1
         self.vimiv["window"].emit("button_press_event", event)
-        self.assertEqual(image_after, self.vimiv.paths[self.vimiv.index])
+        self.assertEqual(image_after, self.vimiv.get_path())
         # Focus library via mouse click
         event = Gdk.Event().new(Gdk.EventType.BUTTON_PRESS)
         event.button = 2
         self.vimiv["window"].emit("button_press_event", event)
-        self.assertTrue(self.vimiv["library"].treeview.is_focus())
+        self.assertTrue(self.vimiv["library"].is_focus())
 
     def test_add_number(self):
         """Add number to the numstr and clear it."""
@@ -57,16 +57,12 @@ class KeyHandlerTest(VimivTestCase):
         self.vimiv["eventhandler"].num_append("2")
         self.assertEqual(self.vimiv["eventhandler"].num_str, "2")
         # Add another number, should change the timer_id
-        id_before = self.vimiv["eventhandler"].timer_id
         self.vimiv["eventhandler"].num_append("3")
-        id_after = self.vimiv["eventhandler"].timer_id
-        self.assertNotEqual(id_before, id_after)
         self.assertEqual(self.vimiv["eventhandler"].num_str, "23")
         # Clear manually, GLib timeout should definitely work as well if the
         # code runs without errors
         self.vimiv["eventhandler"].num_clear()
         self.assertFalse(self.vimiv["eventhandler"].num_str)
-        self.assertFalse(self.vimiv["eventhandler"].timer_id)
 
     def test_receive_number(self):
         """Get a number from numstr and clear it."""
@@ -91,7 +87,7 @@ class KeyHandlerTest(VimivTestCase):
         self.assertFalse(self.vimiv["eventhandler"].num_str)
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("2")
-        self.vimiv["library"].treeview.emit("key_press_event", event)
+        self.vimiv["library"].emit("key_press_event", event)
         self.assertEqual(self.vimiv["eventhandler"].num_str, "2")
         # Clear as it might interfere
         self.vimiv["eventhandler"].num_clear()
@@ -102,9 +98,25 @@ class KeyHandlerTest(VimivTestCase):
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("h")
         event.state = Gdk.ModifierType.CONTROL_MASK
-        self.vimiv["library"].treeview.emit("key_press_event", event)
+        self.vimiv["library"].emit("key_press_event", event)
         after = self.vimiv["library"].show_hidden
         self.assertNotEqual(before, after)
+
+    def test_touch(self):
+        """Touch event."""
+        self.vimiv["library"].file_select(None, Gtk.TreePath(1), None, True)
+        image_before = self.vimiv.get_path()
+        event = Gdk.Event().new(Gdk.EventType.TOUCH_BEGIN)
+        # Twice to check for exception
+        self.vimiv["window"].emit("touch-event", event)
+        self.vimiv["window"].emit("touch-event", event)
+        image_after = self.vimiv.get_path()
+        self.assertEqual(image_before, image_after)  # Touch only disables
+        self.vimiv["library"].toggle()
+        self.assertTrue(self.vimiv["library"].is_focus())
+        refresh_gui()
+        # Test again to see if it was re-activated properly
+        self.test_button_click()
 
 
 if __name__ == "__main__":

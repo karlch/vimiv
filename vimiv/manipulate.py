@@ -2,29 +2,27 @@
 """Manipulate part for vimiv."""
 
 import os
-from threading import Thread
 
 from gi.repository import GdkPixbuf, GLib, Gtk
 from PIL import Image, ImageEnhance
 from vimiv import imageactions
-from vimiv.trash_manager import TrashManager
 from vimiv.fileactions import is_animation
 
 
-class Manipulate(object):
+class Manipulate(Gtk.ScrolledWindow):
     """Manipulate class for vimiv.
 
     Includes the manipulation toolbar, all the actions that apply to it and all
     the other image manipulations like rotate, flip, and so on.
 
     Attributes:
-        app: The main vimiv application to interact with.
-        manipulations: Dictionary of possible manipulations. Includes
-            brightness, contrast and sharpness.
-        scrolled_win: Gtk.ScrolledWindow for the widgets so they are accessible
-            regardless of window size.
         sliders: Dictionary containing bri, con and sha sliders.
-        trash_manager: Class to handle a shared trash directory.
+
+        _app: The main vimiv application to interact with.
+        _manipulations: Dictionary of possible manipulations. Includes
+            brightness, contrast and sharpness.
+        _pil_image: PIL Image of the original size for accepted manipulations.
+        _pil_thumb: Thumbnail of PIL image to work on temporarily.
     """
 
     def __init__(self, app, settings):
@@ -34,33 +32,31 @@ class Manipulate(object):
             app: The main vimiv application to interact with.
             settings: Settings from configfiles to use.
         """
-        self.app = app
+        super(Manipulate, self).__init__()
+        self._app = app
 
         # Settings
-        self.simple_manipulations = {}
-        self.manipulations = {"bri": 1, "con": 1, "sha": 1}
-        self.pil_image = Image
-        self.pil_thumb = Image
+        self._manipulations = {"bri": 1, "con": 1, "sha": 1}
+        self._pil_image = Image.Image
+        self._pil_thumb = Image.Image
 
         # A scrollable window so all tools are always accessible
-        self.scrolled_win = Gtk.ScrolledWindow()
-        self.scrolled_win.set_policy(Gtk.PolicyType.AUTOMATIC,
-                                     Gtk.PolicyType.NEVER)
+        self.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER)
         # A grid in which everything gets packed
         grid = Gtk.Grid()
         grid.set_column_spacing(6)
         grid.set_border_width(6)
-        grid.connect("key_press_event", self.app["eventhandler"].key_pressed,
+        grid.connect("key_press_event", self._app["eventhandler"].on_key_press,
                      "MANIPULATE")
-        self.scrolled_win.add(grid)
+        self.add(grid)
 
         # Sliders
         bri_slider = Gtk.Scale()
-        bri_slider.connect("value-changed", self.value_slider, "bri")
+        bri_slider.connect("value-changed", self._set_slider_value, "bri")
         con_slider = Gtk.Scale()
-        con_slider.connect("value-changed", self.value_slider, "con")
+        con_slider.connect("value-changed", self._set_slider_value, "con")
         sha_slider = Gtk.Scale()
-        sha_slider.connect("value-changed", self.value_slider, "sha")
+        sha_slider.connect("value-changed", self._set_slider_value, "sha")
         self.sliders = {"bri": bri_slider, "con": con_slider, "sha": sha_slider}
 
         # Set some properties
@@ -84,10 +80,10 @@ class Manipulate(object):
 
         # Buttons
         button_yes = Gtk.Button(label="Accept")
-        button_yes.connect("clicked", self.button_clicked, True)
+        button_yes.connect("clicked", self._on_button_clicked, True)
         button_yes.set_size_request(80, 20)
         button_no = Gtk.Button(label="Cancel")
-        button_no.connect("clicked", self.button_clicked, False)
+        button_no.connect("clicked", self._on_button_clicked, False)
         button_no.set_size_request(80, 20)
 
         # Pack everything into the grid
@@ -96,226 +92,59 @@ class Manipulate(object):
                      button_no]:
             grid.add(item)
 
-        # Generate trash manager
-        self.trash_manager = TrashManager()
-
-    def delete(self):
-        """Delete all marked images or the current one."""
-        # Get all images
-        images = self.get_manipulated_images("Deleted")
-        self.app["mark"].marked = []
-        # Delete all images remembering possible errors
-        message = ""
-        for im in images:
-            if not os.path.exists(im):
-                message += "Image %s does not exist." % (im)
-            elif os.path.isdir(im):
-                message += "Deleting directory %s is not supported." % (im)
-            else:
-                self.trash_manager.delete(im)
-        if message:
-            self.app["statusbar"].message(message, "error")
-        # Reload stuff if needed
-        self.app["fileextras"].reload_changes(os.getcwd(), reload_path=True)
-
-    def undelete(self, basename):
-        """Undelete an image in the trash.
+    def check_for_edit(self, force):
+        """Check if an image was edited.
 
         Args:
-            basename: The basename of the image in the trash directory.
+            force: If True move and ignore any editing.
+        Return:
+            0 if no edits were done or force, 1 else.
         """
-        returncode = self.trash_manager.undelete(basename)
-        if returncode == 1:
-            message = "Could not restore %s, file does not exist" % (basename)
-            self.app["statusbar"].message(message, "error")
-        elif returncode == 2:
-            message = "Could not restore %s, directories are not supported" \
-                % (basename)
-            self.app["statusbar"].message(message, "error")
-        elif returncode == 3:
-            message = "Could not restore %s, directory is not accessible" \
-                % (basename)
-            self.app["statusbar"].message(message, "error")
-        else:
-            self.app["fileextras"].reload_changes(os.getcwd(), reload_path=True)
-
-    def get_manipulated_images(self, info):
-        """Return the images which should be manipulated.
-
-        Either the currently focused image or all marked images.
-
-        Args:
-            info: Info to display when acting on marked images.
-        """
-        images = []
-        # Add the image shown
-        if not self.app["mark"].marked and not self.app["thumbnail"].toggled:
-            if self.app["library"].treeview.is_focus():
-                images.append(
-                    os.path.abspath(self.app.get_pos(True)))
-            else:
-                images.append(self.app.paths[self.app.index])
-        # Add all marked images
-        else:
-            images = self.app["mark"].marked
-            if len(images) == 1:
-                message = "%s %d marked image" % (info, len(images))
-            else:
-                message = "%s %d marked images" % (info, len(images))
-            self.app["statusbar"].message(message, "info")
-        return images
-
-    def rotate(self, cwise, rotate_file=True):
-        """Rotate the displayed image and call thread to rotate files.
-
-        Args:
-            cwise: Rotate image 90 * cwise degrees.
-            rotate_file: If True call thread to rotate files.
-        """
-        if not self.app.paths:
-            self.app["statusbar"].message(
-                "No image to rotate", "error")
-            return
-        # Do not rotate animations
-        elif is_animation(self.app.paths[self.app.index]):
-            self.app["statusbar"].message(
-                "Animations cannot be rotated", "warning")
-            return
-        try:
-            cwise = int(cwise)
-            images = self.get_manipulated_images("Rotated")
-            cwise = cwise % 4
-            # Rotate the image shown
-            if self.app.paths[self.app.index] in images:
-                self.app["image"].pixbuf_original = \
-                    self.app["image"].pixbuf_original.rotate_simple(
-                        (90 * cwise))
-                if self.app["image"].fit_image:
-                    self.app["image"].zoom_percent = \
-                        self.app["image"].get_zoom_percent_to_fit(
-                            self.app["image"].fit_image)
-                self.app["image"].update(False)
-            if rotate_file:
-                for fil in images:
-                    if fil in self.simple_manipulations:
-                        self.simple_manipulations[fil][0] = \
-                            (self.simple_manipulations[fil][0] + cwise) % 4
-                    else:
-                        self.simple_manipulations[fil] = [cwise, 0, 0]
-                # Reload thumbnails of rotated images immediately
-                if self.app["thumbnail"].toggled:
-                    self.run_simple_manipulations()
-        except ValueError:
-            self.app["statusbar"].message(
-                "Argument for rotate must be of type integer", "error")
-
-    def run_simple_manipulations(self):
-        """Start thread for rotate and flip."""
-        t = Thread(target=self.thread_for_simple_manipulations)
-        t.start()
-
-    def thread_for_simple_manipulations(self):
-        """Rotate and flip image file in an extra thread."""
-        to_remove = list(self.simple_manipulations.keys())
-        for f in self.simple_manipulations:
-            if self.simple_manipulations[f][0]:
-                imageactions.rotate_file([f],
-                                         self.simple_manipulations[f][0])
-            if self.simple_manipulations[f][1]:
-                imageactions.flip_file([f], True)
-            if self.simple_manipulations[f][2]:
-                imageactions.flip_file([f], False)
-            if self.app["thumbnail"].toggled:
-                self.app["thumbnail"].reload(f)
-        for key in to_remove:
-            del self.simple_manipulations[key]
-
-    def flip(self, horizontal, flip_file=True):
-        """Flip the displayed image and call thread to flip files.
-
-        Args:
-            horizontal: If 1 flip horizontally. Else vertically.
-            rotate_file: If True call thread to rotate files.
-        """
-        if not self.app.paths:
-            self.app["statusbar"].message(
-                "No image to flip", "error")
-            return
-        # Do not flip animations
-        elif is_animation(self.app.paths[self.app.index]):
-            self.app["statusbar"].message(
-                "Animations cannot be flipped", "warning")
-            return
-        try:
-            horizontal = int(horizontal)
-            images = self.get_manipulated_images("Flipped")
-            # Flip the image shown
-            if self.app.paths[self.app.index] in images:
-                self.app["image"].pixbuf_original = \
-                    self.app["image"].pixbuf_original.flip(horizontal)
-                self.app["image"].update(False)
-            if flip_file:
-                for fil in images:
-                    if fil not in self.simple_manipulations:
-                        self.simple_manipulations[fil] = [0, 0, 0]
-                    if horizontal:
-                        self.simple_manipulations[fil][1] = \
-                            (self.simple_manipulations[fil][1] + 1) % 2
-                    else:
-                        self.simple_manipulations[fil][2] = \
-                            (self.simple_manipulations[fil][2] + 1) % 2
-                # Reload thumbnails of flipped images immediately
-                if self.app["thumbnail"].toggled:
-                    self.run_simple_manipulations()
-        except ValueError:
-            self.app["statusbar"].message(
-                "Argument for flip must be of type integer", "error")
-
-    def rotate_auto(self):
-        """Autorotate all pictures in the current pathlist."""
-        amount, method = imageactions.autorotate(self.app.paths)
-        if amount:
-            self.app["image"].load_image()
-            message = "Autorotated %d image(s) using %s." % (amount, method)
-        else:
-            message = "No image rotated. Tried using %s." % (method)
-        self.app["statusbar"].message(message, "info")
+        if force:
+            self._manipulations = {"bri": 1, "con": 1, "sha": 1}
+            return 0
+        elif self._manipulations != {"bri": 1, "con": 1, "sha": 1}:
+            self._app["statusbar"].message(
+                "Image has been edited, add ! to force", "warning")
+            return 1
+        return 0
 
     def toggle(self):
         """Toggle the manipulation bar."""
-        if self.scrolled_win.is_visible():
-            self.scrolled_win.hide()
-            self.app["image"].scrolled_win.grab_focus()
-            self.app["statusbar"].update_info()
-        elif self.app.paths and not(self.app["thumbnail"].toggled or
-                                    self.app["library"].treeview.is_focus()):
-            if os.path.islink(self.app.paths[self.app.index]):
-                self.app["statusbar"].message(
+        if self.is_visible():
+            self.hide()
+            self._app["main_window"].grab_focus()
+            self._app["statusbar"].update_info()
+        elif self._app.get_paths() and \
+                self._app.get_focused_widget() not in ["lib", "thu"]:
+            if os.path.islink(self._app.get_path()):
+                self._app["statusbar"].message(
                     "Manipulating symbolic links is not supported", "warning")
-            elif is_animation(self.app.paths[self.app.index]):
-                self.app["statusbar"].message(
+            elif is_animation(self._app.get_path()):
+                self._app["statusbar"].message(
                     "Manipulating Gifs is not supported", "warning")
             else:
-                self.scrolled_win.show()
+                self.show()
                 self.sliders["bri"].grab_focus()
-                self.app["statusbar"].update_info()
+                self._app["statusbar"].update_info()
                 # Create PIL image to work with
-                size = self.app["image"].imsize
-                self.pil_image = Image.open(self.app.paths[self.app.index])
-                self.pil_thumb = Image.open(self.app.paths[self.app.index])
-                self.pil_thumb.thumbnail(size, Image.ANTIALIAS)
+                size = self._app["image"].get_allocation()
+                size = (size.width, size.height)
+                self._pil_image = Image.open(self._app.get_path())
+                self._pil_thumb = Image.open(self._app.get_path())
+                self._pil_thumb.thumbnail(size, Image.ANTIALIAS)
         else:
-            if self.app["thumbnail"].toggled:
-                self.app["statusbar"].message(
+            if self._app["thumbnail"].toggled:
+                self._app["statusbar"].message(
                     "Manipulate not supported in thumbnail mode", "warning")
-            elif self.app["library"].treeview.is_focus():
-                self.app["statusbar"].message(
+            elif self._app["library"].is_focus():
+                self._app["statusbar"].message(
                     "Manipulate not supported in library", "warning")
             else:
-                self.app["statusbar"].message("No image open to edit",
-                                              "warning")
+                self._app["statusbar"].message("No image open to edit",
+                                               "warning")
 
-    def manipulate_image(self, apply_to_file=False):
+    def _apply(self, apply_to_file=False):
         """Apply manipulations to image.
 
         Manipulations are the three sliders for brightness, contrast and
@@ -326,19 +155,20 @@ class Manipulate(object):
             real: If True, apply manipulations to the real image.
         """
         if apply_to_file:
-            imfile = self.pil_image
+            imfile = self._pil_image
         else:
-            imfile = self.pil_thumb
+            imfile = self._pil_thumb
         # Apply Brightness, Contrast and Sharpness
         enhanced_im = ImageEnhance.Brightness(imfile).enhance(
-            self.manipulations["bri"])
+            self._manipulations["bri"])
         enhanced_im = ImageEnhance.Contrast(enhanced_im).enhance(
-            self.manipulations["con"])
+            self._manipulations["con"])
         enhanced_im = ImageEnhance.Sharpness(enhanced_im).enhance(
-            self.manipulations["sha"])
+            self._manipulations["sha"])
         # On real file save data to file
         if apply_to_file:
-            imageactions.save_image(enhanced_im, self.app.paths[self.app.index])
+            imageactions.save_image(enhanced_im,
+                                    self._app.get_path())
         # Load Pixbuf from PIL data
         data = enhanced_im.tobytes()
         g_data = GLib.Bytes.new(data)
@@ -350,12 +180,12 @@ class Manipulate(object):
             pixbuf = GdkPixbuf.Pixbuf.new_from_bytes(
                 g_data, GdkPixbuf.Colorspace.RGB, False, 8, w, h, 3 * w)
         # Show the edited pixbuf
-        self.app["image"].pixbuf_original = pixbuf
-        self.app["image"].update()
-        self.app["image"].zoom_to(0)
+        self._app["image"].pixbuf_original = pixbuf
+        self._app["image"].update()
+        self._app["image"].zoom_to(0)
 
-    def value_slider(self, slider, name):
-        """Set value of self.manipulations according to slider value.
+    def _set_slider_value(self, slider, name):
+        """Set value of self._manipulations according to slider value.
 
         Args:
             slider: Gtk.Scale on which to operate.
@@ -364,9 +194,9 @@ class Manipulate(object):
         val = slider.get_value()
         val = (val + 127) / 127
         # Change brightness, contrast or sharpness
-        self.manipulations[name] = val
+        self._manipulations[name] = val
         # Run the manipulation function
-        self.manipulate_image()
+        self._apply()
 
     def focus_slider(self, name):
         """Set focus on one of the three sliders.
@@ -375,11 +205,11 @@ class Manipulate(object):
             name: Name of slider to focus.
         """
         # If manipulate is not toggled, this makes no sense
-        if not self.scrolled_win.is_visible():
-            self.app["statusbar"].message(
+        if not self.is_visible():
+            self._app["statusbar"].message(
                 "Focusing a slider only makes sense in manipulate", "error")
         elif name not in self.sliders:
-            self.app["statusbar"].message(
+            self._app["statusbar"].message(
                 "No slider called " + name, "error")
         else:
             self.sliders[name].grab_focus()
@@ -393,41 +223,42 @@ class Manipulate(object):
         try:
             step = int(step)
         except ValueError:
-            self.app["statusbar"].message(
+            self._app["statusbar"].message(
                 "Argument for slider must be of type integer", "error")
             return
         for slider in self.sliders.values():
             if slider.is_focus():
                 val = slider.get_value()
-                step = self.app["eventhandler"].num_receive() * step
+                step = self._app["eventhandler"].num_receive() * step
                 val += step
                 slider.set_value(val)
 
-    def button_clicked(self, button, accept=False):
+    def _on_button_clicked(self, button, accept=False):
+        self.finish(accept)
+
+    def finish(self, accept=False):
         """Finish manipulate mode.
 
         Args:
-            button: Gtk.Button that was clicked.
             accept: If True apply changes to image file. Else discard them.
         """
         # If manipulate is not toggled, this makes no sense
-        if not self.scrolled_win.is_visible():
-            self.app["statusbar"].message(
+        if not self.is_visible():
+            self._app["statusbar"].message(
                 "Finishing manipulate only makes sense in manipulate", "error")
             return
         # Apply changes
         if accept:
-            self.manipulate_image(True)
+            self._apply(True)
         # Reset all the manipulations
-        self.manipulations = {"bri": 1, "con": 1, "sha": 1}
+        self._manipulations = {"bri": 1, "con": 1, "sha": 1}
         for slider in self.sliders.values():
             slider.set_value(0)
         # Show the original image
-        self.app["image"].fit_image = 1
-        self.app["image"].load_image()
+        self._app["image"].fit_image = 1
+        self._app["image"].load()
         # Done
         self.toggle()
-        self.app["statusbar"].update_info()
 
     def cmd_edit(self, manipulation, num="0"):
         """Run the specified manipulation.
@@ -438,12 +269,13 @@ class Manipulate(object):
         """
         # Catch buggy numbers
         if not num.isdigit():
-            self.app["statusbar"].message(
+            self._app["statusbar"].message(
                 "Argument must be of type integer", "error")
             return
-        if not self.scrolled_win.is_visible():
-            if not self.app.paths:
-                self.app["statusbar"].message("No image to manipulate", "error")
+        if not self.is_visible():
+            if not self._app.get_paths():
+                self._app["statusbar"].message(
+                    "No image to manipulate", "error")
                 return
             else:
                 self.toggle()

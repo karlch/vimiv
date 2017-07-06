@@ -17,7 +17,7 @@ disable=no-self-use,
         suppressed-message,
         too-many-return-statements,
         unused-argument,
-        protected-access,
+        arguments-differ,
 
 [BASIC]
 function-rgx=[a-z_][a-z0-9_]{2,50}$

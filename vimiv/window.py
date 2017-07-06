@@ -10,9 +10,9 @@ class Window(Gtk.ApplicationWindow):
     Additionally handles events like fullscreen and resize.
 
     Attributes:
-        app: The main vimiv application to interact with.
-        is_fullscreen: If True, the window is displayed fullscreen.
         winsize: The windowsize as tuple.
+
+        _app: The main vimiv application to interact with.
     """
 
     def __init__(self, app, settings):
@@ -22,19 +22,18 @@ class Window(Gtk.ApplicationWindow):
             app: The main vimiv application to interact with.
             settings: Settings from configfiles to use.
         """
-        Gtk.ApplicationWindow.__init__(self)
+        super(Window, self).__init__()
 
-        self.app = app
-        self.is_fullscreen = False
+        self._app = app
 
         # Configurations from vimivrc
         general = settings["GENERAL"]
         start_fullscreen = general["start_fullscreen"]
 
-        self.connect("destroy", self.app.quit_wrapper)
-        self.connect("button_press_event", self.app["eventhandler"].clicked,
+        self.connect("destroy", self._app.quit_wrapper)
+        self.connect("button_press_event", self._app["eventhandler"].on_click,
                      "IMAGE")
-        self.connect("touch-event", self.app["eventhandler"].touched)
+        self.connect("touch-event", self._app["eventhandler"].on_touch)
         self.add_events(Gdk.EventMask.KEY_PRESS_MASK |
                         Gdk.EventMask.POINTER_MOTION_MASK)
 
@@ -47,85 +46,26 @@ class Window(Gtk.ApplicationWindow):
             self.winsize = (800, 600)
         self.resize(self.winsize[0], self.winsize[1])
 
-        # Fullscreen
-        if Gtk.get_minor_version() > 10:
-            self.connect_data("window-state-event",
-                              Window.on_window_state_change, self)
-        else:
-            self.connect_object("window-state-event",
-                                Window.on_window_state_change, self)
         if start_fullscreen:
             self.toggle_fullscreen()
 
         # Auto resize
-        self.connect("check-resize", self.auto_resize)
+        self.connect("check-resize", self._auto_resize)
         # Focus changes with mouse
-        for widget in [self.app["library"].treeview,
-                       self.app["thumbnail"].iconview,
-                       self.app["manipulate"].sliders["bri"],
-                       self.app["manipulate"].sliders["con"],
-                       self.app["manipulate"].sliders["sha"],
-                       self.app["image"].image]:
-            widget.connect("button-release-event", self.focus_on_mouse_click)
-
-    def on_window_state_change(self, event, window=None):
-        """Handle fullscreen/unfullscreen correctly.
-
-        Args:
-            event: Gtk event that called the function.
-            window: Gtk.Window to operate on.
-        """
-        if window:
-            window.is_fullscreen = bool(Gdk.WindowState.FULLSCREEN
-                                        & event.new_window_state)
-        else:
-            self.is_fullscreen = bool(Gdk.WindowState.FULLSCREEN
-                                      & event.new_window_state)
+        for widget in [self._app["library"],
+                       self._app["thumbnail"],
+                       self._app["manipulate"].sliders["bri"],
+                       self._app["manipulate"].sliders["con"],
+                       self._app["manipulate"].sliders["sha"],
+                       self._app["image"]]:
+            widget.connect("button-release-event", self._on_click)
 
     def toggle_fullscreen(self):
         """Toggle fullscreen."""
-        if self.is_fullscreen:
+        if self.get_window().get_state() & Gdk.WindowState.FULLSCREEN:
             self.unfullscreen()
         else:
             self.fullscreen()
-
-    def auto_resize(self, window):
-        """Automatically resize widgets when window is resized.
-
-        Args:
-            window: The window which emitted the resize event.
-        """
-        if self.get_size() != self.winsize:
-            self.winsize = self.get_size()
-            if self.app.paths:
-                if self.app["thumbnail"].toggled:
-                    self.app["thumbnail"].calculate_columns()
-                if self.app["image"].fit_image:
-                    self.app["image"].zoom_to(0, self.app["image"].fit_image)
-
-    def focus_on_mouse_click(self, widget, event_button):
-        """Update statusbar with the currently focused widget after mouse click.
-
-        Args:
-            widget: The widget that emitted the signal.
-            event_button: Mouse button that was pressed.
-        """
-        self.app["statusbar"].update_info()
-
-    def scroll(self, direction):
-        """Scroll the correct object.
-
-        Args:
-            direction: Scroll direction to emit.
-        """
-        if direction not in "hjklHJKL":
-            self.app["statusbar"].message(
-                "Invalid scroll direction " + direction, "error")
-        elif self.app["thumbnail"].toggled:
-            self.app["thumbnail"].move_direction(direction)
-        else:
-            self.app["image"].scroll(direction)
-        return True  # Deactivates default bindings (here for Arrows)
 
     def zoom(self, zoom_in=True, step=1):
         """Zoom image or thumbnails.
@@ -133,7 +73,26 @@ class Window(Gtk.ApplicationWindow):
         Args:
             zoom_in: If True, zoom in.
         """
-        if self.app["thumbnail"].toggled:
-            self.app["thumbnail"].zoom(zoom_in)
+        if self._app["thumbnail"].toggled:
+            self._app["thumbnail"].zoom(zoom_in)
         else:
-            self.app["image"].zoom_delta(zoom_in=zoom_in, step=step)
+            self._app["image"].zoom_delta(zoom_in=zoom_in, step=step)
+
+    def _auto_resize(self, window):
+        """Automatically resize widgets when window is resized.
+
+        Args:
+            window: The window which emitted the resize event.
+        """
+        if self.get_size() != self.winsize:
+            self.winsize = self.get_size()
+            self._app.emit("widget-layout-changed", self)
+
+    def _on_click(self, widget, event_button):
+        """Update statusbar with the currently focused widget after mouse click.
+
+        Args:
+            widget: The widget that emitted the signal.
+            event_button: Mouse button that was pressed.
+        """
+        self._app["statusbar"].update_info()

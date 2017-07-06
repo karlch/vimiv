@@ -24,33 +24,33 @@ class Commands(object):
         self.app["tag_handler"] = TagHandler(app)
         # Add all commands
         self.add_command("accept_changes",
-                         self.app["manipulate"].button_clicked,
-                         default_args=[None, True])
-        self.add_command("alias", self.app["commandline"].alias,
+                         self.app["manipulate"].finish,
+                         default_args=[True])
+        self.add_command("alias", self.app["commandline"].add_alias,
                          positional_args=["name", "command"])
-        self.add_command("autorotate", self.app["manipulate"].rotate_auto)
-        self.add_command("center", self.app["image"].center_window)
+        self.add_command("autorotate", self.app["transform"].rotate_auto)
+        self.add_command("center", self.app["main_window"].center_window)
         self.add_command("copy_basename", self.app["fileextras"].copy_name,
                          default_args=[False])
         self.add_command("copy_abspath", self.app["fileextras"].copy_name,
                          default_args=[True])
-        self.add_command("delete", self.app["manipulate"].delete)
-        self.add_command("undelete", self.app["manipulate"].undelete,
+        self.add_command("delete", self.app["transform"].delete)
+        self.add_command("undelete", self.app["transform"].undelete,
                          positional_args=["basename"])
         self.add_command("discard_changes",
-                         self.app["manipulate"].button_clicked,
-                         default_args=[None, False])
+                         self.app["manipulate"].finish,
+                         default_args=[False])
         self.add_command("first", self.app["image"].move_pos,
                          default_args=[False], supports_count=True)
         self.add_command("first_lib", self.app["library"].move_pos,
                          default_args=[False], supports_count=True)
         self.add_command("fit", self.app["image"].zoom_to,
-                         default_args=[0])
+                         default_args=[0, "fit"])
         self.add_command("fit_horiz", self.app["image"].zoom_to,
-                         default_args=[0, 2])
+                         default_args=[0, "horizontal"])
         self.add_command("fit_vert", self.app["image"].zoom_to,
-                         default_args=[0, 3])
-        self.add_command("flip", self.app["manipulate"].flip,
+                         default_args=[0, "vertical"])
+        self.add_command("flip", self.app["transform"].flip,
                          positional_args=["direction"])
         self.add_command("format", self.app["fileextras"].format_files,
                          positional_args=["formatstring"])
@@ -89,7 +89,7 @@ class Commands(object):
                          default_args=[True])
         self.add_command("reload_lib", self.app["library"].reload,
                          default_args=["."])
-        self.add_command("rotate", self.app["manipulate"].rotate,
+        self.add_command("rotate", self.app["transform"].rotate,
                          positional_args=["value"], supports_count=True)
         self.add_command("set animation!", self.app["image"].toggle_animation)
         self.add_command("set brightness", self.app["manipulate"].cmd_edit,
@@ -138,7 +138,7 @@ class Commands(object):
         # Hidden commands
         self.add_command("clear_status", self.app["statusbar"].clear_status,
                          is_hidden=True)
-        self.add_command("command", self.app["commandline"].focus,
+        self.add_command("command", self.app["commandline"].enter,
                          optional_args=["text"], is_hidden=True)
         self.add_command("complete", self.app["completions"].complete,
                          default_args=[False], is_hidden=True)
@@ -152,17 +152,20 @@ class Commands(object):
                          default_args=[True], is_hidden=True)
         self.add_command("history_up", self.app["commandline"].history_search,
                          default_args=[False], is_hidden=True)
-        self.add_command("scroll", self.app["window"].scroll,
+        self.add_command("scroll", self.app["main_window"].scroll,
                          positional_args=["direction"], supports_count=True,
                          is_hidden=True)
         self.add_command("scroll_lib", self.app["library"].scroll,
                          positional_args=["direction"], supports_count=True,
                          is_hidden=True)
-        self.add_command("search", self.app["commandline"].cmd_search,
+        self.add_command("search", self.app["commandline"].enter_search,
                          is_hidden=True)
-        self.add_command("search_next", self.app["commandline"].search_move,
-                         supports_count=True, is_hidden=True)
-        self.add_command("search_prev", self.app["commandline"].search_move,
+        self.add_command("search_next",
+                         self.app["commandline"].search_move,
+                         default_args=[True], supports_count=True,
+                         is_hidden=True)
+        self.add_command("search_prev",
+                         self.app["commandline"].search_move,
                          default_args=[False], supports_count=True,
                          is_hidden=True)
         self.add_command("slider", self.app["manipulate"].change_slider,

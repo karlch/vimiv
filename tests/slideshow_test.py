@@ -16,8 +16,8 @@ def refresh_gui(vimiv=None):
     Args:
         vimiv: Vimiv class to receive slideshow index.
     """
-    current_pos = vimiv.index
-    while current_pos == vimiv.index:
+    current_pos = vimiv.get_index()
+    while current_pos == vimiv.get_index():
         Gtk.main_iteration_do(False)
 
 
@@ -41,64 +41,69 @@ class SlideshowTest(VimivTestCase):
         self.slideshow.toggle()
         self.assertFalse(self.slideshow.running)
         self.vimiv["thumbnail"].toggled = False
-        paths_before = self.vimiv.paths
-        self.vimiv.paths = []
+        paths_before = self.vimiv.get_paths()
+        self.vimiv.populate([])
         self.slideshow.toggle()
         self.assertFalse(self.slideshow.running)
         self.vimiv.paths = paths_before
 
     def test_set_delay(self):
         """Set slideshow delay."""
-        self.assertEqual(self.slideshow.delay, 2.0)
+        self.assertEqual(self.slideshow.get_delay(), 2.0)
         self.slideshow.set_delay("3.0")
-        self.assertEqual(self.slideshow.delay, 3.0)
+        self.assertEqual(self.slideshow.get_delay(), 3.0)
         self.slideshow.set_delay(None, "-0.2")
-        self.assertEqual(self.slideshow.delay, 2.8)
+        self.assertEqual(self.slideshow.get_delay(), 2.8)
         self.slideshow.set_delay(None, "+0.4")
-        self.assertAlmostEqual(self.slideshow.delay, 3.2)
+        self.assertAlmostEqual(self.slideshow.get_delay(), 3.2)
         # Shrink with num_str
         self.vimiv["eventhandler"].num_str = "2"
         self.slideshow.set_delay(None, "-0.2")
-        self.assertAlmostEqual(self.slideshow.delay, 2.8)
+        self.assertAlmostEqual(self.slideshow.get_delay(), 2.8)
         # Set via toggle
         self.vimiv["eventhandler"].num_str = "2"
         self.slideshow.toggle()
-        self.assertEqual(self.slideshow.delay, 2.0)
+        self.assertEqual(self.slideshow.get_delay(), 2.0)
         # Set to a too small value
         self.slideshow.set_delay("0.1")
-        self.assertEqual(self.slideshow.delay, 0.5)
+        self.assertEqual(self.slideshow.get_delay(), 0.5)
         ##################
         #  Command line  #
         ##################
         # Increase by value
         self.run_command("slideshow_delay 03")
-        self.assertEqual(self.slideshow.delay, 0.8)
+        self.assertEqual(self.slideshow.get_delay(), 0.8)
         # Fail because of invalid argument
         self.run_command("slideshow_delay value")
         self.check_statusbar("ERROR: Argument for delay must be of type float")
         # Set to default
         self.run_command("set slideshow_delay")
-        self.assertEqual(self.slideshow.delay, self.slideshow.default_delay)
+        self.assertEqual(self.slideshow.get_delay(),
+                         self.slideshow.get_default_delay())
         # Fail because of invalid argument
         self.run_command("set slideshow_delay value")
         self.check_statusbar("ERROR: Argument for delay must be of type float")
 
     def test_running(self):
         """Check if slideshow runs correctly."""
-        self.assertEqual(self.vimiv.index, 0)
+        self.assertEqual(self.vimiv.get_index(), 1)
         self.slideshow.toggle()
         # Set delay when running
         self.slideshow.set_delay("0.5")
-        self.assertEqual(self.slideshow.delay, 0.5)
-        for i in range(1, 3):
+        for i in range(2, 4):
             refresh_gui(self.vimiv)
-            self.assertEqual(self.vimiv.index, i)
+            self.assertEqual(self.vimiv.get_index(), i)
         refresh_gui(self.vimiv)
+
+    def test_get_formatted_delay(self):
+        """Read out the formatted delay from the slideshow."""
+        output = self.slideshow.get_formatted_delay()
+        self.assertIn("2.0s", output)
 
     def tearDown(self):
         if self.slideshow.running:
             self.slideshow.toggle()
-        self.slideshow.delay = 2.0
+        self.slideshow.set_delay(2.0)
 
 
 if __name__ == "__main__":

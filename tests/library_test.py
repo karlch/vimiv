@@ -2,6 +2,7 @@
 """Test library.py for vimiv's test suite."""
 
 import os
+import tempfile
 from unittest import main
 
 from gi import require_version
@@ -19,12 +20,15 @@ class LibraryTest(VimivTestCase):
         cls.init_test(cls, ["vimiv/testimages/"])
         cls.lib = cls.vimiv["library"]
 
+    def setUp(self):
+        self.directory = os.getcwd()
+
     def test_toggle(self):
         """Toggle the library."""
         self.lib.toggle()
-        self.assertFalse(self.lib.treeview.is_focus())
+        self.assertFalse(self.lib.is_focus())
         self.lib.toggle()
-        self.assertTrue(self.lib.treeview.is_focus())
+        self.assertTrue(self.lib.is_focus())
 
     def test_toggle_with_slideshow(self):
         """Toggle the library with running slideshow."""
@@ -32,7 +36,7 @@ class LibraryTest(VimivTestCase):
         self.vimiv["slideshow"].toggle()
         self.lib.toggle()
         self.assertFalse(self.vimiv["slideshow"].running)
-        self.assertTrue(self.lib.treeview.is_focus())
+        self.assertTrue(self.lib.is_focus())
 
     def test_file_select(self):
         """Select file in library."""
@@ -42,21 +46,21 @@ class LibraryTest(VimivTestCase):
         self.assertEqual(self.lib.files, ["symlink with spaces .jpg"])
         self.lib.move_up()
         # Library still focused
-        self.assertTrue(self.lib.treeview.is_focus())
+        self.assertTrue(self.lib.is_focus())
         # Image by position closing library
         path = Gtk.TreePath([self.lib.files.index("arch_001.jpg")])
         self.lib.file_select(None, path, None, True)
         expected_images = ["arch-logo.png", "arch_001.jpg", "symlink_to_image",
                            "vimiv.bmp", "vimiv.svg", "vimiv.tiff"]
         expected_images = [os.path.abspath(image) for image in expected_images]
-        self.assertEqual(self.vimiv.paths, expected_images)
-        open_image = self.vimiv.paths[self.vimiv.index]
+        self.assertEqual(self.vimiv.get_paths(), expected_images)
+        open_image = self.vimiv.get_path()
         expected_image = os.path.abspath("arch_001.jpg")
         self.assertEqual(expected_image, open_image)
         # Library closed, image has focus
-        self.assertFalse(self.lib.treeview.is_focus())
+        self.assertFalse(self.lib.is_focus())
         self.assertFalse(self.lib.grid.is_focus())
-        self.assertTrue(self.vimiv["image"].scrolled_win.is_focus())
+        self.assertTrue(self.vimiv["main_window"].is_focus())
 
     def test_move_pos(self):
         """Move position in library."""
@@ -83,32 +87,32 @@ class LibraryTest(VimivTestCase):
         # Set to 200
         self.lib.resize(None, True, "200")
         self.assertEqual(200,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Grow
         self.lib.resize(True)
         self.assertEqual(220,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         self.lib.resize(True, False, "30")
         self.assertEqual(250,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Shrink
         self.lib.resize(False, False, "50")
         self.assertEqual(200,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Grow via num_str
         self.vimiv["eventhandler"].num_str = "2"
         self.lib.resize(True)
         self.assertEqual(240,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         self.vimiv["eventhandler"].num_str = "2"
         self.lib.resize(False)
         self.assertEqual(200,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         self.assertFalse(self.vimiv["eventhandler"].num_str)
         # Too small
         self.lib.resize(False, False, "500")
         self.assertEqual(100,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Throw errors
         self.lib.resize(False, False, "hi")
         self.check_statusbar("ERROR: Library width must be an integer")
@@ -120,18 +124,18 @@ class LibraryTest(VimivTestCase):
         # Default 20
         self.run_command("grow_lib")
         self.assertEqual(120,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Value passed
         self.run_command("grow_lib 30")
         self.assertEqual(150,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+                         self.lib.get_size_request()[0])
         # Fail by passing an invalid value
         self.run_command("grow_lib value")
         self.check_statusbar("ERROR: Library width must be an integer")
         # Set width to default
         self.run_command("set library_width")
-        self.assertEqual(self.lib.default_width,
-                         self.lib.scrollable_treeview.get_size_request()[0])
+        self.assertEqual(self.vimiv.settings["LIBRARY"]["library_width"],
+                         self.lib.get_size_request()[0])
         # Fail by passing an invalid value
         self.run_command("set library_width value")
         self.check_statusbar("ERROR: Library width must be an integer")
@@ -172,14 +176,14 @@ class LibraryTest(VimivTestCase):
     def test_display_symlink(self):
         """Show real path of symbolic links in library as well."""
         index = self.lib.files.index("symlink_to_image")
-        model = self.lib.treeview.get_model()
+        model = self.lib.get_model()
         markup_string = model[index][1]
         expected_string = "symlink_to_image  →  " \
             + os.path.realpath("symlink_to_image")
         self.assertEqual(markup_string, expected_string)
         # Also after a search
-        self.vimiv["commandline"].cmd_search()
-        self.vimiv["commandline"].reset_text()
+        self.vimiv["commandline"].enter_search()
+        self.vimiv["commandline"].set_text("")
         markup_string = model[index][1]
         expected_string = "symlink_to_image  →  " \
             + os.path.realpath("symlink_to_image")
@@ -198,19 +202,41 @@ class LibraryTest(VimivTestCase):
 
     def test_move_up(self):
         """Move up into directory."""
-        before = os.getcwd()
-        expected = "/".join(before.split("/")[:-2])
+        expected = "/".join(os.getcwd().split("/")[:-2])
         self.vimiv["eventhandler"].num_str = "2"
         self.lib.move_up()
         self.assertEqual(os.getcwd(), expected)
-        self.lib.move_up(before)
-        self.assertEqual(os.getcwd(), before)
+
+    def test_empty_directory(self):
+        """Move in and out of an empty directory."""
+        tmpdir = tempfile.TemporaryDirectory(prefix="vimiv-")
+        self.lib.move_up(tmpdir.name)
+        self.assertEqual(os.getcwd(), tmpdir.name)
+        self.lib.scroll("h")
+        self.assertEqual(os.getcwd(), os.path.dirname(tmpdir.name))
+        tmpdir.cleanup()
+
+    def test_delete_undelete_library(self):
+        """Delete and undelete a file from the library."""
+        # Delete
+        self.lib.move_pos(defined_pos=5)
+        path = os.path.abspath(self.vimiv.get_pos(True))
+        self.assertTrue(os.path.exists(path))
+        self.vimiv["transform"].delete()
+        self.assertFalse(os.path.exists(path))
+        # Undelete
+        self.vimiv["transform"].undelete(os.path.basename(path))
+        self.assertTrue(os.path.exists(path))
+        # Test index here so undelete is always called
+        self.assertEqual(self.vimiv.get_pos(), 4)
 
     def tearDown(self):
         # Reopen and back to beginning
-        if not self.lib.treeview.is_visible():
+        self.lib.move_up(self.directory)
+        if not self.lib.is_visible():
             self.lib.toggle()
-        self.lib.treeview.set_cursor([Gtk.TreePath(0)], None, False)
+        self.lib.set_cursor([Gtk.TreePath(0)], None, False)
+        self.assertEqual(os.getcwd(), self.directory)
 
 
 if __name__ == "__main__":

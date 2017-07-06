@@ -37,13 +37,14 @@ class FileActionsTest(VimivTestCase):
         self.vimiv["fileextras"].format_files("formatted_")
         files = [fil for fil in os.listdir() if "formatted_" in fil]
         files = sorted(files)
-        expected_files = ["formatted_001.jpg", "formatted_002",
-                          "formatted_003.bmp", "formatted_004.svg",
-                          "formatted_005.tiff", "formatted_006.png"]
-        self.assertEqual(files, expected_files)
+        expected_files = ["formatted_001.png", "formatted_002.jpg",
+                          "formatted_003", "formatted_004.bmp",
+                          "formatted_005.svg", "formatted_006.tiff"]
+        for fil in expected_files:
+            self.assertIn(fil, files)
         os.chdir("..")
         # Should not work without a path
-        self.vimiv.paths = []
+        self.vimiv.populate([])
         self.vimiv["fileextras"].format_files("formatted_")
         self.check_statusbar("INFO: No files in path")
         # Should not work in library
@@ -53,18 +54,25 @@ class FileActionsTest(VimivTestCase):
 
     def test_format_files_with_exif(self):
         """Format files according to a formatstring with EXIF data."""
-        # File contains exif data
-        shutil.copytree("testimages/", "testimages_to_format/")
+        os.mkdir("testimages_to_format")
+        shutil.copyfile("testimages/arch_001.jpg",
+                        "testimages_to_format/arch_001.jpg")
         os.chdir("testimages_to_format")
         self.vimiv.quit()
         self.init_test(["arch_001.jpg"])
-        self.vimiv.paths = [os.path.abspath("arch_001.jpg")]
         self.vimiv["fileextras"].format_files("formatted_%Y_")
         self.assertIn("formatted_2016_001.jpg", os.listdir())
-        # File does not contain exif data
-        self.vimiv.paths = [os.path.abspath("arch-logo.png")]
+
+    def test_fail_format_files_with_exif(self):
+        """Run format with exif on a file that has no exif data."""
+        os.mkdir("testimages_to_format")
+        shutil.copyfile("testimages/arch-logo.png",
+                        "testimages_to_format/arch-logo.png")
+        os.chdir("testimages_to_format")
+        self.vimiv.quit()
+        self.init_test(["arch-logo.png"])
         self.vimiv["fileextras"].format_files("formatted_%Y_")
-        message = self.vimiv["statusbar"].left_label.get_text()
+        message = self.vimiv["statusbar"].get_message()
         self.assertIn("No exif data for", message)
 
     def test_clipboard(self):

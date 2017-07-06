@@ -80,9 +80,10 @@ class TrashManager():
         """
         path = os.path.join(self.files_directory, os.path.basename(filename))
         # Ensure that we do not overwrite any files
+        extension = 2
+        original_path = path
         while os.path.exists(path):
-            extension = 2
-            path += "." + str(extension)
+            path = original_path + "." + str(extension)
             extension += 1
         return path
 

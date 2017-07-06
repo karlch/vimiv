@@ -4,6 +4,9 @@
 import os
 from unittest import main, skipUnless
 
+from gi import require_version
+require_version('Gtk', '3.0')
+from gi.repository import Gdk
 from vimiv_testcase import VimivTestCase, refresh_gui
 
 
@@ -17,23 +20,21 @@ class WindowTest(VimivTestCase):
     def test_fullscreen(self):
         """Toggle fullscreen."""
         # Start without fullscreen
-        self.assertFalse(self.vimiv["window"].is_fullscreen)
+        self.assertFalse(self._is_fullscreen())
         # Fullscreen
         self.vimiv["window"].toggle_fullscreen()
         refresh_gui(0.05)
         # Still not reliable
-        # self.assertTrue(self.vimiv["window"].is_fullscreen)
+        # self.assertTrue(self._is_fullscreen())
         # Unfullscreen
         self.vimiv["window"].toggle_fullscreen()
         refresh_gui(0.05)
         # self.assertFalse(self.vimiv["window"].is_fullscreen)
         self.vimiv["window"].fullscreen()
 
-    def test_scroll(self):
-        """Scroll image or thumbnail."""
-        # Error message
-        self.vimiv["window"].scroll("m")
-        self.check_statusbar("ERROR: Invalid scroll direction m")
+    def _is_fullscreen(self):
+        state = self.vimiv["window"].get_window().get_state()
+        return True if state & Gdk.WindowState.FULLSCREEN else False
 
     @skipUnless(os.getenv("DISPLAY") == ":42", "Must run in Xvfb")
     def test_check_resize(self):

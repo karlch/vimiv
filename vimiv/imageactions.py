@@ -84,6 +84,8 @@ def autorotate(filelist, method="auto"):
     elif method == "PIL":
         for path in filelist:
             with Image.open(path) as im:
+                # This will be removed once PIL is deprecated
+                # pylint: disable=protected-access
                 exif = im._getexif()
                 orientation_key = 274  # cf ExifTags
                 rotated = True
