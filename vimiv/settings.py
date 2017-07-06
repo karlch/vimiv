@@ -9,6 +9,9 @@ from gi.repository import GLib
 class WrongSettingValue(Exception):
     """Raised when a setting does not have the correct format."""
 
+class SettingNotFoundError(Exception):
+    """Raised when a setting does not exist."""
+
 
 class Setting(object):
     """Stores a setting and its attributes.
@@ -147,6 +150,62 @@ class MarkupSetting(Setting):
             error = 'Markup must end with ">"'
             raise WrongSettingValue(error)
         self._value = GLib.markup_escape_text(new_value)
+
+class SettingStorage(object):
+    """Stores all settings for vimiv.
+
+    Settings can be accessed via SettingStorage["setting_name"] and changed by
+    calling SettingStorage.override("setting_name", new_value).
+
+    Attributes:
+        _settings: List of all Setting objects. Should not be accessed directly.
+    """
+
+    def __init__(self):
+        self._settings = [
+            Setting("start_fullscreen", False),
+            Setting("start_slideshow", False),
+            FloatSetting("slideshow_delay", 2.0),
+            Setting("shuffle", False),
+            Setting("display_bar", True),
+            ThumbnailSizeSetting("default_thumbsize", (128, 128)),
+            GeometrySetting("geometry", (800, 600)),
+            Setting("search_case_sensitive", True),
+            Setting("incsearch", True),
+            Setting("recursive", False),
+            Setting("rescale_svg", True),
+            FloatSetting("overzoom", 1.0),
+            Setting("copy_to_primary", False),
+            IntSetting("commandline_padding", 6),
+            IntSetting("thumb_padding", 10),
+            IntSetting("completion_height", 200),
+            Setting("autoplay_gifs", True),
+            Setting("show_library", False),
+            IntSetting("library_width", 300),
+            Setting("expand_lib", True),
+            IntSetting("border_width", 0),
+            MarkupSetting("markup", '<span foreground="#875FFF">'),
+            Setting("show_hidden", False),
+            DirectorySetting("desktop_start_dir", os.path.expanduser("~")),
+            IntSetting("file_check_amount", 30),
+            Setting("tilde_in_statusbar", True)]
+
+    def override(self, name, new_value):
+        """Override a setting in the storage.
+
+        Args:
+            name: Name of the setting to override.
+            new_value: Value to override the setting with.
+        """
+        setting = self[name]
+        setting.override(new_value)
+
+    def __getitem__(self, name):
+        """Receive a setting via its name."""
+        for setting in self._settings:
+            if setting.name == name:
+                return setting
+        raise SettingNotFoundError
 
 
 def get_boolean(value):

@@ -204,6 +204,57 @@ class MarkupSettingtest(TestCase):
                           "hi>")
 
 
+class SettingStorageTest(TestCase):
+    """Test the SettingStorage class."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.storage = settings.SettingStorage()
+
+    def test_default_setting(self):
+        """Test if defaults are set correctly in storage."""
+        defaults = {"start_fullscreen": False,
+                    "start_slideshow": False,
+                    "slideshow_delay": 2,
+                    "shuffle": False,
+                    "display_bar": True,
+                    "default_thumbsize": (128, 128),
+                    "geometry": (800, 600),
+                    "search_case_sensitive": True,
+                    "incsearch": True,
+                    "recursive": False,
+                    "rescale_svg": True,
+                    "overzoom": 1,
+                    "copy_to_primary": False,
+                    "commandline_padding": 6,
+                    "thumb_padding": 10,
+                    "completion_height": 200,
+                    "autoplay_gifs": True,
+                    "show_library": False,
+                    "library_width": 300,
+                    "expand_lib": True,
+                    "border_width": 0,
+                    "markup": '<span foreground="#875FFF">',
+                    "show_hidden": False,
+                    "desktop_start_dir": os.path.expanduser("~"),
+                    "file_check_amount": 30,
+                    "tilde_in_statusbar": True}
+        for setting in defaults:
+            storage_setting = self.storage[setting]
+            self.assertEqual(storage_setting.get_value(), defaults[setting])
+
+    def test_override_setting(self):
+        """Override setting directly in storage."""
+        self.storage.override("autoplay_gifs", "false")
+        self.assertEqual(self.storage["autoplay_gifs"].get_value(), False)
+        self.storage.override("autoplay_gifs", "true")
+        self.assertEqual(self.storage["autoplay_gifs"].get_value(), True)
+
+    def test_access_unavailable_setting_in_storage(self):
+        """Try to access a setting that does not exist in storage."""
+        self.assertRaises(settings.SettingNotFoundError,
+                          self.storage.__getitem__, "hello")
+
 
 if __name__ == "__main__":
     main()
