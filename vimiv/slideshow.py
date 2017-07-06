@@ -3,6 +3,7 @@
 
 from gi.repository import GLib, GObject
 from vimiv.helpers import get_float_from_str
+from vimiv.settings import settings
 
 
 class Slideshow(GObject.Object):
@@ -19,19 +20,17 @@ class Slideshow(GObject.Object):
         _timer_id: ID of the currently running GLib.Timeout.
     """
 
-    def __init__(self, app, settings):
+    def __init__(self, app):
         """Create the necessary objects and settings.
 
         Args:
             app: The main vimiv application to interact with.
-            settings: Settings from configfiles to use.
         """
         super(Slideshow, self).__init__()
         self._app = app
-        general = settings["GENERAL"]
 
-        self._default_delay = general["slideshow_delay"]
-        self._delay = general["slideshow_delay"]
+        self._default_delay = settings["slideshow_delay"].get_value()
+        self._delay = settings["slideshow_delay"].get_value()
         self._start_index = 0
         self.running = False
         self._timer_id = GLib.Timeout

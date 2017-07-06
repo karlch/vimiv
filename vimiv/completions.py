@@ -9,6 +9,7 @@ from string import digits
 from gi.repository import Gtk
 from vimiv.fileactions import is_image
 from vimiv.helpers import listdir_wrapper, read_info_from_man
+from vimiv.settings import settings
 
 
 class Completion(Gtk.TreeView):
@@ -50,7 +51,7 @@ class Completion(Gtk.TreeView):
         self.set_enable_search(False)
         self.set_headers_visible(False)
         self.set_activate_on_single_click(True)
-        padding = self._app.settings["GENERAL"]["commandline_padding"]
+        padding = settings["commandline_padding"].get_value()
         renderer = Gtk.CellRendererText()
         renderer.set_padding(padding, 0)
         command_column = Gtk.TreeViewColumn("Command", renderer, markup=0)
@@ -62,7 +63,7 @@ class Completion(Gtk.TreeView):
         # Scrolled window for the completion info
         self.info = Gtk.ScrolledWindow()
         self.info.set_size_request(
-            10, self._app.settings["GENERAL"]["completion_height"])
+            10, settings["completion_height"].get_value())
         self.info.add(self)
         # Defaults
         self._tab_position = 0

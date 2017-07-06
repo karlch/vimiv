@@ -3,6 +3,8 @@
 
 from gi.repository import Gdk, Gtk
 
+from vimiv.settings import settings
+
 
 class Window(Gtk.ApplicationWindow):
     """"Vimiv Window containing the general structure.
@@ -15,20 +17,18 @@ class Window(Gtk.ApplicationWindow):
         _app: The main vimiv application to interact with.
     """
 
-    def __init__(self, app, settings):
+    def __init__(self, app):
         """Create the necessary objects and settings.
 
         Args:
             app: The main vimiv application to interact with.
-            settings: Settings from configfiles to use.
         """
         super(Window, self).__init__()
 
         self._app = app
 
         # Configurations from vimivrc
-        general = settings["GENERAL"]
-        start_fullscreen = general["start_fullscreen"]
+        start_fullscreen = settings["start_fullscreen"].get_value()
 
         self.connect("destroy", self._app.quit_wrapper)
         self.connect("button_press_event", self._app["eventhandler"].on_click,
@@ -38,12 +38,7 @@ class Window(Gtk.ApplicationWindow):
                         Gdk.EventMask.POINTER_MOTION_MASK)
 
         # Set initial window size
-        try:
-            winsize = general["geometry"].split("x")
-            self.winsize = (int(winsize[0]), int(winsize[1]))
-        # Not an integer, no "x" in string
-        except (ValueError, IndexError):
-            self.winsize = (800, 600)
+        self.winsize = settings["geometry"].get_value()
         self.resize(self.winsize[0], self.winsize[1])
 
         if start_fullscreen:

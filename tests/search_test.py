@@ -5,15 +5,17 @@ from unittest import main, TestCase
 
 from vimiv.commandline import Search
 
+from vimiv.settings import settings
+
 
 class SearchTest(TestCase):
     """Search Tests."""
 
     @classmethod
     def setUpClass(cls):
-        settings = {"GENERAL": {"incsearch": False,
-                                "search_case_sensitive": True}}
-        cls.search = Search(None, settings)
+        settings.override("incsearch", "false")
+        settings.override("search_case_sensitive", "true")
+        cls.search = Search(None)
         cls.filelist = []
 
     def setUp(self):

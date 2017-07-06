@@ -45,10 +45,10 @@ class AppTest(VimivTestCase):
         options.insert_value("geometry", string_geom)
         returncode = self.vimiv.do_handle_local_options(options)
         self.assertEqual(returncode, -1)
-        self.assertTrue(self.vimiv.settings["GENERAL"]["shuffle"])
-        self.assertFalse(self.vimiv.settings["GENERAL"]["start_slideshow"])
-        self.assertEqual(self.vimiv.settings["GENERAL"]["slideshow_delay"], 2.2)
-        self.assertEqual(self.vimiv.settings["GENERAL"]["geometry"], "400x400")
+        self.assertTrue(self.settings["shuffle"].get_value())
+        self.assertFalse(self.settings["start_slideshow"].get_value())
+        self.assertAlmostEqual(self.settings["slideshow_delay"].get_value(), 2.2)
+        self.assertEqual(self.settings["geometry"].get_value(), (400, 400))
 
     def test_temp_basedir(self):
         """Using a temporary basedir."""

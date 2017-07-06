@@ -36,6 +36,7 @@ class Setting(object):
         self.name = name
         self._default_value = default_value
         self._value = default_value
+        self._n = 0
 
     def get_default(self):
         return self._default_value
@@ -45,6 +46,9 @@ class Setting(object):
 
     def is_default(self):
         return self._value == self._default_value
+
+    def set_to_default(self):
+        self._value = self._default_value
 
     def override(self, new_value):
         """Override the setting with a new boolean value.
@@ -160,6 +164,7 @@ class SettingStorage(object):
 
     Attributes:
         _settings: List of all Setting objects. Should not be accessed directly.
+        _n: Integer for iterator.
     """
 
     def __init__(self):
@@ -190,6 +195,7 @@ class SettingStorage(object):
             DirectorySetting("desktop_start_dir", os.path.expanduser("~")),
             IntSetting("file_check_amount", 30),
             Setting("tilde_in_statusbar", True)]
+        self._n = 0
 
     def override(self, name, new_value):
         """Override a setting in the storage.
@@ -201,12 +207,29 @@ class SettingStorage(object):
         setting = self[name]
         setting.override(new_value)
 
+    def reset(self):
+        """Reset all settings to their default value."""
+        for setting in self:
+            setting.set_to_default()
+
     def __getitem__(self, name):
         """Receive a setting via its name."""
         for setting in self._settings:
             if setting.name == name:
                 return setting
-        raise SettingNotFoundError
+        raise SettingNotFoundError("No setting called %s." % (name))
+
+    def __iter__(self):
+        self._n = 0
+        return self
+
+    def __next__(self):
+        """Iterate over settings."""
+        if (self._n - 1) < len(self._settings) - 1:
+            self._n += 1
+            return self._settings[self._n  - 1]
+        else:
+            raise StopIteration
 
 
 def get_boolean(value):
@@ -254,3 +277,7 @@ def get_float(value):
     if float_val < 0:
         raise WrongSettingValue("Negative numbers are not supported.")
     return float_val
+
+
+# Initialize an actual SettingsStorage object to work with
+settings = SettingStorage()

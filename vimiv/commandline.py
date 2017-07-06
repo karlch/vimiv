@@ -8,6 +8,7 @@ from threading import Thread
 
 from gi.repository import GLib, Gtk, GObject
 from vimiv.helpers import read_file, error_message, expand_filenames
+from vimiv.settings import settings
 
 
 class CommandLine(Gtk.Entry):
@@ -25,12 +26,11 @@ class CommandLine(Gtk.Entry):
         _pos: Index in _history list.
     """
 
-    def __init__(self, app, settings):
+    def __init__(self, app):
         """Create the necessary objects and settings.
 
         Args:
             app: The main vimiv application to interact with.
-            settings: Settings from configfiles to use.
         """
         super(CommandLine, self).__init__()
         self._app = app
@@ -43,7 +43,7 @@ class CommandLine(Gtk.Entry):
         self.set_hexpand(True)
 
         # Initialize search
-        self.search = Search(self, settings)
+        self.search = Search(self)
 
         # Cmd history from file
         datadir = os.path.join(GLib.get_user_data_dir(), "vimiv")
@@ -457,21 +457,19 @@ class Search(GObject.Object):
             warning.
     """
 
-    def __init__(self, commandline, settings):
+    def __init__(self, commandline):
         """Create necessary objects and settings.
 
         Args:
             commandline: Commandline to interact with.
-            settings: Settings from configfiles to use.
         """
         super(Search, self).__init__()
 
         self._filelist = []
         self._last_file = ""
         self.results = []
-        general = settings["GENERAL"]
-        self._incsearch = general["incsearch"]
-        self._search_case = general["search_case_sensitive"]
+        self._incsearch = settings["incsearch"].get_value()
+        self._search_case = settings["search_case_sensitive"].get_value()
         self._last_widget = ""
 
         if self._incsearch:

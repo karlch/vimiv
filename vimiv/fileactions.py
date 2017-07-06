@@ -7,6 +7,7 @@ from random import shuffle
 from gi.repository import Gdk, GdkPixbuf, Gtk
 from PIL import Image
 from vimiv.helpers import listdir_wrapper
+from vimiv.settings import settings
 
 
 def recursive_search(directory):
@@ -116,7 +117,7 @@ class FileExtras(object):
                 is used.
         """
         self._app = app
-        self._use_primary = self._app.settings["GENERAL"]["copy_to_primary"]
+        self._use_primary = settings["copy_to_primary"].get_value()
 
     def format_files(self, string):
         """Format image names in filelist according to a formatstring.

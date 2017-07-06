@@ -10,7 +10,7 @@ from gi.repository import Gdk, Gio, GLib, Gtk, GObject
 from vimiv.commandline import CommandLine
 from vimiv.commands import Commands
 from vimiv.completions import Completion
-from vimiv.config_parser import parse_config, set_defaults
+from vimiv.config_parser import parse_config
 from vimiv.eventhandler import EventHandler
 from vimiv.fileactions import FileExtras, populate
 from vimiv.information import Information
@@ -19,6 +19,7 @@ from vimiv.log import Log
 from vimiv.main_window import MainWindow
 from vimiv.manipulate import Manipulate
 from vimiv.mark import Mark
+from vimiv.settings import settings
 from vimiv.slideshow import Slideshow
 from vimiv.statusbar import Statusbar
 from vimiv.tags import TagHandler
@@ -37,7 +38,6 @@ class Vimiv(Gtk.Application):
         debug: If True, write all messages and commands to log.
         functions: Dictionary of functions. Includes all commands and additional
             functions that cannot be called from the commandline.
-        settings: Settings from configfiles to use.
 
         _tmpdir: tmpfile.TemporaryDirectory used when running with
             --temp-basedir
@@ -67,7 +67,6 @@ class Vimiv(Gtk.Application):
         super(Vimiv, self).__init__(application_id=app_id)
         self.set_flags(Gio.ApplicationFlags.HANDLES_OPEN)
         self.connect("activate", self.activate_vimiv)
-        self.settings = {}
         self._paths = []
         self._index = 0
         self._widgets = {}
@@ -97,8 +96,8 @@ class Vimiv(Gtk.Application):
         if os.path.exists(working_directory):
             os.chdir(working_directory)
         # Populate list of images
-        recursive = self.settings["GENERAL"]["recursive"]
-        shuffle = self.settings["GENERAL"]["shuffle"]
+        recursive = settings["recursive"].get_value()
+        shuffle = settings["shuffle"].get_value()
         self.populate(filenames, recursive=recursive, shuffle_paths=shuffle)
 
         # Activate vimiv after opening files
@@ -113,23 +112,22 @@ class Vimiv(Gtk.Application):
         Return:
             Exit-code or -1 to continue
         """
-        def set_option(name, section, setting, value=0):
-            """Set a setting in self.settings according to commandline option.
+        def set_option(name, setting, value=0):
+            """Set a setting in settings according to commandline option.
 
             Args:
                 name: Name of the commandline option
-                section: Name of section in self.settings to modify.
-                setting: Name of setting in self.settings to modify.
+                setting: Name of setting in settings to modify.
                 value: One of 0, 1 or 2.
                     0: Set setting to False.
                     1: Set setting to True.
                     2: Set setting to value given in the commandline.
             """
             if options.contains(name):
-                valuedict = {0: False, 1: True}
+                valuedict = {0: "false", 1: "true"}
                 if value == 2:
                     valuedict[2] = options.lookup_value(name).unpack()
-                self.settings[section][setting] = valuedict[value]
+                settings.override(setting, valuedict[value])
 
         # Show Gtk warnings if the debug option is given
         if options.contains("debug"):
@@ -142,7 +140,6 @@ class Vimiv(Gtk.Application):
         # Temp basedir removes all current settings and sets them to default
         if options.contains("temp-basedir"):
             self._tmpdir = tempfile.TemporaryDirectory(prefix="vimiv-")
-            self.settings = set_defaults()
             tmp = self._tmpdir.name
             # Export environment variables for thumbnails, tags, history and
             # logs
@@ -152,16 +149,16 @@ class Vimiv(Gtk.Application):
         # Create settings as soon as we know which config files to use
         elif options.contains("config"):
             configfile = options.lookup_value("config").unpack()
-            self.settings = parse_config(commandline_config=configfile,
-                                         running_tests=self.running_tests)
+            parse_config(commandline_config=configfile,
+                         running_tests=self.running_tests)
         else:
-            self.settings = parse_config(running_tests=self.running_tests)
+            parse_config(running_tests=self.running_tests)
 
         # If we start from desktop, move to the wanted directory
         # Else if the input does not come from a tty, e.g. find "" | vimiv, set
         # paths and index according to the input from the pipe
         if options.contains("start-from-desktop"):
-            os.chdir(self.settings["LIBRARY"]["desktop_start_dir"])
+            os.chdir(settings["desktop_start_dir"].get_value())
         elif not sys.stdin.isatty():
             try:
                 tty_paths = []
@@ -171,19 +168,19 @@ class Vimiv(Gtk.Application):
             except TypeError:
                 pass  # DebugConsoleStdIn is not iterable
 
-        set_option("bar", "GENERAL", "display_bar", 1)
-        set_option("no-bar", "GENERAL", "display_bar", 0)
-        set_option("library", "LIBRARY", "show_library", 1)
-        set_option("no-library", "LIBRARY", "show_library", 0)
-        set_option("fullscreen", "GENERAL", "start_fullscreen", 1)
-        set_option("no-fullscreen", "GENERAL", "start_fullscreen", 0)
-        set_option("shuffle", "GENERAL", "shuffle", 1)
-        set_option("no-shuffle", "GENERAL", "shuffle", 0)
-        set_option("recursive", "GENERAL", "recursive", 1)
-        set_option("no-recursive", "GENERAL", "recursive", 0)
-        set_option("slideshow", "GENERAL", "start_slideshow", 1)
-        set_option("slideshow-delay", "GENERAL", "slideshow_delay", 2)
-        set_option("geometry", "GENERAL", "geometry", 2)
+        set_option("bar", "display_bar", 1)
+        set_option("no-bar", "display_bar", 0)
+        set_option("library", "show_library", 1)
+        set_option("no-library", "show_library", 0)
+        set_option("fullscreen", "start_fullscreen", 1)
+        set_option("no-fullscreen", "start_fullscreen", 0)
+        set_option("shuffle", "shuffle", 1)
+        set_option("no-shuffle", "shuffle", 0)
+        set_option("recursive", "recursive", 1)
+        set_option("no-recursive", "recursive", 0)
+        set_option("slideshow", "start_slideshow", 1)
+        set_option("slideshow-delay", "slideshow_delay", 2)
+        set_option("geometry", "geometry", 2)
 
         return -1  # To continue
 
@@ -206,19 +203,19 @@ class Vimiv(Gtk.Application):
             self["statusbar"].hide()
         self["statusbar"].set_separator_height()
         # Try to generate imagelist recursively from the current directory if
-        # recursive is given and not paths exist
-        if self.settings["GENERAL"]["recursive"] and not self._paths:
-            shuffle = self.settings["GENERAL"]["shuffle"]
+        # recursive is given and no paths exist
+        if settings["recursive"].get_value() and not self._paths:
+            shuffle = settings["shuffle"].get_value()
             self.populate([os.getcwd()], True, shuffle)
         # Show the image if an imagelist exists
         if self._paths:
             self["image"].load()
             # Show library at the beginning?
-            if not self.settings["LIBRARY"]["show_library"]:
+            if not settings["show_library"].get_value():
                 self["library"].grid.hide()
             self["main_window"].grab_focus()
             # Start in slideshow mode?
-            if self.settings["GENERAL"]["start_slideshow"]:
+            if settings["start_slideshow"].get_value():
                 self["slideshow"].toggle()
         else:
             # Slideshow without paths makes no sense
@@ -370,21 +367,21 @@ class Vimiv(Gtk.Application):
         """Create all the other widgets and add them to the class."""
         self["eventhandler"] = EventHandler(self)
         self["transform"] = Transform(self)
-        self["commandline"] = CommandLine(self, self.settings)
+        self["commandline"] = CommandLine(self)
         self["tags"] = TagHandler(self)
-        self["mark"] = Mark(self, self.settings)
+        self["mark"] = Mark(self)
         self["fileextras"] = FileExtras(self)
-        self["statusbar"] = Statusbar(self, self.settings)
+        self["statusbar"] = Statusbar(self)
         self["completions"] = Completion(self)
-        self["slideshow"] = Slideshow(self, self.settings)
-        self["main_window"] = MainWindow(self, self.settings)
+        self["slideshow"] = Slideshow(self)
+        self["main_window"] = MainWindow(self)
         self["image"] = self["main_window"].image
         self["thumbnail"] = self["main_window"].thumbnail
-        self["library"] = Library(self, self.settings)
-        self["manipulate"] = Manipulate(self, self.settings)
+        self["library"] = Library(self)
+        self["manipulate"] = Manipulate(self)
         self["information"] = Information()
-        self["window"] = Window(self, self.settings)
-        self["commands"] = Commands(self, self.settings).commands
+        self["window"] = Window(self)
+        self["commands"] = Commands(self).commands
         # Generate completions as soon as commands exist
         self["completions"].generate_commandlist()
         self["log"] = Log(self)

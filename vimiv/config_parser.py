@@ -7,108 +7,7 @@ import sys
 
 from gi.repository import GLib
 from vimiv.helpers import error_message
-
-
-def set_defaults():
-    """Return the default settings for vimiv.
-
-    Return:
-        Dictionary of default settings.
-    """
-    general = {"start_fullscreen": False,
-               "start_slideshow": False,
-               "slideshow_delay": 2,
-               "shuffle": False,
-               "display_bar": True,
-               "default_thumbsize": (128, 128),
-               "geometry": "800x600",
-               "search_case_sensitive": True,
-               "incsearch": True,
-               "recursive": False,
-               "rescale_svg": True,
-               "overzoom": 1,
-               "copy_to_primary": False,
-               "commandline_padding": 6,
-               "thumb_padding": 10,
-               "completion_height": 200,
-               "autoplay_gifs": True}
-    library = {"show_library": False,
-               "library_width": 300,
-               "expand_lib": True,
-               "border_width": 0,
-               "markup": '<span foreground="#875FFF">',
-               "show_hidden": False,
-               "desktop_start_dir": os.path.expanduser("~"),
-               "file_check_amount": 30,
-               "tilde_in_statusbar": True}
-    aliases = {}
-    settings = {"GENERAL": general, "LIBRARY": library, "ALIASES": aliases}
-    return settings
-
-
-def overwrite_section(key, config, settings):
-    """Overwrite a section in settings with the settings in a configfile.
-
-    Args:
-        key: One of "GENERAL" or "LIBRARY" indicating the main section.
-        config: configparser.ConfigParser of the configfile.
-        settings: Dictionary of settings to operate on.
-
-    Return:
-        settings: Dictionary of modified settings.
-        message: Error message for settings that are given in an invalid way.
-    """
-    # Just checking for all the different settings is not very complex and
-    # absolutely readable
-    # pylint: disable = too-many-branches
-    section = config[key]
-    message = ""
-    for setting in section:
-        if setting not in settings[key]:
-            message += "Ignoring unknown setting %s." % (setting)
-            continue
-        # Parse the setting so it gets the correct value
-        try:
-            if setting == "geometry":
-                file_set = section[setting]
-            elif setting in ["default_thumbsize"]:
-                file_set = section[setting].lstrip("(").rstrip(")")
-                file_set = file_set.split(",")
-                file_set[0] = int(file_set[0])
-                file_set[1] = int(file_set[1])
-                if len(file_set) != 2:
-                    raise ValueError
-                file_set = tuple(file_set)
-            elif setting in ["library_width", "slideshow_delay",
-                             "file_check_amount", "commandline_padding",
-                             "thumb_padding", "completion_height",
-                             "border_width"]:
-                # Must be an integer
-                file_set = int(section[setting])
-            elif setting == "desktop_start_dir":
-                file_set = os.path.expanduser(section[setting])
-                # Do not change the setting if the directory doesn't exist
-                if not os.path.isdir(file_set):
-                    continue
-            elif setting == "markup":
-                # Must be valid markup, not completely safe but better than
-                # nothing
-                markup_str = section[setting]
-                if not markup_str.startswith("<span ") \
-                        or not markup_str.endswith(">"):
-                    continue
-                file_set = section[setting]
-            elif setting == "overzoom":
-                file_set = float(section[setting])
-            else:
-                file_set = section.getboolean(setting)
-
-            settings[key][setting] = file_set
-        except ValueError:
-            message += "Invalid setting '%s' for '%s'.\n" \
-                "Falling back to default '%s'.\n\n" \
-                % (section[setting], setting, settings[key][setting])
-    return settings, message
+from vimiv.settings import WrongSettingValue, SettingNotFoundError, settings
 
 
 def add_aliases(config, settings):
@@ -150,7 +49,6 @@ def parse_config(commandline_config=None, running_tests=False):
     Return:
         Dictionary of modified settings.
     """
-    settings = set_defaults()
     configfiles = []
     # We do not want to parse user configuration files when running the test
     # suite
@@ -177,12 +75,18 @@ def parse_config(commandline_config=None, running_tests=False):
     except configparser.ParsingError as e:
         message += str(e)
 
-    keys = [key for key in config if key in ["GENERAL", "LIBRARY"]]
-    for key in keys:
-        settings, partial_message = overwrite_section(key, config, settings)
-        message += partial_message
-    settings, partial_message = add_aliases(config, settings)
-    message += partial_message
+    # Override settings with settings in config
+    for header in ["GENERAL", "LIBRARY"]:
+        if not header in config:
+            continue
+        section = config[header]
+        for setting in section:
+            try:
+                settings.override(setting, section[setting])
+            except WrongSettingValue as e:
+                message += str(e) + "\n"
+            except SettingNotFoundError:
+                message += "Unknown setting %s\n" % (setting)
 
     if message:
         error_message(message, running_tests=running_tests)

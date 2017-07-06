@@ -7,6 +7,7 @@ from threading import Thread
 from gi.repository import GdkPixbuf, GLib, Gtk
 from vimiv.helpers import get_float_from_str
 from vimiv.fileactions import is_animation
+from vimiv.settings import settings
 
 
 class Image(Gtk.Image):
@@ -37,11 +38,10 @@ class Image(Gtk.Image):
         _timer_id: Id of current animation timer.
     """
 
-    def __init__(self, app, settings):
+    def __init__(self, app):
         """Set default values for attributes."""
         super(Image, self).__init__()
         self._app = app
-        general = settings["GENERAL"]
 
         # Settings and defaults
         self.fit_image = "overzoom"
@@ -49,11 +49,11 @@ class Image(Gtk.Image):
         self.pixbuf_original = GdkPixbuf.Pixbuf()
         self.zoom_percent = 1
         self._animation_toggled = False
-        self._autoplay_gifs = general["autoplay_gifs"]
+        self._autoplay_gifs = settings["autoplay_gifs"].get_value()
         self._identifier = 0
-        self._overzoom = general["overzoom"]
-        self._rescale_svg = general["rescale_svg"]
-        self._shuffle = general["shuffle"]
+        self._overzoom = settings["overzoom"].get_value()
+        self._rescale_svg = settings["rescale_svg"].get_value()
+        self._shuffle = settings["shuffle"].get_value()
         self._size = (0, 0)
         self._timer_id = 0
 

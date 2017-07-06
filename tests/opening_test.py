@@ -64,13 +64,14 @@ class OpeningTest(VimivTestCase):
         # Need to backup because we init in the wrong directory here
         working_dir = self.working_directory
         os.chdir("vimiv/testimages")
-        self.init_test(["."], ["GENERAL"], ["recursive"], [True])
+        self.init_test(["."], to_set=["recursive"], values=["true"])
         self.assertEqual(8, len(self.vimiv.get_paths()))
+        self.settings.reset()
         self.working_directory = working_dir
 
     def tearDown(self):
-        os.chdir(self.working_directory)
         self.vimiv.quit()
+        os.chdir(self.working_directory)
 
 
 if __name__ == "__main__":

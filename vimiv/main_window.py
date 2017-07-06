@@ -23,12 +23,12 @@ class MainWindow(Gtk.ScrolledWindow):
         _app: The main vimiv class to interact with.
     """
 
-    def __init__(self, app, settings):
+    def __init__(self, app):
         """Initialize image and thumbnail attributes and configure self."""
         super(MainWindow, self).__init__()
         self._app = app
-        self.image = Image(app, settings)
-        self.thumbnail = Thumbnail(app, settings)
+        self.image = Image(app)
+        self.thumbnail = Thumbnail(app)
 
         self.set_hexpand(True)
         self.set_vexpand(True)

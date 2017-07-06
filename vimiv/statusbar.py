@@ -5,6 +5,8 @@ import os
 
 from gi.repository import Gdk, GLib, Gtk
 
+from vimiv.settings import settings
+
 
 class Statusbar(Gtk.Grid):
     """Create the statusbar and handle all events for it.
@@ -26,16 +28,15 @@ class Statusbar(Gtk.Grid):
         _was_hidden: If True the statusbar was hidden before an error message.
     """
 
-    def __init__(self, app, settings):
+    def __init__(self, app):
         super(Statusbar, self).__init__()
         self._app = app
-        general = settings["GENERAL"]
 
         # Default values
-        self.hidden = not general["display_bar"]
+        self.hidden = not settings["display_bar"].get_value()
         self.lock = False
         self._errors = True
-        self._tilde_in_statusbar = settings["LIBRARY"]["tilde_in_statusbar"]
+        self._tilde_in_statusbar = settings["tilde_in_statusbar"].get_value()
         self._timer_id = 0
         self._was_hidden = False
 
@@ -55,7 +56,7 @@ class Statusbar(Gtk.Grid):
         self.attach(self._center_label, 1, 0, 1, 1)
         self.attach(self._right_label, 2, 0, 1, 1)
         # Padding and separator
-        padding = self._app.settings["GENERAL"]["commandline_padding"]
+        padding = settings["commandline_padding"].get_value()
         self.set_margin_start(padding)
         self.set_margin_end(padding)
         self.set_margin_top(padding)
@@ -221,7 +222,7 @@ class Statusbar(Gtk.Grid):
     def get_bar_height(self):
         """Return height of the statusbar + padding."""
         bar_height = self.get_allocated_height()
-        padding = self._app.settings["GENERAL"]["commandline_padding"]
+        padding = settings["commandline_padding"].get_value()
         return bar_height + 2 * padding
 
     def get_message(self):

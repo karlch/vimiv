@@ -5,6 +5,7 @@ import os
 from math import floor
 
 from gi.repository import GdkPixbuf, GLib, Gtk
+from vimiv.settings import settings
 from vimiv.thumbnail_manager import ThumbnailManager
 
 
@@ -27,24 +28,22 @@ class Thumbnail(Gtk.IconView):
         _zoom_level_index: Position in the possible_sizes list.
     """
 
-    def __init__(self, app, settings):
+    def __init__(self, app):
         """Create the necessary objects and settings.
 
         Args:
             app: The main application class to interact with.
-            settings: Settings from configfiles to use.
         """
         super(Thumbnail, self).__init__()
         self._app = app
-        general = settings["GENERAL"]
 
         # Settings
         self.toggled = False
-        padding = general["thumb_padding"]
+        padding = settings["thumb_padding"].get_value()
         self._timer_id = GLib.Timeout
-        self._markup = settings["LIBRARY"]["markup"].replace("fore", "back")
+        self._markup = settings["markup"].get_value().replace("fore", "back")
 
-        zoom_level = general["default_thumbsize"]
+        zoom_level = settings["default_thumbsize"].get_value()
         self._zoom_levels = [(64, 64), (128, 128), (256, 256), (512, 512)]
         self._zoom_level_index = self._zoom_levels.index(zoom_level)
 

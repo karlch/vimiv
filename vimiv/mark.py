@@ -20,7 +20,7 @@ class Mark(GObject.Object):
             update their display.
     """
 
-    def __init__(self, app, settings):
+    def __init__(self, app):
         super(Mark, self).__init__()
         self._app = app
         self.marked = []

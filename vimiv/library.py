@@ -6,6 +6,7 @@ import os
 from gi.repository import Gdk, Gtk
 from vimiv.fileactions import is_image
 from vimiv.helpers import listdir_wrapper, sizeof_fmt
+from vimiv.settings import settings
 
 
 class Library(Gtk.TreeView):
@@ -28,25 +29,23 @@ class Library(Gtk.TreeView):
         _positions: Dictionary that stores position in directories.
     """
 
-    def __init__(self, app, settings):
+    def __init__(self, app):
         """Create the necessary objects and settings.
 
         Args:
             app: The main vimiv application to interact with.
-            settings: Settings from configfiles to use.
         """
         super(Library, self).__init__()
         self._app = app
-        library = settings["LIBRARY"]
 
         # Settings
         self._positions = {}
-        self._default_width = library["library_width"]
-        self.expand = library["expand_lib"]
-        border_width = library["border_width"]
-        self._markup = library["markup"]
-        self.show_hidden = library["show_hidden"]
-        self._file_check_amount = library["file_check_amount"]
+        self._default_width = settings["library_width"].get_value()
+        self.expand = settings["expand_lib"].get_value()
+        border_width = settings["border_width"].get_value()
+        self._markup = settings["markup"].get_value()
+        self.show_hidden = settings["show_hidden"].get_value()
+        self._file_check_amount = settings["file_check_amount"].get_value()
 
         # Defaults
         self.files = []

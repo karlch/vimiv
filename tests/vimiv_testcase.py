@@ -9,6 +9,7 @@ from gi import require_version
 require_version("Gtk", "3.0")
 from gi.repository import Gio, GLib, Gtk, GdkPixbuf
 from vimiv.app import Vimiv
+from vimiv.settings import settings
 
 
 def refresh_gui(delay=0):
@@ -41,31 +42,31 @@ class VimivTestCase(TestCase):
     def setUpClass(cls):
         # Get set in init_test as setUpClass will be overridden
         cls.working_directory = ""
+        cls.settings = settings
         cls.vimiv = Vimiv()
         cls.init_test(cls)
 
-    def init_test(self, paths=None, key1=None, key2=None, val=None,
-                  debug=False):
+    def init_test(self, paths=None, to_set=None, values=None, debug=False):
         """Initialize a testable vimiv object saved as self.vimiv.
 
         Args:
             paths: Paths passed to vimiv.
-            key1: List of keys of the sections for settings to be set.
-            key2: List of keys for settings to be set.
-            val: List of values for settings to be set.
+            to_set: List of settings to be set.
+            values: List of values for settings to be set.
         """
         self.working_directory = os.getcwd()
         # Create vimiv class with settings, paths, ...
         self.vimiv = Vimiv(True)  # True for running_tests
+        self.settings = settings
         self.vimiv.debug = debug
         options = GLib.VariantDict.new()
         bool_true = GLib.Variant("b", True)
         options.insert_value("temp-basedir", bool_true)
         self.vimiv.do_handle_local_options(options)
         # Set the required settings
-        if key1:
-            for i, section in enumerate(key1):
-                self.vimiv.settings[section][key2[i]] = val[i]
+        if to_set:
+            for i, setting in enumerate(to_set):
+                self.settings.override(setting, values[i])
         self.vimiv.register()
         self.vimiv.do_startup(self.vimiv)
         if paths:

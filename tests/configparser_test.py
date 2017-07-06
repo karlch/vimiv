@@ -7,7 +7,13 @@ import sys
 import tempfile
 from unittest import TestCase, main
 
+from gi import require_version
+require_version('GLib', '2.0')
+from gi.repository import GLib
+
 import vimiv.config_parser as parser
+
+from vimiv.settings import settings
 
 
 class ConfigparserTest(TestCase):
@@ -30,8 +36,8 @@ class ConfigparserTest(TestCase):
 
     def check_defaults(self, settings):
         """Check is settings contain default values."""
-        defaults = parser.set_defaults()
-        self.assertEqual(settings, defaults)
+        for setting in settings:
+            self.assertTrue(setting.is_default())
 
     def test_parse_config_empty(self):
         """Parse an empty configfile."""
@@ -39,19 +45,19 @@ class ConfigparserTest(TestCase):
         path = os.path.join(self.configdir, "empty_vimivrc")
         with open(path, "w") as f:
             f.write("")
-        settings = parser.parse_config(path, True)
+        parser.parse_config(path, running_tests=True)
         self.check_defaults(settings)
 
     def test_unexisting_configfile(self):
         """Parse a non-existing configfile."""
         path = os.path.join(self.configdir, "this_file_does_not_exist")
         # Should ignore it and set default values
-        settings = parser.parse_config(path, True)
+        settings = parser.parse_config(path, running_tests=True)
         self.check_defaults(settings)
 
     def test_correct_configfile(self):
         """Parse correct non-default configfile with all settings."""
-        settings = {"GENERAL": {"start_fullscreen": "yes",
+        override = {"GENERAL": {"start_fullscreen": "yes",
                                 "start_slideshow": "yes",
                                 "shuffle": "yes",
                                 "display_bar": "no",
@@ -75,39 +81,36 @@ class ConfigparserTest(TestCase):
                                 "file_check_amount": "10",
                                 "tilde_in_statusbar": "no"},
                     "ALIASES": {"testalias": "zoom_in"}}
-        configfile = self.create_configfile(settings=settings)
-        parsed_settings = parser.parse_config(configfile, True)
-        # False positive
-        # pylint: disable = unsubscriptable-object
-        general = parsed_settings["GENERAL"]
-        library = parsed_settings["LIBRARY"]
-        aliases = parsed_settings["ALIASES"]
-        self.assertEqual(general["start_fullscreen"], True)
-        self.assertEqual(general["start_slideshow"], True)
-        self.assertEqual(general["shuffle"], True)
-        self.assertEqual(general["display_bar"], False)
-        self.assertEqual(general["default_thumbsize"], (256, 256))
-        self.assertEqual(general["geometry"], "400x400")
-        self.assertEqual(general["recursive"], True)
-        self.assertEqual(general["rescale_svg"], True)
-        self.assertEqual(general["overzoom"], 1.5)
-        self.assertEqual(general["search_case_sensitive"], True)
-        self.assertEqual(general["incsearch"], False)
-        self.assertEqual(general["copy_to_primary"], False)
-        self.assertEqual(general["commandline_padding"], 0)
-        self.assertEqual(general["completion_height"], 100)
-        self.assertEqual(library["show_library"], True)
-        self.assertEqual(library["library_width"], 200)
-        self.assertEqual(library["expand_lib"], False)
-        self.assertEqual(library["border_width"], 12)
-        self.assertEqual(library["markup"], "<span foreground=\"#FF0000\">")
-        self.assertEqual(library["show_hidden"], False)
-        self.assertEqual(library["desktop_start_dir"],
+        configfile = self.create_configfile(settings=override)
+        parser.parse_config(configfile, running_tests=True)
+        self.assertEqual(settings["start_fullscreen"].get_value(), True)
+        self.assertEqual(settings["start_slideshow"].get_value(), True)
+        self.assertEqual(settings["shuffle"].get_value(), True)
+        self.assertEqual(settings["display_bar"].get_value(), False)
+        self.assertEqual(settings["default_thumbsize"].get_value(), (256, 256))
+        self.assertEqual(settings["geometry"].get_value(), (400, 400))
+        self.assertEqual(settings["recursive"].get_value(), True)
+        self.assertEqual(settings["rescale_svg"].get_value(), True)
+        self.assertEqual(settings["overzoom"].get_value(), 1.5)
+        self.assertEqual(settings["search_case_sensitive"].get_value(), True)
+        self.assertEqual(settings["incsearch"].get_value(), False)
+        self.assertEqual(settings["copy_to_primary"].get_value(), False)
+        self.assertEqual(settings["commandline_padding"].get_value(), 0)
+        self.assertEqual(settings["completion_height"].get_value(), 100)
+        self.assertEqual(settings["show_library"].get_value(), True)
+        self.assertEqual(settings["library_width"].get_value(), 200)
+        self.assertEqual(settings["expand_lib"].get_value(), False)
+        self.assertEqual(settings["border_width"].get_value(), 12)
+        self.assertEqual(
+            settings["markup"].get_value(),
+            GLib.markup_escape_text("<span foreground=\"#FF0000\">"))
+        self.assertEqual(settings["show_hidden"].get_value(), False)
+        self.assertEqual(settings["desktop_start_dir"].get_value(),
                          os.path.expanduser("~/.local"))
-        self.assertEqual(library["file_check_amount"], 10)
-        self.assertEqual(library["tilde_in_statusbar"], False)
-        self.assertIn("testalias", aliases.keys())
-        self.assertEqual(aliases["testalias"], "zoom_in")
+        self.assertEqual(settings["file_check_amount"].get_value(), 10)
+        self.assertEqual(settings["tilde_in_statusbar"].get_value(), False)
+        # self.assertIn("testalias", aliases.keys())
+        # self.assertEqual(aliases["testalias"], "zoom_in")
 
     def test_broken_configfiles(self):
         """Parse broken configfiles.
@@ -138,33 +141,6 @@ class ConfigparserTest(TestCase):
         output = sys.stdout.getvalue().strip()
         self.assertIn("Invalid configfile", output)
         self.check_defaults(parsed_settings)
-
-    def test_broken_settings(self):
-        """Parse invalid values for settings."""
-        def run_check(settings, expected_output):
-            """Run check for settings, check for expected output."""
-            configfile = self.create_configfile(settings=settings)
-            parsed_settings = parser.parse_config(configfile,
-                                                  running_tests=True)
-            # pylint:disable=no-member
-            output = sys.stdout.getvalue().strip()
-            self.assertIn(expected_output, output)
-            self.check_defaults(parsed_settings)
-        # No value for setting
-        settings = {"GENERAL": {"start_fullscreen": ""}}
-        run_check(settings, "start_fullscreen")
-        # Value is not an integer
-        settings = {"GENERAL": {"slideshow_delay": "wrong"}}
-        run_check(settings, "slideshow_delay")
-        # Value is not a tuple
-        settings = {"GENERAL": {"default_thumbsize": "wrong"}}
-        run_check(settings, "default_thumbsize")
-        # Invalid markup
-        settings = {"LIBRARY": {"markup": "wrong"}}
-        run_check(settings, "")
-        # Directory does not exist
-        settings = {"LIBRARY": {"desktop_start_dir": "~/foo/bar/baz/"}}
-        run_check(settings, "")
 
     def test_parse_keys(self):
         """Parse a correct minimal keyfile."""
@@ -248,6 +224,10 @@ class ConfigparserTest(TestCase):
                 f.write(text)
 
         return configfile
+    def tearDown(self):
+        """Rest all settings to default."""
+        settings.reset()
+
 
     @classmethod
     def create_keyfile(cls, keybindings):

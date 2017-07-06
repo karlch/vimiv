@@ -25,12 +25,11 @@ class Manipulate(Gtk.ScrolledWindow):
         _pil_thumb: Thumbnail of PIL image to work on temporarily.
     """
 
-    def __init__(self, app, settings):
+    def __init__(self, app):
         """Create the necessary objects and settings.
 
         Args:
             app: The main vimiv application to interact with.
-            settings: Settings from configfiles to use.
         """
         super(Manipulate, self).__init__()
         self._app = app

@@ -9,17 +9,15 @@ class Commands(object):
 
     # Adding one command per statement is absolutely acceptable
     # pylint:disable=too-many-statements
-    def __init__(self, app, settings):
+    def __init__(self, app):
         """Generate commands and functions.
 
         Args:
             app: The main vimiv application to interact with.
-            settings: Settings from configfiles to use.
             commands: Dictionary containing all commands with information.
                 See the add_command method.
         """
         self.app = app
-        self.settings = settings
         self.commands = {}
         self.app["tag_handler"] = TagHandler(app)
         # Add all commands
@@ -175,12 +173,12 @@ class Commands(object):
         # Add aliases catching
         # 1) aliases that would overwrite an existing function
         # 2) aliases that link to a non-existing command
-        self.app.aliases = \
-            {alias: self.settings["ALIASES"][alias]
-             for alias in self.settings["ALIASES"]
-             if alias not in self.app.functions
-             and (self.settings["ALIASES"][alias] in self.app.functions
-                  or self.settings["ALIASES"][alias][0] in "~/.!")}
+        # self.app.aliases = \
+        #     {alias: self.settings["ALIASES"][alias]
+        #      for alias in self.settings["ALIASES"]
+        #      if alias not in self.app.functions
+        #      and (self.settings["ALIASES"][alias] in self.app.functions
+        #           or self.settings["ALIASES"][alias][0] in "~/.!")}
 
     def __getitem__(self, name):
         """Return the command corresponding to name.
