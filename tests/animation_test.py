@@ -50,6 +50,15 @@ class AnimationTest(VimivTestCase):
         self.image.zoom_delta(zoom_in=False)
         self.assertEqual(self.image.get_zoom_percent(), start)
 
+    def test_overzoom(self):
+        """Test overzoom at opening and fit afterwards for animations."""
+        # Overzoom is respected
+        self.assertEqual(self.image.get_zoom_percent(), 100)
+        # But not for a direct call to fit
+        self.image.zoom_to(0, "fit")
+        self.assertGreater(self.image.get_zoom_percent(), 100)
+        self.image.move_pos(forward=False)
+
     def _update_gif(self, assertion):
         count = 0
         while self.image.get_animation_toggled() != assertion:

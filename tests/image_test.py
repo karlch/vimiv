@@ -164,6 +164,20 @@ class ImageTest(VimivTestCase):
                          os.path.abspath("arch-logo.png"))
         self.vimiv["commandline"].search.reset()
 
+    def test_overzoom(self):
+        """Test overzoom at opening and fit afterwards."""
+        # Finish other image loading threads
+        refresh_gui(0.01)
+        # Move to a small image
+        self.image.move_pos()
+        refresh_gui(0.01)
+        # Overzoom is respected
+        self.assertEqual(self.image.get_zoom_percent(), 100)
+        # But not for a direct call to fit
+        self.image.zoom_to(0, "fit")
+        self.assertGreater(self.image.get_zoom_percent(), 100)
+        self.image.move_pos(forward=False)
+
 
 if __name__ == "__main__":
     main()
