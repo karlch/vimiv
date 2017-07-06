@@ -27,6 +27,7 @@ The most important changes between versions are listed here.
     vimiv's trash. If anyone has hard feelings about this, it is very easy to
     bind to an alias.
   * Add an :undelete command to move images back to their original path.
+* Large code changes to decouple vimiv
 
 #### v0.8
 * Rewrite large parts to make vimiv a Gtk.Application
