@@ -127,8 +127,9 @@ class DirectorySetting(Setting):
     """
 
     def override(self, new_value):
-        if os.path.isdir(new_value):
-            self._value = new_value
+        directory = os.path.abspath(os.path.expanduser(new_value))
+        if os.path.isdir(directory):
+            self._value = directory
         else:
             error = "Directory %s does not exist." % (new_value)
             raise WrongSettingValue(error)
