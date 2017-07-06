@@ -3,6 +3,8 @@
 
 import os
 
+from gi.repository import GLib
+
 
 class WrongSettingValue(Exception):
     """Raised when a setting does not have the correct format."""
@@ -66,6 +68,34 @@ class FloatSetting(Setting):
         self._value = get_float(new_value)
 
 
+class ThumbnailSizeSetting(Setting):
+    """Stores a thumbnail size setting.
+
+    This setting is stored as a python tuple with two equal integer values. The
+    integer value must be one of 64, 128, 256, 512.
+    """
+
+    def override(self, new_value):
+        """Override the setting with a new thumbnail size.
+
+        Args:
+            new_value: String in the form of "(val, val)" for the new value.
+        """
+        new_value = new_value.lstrip("(").rstrip(")")
+        int_tuple = new_value.split(",")
+        if len(int_tuple) != 2:
+            error = "Tuple must be of the form (val, val)."
+            raise WrongSettingValue(error)
+        int_tuple = (get_int(int_tuple[0]), get_int(int_tuple[1]))
+        if int_tuple[0] != int_tuple[1]:
+            error = "Thumbnail width and height must be equal"
+            raise WrongSettingValue(error)
+        if int_tuple[0] not in [64, 128, 256, 512]:
+            error = "Thumbnail size must be one of 64, 128, 256 and 512."
+            raise WrongSettingValue(error)
+        self._value = tuple(int_tuple)
+
+
 class GeometrySetting(Setting):
     """Stores a geometry setting.
 
@@ -99,6 +129,24 @@ class DirectorySetting(Setting):
         else:
             error = "Directory %s does not exist." % (new_value)
             raise WrongSettingValue(error)
+
+
+class MarkupSetting(Setting):
+    """Stores a markup setting to highlight e.g. search results.
+
+    This setting gets stored as a python string but it must be closeable via
+    "</span>". The valid default is '<span foreground="#875FFF">'.
+    """
+
+    def override(self, new_value):
+        new_value = new_value.strip()
+        if not new_value.startswith("<span"):
+            error = 'Markup must start with "<span"'
+            raise WrongSettingValue(error)
+        elif not new_value.endswith(">"):
+            error = 'Markup must end with ">"'
+            raise WrongSettingValue(error)
+        self._value = GLib.markup_escape_text(new_value)
 
 
 def get_boolean(value):

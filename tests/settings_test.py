@@ -5,6 +5,9 @@ import os
 
 from unittest import TestCase, main
 
+from gi import require_version
+require_version('GLib', '2.0')
+from gi.repository import GLib
 from vimiv import settings
 
 
@@ -90,6 +93,37 @@ class FloatSettingTest(TestCase):
                           "True")
 
 
+class ThumbnailSizeSettingTest(TestCase):
+    """Test the ThumbnailSizeSetting class."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.name = "int_tuple"
+        cls.default = (128, 128)
+        cls.setting = settings.ThumbnailSizeSetting(cls.name, cls.default)
+
+    def test_override(self):
+        """Test overriding a thumbnail size setting."""
+        self.setting.override("(256, 256)")
+        self.assertEqual(self.setting.get_value(), (256, 256))
+        self.assertFalse(self.setting.is_default())
+
+    def test_fail_override(self):
+        """Fail overriding a thumbnail size setting."""
+        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+                          "hello")
+        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+                          "100 100")
+        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+                          "100,-100")
+        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+                          "(100, 256)")
+        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+                          "(512, 256)")
+        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+                          "(100, 100)")
+
+
 class GeometrySettingTest(TestCase):
     """Test the GeometrySetting class."""
 
@@ -141,6 +175,34 @@ class DirectorySettingTest(TestCase):
                           "100")
         self.assertRaises(settings.WrongSettingValue, self.setting.override,
                           "/foo/bar/baz")
+
+
+class MarkupSettingtest(TestCase):
+    """Test the MarkupSetting class."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.name = "markup"
+        cls.default = GLib.markup_escape_text('<span foreground="#875FFF">')
+        cls.setting = settings.MarkupSetting(cls.name, cls.default)
+
+    def test_override(self):
+        """Test overriding a markup setting."""
+        new_markup = GLib.markup_escape_text('<span foreground="#FFFFFF">')
+        new_markup_string = '<span foreground="#FFFFFF">'
+        self.setting.override(new_markup_string)
+        self.assertEqual(self.setting.get_value(), new_markup)
+        self.assertFalse(self.setting.is_default())
+
+    def test_fail_override(self):
+        """Fail overriding a markup setting."""
+        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+                          "hello")
+        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+                          "<span hi")
+        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+                          "hi>")
+
 
 
 if __name__ == "__main__":
