@@ -30,7 +30,7 @@ each setting means and what values are possible is explained below:
 |-------|-----|-------|-----------|
 |<a name="rescale-svg" class="anchor">rescale_svg</a>|Bool|yes|If yes, rescale vector graphics automatically by reloading the image. Otherwise simply zoom as if they were a normal image.|
 |-------|-----|-------|-----------|
-|<a name="overzoom" class="anchor">overzoom</a>|Float|1.0|Float defining the maximum amount to scale images up by trying to fit the window.|
+|<a name="overzoom" class="anchor">overzoom</a>|Float|1.0|Float defining the maximum amount to scale images up by trying to fit the window when first loading the image.|
 |-------|-----|-------|-----------|
 |<a name="search-case-sensitive" class="anchor">search_case_sensitive</a>|Bool|yes|If yes, search case sensitively. Ignore case otherwise.|
 |-------|-----|-------|-----------|
