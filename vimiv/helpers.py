@@ -121,25 +121,6 @@ def read_info_from_man():
     return infodict
 
 
-def get_float_from_str(float_str):
-    """Return a usable float from user input or return an error.
-
-    Args:
-        float_str: String given by the user to be parsed.
-    return:
-        The float.
-        An errorcode: 1 for errors, 0 else.
-    """
-    # If prefixed with a zero convert to decimal
-    if float_str[0] == "0" and len(float_str) > 1 and float_str[1] != ".":
-        float_str = "0." + float_str[1:]
-    try:
-        num = float(float_str)
-        return num, 0
-    except ValueError:
-        return None, 1
-
-
 def expand_filenames(filename, filelist, command):
     """Expand % to filename and * to filelist in command."""
     # Escape spaces for the shell

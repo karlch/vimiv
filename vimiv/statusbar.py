@@ -12,7 +12,6 @@ class Statusbar(Gtk.Grid):
     """Create the statusbar and handle all events for it.
 
     Attributes:
-        hidden: If True, the statusbar is not visible.
         size: Height of the statusbar.
         lock: If True, do not update any information.
         separator: Gtk.Separator used as background of the statusbar. Makes sure
@@ -23,7 +22,6 @@ class Statusbar(Gtk.Grid):
         _errors: True if there are errors.
         _left_label: Gtk.Label containing position, name and zoom.
         _right_label: Gtk.Label containing mode and prefixed numbers.
-        _tilde_in_statusbar: If True, collapse $HOME to ~ in library statusbar.
         _timer_id: ID of the currently running GLib.Timeout.
         _was_hidden: If True the statusbar was hidden before an error message.
     """
@@ -33,10 +31,8 @@ class Statusbar(Gtk.Grid):
         self._app = app
 
         # Default values
-        self.hidden = not settings["display_bar"].get_value()
         self.lock = False
         self._errors = True
-        self._tilde_in_statusbar = settings["tilde_in_statusbar"].get_value()
         self._timer_id = 0
         self._was_hidden = False
 
@@ -66,6 +62,7 @@ class Statusbar(Gtk.Grid):
         # Connect signals
         self._app["commandline"].search.connect("no-search-results",
                                                 self._on_no_search_results)
+        settings.connect("changed", self._on_settings_changed)
 
     def message(self, message, style="error", timeout=5):
         """Push a message to the statusbar.
@@ -83,8 +80,8 @@ class Statusbar(Gtk.Grid):
             style.upper() + ": </span></b>" + message
         self._timer_id = GLib.timeout_add(timeout * 1000, self.update_info)
         # Show if is was hidden
-        if self.hidden:
-            self.toggle()
+        if not settings["display_bar"].get_value():
+            settings.override("display_bar", "true")
             self._was_hidden = True
         self._left_label.set_markup(message)
         # CSS to style bar according to message
@@ -103,7 +100,7 @@ class Statusbar(Gtk.Grid):
         # Hide again if it was shown due to an error message
         if self._was_hidden:
             self._was_hidden = False
-            self.toggle()
+            settings.override("display_bar", "false")
         # Strip error messages if any
         if self._errors:
             self._error_false()
@@ -136,7 +133,7 @@ class Statusbar(Gtk.Grid):
         # Directory if library is focused
         if "LIBRARY" in mode:
             cur_dir = os.getcwd()
-            if self._tilde_in_statusbar:
+            if settings["tilde_in_statusbar"].get_value():
                 cur_dir = cur_dir.replace(os.getenv("HOME"), "~")
             self._left_label.set_text(cur_dir)
         # Position, name and thumbnail size in thumb mode
@@ -175,8 +172,8 @@ class Statusbar(Gtk.Grid):
 
     def _set_right_status(self, mode):
         """Set the right side of the statusbar to mode and num_str."""
-        message = "{0:15}  {1:4}".format(mode,
-                                         self._app["eventhandler"].num_str)
+        message = "{0:15}  {1:4}".format(
+            mode, self._app["eventhandler"].get_num_str())
         self._right_label.set_markup(message)
 
     def _set_window_title(self):
@@ -199,17 +196,6 @@ class Statusbar(Gtk.Grid):
             return "<b>-- THUMBNAIL --</b>"
         return "<b>-- IMAGE --</b>"
 
-    def toggle(self):
-        """Toggle statusbar and resize image if necessary."""
-        if not self.hidden and not self._app["commandline"].is_visible():
-            self.hide()
-            self.separator.hide()
-        else:
-            self.show()
-            self.separator.show()
-        self.hidden = not self.hidden
-        self._app.emit("widget-layout-changed", self)
-
     def clear_status(self):
         """Clear num_str, search and error messages from the statusbar."""
         self._app["commandline"].search.reset()
@@ -230,3 +216,13 @@ class Statusbar(Gtk.Grid):
 
     def _on_no_search_results(self, search, searchstr):
         self.message('No file matching "%s"' % (searchstr), "info")
+
+    def _on_settings_changed(self, new_settings, setting):
+        if setting == "display_bar":
+            if settings["display_bar"].get_value():
+                self.show()
+                self.separator.show()
+            elif not self._app["commandline"].is_visible():
+                self.hide()
+                self.separator.hide()
+            self._app.emit("widget-layout-changed", self)

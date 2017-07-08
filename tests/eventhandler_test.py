@@ -52,30 +52,30 @@ class KeyHandlerTest(VimivTestCase):
 
     def test_add_number(self):
         """Add number to the numstr and clear it."""
-        self.assertFalse(self.vimiv["eventhandler"].num_str)
+        self.assertFalse(self.vimiv["eventhandler"].get_num_str())
         # Add a number
         self.vimiv["eventhandler"].num_append("2")
-        self.assertEqual(self.vimiv["eventhandler"].num_str, "2")
+        self.assertEqual(self.vimiv["eventhandler"].get_num_str(), "2")
         # Add another number, should change the timer_id
         self.vimiv["eventhandler"].num_append("3")
-        self.assertEqual(self.vimiv["eventhandler"].num_str, "23")
+        self.assertEqual(self.vimiv["eventhandler"].get_num_str(), "23")
         # Clear manually, GLib timeout should definitely work as well if the
         # code runs without errors
         self.vimiv["eventhandler"].num_clear()
-        self.assertFalse(self.vimiv["eventhandler"].num_str)
+        self.assertFalse(self.vimiv["eventhandler"].get_num_str())
 
     def test_receive_number(self):
         """Get a number from numstr and clear it."""
         # Integer
-        self.vimiv["eventhandler"].num_str = "03"
+        self.vimiv["eventhandler"].num_append("3")
         num = self.vimiv["eventhandler"].num_receive()
         self.assertEqual(num, 3)
-        self.assertFalse(self.vimiv["eventhandler"].num_str)
+        self.assertFalse(self.vimiv["eventhandler"].get_num_str())
         # Float
-        self.vimiv["eventhandler"].num_str = "03"
-        num = self.vimiv["eventhandler"].num_receive(get_float=True)
+        self.vimiv["eventhandler"].num_append("03")
+        num = self.vimiv["eventhandler"].num_receive(to_float=True)
         self.assertEqual(num, 0.3)
-        self.assertFalse(self.vimiv["eventhandler"].num_str)
+        self.assertFalse(self.vimiv["eventhandler"].get_num_str())
         # Empty should give default
         num = self.vimiv["eventhandler"].num_receive()
         self.assertEqual(num, 1)
@@ -84,22 +84,22 @@ class KeyHandlerTest(VimivTestCase):
 
     def test_add_number_via_keypress(self):
         """Add a number to the numstr by keypress."""
-        self.assertFalse(self.vimiv["eventhandler"].num_str)
+        self.assertFalse(self.vimiv["eventhandler"].get_num_str())
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("2")
         self.vimiv["library"].emit("key_press_event", event)
-        self.assertEqual(self.vimiv["eventhandler"].num_str, "2")
+        self.assertEqual(self.vimiv["eventhandler"].get_num_str(), "2")
         # Clear as it might interfere
         self.vimiv["eventhandler"].num_clear()
 
     def test_key_press_modifier(self):
         """Press key with modifier."""
-        before = self.vimiv["library"].show_hidden
+        before = self.settings["show_hidden"].get_value()
         event = Gdk.Event().new(Gdk.EventType.KEY_PRESS)
         event.keyval = Gdk.keyval_from_name("h")
         event.state = Gdk.ModifierType.CONTROL_MASK
         self.vimiv["library"].emit("key_press_event", event)
-        after = self.vimiv["library"].show_hidden
+        after = self.settings["show_hidden"].get_value()
         self.assertNotEqual(before, after)
 
     def test_touch(self):

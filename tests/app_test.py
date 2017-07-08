@@ -47,7 +47,8 @@ class AppTest(VimivTestCase):
         self.assertEqual(returncode, -1)
         self.assertTrue(self.settings["shuffle"].get_value())
         self.assertFalse(self.settings["start_slideshow"].get_value())
-        self.assertAlmostEqual(self.settings["slideshow_delay"].get_value(), 2.2)
+        self.assertAlmostEqual(self.settings["slideshow_delay"].get_value(),
+                               2.2)
         self.assertEqual(self.settings["geometry"].get_value(), (400, 400))
 
     def test_temp_basedir(self):

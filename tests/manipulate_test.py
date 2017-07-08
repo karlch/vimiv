@@ -78,7 +78,7 @@ class ManipulateTest(VimivTestCase):
         received_value = self.manipulate.sliders["bri"].get_value()
         self.assertEqual(received_value, -1)
         # Change value with a numstr
-        self.vimiv["eventhandler"].num_str = "5"
+        self.vimiv["eventhandler"].set_num_str(5)
         self.manipulate.change_slider(2)
         received_value = self.manipulate.sliders["bri"].get_value()
         self.assertEqual(received_value, -1 + 2 * 5)
@@ -96,17 +96,17 @@ class ManipulateTest(VimivTestCase):
         self.assertEqual(self.manipulate.sliders["sha"].get_value(), 20)
         self.assertTrue(self.manipulate.sliders["sha"].is_focus())
         # Set contrast via command line
-        self.run_command("set contrast 35")
+        self.run_command("edit con 35")
         self.assertEqual(self.manipulate.sliders["con"].get_value(), 35)
         self.assertTrue(self.manipulate.sliders["con"].is_focus())
         # No argument means 0
-        self.run_command("set contrast")
+        self.run_command("edit con")
         self.assertEqual(self.manipulate.sliders["con"].get_value(), 0)
         # Close via command line
         self.run_command("discard_changes")
         self.assertFalse(self.manipulate.sliders["sha"].is_focus())
         # Error: not a valid integer for manipulation
-        self.run_command("set brightness value")
+        self.run_command("edit bri value")
         self.assertFalse(self.manipulate.sliders["bri"].is_focus())
         self.check_statusbar("ERROR: Argument must be of type integer")
 

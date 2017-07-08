@@ -143,7 +143,7 @@ class MainWindow(Gtk.ScrolledWindow):
             if self.thumbnail.toggled:
                 self.thumbnail.move_to_pos(index)
             else:
-                self._app["eventhandler"].num_str = str(index + 1)
+                self._app["eventhandler"].set_num_str(index + 1)
                 self.image.move_pos()
             self._app["statusbar"].update_info()
         # We need to check again as populate was called

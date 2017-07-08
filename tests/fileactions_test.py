@@ -95,12 +95,12 @@ class FileActionsTest(VimivTestCase):
         clipboard.request_text(compare_text, abspath)
         self.assertTrue(self.compare_result)
         # Toggle to primary and copy basename
-        self.vimiv["fileextras"].toggle_clipboard()
+        self.run_command("set copy_to_primary!")
         self.vimiv["fileextras"].copy_name(False)
         primary.request_text(compare_text, basename)
         self.assertTrue(self.compare_result)
         # Toggle back to clipboard and copy basename
-        self.vimiv["fileextras"].toggle_clipboard()
+        self.run_command("set copy_to_primary!")
         self.vimiv["fileextras"].copy_name(False)
         clipboard.request_text(compare_text, basename)
         self.assertTrue(self.compare_result)

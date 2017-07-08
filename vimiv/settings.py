@@ -3,7 +3,7 @@
 
 import os
 
-from gi.repository import GLib
+from gi.repository import GLib, GObject
 
 
 class WrongSettingValue(Exception):
@@ -12,11 +12,18 @@ class WrongSettingValue(Exception):
 class SettingNotFoundError(Exception):
     """Raised when a setting does not exist."""
 
+class NotABoolean(Exception):
+    """Raised when a setting is not a boolean."""
+
+class NotANumber(Exception):
+    """Raised when a setting is not a number."""
+
 
 class Setting(object):
     """Stores a setting and its attributes.
 
-    By default the setting is of type boolean.
+    This class should not be used directly. Instead it is used as BaseClass for
+    different types of settings.
 
     Attributes:
         name: Name of the setting as string.
@@ -50,15 +57,15 @@ class Setting(object):
     def set_to_default(self):
         self._value = self._default_value
 
+
+class BoolSetting(Setting):
+    """Stores a boolean setting."""
+
     def override(self, new_value):
-        """Override the setting with a new boolean value.
-
-        This is the default and gets overriden by other setting classes.
-
-        Args:
-            new_value: String to convert to a boolean for the new value.
-        """
         self._value = get_boolean(new_value)
+
+    def toggle(self):
+        self._value = not self._value
 
 
 class IntSetting(Setting):
@@ -67,12 +74,33 @@ class IntSetting(Setting):
     def override(self, new_value):
         self._value = get_int(new_value)
 
+    def add(self, value, multiplier):
+        """Add a value to the currently stored integer.
+
+        Args:
+            value: The integer value to add.
+            multiplier: Integer to multiply value with.
+        """
+        value = get_int(value, allow_sign=True)
+        multiplier = get_int(multiplier, allow_sign=False)
+        self._value += value * multiplier
 
 class FloatSetting(Setting):
     """Stores a float setting."""
 
     def override(self, new_value):
         self._value = get_float(new_value)
+
+    def add(self, value, multiplier):
+        """Add a value to the currently stored float.
+
+        Args:
+            value: The float value to add.
+            multiplier: Float to multiply value with.
+        """
+        value = get_float(value, allow_sign=True)
+        multiplier = get_float(multiplier, allow_sign=False)
+        self._value += value * multiplier
 
 
 class ThumbnailSizeSetting(Setting):
@@ -91,14 +119,14 @@ class ThumbnailSizeSetting(Setting):
         new_value = new_value.lstrip("(").rstrip(")")
         int_tuple = new_value.split(",")
         if len(int_tuple) != 2:
-            error = "Tuple must be of the form (val, val)."
+            error = "Tuple must be of the form (val, val)"
             raise WrongSettingValue(error)
         int_tuple = (get_int(int_tuple[0]), get_int(int_tuple[1]))
         if int_tuple[0] != int_tuple[1]:
             error = "Thumbnail width and height must be equal"
             raise WrongSettingValue(error)
         if int_tuple[0] not in [64, 128, 256, 512]:
-            error = "Thumbnail size must be one of 64, 128, 256 and 512."
+            error = "Thumbnail size must be one of 64, 128, 256 and 512"
             raise WrongSettingValue(error)
         self._value = tuple(int_tuple)
 
@@ -118,7 +146,7 @@ class GeometrySetting(Setting):
         """
         geometry = new_value.split("x")
         if len(geometry) != 2:
-            error = "Geometry must be of the form WIDTHxHEIGHT."
+            error = "Geometry must be of the form WIDTHxHEIGHT"
             raise WrongSettingValue(error)
         self._value = (get_int(geometry[0]), get_int(geometry[1]))
 
@@ -135,7 +163,7 @@ class DirectorySetting(Setting):
         if os.path.isdir(directory):
             self._value = directory
         else:
-            error = "Directory %s does not exist." % (new_value)
+            error = "Directory '%s' does not exist" % (new_value)
             raise WrongSettingValue(error)
 
 
@@ -147,6 +175,11 @@ class MarkupSetting(Setting):
     """
 
     def override(self, new_value):
+        """Override the currently stored value with a new one performing checks.
+
+        Args:
+            new_value: The value used to override the current value.
+        """
         new_value = new_value.strip()
         if not new_value.startswith("<span"):
             error = 'Markup must start with "<span"'
@@ -156,7 +189,17 @@ class MarkupSetting(Setting):
             raise WrongSettingValue(error)
         self._value = GLib.markup_escape_text(new_value)
 
-class SettingStorage(object):
+    def surround(self, string):
+        """Surround a string with the markup tags.
+
+        Args:
+            string: The string to surround.
+        Return:
+            self._value + string + "</span>"
+        """
+        return self._value + string + "</span>"
+
+class SettingStorage(GObject.Object):
     """Stores all settings for vimiv.
 
     Settings can be accessed via SettingStorage["setting_name"] and changed by
@@ -165,47 +208,87 @@ class SettingStorage(object):
     Attributes:
         _settings: List of all Setting objects. Should not be accessed directly.
         _n: Integer for iterator.
+
+    Signals:
+        changed: Emitted when a setting was changed.
     """
 
     def __init__(self):
+        super(SettingStorage, self).__init__()
         self._settings = [
-            Setting("start_fullscreen", False),
-            Setting("start_slideshow", False),
+            BoolSetting("start_fullscreen", False),
+            BoolSetting("start_slideshow", False),
             FloatSetting("slideshow_delay", 2.0),
-            Setting("shuffle", False),
-            Setting("display_bar", True),
+            BoolSetting("shuffle", False),
+            BoolSetting("display_bar", True),
             ThumbnailSizeSetting("default_thumbsize", (128, 128)),
             GeometrySetting("geometry", (800, 600)),
-            Setting("search_case_sensitive", True),
-            Setting("incsearch", True),
-            Setting("recursive", False),
-            Setting("rescale_svg", True),
+            BoolSetting("search_case_sensitive", True),
+            BoolSetting("incsearch", True),
+            BoolSetting("recursive", False),
+            BoolSetting("rescale_svg", True),
             FloatSetting("overzoom", 1.0),
-            Setting("copy_to_primary", False),
+            BoolSetting("copy_to_primary", False),
             IntSetting("commandline_padding", 6),
             IntSetting("thumb_padding", 10),
             IntSetting("completion_height", 200),
-            Setting("autoplay_gifs", True),
-            Setting("show_library", False),
+            BoolSetting("play_animations", True),
+            BoolSetting("show_library", False),
             IntSetting("library_width", 300),
-            Setting("expand_lib", True),
+            BoolSetting("expand_lib", True),
             IntSetting("border_width", 0),
             MarkupSetting("markup", '<span foreground="#875FFF">'),
-            Setting("show_hidden", False),
+            BoolSetting("show_hidden", False),
             DirectorySetting("desktop_start_dir", os.path.expanduser("~")),
             IntSetting("file_check_amount", 30),
-            Setting("tilde_in_statusbar", True)]
+            BoolSetting("tilde_in_statusbar", True)]
         self._n = 0
 
-    def override(self, name, new_value):
+    def override(self, name, new_value=None):
         """Override a setting in the storage.
 
         Args:
             name: Name of the setting to override.
-            new_value: Value to override the setting with.
+            new_value: Value to override the setting with. If None use default.
         """
         setting = self[name]
+        if new_value is None:
+            new_value = setting.get_default()
         setting.override(new_value)
+        self.emit("changed", name)
+
+    def toggle(self, name):
+        """Toggle a setting in the storage.
+
+        If the setting is not a boolean, an exception is raised.
+
+        Args:
+            name: Name of the setting to toggle.
+        """
+        if isinstance(self[name], BoolSetting):
+            self[name].toggle()
+            self.emit("changed", name)
+        else:
+            error = "Cannot toggle non boolean setting '%s'" % (name)
+            raise NotABoolean(error)
+
+    def add_to(self, name, value, multiplier):
+        """Add a number to a setting in the storage.
+
+        If the setting is not a number, an exception is raised.
+
+        Args:
+            name: Name of the setting to change.
+            value: Value to add.
+            multiplier: Multiply value by this. Used for num_str.
+        """
+
+        if isinstance(self[name], (IntSetting, FloatSetting)):
+            self[name].add(value, multiplier)
+            self.emit("changed", name)
+        else:
+            error = "Cannot add to non number setting '%s'" % (name)
+            raise NotANumber(error)
 
     def reset(self):
         """Reset all settings to their default value."""
@@ -217,7 +300,7 @@ class SettingStorage(object):
         for setting in self._settings:
             if setting.name == name:
                 return setting
-        raise SettingNotFoundError("No setting called %s." % (name))
+        raise SettingNotFoundError("No setting called '%s'" % (name))
 
     def __iter__(self):
         self._n = 0
@@ -243,40 +326,47 @@ def get_boolean(value):
     return True if value.lower() in ["yes", "true"] else False
 
 
-def get_int(value):
-    """Convert a value to a positive integer.
+def get_int(value, allow_sign=False):
+    """Convert a value to an integer.
 
     Args:
         value: String value to convert.
+        allow_sign: If True, negative values are allowed.
     Return:
         int(value) if possible.
     """
     try:
         int_val = int(value)
     except ValueError:
-        error = "Could not convert %s to int." % (value)
+        error = "Could not convert '%s' to int" % (value)
         raise WrongSettingValue(error)
-    if int_val < 0:
+    if int_val < 0 and not allow_sign:
         raise WrongSettingValue("Negative numbers are not supported.")
     return int_val
 
 
-def get_float(value):
-    """Convert a value to a positive float.
+def get_float(value, allow_sign=False):
+    """Convert a value to a float.
 
     Args:
         value: String value to convert.
+        allow_sign: If True, negative values are allowed.
     Return:
         float(value) if possible.
     """
     try:
         float_val = float(value)
     except ValueError:
-        error = "Could not convert %s to float." % (value)
+        error = "Could not convert '%s' to float" % (value)
         raise WrongSettingValue(error)
-    if float_val < 0:
+    if float_val < 0 and not allow_sign:
         raise WrongSettingValue("Negative numbers are not supported.")
     return float_val
+
+
+# Initiate signals for the SettingsStorage
+GObject.signal_new("changed", SettingStorage, GObject.SIGNAL_RUN_LAST,
+                   None, (GObject.TYPE_PYOBJECT,))
 
 
 # Initialize an actual SettingsStorage object to work with

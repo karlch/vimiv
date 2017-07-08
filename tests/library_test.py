@@ -69,15 +69,15 @@ class LibraryTest(VimivTestCase):
         self.lib.move_pos()
         self.assertEqual(self.vimiv.get_pos(True), "vimiv.tiff")
         # 3g
-        self.vimiv["eventhandler"].num_str = "3"
+        self.vimiv["eventhandler"].set_num_str(3)
         self.lib.move_pos()
         self.assertEqual(self.vimiv.get_pos(True), "arch_001.jpg")
-        self.assertFalse(self.vimiv["eventhandler"].num_str)
+        self.assertFalse(self.vimiv["eventhandler"].get_num_str())
         # g
         self.lib.move_pos(False)
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         # Throw an error
-        self.vimiv["eventhandler"].num_str = "300"
+        self.vimiv["eventhandler"].set_num_str(300)
         self.lib.move_pos()
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         self.check_statusbar("WARNING: Unsupported index")
@@ -85,60 +85,38 @@ class LibraryTest(VimivTestCase):
     def test_resize(self):
         """Resize library."""
         # Set to 200
-        self.lib.resize(None, True, "200")
+        self.run_command("set library_width 200")
         self.assertEqual(200,
                          self.lib.get_size_request()[0])
         # Grow
-        self.lib.resize(True)
+        self.run_command("set library_width +20")
         self.assertEqual(220,
                          self.lib.get_size_request()[0])
-        self.lib.resize(True, False, "30")
+        self.run_command("set library_width +30")
         self.assertEqual(250,
                          self.lib.get_size_request()[0])
         # Shrink
-        self.lib.resize(False, False, "50")
+        self.run_command("set library_width -50")
         self.assertEqual(200,
                          self.lib.get_size_request()[0])
-        # Grow via num_str
-        self.vimiv["eventhandler"].num_str = "2"
-        self.lib.resize(True)
+        # Grow and shrink via num_str
+        self.run_command("2set library_width +20")
         self.assertEqual(240,
                          self.lib.get_size_request()[0])
-        self.vimiv["eventhandler"].num_str = "2"
-        self.lib.resize(False)
+        self.run_command("2set library_width -20")
         self.assertEqual(200,
                          self.lib.get_size_request()[0])
-        self.assertFalse(self.vimiv["eventhandler"].num_str)
+        self.assertFalse(self.vimiv["eventhandler"].get_num_str())
         # Too small
-        self.lib.resize(False, False, "500")
+        self.run_command("set library_width -500")
         self.assertEqual(100,
                          self.lib.get_size_request()[0])
+        self.assertGreater(self.settings["library_width"].get_value(), 0)
         # Throw errors
-        self.lib.resize(False, False, "hi")
-        self.check_statusbar("ERROR: Library width must be an integer")
-        self.lib.resize(False, True, "hi")
-        self.check_statusbar("ERROR: Library width must be an integer")
-        ##################
-        #  Command line  #
-        ##################
-        # Default 20
-        self.run_command("grow_lib")
-        self.assertEqual(120,
-                         self.lib.get_size_request()[0])
-        # Value passed
-        self.run_command("grow_lib 30")
-        self.assertEqual(150,
-                         self.lib.get_size_request()[0])
-        # Fail by passing an invalid value
-        self.run_command("grow_lib value")
-        self.check_statusbar("ERROR: Library width must be an integer")
-        # Set width to default
-        self.run_command("set library_width")
-        self.assertEqual(self.settings["library_width"].get_value(),
-                         self.lib.get_size_request()[0])
-        # Fail by passing an invalid value
-        self.run_command("set library_width value")
-        self.check_statusbar("ERROR: Library width must be an integer")
+        self.run_command("set library_width hi")
+        self.check_statusbar("ERROR: Could not convert 'hi' to int")
+        self.run_command("set library_width +hi")
+        self.check_statusbar("ERROR: Could not convert '+hi' to int")
 
     def test_scroll(self):
         """Scroll library."""
@@ -150,10 +128,10 @@ class LibraryTest(VimivTestCase):
         self.lib.scroll("k")
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         # 3j
-        self.vimiv["eventhandler"].num_str = "3"
+        self.vimiv["eventhandler"].set_num_str(3)
         self.lib.scroll("j")
         self.assertEqual(self.vimiv.get_pos(True), "directory")
-        self.assertFalse(self.vimiv["eventhandler"].num_str)
+        self.assertFalse(self.vimiv["eventhandler"].get_num_str())
         # l
         expected_path = os.path.abspath("directory")
         self.lib.scroll("l")
@@ -166,7 +144,7 @@ class LibraryTest(VimivTestCase):
         # Remember pos
         self.assertEqual(self.vimiv.get_pos(True), "directory")
         # Back to beginning
-        self.vimiv["eventhandler"].num_str = "3"
+        self.vimiv["eventhandler"].set_num_str(3)
         self.lib.scroll("k")
         self.assertEqual(self.vimiv.get_pos(True), "animation")
         # Fail because of invalid argument
@@ -203,7 +181,7 @@ class LibraryTest(VimivTestCase):
     def test_move_up(self):
         """Move up into directory."""
         expected = "/".join(os.getcwd().split("/")[:-2])
-        self.vimiv["eventhandler"].num_str = "2"
+        self.vimiv["eventhandler"].set_num_str(2)
         self.lib.move_up()
         self.assertEqual(os.getcwd(), expected)
 

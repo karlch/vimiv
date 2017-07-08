@@ -2,7 +2,6 @@
 """Slideshow for vimiv."""
 
 from gi.repository import GLib, GObject
-from vimiv.helpers import get_float_from_str
 from vimiv.settings import settings
 
 
@@ -13,8 +12,6 @@ class Slideshow(GObject.Object):
         running: If True the slideshow is running.
 
         _app: The main application class to interact with.
-        _default_delay: Slideshow delay set in the default settings.
-        _delay: Slideshow delay between images.
         _start_index: Index of the image when slideshow was started. Saved to
             display a message when slideshow is back at the beginning.
         _timer_id: ID of the currently running GLib.Timeout.
@@ -29,11 +26,10 @@ class Slideshow(GObject.Object):
         super(Slideshow, self).__init__()
         self._app = app
 
-        self._default_delay = settings["slideshow_delay"].get_value()
-        self._delay = settings["slideshow_delay"].get_value()
         self._start_index = 0
         self.running = False
         self._timer_id = GLib.Timeout
+        settings.connect("changed", self._on_settings_changed)
 
     def toggle(self):
         """Toggle the slideshow or update the delay."""
@@ -46,15 +42,17 @@ class Slideshow(GObject.Object):
             self._app["statusbar"].message(message, "warning")
             return
         # Delay changed via vimiv["eventhandler"].num_str?
-        if self._app["eventhandler"].num_str:
-            self.set_delay(fixed_val=self._app["eventhandler"].num_str)
+        number = self._app["eventhandler"].get_num_str()
+        if number:
+            settings.override("slideshow_delay", number)
+            self._app["eventhandler"].num_clear()
         # If the delay wasn't changed in any way just toggle the slideshow
         else:
             self.running = not self.running
             if self.running:
+                delay = 1000 * settings["slideshow_delay"].get_value()
                 self._start_index = self._app.get_index()
-                self._timer_id = GLib.timeout_add(1000 * self._delay,
-                                                  self._next)
+                self._timer_id = GLib.timeout_add(delay, self._next)
             else:
                 self._app["statusbar"].lock = False
                 GLib.source_remove(self._timer_id)
@@ -72,49 +70,22 @@ class Slideshow(GObject.Object):
             self._app["statusbar"].lock = False
         return True  # So we continue running
 
-    def set_delay(self, fixed_val=None, step=None):
-        """Set slideshow delay.
-
-        Args:
-            fixed_val: Value to which the delay is set.
-            step: Add step to the current delay.
-        """
-        val = fixed_val if fixed_val else self._default_delay
-        # Parse step and fixed_val
-        if step:
-            step, errorcode = get_float_from_str(step)
-            if errorcode:
-                self._app["statusbar"].message(
-                    "Argument for delay must be of type float", "error")
-                return
-            step *= self._app["eventhandler"].num_receive(1, True)
-            self._delay += step
-        elif val:
-            val, errorcode = get_float_from_str(str(val))
-            if errorcode:
-                self._app["statusbar"].message(
-                    "Argument for delay must be of type float", "error")
-                return
-            self._delay = val
-            self._app["eventhandler"].num_clear()
-        # Set a minimum
-        if self._delay < 0.5:
-            self._delay = 0.5
-            self._app["statusbar"].message(
-                "Delays shorter than 0.5 s are not allowed", "warning")
-        # If slideshow was running reload it
-        if self.running:
-            GLib.source_remove(self._timer_id)
-            self._timer_id = GLib.timeout_add(1000 * self._delay, self._next)
-            self._app["statusbar"].update_info()
-
     def get_formatted_delay(self):
         """Return the delay formatted neatly for the statusbar."""
-        return "[slideshow - {0:.1f}s]".format(self._delay)
+        delay = settings["slideshow_delay"].get_value()
+        return "[slideshow - {0:.1f}s]".format(delay)
 
-    # These are for the test suite
-    def get_delay(self):
-        return self._delay
-
-    def get_default_delay(self):
-        return self._default_delay
+    def _on_settings_changed(self, new_settings, setting):
+        if setting == "slideshow_delay":
+            delay = settings["slideshow_delay"].get_value()
+            # Set a minimum
+            if delay < 0.5:
+                settings.override("slideshow_delay", "0.5")
+                self._app["statusbar"].message(
+                    "Delays shorter than 0.5 s are not allowed", "warning")
+                return
+            # If slideshow was running reload it
+            if self.running:
+                GLib.source_remove(self._timer_id)
+                self._timer_id = GLib.timeout_add(1000 * delay, self._next)
+                self._app["statusbar"].update_info()

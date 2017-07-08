@@ -27,9 +27,6 @@ class Window(Gtk.ApplicationWindow):
 
         self._app = app
 
-        # Configurations from vimivrc
-        start_fullscreen = settings["start_fullscreen"].get_value()
-
         self.connect("destroy", self._app.quit_wrapper)
         self.connect("button_press_event", self._app["eventhandler"].on_click,
                      "IMAGE")
@@ -41,7 +38,7 @@ class Window(Gtk.ApplicationWindow):
         self.winsize = settings["geometry"].get_value()
         self.resize(self.winsize[0], self.winsize[1])
 
-        if start_fullscreen:
+        if settings["start_fullscreen"].get_value():
             self.toggle_fullscreen()
 
         # Auto resize

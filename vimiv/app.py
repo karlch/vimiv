@@ -199,7 +199,7 @@ class Vimiv(Gtk.Application):
         self["commandline"].hide()
         self["completions"].hide()
         # Statusbar depending on setting
-        if self["statusbar"].hidden:
+        if not settings["display_bar"].get_value():
             self["statusbar"].hide()
         self["statusbar"].set_separator_height()
         # Try to generate imagelist recursively from the current directory if
@@ -221,7 +221,7 @@ class Vimiv(Gtk.Application):
             # Slideshow without paths makes no sense
             self["slideshow"].running = False
             self["library"].focus()
-            if self["library"].expand:
+            if settings["expand_lib"].get_value():
                 self["main_window"].hide()
 
     def quit_wrapper(self, force=False):

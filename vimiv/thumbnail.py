@@ -80,7 +80,7 @@ class Thumbnail(Gtk.IconView):
         self.toggle(True)
         count = path.get_indices()[0] + 1
         self._app["eventhandler"].num_clear()
-        self._app["eventhandler"].num_str = str(count)
+        self._app["eventhandler"].set_num_str(count)
         self._app["image"].move_pos()
 
     def toggle(self, select_image=False):
@@ -99,7 +99,7 @@ class Thumbnail(Gtk.IconView):
                 self._app["library"].focus()
                 # Re-expand the library if there is no image and the setting
                 # applies
-                if self._app["library"].expand and \
+                if settings["expand_lib"].get_value() and \
                         self._app["image"].pixbuf_original.get_height() == 1:
                     self._app["main_window"].hide()
                     self._app["library"].set_hexpand(True)

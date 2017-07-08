@@ -17,15 +17,15 @@ class StatusbarTest(VimivTestCase):
     def test_toggle_statusbar(self):
         """Toggle the statusbar."""
         self.assertTrue(self.statusbar.is_visible())
-        self.assertFalse(self.statusbar.hidden)
+        self.assertTrue(self.settings["display_bar"].get_value())
         # Hide
-        self.statusbar.toggle()
+        self.run_command("set display_bar!")
         self.assertFalse(self.statusbar.is_visible())
-        self.assertTrue(self.statusbar.hidden)
+        self.assertFalse(self.settings["display_bar"].get_value())
         # Show again
-        self.statusbar.toggle()
+        self.run_command("set display_bar!")
         self.assertTrue(self.statusbar.is_visible())
-        self.assertFalse(self.statusbar.hidden)
+        self.assertTrue(self.settings["display_bar"].get_value())
 
     def test_message(self):
         """Show a message."""
@@ -43,7 +43,7 @@ class StatusbarTest(VimivTestCase):
     def test_hidden_message(self):
         """Show an error message with an initially hidden statusbar."""
         # Hide
-        self.statusbar.toggle()
+        self.run_command("set display_bar!")
         self.assertFalse(self.statusbar.is_visible())
         # Send an error message
         self.statusbar.message("Test error")
@@ -55,17 +55,17 @@ class StatusbarTest(VimivTestCase):
                             "ERROR: Test error")
         self.assertFalse(self.statusbar.is_visible())
         # Show again
-        self.statusbar.toggle()
+        self.run_command("set display_bar!")
         self.assertTrue(self.statusbar.is_visible())
 
     def test_clear_status(self):
         """Clear num_str, search and error message."""
-        self.vimiv["eventhandler"].num_str = "42"
+        self.vimiv["eventhandler"].set_num_str(42)
         self.vimiv["commandline"].search.results = ["Something"]
         self.statusbar.message("Catastrophe", "error")
         self.check_statusbar("ERROR: Catastrophe")
         self.statusbar.clear_status()
-        self.assertEqual(self.vimiv["eventhandler"].num_str, "")
+        self.assertFalse(self.vimiv["eventhandler"].get_num_str())
         self.assertFalse(self.vimiv["commandline"].search.results)
         self.assertNotEqual(self.vimiv["statusbar"].get_message(),
                             "Error: Catastrophe")

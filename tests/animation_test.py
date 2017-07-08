@@ -24,7 +24,6 @@ class AnimationTest(VimivTestCase):
         second_pb = self.image.pixbuf_original.copy()
         self.assertFalse(compare_pixbufs(first_pb, second_pb))
         # Frames should no longer be updated
-        self.image.toggle_animation()
         self._update_gif(False)
         first_pb = self.image.pixbuf_original.copy()
         delay = self.image.pixbuf_iter.get_delay_time()
@@ -32,7 +31,6 @@ class AnimationTest(VimivTestCase):
         second_pb = self.image.pixbuf_original.copy()
         self.assertTrue(compare_pixbufs(first_pb, second_pb))
         # Back to standard state
-        self.image.toggle_animation()
         self._update_gif(True)
 
     def test_fail_transform_animation(self):
@@ -60,12 +58,10 @@ class AnimationTest(VimivTestCase):
         self.image.move_pos(forward=False)
 
     def _update_gif(self, assertion):
-        count = 0
-        while self.image.get_animation_toggled() != assertion:
-            if count > 10:
-                self.fail("Animation toggled not %s" % (assertion))
-            refresh_gui(0.1)
-            count += 1
+        self.run_command("set play_animations %s" % (str(assertion)))
+        refresh_gui(0.1)
+        self.assertEqual(self.settings["play_animations"].get_value(),
+                         assertion)
 
 
 if __name__ == "__main__":

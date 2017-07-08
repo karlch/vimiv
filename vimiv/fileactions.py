@@ -113,11 +113,8 @@ class FileExtras(object):
 
         Args:
             _app: The main vimiv class to interact with.
-            _use_primary: True if operating on primary clipboard. Else clipboard
-                is used.
         """
         self._app = app
-        self._use_primary = settings["copy_to_primary"].get_value()
 
     def format_files(self, string):
         """Format image names in filelist according to a formatstring.
@@ -193,15 +190,12 @@ class FileExtras(object):
             name = os.path.basename(name)
         # Set clipboard
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY) \
-            if self._use_primary \
+            if settings["copy_to_primary"].get_value() \
             else Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         # Text to clipboard
         clipboard.set_text(name, -1)
         # Info message
         message = "Copied <b>" + name + "</b> to %s" % \
-            ("primary" if self._use_primary else "clipboard")
+            ("primary" if settings["copy_to_primary"].get_value()
+             else "clipboard")
         self._app["statusbar"].message(message, "info")
-
-    def toggle_clipboard(self):
-        """Toggle between primary and clipboard selection."""
-        self._use_primary = not self._use_primary

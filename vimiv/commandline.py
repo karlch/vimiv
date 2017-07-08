@@ -128,7 +128,7 @@ class CommandLine(Gtk.Entry):
             else:  # Default to internal cmd
                 self._app["eventhandler"].num_clear()
                 while cmd[0].isdigit():
-                    self._app["eventhandler"].num_str += cmd[0]
+                    self._app["eventhandler"].num_append(cmd[0])
                     cmd = cmd[1:]
                 self.run_command(cmd)
 
@@ -143,12 +143,8 @@ class CommandLine(Gtk.Entry):
         """
         # Get name and arguments
         name_func_and_args = cmd.split()
-        if cmd.startswith("set "):
-            name_func = " ".join(name_func_and_args[0:2])
-            conf_args = name_func_and_args[2:]
-        else:
-            name_func = name_func_and_args[0]
-            conf_args = name_func_and_args[1:]
+        name_func = name_func_and_args[0]
+        conf_args = name_func_and_args[1:]
         if name_func in self._app["commands"]:
             cmd_dict = self._app["commands"][name_func]
             # Do not allow calling hidden commands from the command line
@@ -444,11 +440,9 @@ class Search(GObject.Object):
     Attributes:
         results: List of files in search results.
 
-        _incsearch: If True, enable incremental search.
         _filelist: List of files to operate search on.
         _last_file: Filename that was focused before search.
         _last_widget: Widget that was focused before search.
-        _search_case: If True, search case sensitively.
 
     Signals:
         search-completed: Emitted when a search was completed so the widgets can
@@ -468,11 +462,9 @@ class Search(GObject.Object):
         self._filelist = []
         self._last_file = ""
         self.results = []
-        self._incsearch = settings["incsearch"].get_value()
-        self._search_case = settings["search_case_sensitive"].get_value()
         self._last_widget = ""
 
-        if self._incsearch:
+        if settings["incsearch"].get_value():
             commandline.connect("changed", self._do_incsearch)
 
     def _do_incsearch(self, entry):
@@ -497,10 +489,11 @@ class Search(GObject.Object):
 
     def run(self, searchstr):
         """Start a search through filelist and emit search-completed signal."""
+        case_sensitive = settings["search_case_sensitive"].get_value()
         self.results = \
             [fil for fil in self._filelist
              if searchstr in fil
-             or not self._search_case and searchstr.lower() in fil.lower()]
+             or not case_sensitive and searchstr.lower() in fil.lower()]
         if self.results:
             self.next_result(forward=True)
         else:
@@ -547,12 +540,6 @@ class Search(GObject.Object):
             if self._last_file in self._filelist else None
         self.results = []
         self.emit("search-completed", last_pos, self._last_widget)
-
-    def toggle_search_case(self):
-        self._search_case = not self._search_case
-
-    def toggle_incsearch(self):
-        self._incsearch = not self._incsearch
 
 
 # Initiate signals for the Search class

@@ -1,6 +1,8 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Contains all commands and functions for vimiv."""
 
+from vimiv.settings import (settings, WrongSettingValue, SettingNotFoundError,
+                            NotABoolean, NotANumber)
 from vimiv.tags import TagHandler
 
 
@@ -38,6 +40,9 @@ class Commands(object):
         self.add_command("discard_changes",
                          self.app["manipulate"].finish,
                          default_args=[False])
+        self.add_command("edit", self.app["manipulate"].cmd_edit,
+                         positional_args=["manipulation"],
+                         optional_args=["value"])
         self.add_command("first", self.app["image"].move_pos,
                          default_args=[False], supports_count=True)
         self.add_command("first_lib", self.app["library"].move_pos,
@@ -53,9 +58,6 @@ class Commands(object):
         self.add_command("format", self.app["fileextras"].format_files,
                          positional_args=["formatstring"])
         self.add_command("fullscreen", self.app["window"].toggle_fullscreen)
-        self.add_command("grow_lib", self.app["library"].resize,
-                         default_args=[True, False], optional_args=["value"],
-                         supports_count=True)
         self.add_command("last", self.app["image"].move_pos,
                          default_args=[True], supports_count=True)
         self.add_command("last_lib", self.app["library"].move_pos,
@@ -89,32 +91,9 @@ class Commands(object):
                          default_args=["."])
         self.add_command("rotate", self.app["transform"].rotate,
                          positional_args=["value"], supports_count=True)
-        self.add_command("set animation!", self.app["image"].toggle_animation)
-        self.add_command("set brightness", self.app["manipulate"].cmd_edit,
-                         default_args=["bri"], optional_args=["value"])
-        self.add_command("set clipboard!",
-                         self.app["fileextras"].toggle_clipboard)
-        self.add_command("set contrast", self.app["manipulate"].cmd_edit,
-                         default_args=["con"], optional_args=["value"])
-        self.add_command("set library_width", self.app["library"].resize,
-                         default_args=[None, True], optional_args=["value"])
-        self.add_command("set overzoom", self.app["image"].set_overzoom,
-                         optional_args=["value"])
-        self.add_command("set rescale_svg!",
-                         self.app["image"].toggle_rescale_svg)
-        self.add_command("set sharpness", self.app["manipulate"].cmd_edit,
-                         default_args=["sha"], optional_args=["value"])
-        self.add_command("set show_hidden!", self.app["library"].toggle_hidden)
-        self.add_command("set slideshow_delay", self.app["slideshow"].set_delay,
+        self.add_command("set", self.set, positional_args=["setting"],
                          optional_args=["value"], supports_count=True)
-        self.add_command("set statusbar!", self.app["statusbar"].toggle)
-        self.add_command("shrink_lib", self.app["library"].resize,
-                         default_args=[False, False], optional_args=["value"],
-                         supports_count=True)
         self.add_command("slideshow", self.app["slideshow"].toggle,
-                         supports_count=True)
-        self.add_command("slideshow_delay", self.app["slideshow"].set_delay,
-                         default_args=[None], positional_args=["value"],
                          supports_count=True)
         self.add_command("tag_load", self.app["tags"].load,
                          positional_args=["tagname"])
@@ -179,6 +158,28 @@ class Commands(object):
         #      if alias not in self.app.functions
         #      and (self.settings["ALIASES"][alias] in self.app.functions
         #           or self.settings["ALIASES"][alias][0] in "~/.!")}
+
+    def set(self, setting, value=None):
+        """Wrapper for settings.override catching errors."""
+        # Allow passing multipliers via keybinding
+        multiplier = self.app["eventhandler"].get_num_str()
+        if multiplier:
+            self.app["eventhandler"].num_clear()
+        else:
+            multiplier = "1"
+        try:
+            # Toggle boolean settings
+            if setting.endswith("!"):
+                setting = setting.rstrip("!")
+                settings.toggle(setting)
+            # Add to number settings
+            elif value and value.startswith("+") or value.startswith("-"):
+                settings.add_to(setting, value, multiplier)
+            else:
+                settings.override(setting, value)
+        except (WrongSettingValue, SettingNotFoundError, NotABoolean,
+                NotANumber) as e:
+            self.app["statusbar"].message(str(e), "error")
 
     def __getitem__(self, name):
         """Return the command corresponding to name.

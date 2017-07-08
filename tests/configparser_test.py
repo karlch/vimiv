@@ -34,9 +34,9 @@ class ConfigparserTest(TestCase):
         cls.keybindings["MANIPULATE"] = {"a": "autorotate"}
         cls.keybindings["COMMAND"] = {"Tab": "complete"}
 
-    def check_defaults(self, settings):
+    def check_defaults(self, settings_to_check):
         """Check is settings contain default values."""
-        for setting in settings:
+        for setting in settings_to_check:
             self.assertTrue(setting.is_default())
 
     def test_parse_config_empty(self):
@@ -52,8 +52,8 @@ class ConfigparserTest(TestCase):
         """Parse a non-existing configfile."""
         path = os.path.join(self.configdir, "this_file_does_not_exist")
         # Should ignore it and set default values
-        settings = parser.parse_config(path, running_tests=True)
-        self.check_defaults(settings)
+        read_settings = parser.parse_config(path, running_tests=True)
+        self.check_defaults(read_settings)
 
     def test_correct_configfile(self):
         """Parse correct non-default configfile with all settings."""
@@ -187,11 +187,11 @@ class ConfigparserTest(TestCase):
         self.assertIn("Duplicate keybinding", output)
 
     @classmethod
-    def create_configfile(cls, settings=None, text=None):
+    def create_configfile(cls, new_settings=None, text=None):
         """Create a vimiv configfile.
 
         Args:
-            settings: Dictionary containing the settings for the configfile.
+            new_settings: Dictionary containing the settings for the configfile.
             text: Text to write to the configfile
         Return:
             path to the created configfile

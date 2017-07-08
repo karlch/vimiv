@@ -38,7 +38,7 @@ class ImageTest(VimivTestCase):
         self.image.zoom_delta(step=2)
         self.assertEqual(self.image.zoom_percent, perc_before * 1.5)
         # zoom out by eventhandler to same level
-        self.vimiv["eventhandler"].num_str = "2"
+        self.vimiv["eventhandler"].set_num_str(2)
         self.image.zoom_delta(zoom_in=False)
         self.assertAlmostEqual(self.image.zoom_percent, perc_before)
         # Zoom to a size representing half the image size
@@ -47,7 +47,7 @@ class ImageTest(VimivTestCase):
         pixbuf = self.image.get_pixbuf()
         self.assertEqual(width * 0.5, pixbuf.get_width())
         # Zoom by eventhandler
-        self.vimiv["eventhandler"].num_str = "03"
+        self.vimiv["eventhandler"].set_num_str(0.3)
         self.image.zoom_to(0)
         self.assertEqual(self.image.zoom_percent, 0.3)
         pixbuf = self.image.get_pixbuf()
@@ -78,7 +78,7 @@ class ImageTest(VimivTestCase):
         self.assertEqual(expected_zoom, self.image.zoom_percent)
         # Zoom with invalid argument
         self.run_command("zoom_out value")
-        self.check_statusbar("ERROR: Argument for zoom must be of type float")
+        self.check_statusbar("ERROR: Could not convert 'value' to float")
         # Zoom to fit
         self.run_command("fit")
         self.assertEqual(self.image.zoom_percent,
@@ -92,11 +92,11 @@ class ImageTest(VimivTestCase):
         self.assertEqual(self.image.zoom_percent,
                          self.image.get_zoom_percent_to_fit("vertical"))
         # Zoom_to 0.5
-        self.run_command("zoom_to 05")
+        self.run_command("zoom_to 0.5")
         self.assertEqual(self.image.zoom_percent, 0.5)
         # Zoom_to with invalid argument
         self.run_command("zoom_to value")
-        self.check_statusbar("ERROR: Argument for zoom must be of type float")
+        self.check_statusbar("ERROR: Could not convert 'value' to float")
 
     def test_move(self):
         """Move from image to image."""
@@ -116,31 +116,31 @@ class ImageTest(VimivTestCase):
     def test_settings(self):
         """Change image.py settings."""
         # Rescale svg
-        before = self.image.get_rescale_svg()
-        self.image.toggle_rescale_svg()
-        self.assertNotEqual(before, self.image.get_rescale_svg())
-        self.image.toggle_rescale_svg()
-        self.assertEqual(before, self.image.get_rescale_svg())
+        before = self.settings["rescale_svg"].get_value()
+        self.run_command("set rescale_svg!")
+        after = self.settings["rescale_svg"].get_value()
+        self.assertNotEqual(before, after)
+        self.run_command("set rescale_svg!")
+        after = self.settings["rescale_svg"].get_value()
+        self.assertEqual(before, after)
         # Overzoom
-        self.image.set_overzoom("1.66")
-        self.assertEqual(self.image.get_overzoom(), 1.66)
-        # Animations should be tested in animation_test.py
+        self.run_command("set overzoom 1.66")
+        self.assertEqual(self.settings["overzoom"].get_value(), 1.66)
 
     def test_auto_rezoom_on_changes(self):
         """Automatically rezoom the image when different widgets are shown."""
         # Definitely show statusbar
-        if self.vimiv["statusbar"].hidden:
-            self.vimiv["statusbar"].toggle()
+        self.settings.override("display_bar", "true")
         # Zoom to fit vertically so something happens
         refresh_gui()
         self.image.zoom_to(0, "vertical")
         before = self.image.zoom_percent
         # Hide statusbar -> larger image
-        self.vimiv["statusbar"].toggle()
+        self.settings.override("display_bar", "false")
         after = self.image.zoom_percent
         self.assertGreater(after, before)
         # Show statusbar -> image back to size before
-        self.vimiv["statusbar"].toggle()
+        self.settings.override("display_bar", "true")
         after = self.image.zoom_percent
         self.assertEqual(after, before)
         # Zoom to fit horizontally so something happens

@@ -18,7 +18,7 @@ copy_to_primary: no
 commandline_padding: 6
 thumb_padding: 10
 completion_height: 200
-autoplay_gifs: yes
+play_animations: yes
 
 [LIBRARY] ######################################################################
 show_library: no

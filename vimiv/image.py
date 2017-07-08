@@ -5,9 +5,8 @@ from random import shuffle
 from threading import Thread
 
 from gi.repository import GdkPixbuf, GLib, Gtk
-from vimiv.helpers import get_float_from_str
 from vimiv.fileactions import is_animation
-from vimiv.settings import settings
+from vimiv.settings import settings, get_float, WrongSettingValue
 
 
 class Image(Gtk.Image):
@@ -28,12 +27,7 @@ class Image(Gtk.Image):
 
         _animation_toggled: If True, animation is playing.
         _app: The main vimiv class to interact with.
-        _autoplay_gifs: If True, autoplay animations.
         _identifier: Used so GUI callbacks are only done if the image is equal
-        _overzoom: Float describing the maximum amount to zoom images above
-            their default size.
-        _rescale_svg: If True rescale vector graphics when zooming.
-        _shuffle: If True randomly shuffle paths.
         _size: Size of the displayed image as a tuple.
         _timer_id: Id of current animation timer.
     """
@@ -48,19 +42,15 @@ class Image(Gtk.Image):
         self.pixbuf_iter = GdkPixbuf.PixbufAnimationIter()
         self.pixbuf_original = GdkPixbuf.Pixbuf()
         self.zoom_percent = 1
-        self._animation_toggled = False
-        self._autoplay_gifs = settings["autoplay_gifs"].get_value()
         self._identifier = 0
-        self._overzoom = settings["overzoom"].get_value()
-        self._rescale_svg = settings["rescale_svg"].get_value()
-        self._shuffle = settings["shuffle"].get_value()
-        self._size = (0, 0)
+        self._size = (1, 1)
         self._timer_id = 0
 
         # Connect signals
         self._app["transform"].connect("changed", self._on_image_changed)
         self._app["commandline"].search.connect("search-completed",
                                                 self._on_search_completed)
+        settings.connect("changed", self._on_settings_changed)
 
     def update(self, update_info=True):
         """Show the final image.
@@ -78,7 +68,8 @@ class Image(Gtk.Image):
         # Rescaling of svg
         name = self._app.get_path()
         info = GdkPixbuf.Pixbuf.get_file_info(name)[0]
-        if info and "svg" in info.get_extensions():
+        if info and "svg" in info.get_extensions() \
+                and settings["rescale_svg"].get_value():
             pixbuf_final = GdkPixbuf.Pixbuf.new_from_file_at_scale(
                 name, -1, pbf_height, True)
         else:
@@ -99,10 +90,10 @@ class Image(Gtk.Image):
         # Allow user steps
         step = self._app["eventhandler"].num_receive(step, True)
         if isinstance(step, str):
-            step, err = get_float_from_str(step)
-            if err:
-                self._app["statusbar"].message(
-                    "Argument for zoom must be of type float", "error")
+            try:
+                step = get_float(step, allow_sign=True)
+            except WrongSettingValue as e:
+                self._app["statusbar"].message(str(e), "error")
                 return
         fallback_zoom = self.zoom_percent
         if zoom_in:
@@ -124,10 +115,10 @@ class Image(Gtk.Image):
         percent = self._app["eventhandler"].num_receive(percent, True)
         # Given from commandline
         if isinstance(percent, str):
-            percent, err = get_float_from_str(percent)
-            if err:
-                self._app["statusbar"].message(
-                    "Argument for zoom must be of type float", "error")
+            try:
+                percent = get_float(percent)
+            except WrongSettingValue as e:
+                self._app["statusbar"].message(str(e), "error")
                 return
         self._size = self._get_available_size()
         # 0 means zoom to fit
@@ -164,7 +155,8 @@ class Image(Gtk.Image):
         self.fit_image = "overzoom"
 
         # Reshuffle on wrap-around
-        if self._shuffle and self._app.get_index() is 0 and delta > 0:
+        if settings["shuffle"].get_value() \
+                and self._app.get_index() is 0 and delta > 0:
             shuffle(self._app.get_paths())
 
         # Load the image at path into self.pixbuf_* and show it
@@ -212,32 +204,6 @@ class Image(Gtk.Image):
         else:
             self.move_index(True, False, pos - current - 1)
 
-    def toggle_rescale_svg(self):
-        """Toggle rescale state of vector images."""
-        self._rescale_svg = not self._rescale_svg
-
-    def set_overzoom(self, new_value="1"):
-        """Set overzoom of images."""
-        new_value, error = get_float_from_str(new_value)
-        if error:
-            self._app["statusbar"].message(
-                "Argument for zoom must be of type float", "error")
-            return
-        self._overzoom = new_value
-        # Update image if it makes sense
-        if self.fit_image != "user":
-            self.zoom_percent = self.get_zoom_percent_to_fit(self.fit_image)
-            self.update()
-
-    def toggle_animation(self):
-        """Toggle animation status of Gifs."""
-        if self._app.get_paths() and is_animation(self._app.get_path()) \
-                and not self._app["thumbnail"].toggled:
-            if self._animation_toggled:
-                self._pause_gif()
-            else:
-                self._play_gif()
-
     def get_scroll_scale(self):
         return self.zoom_percent / self.get_zoom_percent_to_fit() * 2
 
@@ -256,8 +222,8 @@ class Image(Gtk.Image):
         pbo_width = self.pixbuf_original.get_width()
         pbo_height = self.pixbuf_original.get_height()
         # Maximum size respecting overzoom
-        max_width = pbo_width * self._overzoom
-        max_height = pbo_height * self._overzoom
+        max_width = pbo_width * settings["overzoom"].get_value()
+        max_height = pbo_height * settings["overzoom"].get_value()
         # Get scales for "panorama" vs "portrait" image
         w_scale = pbo_width / self._size[0]
         h_scale = pbo_height / self._size[1]
@@ -266,7 +232,7 @@ class Image(Gtk.Image):
         fits = max_width < self._size[0] and max_height < self._size[1]
         # Image fits completely even with overzoom and we do not want to fit
         if fits and fit in ["user", "overzoom"]:
-            return self._overzoom
+            return settings["overzoom"].get_value()
         # Force horizontal fit or "panorama" image
         elif fit == "horizontal" or (scale_width and fit != "vertical"):
             return self._size[0] / pbo_width
@@ -303,7 +269,6 @@ class Image(Gtk.Image):
 
     def _play_gif(self):
         """Run the animation of a gif."""
-        self._animation_toggled = True
         self.pixbuf_original = self.pixbuf_iter.get_pixbuf()
         GLib.idle_add(self.update)
         if self.pixbuf_iter.advance():
@@ -317,7 +282,6 @@ class Image(Gtk.Image):
 
     def _pause_gif(self):
         """Pause a gif or show initial image."""
-        self._animation_toggled = False
         if self._timer_id:
             GLib.source_remove(self._timer_id)
             self._timer_id = 0
@@ -338,7 +302,7 @@ class Image(Gtk.Image):
         if self._app["library"].grid.is_visible():
             library_width = self._app["library"].get_size_request()[0]
             size = (size[0] - library_width, size[1])
-        if not self._app["statusbar"].hidden:
+        if settings["display_bar"].get_value():
             size = (size[0], size[1] - self._app["statusbar"].get_bar_height())
         return size
 
@@ -377,20 +341,10 @@ class Image(Gtk.Image):
         self.pixbuf_original = self.pixbuf_iter.get_pixbuf()
         self._size = self._get_available_size()
         self.zoom_percent = self.get_zoom_percent_to_fit(self.fit_image)
-        if self._autoplay_gifs:
+        if settings["play_animations"].get_value():
             delay = self.pixbuf_iter.get_delay_time()
             self._timer_id = GLib.timeout_add(delay, self._play_gif) \
                 if delay >= 0 else 0
-
-    # Needed for test suite
-    def get_rescale_svg(self):
-        return self._rescale_svg
-
-    def get_overzoom(self):
-        return self._overzoom
-
-    def get_animation_toggled(self):
-        return self._animation_toggled
 
     def _on_image_changed(self, transform, change, arg):
         """Update image after a transformation.
@@ -411,5 +365,19 @@ class Image(Gtk.Image):
 
     def _on_search_completed(self, search, new_pos, last_focused):
         if last_focused == "im":
-            self._app["eventhandler"].num_str = str(new_pos + 1)
+            self._app["eventhandler"].set_num_str(new_pos + 1)
             self.move_pos()
+
+    def _on_settings_changed(self, new_settings, setting):
+        # Rescale image after setting overzoom
+        if setting == "overzoom" and self.fit_image != "user":
+            self.zoom_percent = self.get_zoom_percent_to_fit(self.fit_image)
+            self.update()
+        # Change play status of gifs
+        elif setting == "play_animations":
+            if self._app.get_paths() and is_animation(self._app.get_path()) \
+                    and not self._app["thumbnail"].toggled:
+                if settings["play_animations"].get_value():
+                    self._play_gif()
+                else:
+                    self._pause_gif()

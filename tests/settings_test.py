@@ -18,7 +18,7 @@ class BoolSettingTest(TestCase):
     def setUpClass(cls):
         cls.name = "is_true"
         cls.default = True
-        cls.setting = settings.Setting(cls.name, cls.default)
+        cls.setting = settings.BoolSetting(cls.name, cls.default)
 
     def test_init(self):
         """Test initializing a setting."""
@@ -229,7 +229,7 @@ class SettingStorageTest(TestCase):
                     "commandline_padding": 6,
                     "thumb_padding": 10,
                     "completion_height": 200,
-                    "autoplay_gifs": True,
+                    "play_animations": True,
                     "show_library": False,
                     "library_width": 300,
                     "expand_lib": True,
@@ -245,10 +245,10 @@ class SettingStorageTest(TestCase):
 
     def test_override_setting(self):
         """Override setting directly in storage."""
-        self.storage.override("autoplay_gifs", "false")
-        self.assertEqual(self.storage["autoplay_gifs"].get_value(), False)
-        self.storage.override("autoplay_gifs", "true")
-        self.assertEqual(self.storage["autoplay_gifs"].get_value(), True)
+        self.storage.override("play_animations", "false")
+        self.assertEqual(self.storage["play_animations"].get_value(), False)
+        self.storage.override("play_animations", "true")
+        self.assertEqual(self.storage["play_animations"].get_value(), True)
 
     def test_access_unavailable_setting_in_storage(self):
         """Try to access a setting that does not exist in storage."""

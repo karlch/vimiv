@@ -40,7 +40,8 @@ class Completion(Gtk.TreeView):
                             "path": [Gtk.ListStore(str, str)],
                             "tag": [Gtk.ListStore(str, str)],
                             "search": [Gtk.ListStore(str, str)],
-                            "trash": [Gtk.ListStore(str, str)]}
+                            "trash": [Gtk.ListStore(str, str)],
+                            "setting": [Gtk.ListStore(str, str)]}
         for liststore in self._liststores.values():
             comp_filter = liststore[0].filter_new()
             comp_filter.set_visible_func(self._completion_filter)
@@ -207,6 +208,9 @@ class Completion(Gtk.TreeView):
             # Undelete files from trash
             elif command.startswith("undelete"):
                 return "trash"
+            # Settings
+            elif command.startswith("set"):
+                return "setting"
         return "internal"
 
     def _complete_path(self, path):
@@ -227,7 +231,7 @@ class Completion(Gtk.TreeView):
         if directory == "/dev":
             return
         # Files in that directory
-        files = listdir_wrapper(directory, self._app["library"].show_hidden)
+        files = listdir_wrapper(directory, settings["show_hidden"].get_value())
         # Format them neatly depending on directory and type
         for fil in files:
             fil = os.path.join(directory, fil)
@@ -246,7 +250,7 @@ class Completion(Gtk.TreeView):
         """
         self._liststores["tag"][0].clear()
         tags = listdir_wrapper(self._app["tags"].directory,
-                               self._app["library"].show_hidden)
+                               settings["show_hidden"].get_value())
         for tag in tags:
             self._liststores["tag"][0].append([command.split()[0] + " " + tag,
                                                ""])
@@ -261,7 +265,7 @@ class Completion(Gtk.TreeView):
         """If there is more than one word in command, do path completion.
 
         Args:
-            command: The internal command to complete.
+            command: The external command to complete.
         """
         self._liststores["external"][0].clear()
         command = command.lstrip("!").lstrip(" ")
@@ -309,6 +313,24 @@ class Completion(Gtk.TreeView):
                 completion = "undelete %s" % (fil)
                 self._liststores["trash"][0].append([completion, ""])
 
+    def _complete_setting(self, command):
+        """Complete settings for :set.
+
+        Args:
+            command: The internal command to complete.
+        """
+        self._liststores["setting"][0].clear()
+        # Get all settings
+        setting_names = [setting.name for setting in settings]
+        # Add them to completion formatted to 'set $SETTING'
+        for name in setting_names:
+            completion = "set %s" % (name)
+            typestr = str(type(settings[name].get_value()))
+            typestr = typestr.replace("<class '", "").rstrip("'>")
+            info = "<i>" + typestr + "</i>"
+            self._liststores["setting"][0].append([completion, info])
+
+
     def _completion_filter(self, model, treeiter, data):
         """Filter function used in the liststores to filter completions.
 
@@ -343,6 +365,8 @@ class Completion(Gtk.TreeView):
             self._complete_external(command)
         elif comp_type == "trash":
             self._complete_trash(command)
+        elif comp_type == "setting":
+            self._complete_setting(command)
         self.set_model(self._liststores[comp_type][1])
         self._liststores[comp_type][1].refilter()
         self.reset()

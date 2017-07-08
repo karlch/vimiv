@@ -104,6 +104,7 @@ class VimivTestCase(TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        cls.settings.reset()
         cls.vimiv.quit()
         os.chdir(cls.working_directory)
 

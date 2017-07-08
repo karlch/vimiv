@@ -3,7 +3,7 @@
 
 from gi.repository import Gdk, GLib, GObject
 from vimiv.config_parser import parse_keys
-from vimiv.helpers import get_float_from_str
+from vimiv.settings import get_float, get_int
 
 
 class EventHandler(GObject.Object):
@@ -22,7 +22,7 @@ class EventHandler(GObject.Object):
     def __init__(self, app):
         """Initialize defaults."""
         super(EventHandler, self).__init__()
-        self.num_str = ""
+        self._num_str = ""
         self._app = app
         self._timer_id = 0
         self._timer_id_touch = 0
@@ -124,10 +124,11 @@ class EventHandler(GObject.Object):
         if self._timer_id:
             GLib.source_remove(self._timer_id)
         self._timer_id = GLib.timeout_add_seconds(1, self.num_clear)
-        self.num_str += num
+        self._num_str += num
+        self._convert_trailing_zeros()
         # Write number to log file in debug mode
         if self._app.debug:
-            self._app["log"].write_message("number", num + "->" + self.num_str)
+            self._app["log"].write_message("number", num + "->" + self._num_str)
         self._app["statusbar"].update_info()
 
     def num_clear(self):
@@ -136,24 +137,36 @@ class EventHandler(GObject.Object):
         if self._timer_id:
             GLib.source_remove(self._timer_id)
         # Write number cleared to log file in debug mode
-        if self._app.debug and self.num_str:
+        if self._app.debug and self._num_str:
             self._app["log"].write_message("number", "cleared")
         self._timer_id = 0
         # Reset
-        self.num_str = ""
+        self._num_str = ""
         self._app["statusbar"].update_info()
 
-    def num_receive(self, number=1, get_float=False):
-        """Receive self.num_str and clear it.
+    def num_receive(self, number=1, to_float=False):
+        """Receive self._num_str and clear it.
 
         Args:
-            number: Number to return if there self.num_str is empty.
-            get_float: If True, convert num_str to float. Else to int.
+            number: Number to return if self._num_str is empty.
+            to_float: If True, convert num_str to float. Else to int.
         Return:
             The received number or default.
         """
-        if self.num_str:
-            number = get_float_from_str(self.num_str)[0] \
-                if get_float else int(self.num_str)
+        if self._num_str:
+            number = get_float(self._num_str) \
+                if to_float else get_int(self._num_str)
             self.num_clear()
         return number
+
+    def get_num_str(self):
+        return self._num_str
+
+    def set_num_str(self, number):
+        self.num_clear()
+        self.num_append(str(number))
+
+    def _convert_trailing_zeros(self):
+        """If prefixed with zero add a decimal point to self._num_str"""
+        if self._num_str.startswith("0") and not self._num_str.startswith("0."):
+            self._num_str = self._num_str.replace("0", "0.")

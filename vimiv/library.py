@@ -15,17 +15,10 @@ class Library(Gtk.TreeView):
     Includes the treeview with the library and all actions that apply to it.
 
     Attributes:
-        expand: If True expand the library to window width if no images are
-            shown.
-        show_hidden: If True show hidden files.
         files: Files in the library.
         grid: Gtk.Grid containing the TreeView and the border.
 
         _app: The main vimiv application to interact with.
-        _default_width: Setting for the default width of the library.
-        _file_check_amount: Amount of files checked in a directory to display
-            amount of images in it.
-        _markup: Markup string used to highlight search results.
         _positions: Dictionary that stores position in directories.
     """
 
@@ -40,12 +33,7 @@ class Library(Gtk.TreeView):
 
         # Settings
         self._positions = {}
-        self._default_width = settings["library_width"].get_value()
-        self.expand = settings["expand_lib"].get_value()
         border_width = settings["border_width"].get_value()
-        self._markup = settings["markup"].get_value()
-        self.show_hidden = settings["show_hidden"].get_value()
-        self._file_check_amount = settings["file_check_amount"].get_value()
 
         # Defaults
         self.files = []
@@ -58,7 +46,8 @@ class Library(Gtk.TreeView):
             border.set_size_request(border_width, 1)
             self.grid.attach(border, 1, 0, 1, 1)
         # Pack everything
-        self.set_size_request(self._default_width - border_width, 10)
+        self.set_size_request(
+            settings["library_width"].get_value() - border_width, 10)
         scrolled_win = Gtk.ScrolledWindow()
         scrolled_win.set_vexpand(True)
         scrolled_win.add(self)
@@ -85,7 +74,7 @@ class Library(Gtk.TreeView):
         # Set the liststore model
         self.set_model(self._liststore_create())
         # Set the hexpand property if requested in the configfile
-        if not self._app.get_paths() and self.expand:
+        if not self._app.get_paths() and settings["expand_lib"].get_value():
             self.set_hexpand(True)
 
         # Connect signals
@@ -93,6 +82,7 @@ class Library(Gtk.TreeView):
         self._app["mark"].connect("marks-changed", self._on_marks_changed)
         self._app["commandline"].search.connect("search-completed",
                                                 self._on_search_completed)
+        settings.connect("changed", self._on_settings_changed)
 
     def toggle(self, update_image=True):
         """Toggle the library.
@@ -111,7 +101,7 @@ class Library(Gtk.TreeView):
             if not self._app.get_paths():
                 # Hide the non existing image and expand if necessary
                 self._app["main_window"].hide()
-                if self.expand:
+                if settings["expand_lib"].get_value():
                     self.set_hexpand(True)
             else:  # Try to focus the current image in the library
                 image = self._app.get_path()
@@ -254,7 +244,7 @@ class Library(Gtk.TreeView):
             if os.path.isdir(name):
                 markup_string = "<b>" + markup_string + "</b>"
             if name in self._app["commandline"].search.results:
-                markup_string = self._markup + markup_string + "</span>"
+                markup_string = settings["markup"].surround(markup_string)
             model[i][1] = markup_string
 
     def move_pos(self, forward=True, defined_pos=None):
@@ -285,43 +275,6 @@ class Library(Gtk.TreeView):
         self.scroll_to_cell(Gtk.TreePath(new_pos), None, True, 0.5, 0)
         # Clear the prefix
         self._app["eventhandler"].num_clear()
-
-    def resize(self, inc=True, require_val=False, val=None):
-        """Resize the library and update the image if necessary.
-
-        Args:
-            inc: If True increase the library size.
-            require_val: If True require a specific value val for the size.
-            val: Specific value for the new size.
-        """
-        width = self.get_size_request()[0]
-        # Check if val is an acceptable integer
-        if val and not val.isdigit():
-            message = "Library width must be an integer"
-            self._app["statusbar"].message(message, "error")
-            return
-        if require_val:
-            val = int(val) if val else self._default_width
-            width = val
-        else:  # Grow/shrink by value
-            step = self._app["eventhandler"].num_receive()
-            val = int(val) if val else 20 * step
-            if inc:
-                width += val
-            else:
-                width -= val
-        # Set some reasonable limits to the library size
-        if width > self._app["window"].winsize[0] - 200:
-            width = self._app["window"].winsize[0] - 200
-        elif width < 100:
-            width = 100
-        self.set_size_request(width, 10)
-        self._app.emit("widget-layout-changed", self)
-
-    def toggle_hidden(self):
-        """Toggle showing of hidden files."""
-        self.show_hidden = not self.show_hidden
-        self.reload(".")
 
     def scroll(self, direction):
         """Scroll the library viewer and call file_select if necessary.
@@ -388,7 +341,7 @@ class Library(Gtk.TreeView):
             if os.path.isdir(fil):
                 markup_string = "<b>" + markup_string + "</b>"
             if fil in self._app["commandline"].search.results:
-                markup_string = self._markup + markup_string + "</span>"
+                markup_string = settings["markup"].surround(markup_string)
             liststore.append([i + 1, markup_string, size, marked_string])
 
         return liststore
@@ -402,8 +355,9 @@ class Library(Gtk.TreeView):
             filelist, filesize: List of files, dictionary with filesize info
         """
         # Get data from ls -lh and parse it correctly
-        files = listdir_wrapper(directory, self.show_hidden)
+        files = listdir_wrapper(directory, settings["show_hidden"].get_value())
         filesize = {}
+        file_check_amount = settings["file_check_amount"].get_value()
         for fil in files:
             # Catch broken symbolic links
             if os.path.islink(fil) and \
@@ -412,13 +366,14 @@ class Library(Gtk.TreeView):
             # Number of images in directory as filesize
             if os.path.isdir(fil):
                 try:
-                    subfiles = listdir_wrapper(fil, self.show_hidden)
+                    subfiles = listdir_wrapper(
+                        fil, settings["show_hidden"].get_value())
                     # Necessary to keep acceptable speed in library
                     many = False
-                    if len(subfiles) > self._file_check_amount:
+                    if len(subfiles) > file_check_amount:
                         many = True
                     subfiles = [sub
-                                for sub in subfiles[:self._file_check_amount]
+                                for sub in subfiles[:file_check_amount]
                                 if is_image(os.path.join(fil, sub))]
                     amount = str(len(subfiles))
                     if subfiles and many:
@@ -438,7 +393,7 @@ class Library(Gtk.TreeView):
     def _on_paths_changed(self, app, widget):
         """Reload filelist on the paths-changed signal from app."""
         # Expand library if set by user and all paths were removed
-        if not self._app.get_paths() and self.expand:
+        if not self._app.get_paths() and settings["expand_lib"].get_value():
             self.set_hexpand(True)
             if not self.is_focus():
                 self.focus()
@@ -470,6 +425,21 @@ class Library(Gtk.TreeView):
                     and not self._app["commandline"].is_visible():
                 path = Gtk.TreePath(new_pos)
                 self.file_select(self, path, None, False)
+
+    def _on_settings_changed(self, new_settings, setting):
+        if setting == "library_width":
+            width = settings["library_width"].get_value()
+            # Set some reasonable limits to the library size
+            width = min(width, self._app["window"].winsize[0])
+            width = max(width, 100)
+            if width != settings["library_width"].get_value():
+                settings.override("library_width", width)
+                return
+            else:
+                self.set_size_request(width, 10)
+                self._app.emit("widget-layout-changed", self)
+        elif setting == "show_hidden" and self.is_visible():
+            self.reload(".")
 
     def __getitem__(self, directory):
         """Convenience method to access saved positions via self[directory].

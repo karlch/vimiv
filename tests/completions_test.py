@@ -76,14 +76,14 @@ class CompletionsTest(VimivTestCase):
             self.assertIn(row[0], expected_completions)
         self.assertEqual(len(liststore), len(expected_completions))
         # Expand home
-        self.vimiv["library"].show_hidden = True
+        self.settings.override("show_hidden", "true")
         self.vimiv["commandline"].set_text(":~/.loca")
         liststore = self.completions.get_model()
         completions = []
         for row in liststore:
             completions.append(row[0])
         self.assertIn("~/.local/", completions)
-        self.vimiv["library"].show_hidden = False
+        self.settings.override("show_hidden", "false")
 
     def test_tag_completion(self):
         """Completion of tags."""
