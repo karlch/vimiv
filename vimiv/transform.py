@@ -7,6 +7,7 @@ from threading import Thread
 
 from gi.repository import GObject
 from vimiv import imageactions
+from vimiv.exceptions import TrashUndeleteError
 from vimiv.fileactions import is_animation
 from vimiv.trash_manager import TrashManager
 
@@ -59,20 +60,12 @@ class Transform(GObject.Object):
         Args:
             basename: The basename of the image in the trash directory.
         """
-        returncode = self.trash_manager.undelete(basename)
-        if returncode == 1:
-            message = "Could not restore %s, file does not exist" % (basename)
-            self._app["statusbar"].message(message, "error")
-        elif returncode == 2:
-            message = "Could not restore %s, directories are not supported" \
-                % (basename)
-            self._app["statusbar"].message(message, "error")
-        elif returncode == 3:
-            message = "Could not restore %s, directory is not accessible" \
-                % (basename)
-            self._app["statusbar"].message(message, "error")
-        else:
+        try:
+            self.trash_manager.undelete(basename)
             self._app.emit("paths-changed", self)
+        except TrashUndeleteError as e:
+            message = "Could not restore %s, %s" % (basename, str(e))
+            self._app["statusbar"].message(message, "error")
 
     def get_images(self, info):
         """Return the images which should be manipulated.

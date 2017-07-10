@@ -5,21 +5,8 @@ import os
 
 from gi.repository import GLib, GObject
 
-
-class WrongSettingValue(Exception):
-    """Raised when a setting does not have the correct format."""
-
-
-class SettingNotFoundError(Exception):
-    """Raised when a setting does not exist."""
-
-
-class NotABoolean(Exception):
-    """Raised when a setting is not a boolean."""
-
-
-class NotANumber(Exception):
-    """Raised when a setting is not a number."""
+from vimiv.exceptions import (WrongSettingValue, NotABoolean, NotANumber,
+                              SettingNotFoundError)
 
 
 class Setting(object):

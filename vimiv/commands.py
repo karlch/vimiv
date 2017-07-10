@@ -1,14 +1,11 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Contains all commands and functions for vimiv."""
 
+from vimiv.exceptions import AliasError
 from vimiv.helpers import error_message
 from vimiv.settings import (settings, WrongSettingValue, SettingNotFoundError,
                             NotABoolean, NotANumber)
 from vimiv.tags import TagHandler
-
-
-class AliasError(Exception):
-    """Raised if there are problems when adding an alias."""
 
 
 class Commands(object):

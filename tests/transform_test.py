@@ -82,7 +82,7 @@ class TransformTest(VimivTestCase):
         shutil.rmtree(tmpdir)
         self.transform.undelete(basename)
         self.check_statusbar(
-            "ERROR: Could not restore %s, directory is not accessible"
+            "ERROR: Could not restore %s, original directory is not accessible"
             % (basename))
 
     def test_rotate(self):

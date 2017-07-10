@@ -13,6 +13,8 @@ import time
 
 from gi.repository import GLib
 
+from vimiv.exceptions import TrashUndeleteError
+
 
 class TrashManager():
     """Provides mechanism to delete and undelete images.
@@ -47,30 +49,24 @@ class TrashManager():
 
         Args:
             basename: The basename of the file in the trash directory.
-        Return:
-            0: No errors.
-            1: File does not exist.
-            2: File is a directory.
-            3: Directory of the file does not exist.
         """
         info_filename = os.path.join(self.info_directory,
                                      basename + ".trashinfo")
         trash_filename = os.path.join(self.files_directory, basename)
         if not os.path.exists(info_filename) \
                 or not os.path.exists(trash_filename):
-            return 1
+            raise TrashUndeleteError("file does not exist")
         if os.path.isdir(trash_filename):
-            return 2
+            raise TrashUndeleteError("directories are not supported")
         info = configparser.ConfigParser()
         info.read(info_filename)
         content = info["Trash Info"]
         original_filename = content["Path"]
         # Directory of the file is not accessible
         if not os.path.isdir(os.path.dirname(original_filename)):
-            return 3
+            raise TrashUndeleteError("original directory is not accessible")
         shutil.move(trash_filename, original_filename)
         os.remove(info_filename)
-        return 0
 
     def _get_trash_filename(self, filename):
         """Return the name of the file in self.files_directory.

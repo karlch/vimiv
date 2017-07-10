@@ -7,6 +7,7 @@ from subprocess import PIPE, Popen
 from threading import Thread
 
 from gi.repository import GLib, Gtk, GObject
+from vimiv.exceptions import NoSearchResultsError
 from vimiv.helpers import read_file, error_message, expand_filenames
 from vimiv.commands import Commands
 from vimiv.settings import settings
@@ -412,9 +413,10 @@ class CommandLine(Gtk.Entry):
         """
         repeat = self._app["eventhandler"].num_receive()
         focused_file = os.path.basename(self._app.get_pos(True))
-        if self.search.next_result(forward, repeat, focused_file):
-            self._app["statusbar"].message("No search results to navigate",
-                                           "error")
+        try:
+            self.search.next_result(forward, repeat, focused_file)
+        except NoSearchResultsError as e:
+            self._app["statusbar"].message(str(e), "error")
 
     def get_history(self):
         return self._history
@@ -507,7 +509,6 @@ class Search(GObject.Object):
             repeat: Steps coming from eventhandler.
             focused_file: File that is focused before calling this. Required as
                 this may be called with keybindings.
-        Return: 1 if failed, 0 if successfull
         """
         if focused_file:
             self._last_file = focused_file
@@ -516,11 +517,10 @@ class Search(GObject.Object):
         filelist = list(self._filelist)
         if not forward:
             filelist.reverse()
-        try:
-            index = filelist.index(self._last_file) + 1
-        # Search move called in a directory without search
-        except ValueError:
-            return 1
+        if self._last_file not in filelist:
+            raise NoSearchResultsError("No search results to navigate")
+        index = filelist.index(self._last_file) + 1
+
         filelist = filelist[index:] + filelist[:index]
         # Find next match
         for i, f in enumerate(filelist):
