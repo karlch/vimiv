@@ -244,6 +244,8 @@ class Library(Gtk.TreeView):
             if os.path.isdir(name):
                 markup_string = "<b>" + markup_string + "</b>"
             if name in self._app["commandline"].search.results:
+                # This is a MarkupSetting not a BoolSetting as pylint thinks
+                # pylint: disable=no-member
                 markup_string = settings["markup"].surround(markup_string)
             model[i][1] = markup_string
 
@@ -341,6 +343,8 @@ class Library(Gtk.TreeView):
             if os.path.isdir(fil):
                 markup_string = "<b>" + markup_string + "</b>"
             if fil in self._app["commandline"].search.results:
+                # This is a MarkupSetting not a BoolSetting as pylint thinks
+                # pylint: disable=no-member
                 markup_string = settings["markup"].surround(markup_string)
             liststore.append([i + 1, markup_string, size, marked_string])
 

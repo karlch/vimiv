@@ -329,7 +329,6 @@ class Completion(Gtk.TreeView):
             info = "<i>" + typestr + "</i>"
             self._liststores["setting"][0].append([completion, info])
 
-
     def _completion_filter(self, model, treeiter, data):
         """Filter function used in the liststores to filter completions.
 

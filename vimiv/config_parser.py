@@ -77,7 +77,7 @@ def parse_config(commandline_config=None, running_tests=False):
 
     # Override settings with settings in config
     for header in ["GENERAL", "LIBRARY"]:
-        if not header in config:
+        if header not in config:
             continue
         section = config[header]
         for setting in section:

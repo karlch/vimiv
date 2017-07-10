@@ -167,6 +167,6 @@ class EventHandler(GObject.Object):
         self.num_append(str(number))
 
     def _convert_trailing_zeros(self):
-        """If prefixed with zero add a decimal point to self._num_str"""
+        """If prefixed with zero add a decimal point to self._num_str."""
         if self._num_str.startswith("0") and not self._num_str.startswith("0."):
             self._num_str = self._num_str.replace("0", "0.")

@@ -110,7 +110,8 @@ class FastCommandlineTest(CommandlineTest):
         self.check_statusbar(
             'ERROR: Alias "test" failed: no command called "foo_bar_baz"')
         self.vimiv["commandline"].commands.add_alias("first_lib", "!ls")
-        self.assertNotIn("first_lib", self.vimiv["commandline"].commands.aliases)
+        self.assertNotIn("first_lib",
+                         self.vimiv["commandline"].commands.aliases)
         self.check_statusbar(
             'ERROR: Alias "first_lib" would overwrite an existing command')
 

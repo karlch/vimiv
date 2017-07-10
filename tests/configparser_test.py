@@ -222,12 +222,11 @@ class ConfigparserTest(TestCase):
         elif text:
             with open(configfile, "w") as f:
                 f.write(text)
-
         return configfile
+
     def tearDown(self):
         """Rest all settings to default."""
         settings.reset()
-
 
     @classmethod
     def create_keyfile(cls, keybindings):

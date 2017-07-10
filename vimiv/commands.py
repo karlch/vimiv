@@ -141,7 +141,8 @@ class Commands(object):
                          default_args=[True], is_hidden=True)
         self.add_command("focus_slider", self._app["manipulate"].focus_slider,
                          positional_args=["name"], is_hidden=True)
-        self.add_command("history_down", self._app["commandline"].history_search,
+        self.add_command("history_down",
+                         self._app["commandline"].history_search,
                          default_args=[True], is_hidden=True)
         self.add_command("history_up", self._app["commandline"].history_search,
                          default_args=[False], is_hidden=True)
@@ -219,7 +220,7 @@ class Commands(object):
         items = list(self._commands.values())
         if (self._n - 1) < len(items) - 1:
             self._n += 1
-            return items[self._n  - 1]
+            return items[self._n - 1]
         else:
             raise StopIteration
 
@@ -269,7 +270,7 @@ class Commands(object):
         if name in self._commands.keys():
             raise AliasError('Alias "%s" would overwrite an existing command'
                              % (name))
-        if not command in self._commands.keys() \
+        if command not in self._commands.keys() \
                 and command_name[0] not in "!~/.":
             raise AliasError('Alias "%s" failed: no command called "%s"'
                              % (name, command_name))
@@ -321,6 +322,11 @@ class Command(object):
         self.is_hidden = is_hidden
 
     def get_max_args(self):
+        """Return the maximum amount of arguments a command may receive.
+
+        Return:
+            The maximum of arguments as integer.
+        """
         num = 0
         if self.positional_args:
             num += len(self.positional_args)

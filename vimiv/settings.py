@@ -9,11 +9,14 @@ from gi.repository import GLib, GObject
 class WrongSettingValue(Exception):
     """Raised when a setting does not have the correct format."""
 
+
 class SettingNotFoundError(Exception):
     """Raised when a setting does not exist."""
 
+
 class NotABoolean(Exception):
     """Raised when a setting is not a boolean."""
+
 
 class NotANumber(Exception):
     """Raised when a setting is not a number."""
@@ -84,6 +87,7 @@ class IntSetting(Setting):
         value = get_int(value, allow_sign=True)
         multiplier = get_int(multiplier, allow_sign=False)
         self._value += value * multiplier
+
 
 class FloatSetting(Setting):
     """Stores a float setting."""
@@ -199,6 +203,7 @@ class MarkupSetting(Setting):
         """
         return self._value + string + "</span>"
 
+
 class SettingStorage(GObject.Object):
     """Stores all settings for vimiv.
 
@@ -284,7 +289,6 @@ class SettingStorage(GObject.Object):
             value: Value to add.
             multiplier: Multiply value by this. Used for num_str.
         """
-
         if isinstance(self[name], (IntSetting, FloatSetting)):
             self[name].add(value, multiplier)
             self.emit("changed", name)
@@ -318,7 +322,7 @@ class SettingStorage(GObject.Object):
         """Iterate over settings."""
         if (self._n - 1) < len(self._settings) - 1:
             self._n += 1
-            return self._settings[self._n  - 1]
+            return self._settings[self._n - 1]
         else:
             raise StopIteration
 
