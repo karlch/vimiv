@@ -206,6 +206,7 @@ class SettingStorage(GObject.Object):
     calling SettingStorage.override("setting_name", new_value).
 
     Attributes:
+        _aliases: Dictionary containing all aliases.
         _settings: List of all Setting objects. Should not be accessed directly.
         _n: Integer for iterator.
 
@@ -215,6 +216,7 @@ class SettingStorage(GObject.Object):
 
     def __init__(self):
         super(SettingStorage, self).__init__()
+        self._aliases = {}
         self._settings = [
             BoolSetting("start_fullscreen", False),
             BoolSetting("start_slideshow", False),
@@ -294,6 +296,12 @@ class SettingStorage(GObject.Object):
         """Reset all settings to their default value."""
         for setting in self:
             setting.set_to_default()
+
+    def set_aliases(self, aliases):
+        self._aliases = aliases
+
+    def get_aliases(self):
+        return self._aliases
 
     def __getitem__(self, name):
         """Receive a setting via its name."""

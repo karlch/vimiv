@@ -7,6 +7,8 @@ import shutil
 from subprocess import Popen, PIPE
 from unittest import main
 
+from vimiv.settings import settings
+
 from vimiv_testcase import VimivTestCase, refresh_gui
 
 
@@ -71,16 +73,11 @@ class FastCommandlineTest(CommandlineTest):
 
     def test_run_alias(self):
         """Run an alias."""
-        return
-        self.vimiv.aliases = {"test_alias": "set show_hidden!"}
-        before_command = self.vimiv["library"].show_hidden
-        self.run_command("test_alias")
-        after_command = self.vimiv["library"].show_hidden
+        self.vimiv["commandline"].commands.add_alias("test", "set show_hidden!")
+        before_command = settings["show_hidden"].get_value()
+        self.run_command("test")
+        after_command = settings["show_hidden"].get_value()
         self.assertNotEqual(before_command, after_command)
-        # Alias that does not exist
-        self.vimiv.aliases = {"test_alias": "useless_command"}
-        self.run_command("test_alias")
-        self.check_statusbar("ERROR: No command called useless_command")
 
     def test_run_external(self):
         """Run an external command and test failures."""
@@ -99,11 +96,23 @@ class FastCommandlineTest(CommandlineTest):
         self.check_statusbar("ERROR: Command exited with status 127\n" +
                              err_message)
 
-    def test_alias(self):
+    def test_add_alias(self):
         """Add an alias."""
-        return
-        self.vimiv["commandline"].add_alias("testalias")
-        self.assertTrue("testalias" in self.vimiv.aliases)
+        self.vimiv["commandline"].commands.add_alias("test", "!ls")
+        self.assertIn("test", self.vimiv["commandline"].commands.aliases)
+        self.assertEqual(self.vimiv["commandline"].commands.aliases["test"],
+                         "!ls")
+
+    def test_fail_add_alias(self):
+        """Fail adding an alias."""
+        self.vimiv["commandline"].commands.add_alias("test", "foo_bar_baz")
+        self.assertNotIn("test", self.vimiv["commandline"].commands.aliases)
+        self.check_statusbar(
+            'ERROR: Alias "test" failed: no command called "foo_bar_baz"')
+        self.vimiv["commandline"].commands.add_alias("first_lib", "!ls")
+        self.assertNotIn("first_lib", self.vimiv["commandline"].commands.aliases)
+        self.check_statusbar(
+            'ERROR: Alias "first_lib" would overwrite an existing command')
 
     def test_history_search(self):
         """Search through history."""
@@ -150,6 +159,9 @@ class FastCommandlineTest(CommandlineTest):
         self.run_command("!find . -type f -maxdepth 1 |")
         refresh_gui()
         self.check_statusbar("INFO: No image found")
+
+    def tearDown(self):
+        self.vimiv["commandline"].commands.aliases.clear()
 
 
 class SlowCommandlineTest(CommandlineTest):

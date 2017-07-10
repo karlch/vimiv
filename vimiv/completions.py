@@ -6,7 +6,7 @@ import re
 from itertools import takewhile
 from string import digits
 
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 from vimiv.fileactions import is_image
 from vimiv.helpers import listdir_wrapper, read_info_from_man
 from vimiv.settings import settings
@@ -73,21 +73,20 @@ class Completion(Gtk.TreeView):
 
     def generate_commandlist(self):
         """Generate a list of internal vimiv commands and store it."""
-        commands = [cmd for cmd in self._app["commands"]
-                    if not self._app["commands"][cmd]["is_hidden"]]
-        aliases = list(self._app.aliases.keys())
+        commands = [cmd.name for cmd in self._app["commandline"].commands
+                    if not cmd.is_hidden]
+        aliases = list(self._app["commandline"].commands.aliases.keys())
         all_commands = sorted(commands + aliases)
         infodict = read_info_from_man()
         for command in all_commands:
             if command in infodict:
                 info = infodict[command]
-            elif command in self._app.aliases:
-                info = "Alias to " + self._app.aliases[command]
-                # Escape ampersand for Gtk
-                info = info.replace("&", "&amp;")
+            elif command in aliases:
+                info = "Alias to %s" % (
+                    self._app["commandline"].commands.aliases[command])
             else:
                 info = ""
-            info = "<i>" + info + "</i>"
+            info = "<i>" + GLib.markup_escape_text(info) + "</i>"
             self._liststores["internal"][0].append([command, info])
 
     def show(self):

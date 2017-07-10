@@ -10,18 +10,18 @@ from vimiv.helpers import error_message
 from vimiv.settings import WrongSettingValue, SettingNotFoundError, settings
 
 
-def add_aliases(config, settings):
+def get_aliases(config):
     """Add aliases from the configfile to the ALIASES section of settings.
 
     Args:
         config: configparser.ConfigParser of the configfile.
-        settings: Dictionary of settings to operate on.
 
     Return:
-        settings: Dictionary of modified settings.
+        aliases: Dictionary of aliases.
         message: Error message filled with aliases that cannot be parsed.
     """
     message = ""
+    aliases = {}
 
     try:
         alias_section = config["ALIASES"]
@@ -31,13 +31,13 @@ def add_aliases(config, settings):
 
     for alias in alias_section:
         try:
-            settings["ALIASES"][alias] = alias_section[alias]
+            aliases[alias] = alias_section[alias]
         except configparser.InterpolationError as e:
             message += "Parsing alias '%s' failed.\n" % alias \
                 + "If you meant to use % for current file, use %%.\n" \
                 + e.message + "\n"
 
-    return settings, message
+    return aliases, message
 
 
 def parse_config(commandline_config=None, running_tests=False):
@@ -87,6 +87,11 @@ def parse_config(commandline_config=None, running_tests=False):
                 message += str(e) + "\n"
             except SettingNotFoundError:
                 message += "Unknown setting %s\n" % (setting)
+
+    # Receive aliases
+    aliases, partial_message = get_aliases(config)
+    settings.set_aliases(aliases)
+    message += partial_message
 
     if message:
         error_message(message, running_tests=running_tests)

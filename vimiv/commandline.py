@@ -8,6 +8,7 @@ from threading import Thread
 
 from gi.repository import GLib, Gtk, GObject
 from vimiv.helpers import read_file, error_message, expand_filenames
+from vimiv.commands import Commands
 from vimiv.settings import settings
 
 
@@ -15,6 +16,7 @@ class CommandLine(Gtk.Entry):
     """Commandline of vimiv.
 
     Attributes:
+        commands: Commands class storing all commands.
         search: Search class defined below.
         running_processes: List of all running external processes.
 
@@ -34,6 +36,7 @@ class CommandLine(Gtk.Entry):
         """
         super(CommandLine, self).__init__()
         self._app = app
+        self.commands = None
 
         # Command line
         self.connect("activate", self._on_activate)
@@ -77,8 +80,8 @@ class CommandLine(Gtk.Entry):
     def _on_activate(self, entry):
         """Handle input from the entry when activated.
 
-        Check for type of command (internal, external, path or alias) and run
-        the correct function.
+        Check for type of command (internal, external or path) and run the
+        correct function.
 
         Args:
             entry: The Gtk.Entry from which the command comes.
@@ -88,9 +91,6 @@ class CommandLine(Gtk.Entry):
             return
         # cmd from input
         command = entry.get_text()
-        # Check for alias and update command
-        if command[1:] in self._app.aliases:
-            command = ":" + self._app.aliases[command[1:]]
         # And close the cmd line by emptying text
         self.set_text("")
         # Write command to log in debug mode
@@ -102,6 +102,9 @@ class CommandLine(Gtk.Entry):
         self._history.insert(0, command)
         # Reset history position
         self._pos = 0
+        # Dereference aliases
+        if command.lstrip(":") in self.commands.aliases:
+            command = self.commands.aliases[command.lstrip(":")]
         # Run the correct command
         self._run(command)
 
@@ -113,24 +116,25 @@ class CommandLine(Gtk.Entry):
         Args:
             command: The command to operate on.
         """
-        if command[0] == "/":  # Search
+        # Search
+        if command[0] == "/":
             self.search.run(command[1:])  # Strip /
-        else:  # Run a command
-            cmd = command.lstrip(":")
+        # Run something different depending on first char in command
+        else:
+            command = command.lstrip(":")
             # If there was no command just leave
-            if not cmd:
+            if not command:
                 return
-            # Run something different depending on first char in cmd
-            if cmd[0] == "!":
-                self._run_external_command(cmd[1:])  # Strip the !
-            elif cmd[0] == "~" or cmd[0] == "." or cmd[0] == "/":
-                self._run_path(cmd)
-            else:  # Default to internal cmd
+            elif command[0] == "!":
+                self._run_external_command(command[1:])  # Strip the !
+            elif command[0] == "~" or command[0] == "." or command[0] == "/":
+                self._run_path(command)
+            else:  # Default to internal command
                 self._app["eventhandler"].num_clear()
-                while cmd[0].isdigit():
-                    self._app["eventhandler"].num_append(cmd[0])
-                    cmd = cmd[1:]
-                self.run_command(cmd)
+                while command[0].isdigit():
+                    self._app["eventhandler"].num_append(command[0])
+                    command = command[1:]
+                self.run_command(command)
 
     # Public because keyhandler also calls this
     def run_command(self, cmd, keyname=None):
@@ -144,29 +148,30 @@ class CommandLine(Gtk.Entry):
         # Get name and arguments
         name_func_and_args = cmd.split()
         name_func = name_func_and_args[0]
-        conf_args = name_func_and_args[1:]
-        if name_func in self._app["commands"]:
-            cmd_dict = self._app["commands"][name_func]
+        given_args = name_func_and_args[1:]
+        command_names = [cmd.name for cmd in self.commands]
+        if name_func in command_names:
+            command = self.commands[name_func]
             # Do not allow calling hidden commands from the command line
-            if not keyname and cmd_dict["is_hidden"]:
+            if not keyname and command.is_hidden:
                 message = "Called a hidden command from the command line"
                 self._app["statusbar"].message(message, "error")
                 return
             # Check if the amount of arguments
-            if len(conf_args) < len(cmd_dict["positional_args"]):
+            if len(given_args) < command.get_min_args():
                 message = "Missing positional arguments for command " + \
-                    name_func + ": " + ", ".join(cmd_dict["positional_args"])
+                    name_func + ": " + ", ".join(command.positional_args)
                 self._app["statusbar"].message(message, "error")
-            elif len(conf_args) > len(cmd_dict["positional_args"]) + \
-                    len(cmd_dict["optional_args"]):
+            elif len(given_args) > command.get_max_args():
                 message = "Too many arguments for command " + name_func
                 self._app["statusbar"].message(message, "error")
             else:
                 # Check if the function supports passing count
-                if not cmd_dict["supports_count"]:
+                if not command.supports_count:
                     self._app["eventhandler"].num_clear()
-                args = cmd_dict["default_args"] + conf_args
-                cmd_dict["function"](*args)
+                args = command.default_args + given_args \
+                    if command.default_args else given_args
+                command.function(*args)
         # If the command name is not in the dictionary throw an error
         else:
             message = "No command called " + name_func
@@ -411,15 +416,6 @@ class CommandLine(Gtk.Entry):
             self._app["statusbar"].message("No search results to navigate",
                                            "error")
 
-    def add_alias(self, alias, *command):
-        """Add an alias.
-
-        Args:
-            alias: The alias to set up.
-            command: Command to be called.
-        """
-        self._app.aliases[alias] = " ".join(command)
-
     def get_history(self):
         return self._history
 
@@ -429,6 +425,10 @@ class CommandLine(Gtk.Entry):
         with open(histfile, "w") as f:
             for cmd in self._history:
                 f.write(cmd + "\n")
+
+    def init_commands(self):
+        """Initiate all commands as soon as the complete app is initialized."""
+        self.commands = Commands(self._app)
 
 
 class Search(GObject.Object):

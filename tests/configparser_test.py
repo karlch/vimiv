@@ -81,7 +81,7 @@ class ConfigparserTest(TestCase):
                                 "file_check_amount": "10",
                                 "tilde_in_statusbar": "no"},
                     "ALIASES": {"testalias": "zoom_in"}}
-        configfile = self.create_configfile(settings=override)
+        configfile = self.create_configfile(new_settings=override)
         parser.parse_config(configfile, running_tests=True)
         self.assertEqual(settings["start_fullscreen"].get_value(), True)
         self.assertEqual(settings["start_slideshow"].get_value(), True)
@@ -199,15 +199,15 @@ class ConfigparserTest(TestCase):
         configfile = os.path.join(cls.configdir,
                                   "vimivrc_" + str(cls.configfile_counter))
         cls.configfile_counter += 1
-        if settings:
-            general = settings["GENERAL"] \
-                if "GENERAL" in settings.keys() \
+        if new_settings:
+            general = new_settings["GENERAL"] \
+                if "GENERAL" in new_settings.keys() \
                 else {}
-            library = settings["LIBRARY"] \
-                if "LIBRARY" in settings.keys() \
+            library = new_settings["LIBRARY"] \
+                if "LIBRARY" in new_settings.keys() \
                 else {}
-            aliases = settings["ALIASES"] \
-                if "ALIASES" in settings.keys() \
+            aliases = new_settings["ALIASES"] \
+                if "ALIASES" in new_settings.keys() \
                 else {}
             with open(configfile, "w") as f:
                 f.write("[GENERAL]\n")

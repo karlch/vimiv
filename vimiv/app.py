@@ -8,7 +8,6 @@ from time import time
 
 from gi.repository import Gdk, Gio, GLib, Gtk, GObject
 from vimiv.commandline import CommandLine
-from vimiv.commands import Commands
 from vimiv.completions import Completion
 from vimiv.config_parser import parse_config
 from vimiv.eventhandler import EventHandler
@@ -31,13 +30,7 @@ class Vimiv(Gtk.Application):
     """Main vimiv application class inheriting from Gtk.Application.
 
     Attributes:
-        aliases: Dictionary of aliases to commands.
-            aliases[alias-name] = command-name
-        commands: Dictionary of commands.
-            commands[command-name] = [function, *args]
         debug: If True, write all messages and commands to log.
-        functions: Dictionary of functions. Includes all commands and additional
-            functions that cannot be called from the commandline.
 
         _tmpdir: tmpfile.TemporaryDirectory used when running with
             --temp-basedir
@@ -72,9 +65,6 @@ class Vimiv(Gtk.Application):
         self._widgets = {}
         self.debug = False
         self._tmpdir = None
-        self.commands = {}
-        self.aliases = {}
-        self.functions = {}
         self.running_tests = running_tests
         # Set up all commandline options
         self._init_commandline_options()
@@ -381,8 +371,8 @@ class Vimiv(Gtk.Application):
         self["manipulate"] = Manipulate(self)
         self["information"] = Information()
         self["window"] = Window(self)
-        self["commands"] = Commands(self).commands
         # Generate completions as soon as commands exist
+        self["commandline"].init_commands()
         self["completions"].generate_commandlist()
         self["log"] = Log(self)
 
