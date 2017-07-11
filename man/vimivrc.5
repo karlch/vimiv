@@ -25,7 +25,7 @@ More information in a nicer format is available at:
 \[la]http://karlch.github.io/vimiv/documentation/configuration/\[ra]
 .SH SETTINGS
 .PP
-Settings are configured in the vimivrc file. This file is separated into three
+Settings are configured in the vimivrc file. This file is separated into four
 sections:
 .RS
 .IP \(bu 2
@@ -33,11 +33,13 @@ GENERAL
 .IP \(bu 2
 LIBRARY
 .IP \(bu 2
+EDIT
+.IP \(bu 2
 ALIASES
 .RE
 .PP
-The first two sections group settings, the third is used to define aliases. What
-each setting means and what values are possible is explained below:
+The first three sections group settings, the fourth is used to define aliases.
+What each setting means and what values are possible is explained below:
 .SS GENERAL
 .TP
 \fB\fCstart_fullscreen\fR, \fB\fCBool\fR
@@ -88,8 +90,8 @@ Padding to use between thumbnails. Note: Additionally to the padding column spac
 \fB\fCcompletion_height\fR, \fB\fCInt\fR
 Height of the completion menu when showing command line completions.
 .TP
-\fB\fCautoplay_gifs\fR, \fB\fCBool\fR
-If yes, automatically start playing an animated gif when the file is opened.
+\fB\fCplay\\_animations\fR, \fB\fCBool\fR
+If yes, animated gif are played. Otherwise stay at the first/current frame.
 .SS LIBRARY
 .TP
 \fB\fCshow_library\fR, \fB\fCBool\fR
@@ -118,6 +120,10 @@ The amount of files vimiv should check in a directory for whether they are image
 .TP
 \fB\fCtilde_in_statusbar\fR, \fB\fCBool\fR
 If yes, collapse $HOME to ~ in the statusbar in the library.
+.SS EDIT
+.TP
+\fB\fCautosave_images\fR, \fB\fCBool\fR
+If yes, automatically save rotated/flipped images to disk. Otherwise to keep changes :w must be called explicitly.
 .SS ALIASES
 .PP
 It is possible to configure aliases for the command line in this section.
@@ -156,7 +162,7 @@ Supported modifiers are:
 .IP \(bu 2
 Shift via Shift+keyname
 .IP \(bu 2
-Control via 
+Control via ^keyname
 .IP \(bu 2
 Alt via Alt+keyname
 .RE
@@ -195,6 +201,9 @@ Delete the current image.
 \fB\fCdiscard_changes\fR
 Discard any changes made in manipulate mode and leave it.
 .TP
+\fB\fCedit\fR
+Edit brightness, contrast or saturation of the current image.
+.TP
 \fB\fCfirst\fR
 Move to the first image of the filelist in image/thumbnail mode.
 .TP
@@ -221,9 +230,6 @@ Format all currently open filenames.
 .TP
 \fB\fCfullscreen\fR
 Toggle fullscreen mode.
-.TP
-\fB\fCgrow_lib\fR
-Increase the library width.
 .TP
 \fB\fClast\fR
 Move to the last image of the filelist in image/thumbnail mode.
@@ -276,47 +282,11 @@ Reload the library.
 \fB\fCrotate\fR
 Rotate the image counter\-clockwise.
 .TP
-\fB\fCset animation!\fR
-Toggle the animation status of animated Gifs.
-.TP
-\fB\fCset brightness\fR
-Set the brightness of the current image.
-.TP
-\fB\fCset clipboard!\fR
-Toggle the copy_to_primary setting.
-.TP
-\fB\fCset contrast\fR
-Set the contrast of the current image.
-.TP
-\fB\fCset library_width\fR
-Set the library width.
-.TP
-\fB\fCset overzoom\fR
-Set the overzoom setting.
-.TP
-\fB\fCset rescale_svg!\fR
-Toggle the rescale_svg setting.
-.TP
-\fB\fCset sharpness\fR
-Set the sharpness of the current image.
-.TP
-\fB\fCset show_hidden!\fR
-Toggle the show_hidden setting.
-.TP
-\fB\fCset slideshow_delay\fR
-Set the slideshow delay.
-.TP
-\fB\fCset statusbar!\fR
-Toggle the statusbar.
-.TP
-\fB\fCshrink_lib\fR
-Decrease the library width.
+\fB\fCset\fR
+Change the value of a setting.
 .TP
 \fB\fCslideshow\fR
 Toggle the slideshow.
-.TP
-\fB\fCslideshow_delay\fR
-Change the value of the slideshow delay.
 .TP
 \fB\fCtag_write\fR
 Write the names of all currently marked images to a tagfile.
@@ -338,6 +308,12 @@ Focus the widget last focused before the library.
 .TP
 \fB\fCversion\fR
 Display pop\-up with version information.
+.TP
+\fB\fCw\fR
+Explicitly save changed images to disk.
+.TP
+\fB\fCwq\fR
+Same as :w but also quit vimiv.
 .TP
 \fB\fCzoom_in\fR
 Zoom in.

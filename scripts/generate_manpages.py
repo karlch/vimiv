@@ -53,9 +53,20 @@ def strip_html(source):
         f.write(cleaned_content)
 
 
+def escape_markdown_characters(source):
+    """Escape special markdown characters like "^" in source."""
+    with open(source) as f:
+        content = f.read()
+    cleaned_content = content.replace("^", "\^")
+
+    with open(source, "w") as f:
+        f.write(cleaned_content)
+
+
 def generate_main_page(source="man/manpage.md", target="man/vimiv.1"):
     """Generate the main vimiv man page from source markdown to target."""
     delete_jekyll_header(source)
+    escape_markdown_characters(source)
     cmd = "md2man-roff %s > %s" % (source, target)
     os.system(cmd)
 
@@ -120,6 +131,7 @@ def generate_config_page(source="man/manpage_5.md", target="man/vimiv.5"):
     replace_include_lines(source)
     convert_tables(source)
     strip_html(source)
+    escape_markdown_characters(source)
     cmd = "md2man-roff %s > %s" % (source, target)
     os.system(cmd)
 

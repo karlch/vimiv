@@ -53,7 +53,7 @@ class HelpersTest(TestCase):
         """Read command information from the vimiv man page."""
         infodict = helpers.read_info_from_man()
         # Check if some keys exist
-        self.assertIn("set brightness", infodict)
+        self.assertIn("set", infodict)
         self.assertIn("center", infodict)
         # Check if the first sentence is added correctly
         # Simple
