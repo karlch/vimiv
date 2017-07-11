@@ -33,7 +33,7 @@ for the development branch.
 
 * python3
 * python-gobject
-* Gtk3
-* python-pillow
+* gtk3
 * python-setuptools for installation
-* optional: jhead for better autorotation with exif data
+* on debian-based systems: python-dev for installation
+* optional: libgexiv2 for exif support
