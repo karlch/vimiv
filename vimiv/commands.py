@@ -208,9 +208,7 @@ class Commands(object):
         Return:
             Dictionary of the command information.
         """
-        if name in self._commands:
-            return self._commands[name]
-        return None
+        return self._commands[name]
 
     def __iter__(self):
         self._n = 0

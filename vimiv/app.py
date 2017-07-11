@@ -420,9 +420,7 @@ class Vimiv(Gtk.Application):
         Return:
             The widget if it exists. None else.
         """
-        if name in self._widgets:
-            return self._widgets[name]
-        return None
+        return self._widgets[name]
 
     def __setitem__(self, name, widget):
         """Convenience method to access widgets via self[name].
