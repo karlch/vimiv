@@ -16,34 +16,17 @@ class Image(Gtk.Image):
 
     Attributes:
         fit_image:
-<<<<<<< HEAD
             user: Image is user zoomed.
             overzoom: Image is zoomed to fit respecting overzoom.
             horizontal: Image is zoomed to fit horizontally.
             vertical: Image is zoomed to fit vertically.
             fit: Image is zoomed to fit.
-        pixbuf_iter: Iter of displayed animation.
-        pixbuf_original: Original image.
-=======
-            0: Image is user zoomed.
-            1: Image is zoomed to fit.
-            2: Image is zoomed to fit horizontally.
-            3: Image is zoomed to fit vertically.
->>>>>>> enhance
         zoom_percent: Percentage to zoom to compared to the original size.
 
-        _animation_toggled: If True, animation is playing.
         _app: The main vimiv class to interact with.
         _identifier: Used so GUI callbacks are only done if the image is equal
-<<<<<<< HEAD
-=======
-        _overzoom: Float describing the maximum amount to zoom images above
-            their default size.
         _pixbuf_iter: Iter of displayed animation.
         _pixbuf_original: Original image.
-        _rescale_svg: If True rescale vector graphics when zooming.
-        _shuffle: If True randomly shuffle paths.
->>>>>>> enhance
         _size: Size of the displayed image as a tuple.
         _timer_id: Id of current animation timer.
     """
