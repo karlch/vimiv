@@ -196,6 +196,27 @@ class TransformTest(VimivTestCase):
         self.assertIn("autorotate, 1 file",
                       self.vimiv["statusbar"].get_message())
 
+    def test_write(self):
+        """Write changes to disk via write command."""
+        self.settings.override("autosave_images", "false")
+        pixbuf = self.vimiv["image"].get_pixbuf_original()
+        self.transform.rotate(1)
+        # File has not changed
+        file_pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.vimiv.get_path())
+        self.assertEqual(pixbuf.get_height(), file_pixbuf.get_height())
+        # But after calling write it has
+        self.transform.write()
+        file_pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.vimiv.get_path())
+        self.assertNotEqual(pixbuf.get_height(), file_pixbuf.get_height())
+        # Set back
+        self.transform.rotate(-1)
+        self.transform.write()
+        file_pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.vimiv.get_path())
+        self.assertEqual(pixbuf.get_height(), file_pixbuf.get_height())
+
+    def tearDown(self):
+        self.settings.reset()
+
     @classmethod
     def tearDownClass(cls):
         cls.vimiv.quit()

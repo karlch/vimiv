@@ -48,6 +48,19 @@ class ManipulateTest(VimivTestCase):
         self.assertFalse(compare_files(tmpfile, self.vimiv.get_path()))
         self.manipulate.toggle()  # Re-open to keep state equal
 
+    def test_write_image(self):
+        """Write an image to disk from manipulate."""
+        # Copy image before manipulation
+        tmpfile = "tmp.jpg"
+        if os.path.exists(tmpfile):
+            os.remove(tmpfile)
+        shutil.copyfile(self.vimiv.get_path(), tmpfile)
+        # Image is different to copied backup after manipulations
+        self.manipulate.cmd_edit("bri", "20")
+        self.vimiv["transform"].write()
+        self.assertFalse(compare_files(tmpfile, self.vimiv.get_path()))
+        self.manipulate.toggle()  # Re-open to keep state equal
+
     def test_focus_sliders(self):
         """Focusing sliders in manipulate."""
         self.assertTrue(self.manipulate.sliders["bri"].is_focus())

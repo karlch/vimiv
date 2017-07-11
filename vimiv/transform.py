@@ -67,6 +67,26 @@ class Transform(GObject.Object):
             message = "Could not restore %s, %s" % (basename, str(e))
             self._app["statusbar"].message(message, "error")
 
+    def write(self, quit_app=False):
+        """Write transformed/manipulated image(s) to disk.
+
+        Args:
+            quit: If True, quit the application. Activated by :wq.
+        """
+        self._app["statusbar"].message("Saving...", "info")
+        # Manipulations include transformations implicitly
+        if self._app["manipulate"].is_visible():
+            self._app["manipulate"].finish(True)
+            self._changes.clear()
+        # Only apply any transformations
+        else:
+            self._thread_for_apply()
+        # Quit or inform
+        if quit_app:
+            self._app.quit_wrapper()
+        else:
+            self._app["statusbar"].message("Changes written to disk", "info")
+
     def get_images(self, info):
         """Return the images which should be manipulated.
 

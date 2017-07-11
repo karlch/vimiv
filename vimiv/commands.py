@@ -118,6 +118,9 @@ class Commands(object):
                          positional_args=["tagname"])
         self.add_command("thumbnail", self._app["thumbnail"].toggle)
         self.add_command("version", self._app["information"].show_version_info)
+        self.add_command("w", self._app["transform"].write)
+        self.add_command("wq", self._app["transform"].write,
+                         default_args=[True])
         self.add_command("zoom_in", self._app["window"].zoom,
                          default_args=[True], optional_args=["steps"],
                          supports_count=True)

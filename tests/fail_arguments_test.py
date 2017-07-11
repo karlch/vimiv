@@ -23,8 +23,7 @@ class FailingArgTest(VimivTestCase):
                     "last", "last_lib", "library", "manipulate", "mark",
                     "mark_all", "mark_between", "move_up", "next", "next!",
                     "prev", "prev!", "q", "q!", "reload_lib", "slideshow",
-                    "thumbnail",
-                    "unfocus_library", "version"]:
+                    "thumbnail", "unfocus_library", "version", "w", "wq"]:
             self.fail_arguments(cmd, 1, too_many=True)
         # 1 Argument optional
         for cmd in ["zoom_in", "zoom_out", "zoom_to"]:
