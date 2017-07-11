@@ -28,6 +28,22 @@ The most important changes between versions are listed here.
     bind to an alias.
   * Add an :undelete command to move images back to their original path.
 * Large code changes to decouple vimiv
+* New way to handle settings:
+  * Settings are now stored in one global class for increased flexibility
+  * Rewrite of the :set command which now simply changes a setting in the
+    storage
+  * Changed setting names to reflect new behaviour:
+    * autoplay\_gifs renamed to play\_animations
+  * The set brightness/contrast/sharpness commands are now called edit
+    brightness/contrast/sharpness.
+  * All commands that started with set are now merged into a single set command
+    leading to different command names for some of them.
+* Get rid of PIL as dependency:
+  * GdkPixbuf used for all simple transformations
+  * A small C-extension deals with brightness and contrast
+  * Support for editing sharpness was dropped
+  * Editing saturation is now possible
+  * New optional dependency `gexiv2` for Exif support
 
 #### v0.8
 * Rewrite large parts to make vimiv a Gtk.Application

@@ -1,7 +1,7 @@
 ##### accept\_changes
 Accept changes made in manipulate.
 
-Refers to brightnes, contrast and sharpness of the image.
+Refers to brightnes, contrast and saturation of the image.
 
 ##### alias
 **Syntax:** <t class="command"><b>:alias</b> <i>aliasname command</i></t>  
@@ -47,8 +47,23 @@ standard, per default <b class="filename">$XDG_DATA_HOME/Trash/</b>.
 ##### discard\_changes
 Discard any changes made in manipulate mode and leave it.
 
-This resets brightness, contrast and sharpness to 0 and restores the original
+This resets brightness, contrast and saturation to 0 and restores the original
 image.
+
+##### edit
+**Syntax:** <t class="command"><b>:edit</b> <i>manipulation [value]</i></t>  
+
+Edit brightness, contrast or saturation of the current image.
+
+Enter manipulate mode if not there yet.
+
+**Positional arguments:**
+* <i class="command">manipulation</i>: The manipulation to edit. One of bri, con
+  or sat corresponding to brightness, contrast and saturation.
+
+**Optional arguments:**
+* <i class="command">value</i>: New value of the manipulation. If omitted, 0 is
+  used.
 
 ##### first
 Move to the first image of the filelist in image/thumbnail mode.
@@ -203,119 +218,36 @@ Rotate the image counter-clockwise.
 
 **Count:** Rotate the image ([count] * <i class="command">value</i> % 4) times.
 
-##### set animation!
-Toggle the animation status of animated Gifs.
+##### set
+**Syntax:** <t class="command"><b>:set</b> <i>setting [value]</i></t>
 
-##### set brightness
-**Syntax:** <t class="command"><b>:set brightness</b> <i>[value]</i></t>
+Change the value of a setting.
 
-Set the brightness of the current image.
+If the setting is of type Bool, appending ! will toggle the setting.
 
-Enter manipulate mode if not there yet.
+**Example:** <t class="command"><b>:set</b> <i>show_hidden!</i></t>  
+Toggle the [show\_hidden]({{ site.baseurl }}/docs/configuration#show-hidden)
+setting.
 
-**Optional arguments:**
-* <i class="command">value</i>: Value between -127 and 127 to set the brightness
-  to. Defaults to 0.
+If the setting is a number, values can be added/substracted by prepending + or -
+to the value.
 
-##### set clipboard!
-Toggle the [copy\_to\_primary]({{ site.baseurl
-}}/docs/configuration#copy-to-primary) setting.
+**Example:** <t class="command"><b>:set</b> <i>slideshow_delay +1</i></t>  
+Add 1 to the [slideshow\_delay](
+{{ site.baseurl }}/docs/configuration#slideshow-delay) setting.
 
-Switches between primary and clipboard.
-
-##### set contrast
-**Syntax:** <t class="command"><b>:set contrast</b> <i>[value]</i></t>
-
-Set the contrast of the current image.
-
-Enter manipulate mode if not there yet.
+**Positional arguments:**
+* <i class="command">setting</i>: The setting to change. The name to enter is
+  the same as the one in the configuration file.
 
 **Optional arguments:**
-* <i class="command">value</i>: Value between -127 and 127 to set the contrast
-  to. Defaults to 0.
-
-##### set library\_width
-**Syntax:** <t class="command"><b>:set library_width</b> <i>[value]</i></t>
-
-Set the library width.
-
-**Optional arguments:**
-* <i class="command">value</i>: Value to set the library width to. Defaults to
-  the [library\_width]({{
-  site.baseurl}}/docs/configuration#library-width) setting.
-
-##### set overzoom
-**Syntax:** <t class="command"><b>:set overzoom</b> <i>[value]</i></t>
-
-Set the [overzoom]({{
-site.baseurl}}/docs/configuration#overzoom) setting.
-
-**Optional arguments:**
-* <i class="command">value</i>: Value to set the overzoom setting to. Defaults
-  to 1.
-
-##### set rescale\_svg!
-Toggle the [rescale\_svg]({{
-site.baseurl}}/docs/configuration#rescale-svg) setting.
-
-##### set sharpness
-**Syntax:** <t class="command"><b>:set sharpness</b> <i>[value]</i></t>
-
-Set the sharpness of the current image.
-
-Enter manipulate mode if not there yet.
-
-**Optional arguments:**
-* <i class="command">value</i>: Value between -127 and 127 to set the sharpness
-  to. Defaults to 0.
-
-##### set show\_hidden!
-Toggle the [show\_hidden]({{
-  site.baseurl}}/docs/configuration#show-hidden) setting.
-
-##### set slideshow\_delay
-**Syntax:** <t class="command"><b>:set slideshow_delay</b> <i>[value]</i></t>
-
-Set the slideshow delay.
-
-**Optional arguments:**
-* <i class="command">value</i>: Value to set the slideshow delay to.  Defaults
-  to the [slideshow\_delay]({{ site.baseurl
-}}/docs/configuration#slideshow-delay) setting.
-
-##### set statusbar!
-Toggle the statusbar.
-
-**Note:** Even if the statusbar is hidden, error messages are still displayed.
-
-##### shrink\_lib
-**Syntax:** <t class="command"><b>:shrink_lib</b> <i>[value]</i></t>
-
-Decrease the library width.
-
-**Optional arguments:**
-* <i class="command">value</i>: Value to decrease width by. Defaults to 20.
-
-**Count:** Multiply [value] by [count].
+* <i class="command">value</i>: New value of the setting. If omitted, the
+  default value is applied.
 
 ##### slideshow
 Toggle the slideshow.
 
 **Count:** Set the slideshow delay to [count].
-
-##### slideshow\_delay
-**Syntax:** <t class="command"><b>:slideshow_delay</b> <i>value</i></t>
-
-Change the value of the slideshow delay.
-
-**Positional arguments:**
-* <i class="command">value</i>: Change by value.
-
-**Count:** Multiply [value] by [count].
-
-**Note:** This decreases or increases by the given value. If you want to set
-the delay to a specific value, use [set slideshow_delay](#set-slideshow_delay)
-instead.
 
 ##### tag\_write
 **Syntax:** <t class="command"><b>:tag_write</b> <i>tagname</i></t>
@@ -357,7 +289,6 @@ This moves it from the trash directory back to its original path.
 **Positional arguments:**
 * <i class="command">basename</i>: Unique basename of the image to undelete as
   it is in the trash directory.
-
 
 ##### unfocus\_library
 Focus the widget last focused before the library.

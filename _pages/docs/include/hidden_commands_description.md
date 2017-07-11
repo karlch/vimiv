@@ -108,6 +108,6 @@ Focus one of the manipulate slider.
 
 **Positional arguments:**
 * <i class="command">name</i>: Name of the slider. One of <i
-  class="command">bri/con/sha</i>.
+  class="command">bri/con/sat</i>.
 
 **Note:** Only makes sense in MANIPULATE section.

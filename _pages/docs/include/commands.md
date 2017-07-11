@@ -16,6 +16,8 @@
 |----|-----------|
 |<a href="#discard_changes">discard_changes</a>|Discard any changes made in manipulate mode and leave it.|
 |----|-----------|
+|<a href="#edit">edit</a>|Edit brightness, contrast or saturation of the current image.|
+|----|-----------|
 |<a href="#first">first</a>|Move to the first image of the filelist in image/thumbnail mode.|
 |----|-----------|
 |<a href="#first_lib">first_lib</a>|Move to the first file of the filelist in the library.|
@@ -33,8 +35,6 @@
 |<a href="#format">format</a>|Format all currently open filenames.|
 |----|-----------|
 |<a href="#fullscreen">fullscreen</a>|Toggle fullscreen mode.|
-|----|-----------|
-|<a href="#grow_lib">grow_lib</a>|Increase the library width.|
 |----|-----------|
 |<a href="#last">last</a>|Move to the last image of the filelist in image/thumbnail mode.|
 |----|-----------|
@@ -70,33 +70,9 @@
 |----|-----------|
 |<a href="#rotate">rotate</a>|Rotate the image counter-clockwise.|
 |----|-----------|
-|<a href="#set-animation">set animation!</a>|Toggle the animation status of animated Gifs.|
-|----|-----------|
-|<a href="#set-brightness">set brightness</a>|Set the brightness of the current image.|
-|----|-----------|
-|<a href="#set-clipboard">set clipboard!</a>|Toggle the copy\_to\_primary setting.|
-|----|-----------|
-|<a href="#set-contrast">set contrast</a>|Set the contrast of the current image.|
-|----|-----------|
-|<a href="#set-library_width">set library_width</a>|Set the library width.|
-|----|-----------|
-|<a href="#set-overzoom">set overzoom</a>|Set the overzoom setting.|
-|----|-----------|
-|<a href="#set-rescale_svg">set rescale_svg!</a>|Toggle the rescale\_svg setting.|
-|----|-----------|
-|<a href="#set-sharpness">set sharpness</a>|Set the sharpness of the current image.|
-|----|-----------|
-|<a href="#set-show_hidden">set show_hidden!</a>|Toggle the show\_hidden setting.|
-|----|-----------|
-|<a href="#set-slideshow_delay">set slideshow_delay</a>|Set the slideshow delay.|
-|----|-----------|
-|<a href="#set-statusbar">set statusbar!</a>|Toggle the statusbar.|
-|----|-----------|
-|<a href="#shrink_lib">shrink_lib</a>|Decrease the library width.|
+|<a href="#set">set</a>|Change the value of a setting.|
 |----|-----------|
 |<a href="#slideshow">slideshow</a>|Toggle the slideshow.|
-|----|-----------|
-|<a href="#slideshow_delay">slideshow_delay</a>|Change the value of the slideshow delay.|
 |----|-----------|
 |<a href="#tag_write">tag_write</a>|Write the names of all currently marked images to a tagfile.|
 |----|-----------|

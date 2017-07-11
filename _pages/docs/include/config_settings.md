@@ -44,7 +44,7 @@ each setting means and what values are possible is explained below:
 |-------|-----|-------|-----------|
 |completion_height|Int|200|Height of the completion menu when showing command line completions.|
 |-------|-----|-------|-----------|
-|autoplay_gifs|Bool|yes|If yes, automatically start playing an animated gif when the file is opened.|
+|play\_animations|Bool|yes|If yes, animated gif are played. Otherwise stay at the first/current frame.|
 |-------|-----|-------|-----------|
 
 #### LIBRARY

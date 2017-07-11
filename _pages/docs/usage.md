@@ -53,7 +53,7 @@ These changes are automatically applied to the file. An image is deleted with
 freedesktop standard, by default <b class="filename">$XDG_DATA_HOME/Trash</b>.
 
 For additional editing open manipulate mode with `c`. Here brightness, contrast
-and sharpness can be edited. To focus the respective slider use the `bcs` keys.
+and saturation can be edited. To focus the respective slider use the `bcs` keys.
 To apply the changes accept with `Return`, to leave manipulate mode reverting
 any changes press `Escape`.
 
