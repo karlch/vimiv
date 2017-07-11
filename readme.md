@@ -59,6 +59,7 @@ for the development branch.
 * python-gobject
 * gtk3
 * python-setuptools (for installation)
+* python-dev (on debian-based systems for installation)
 * libgexiv2 (optional for EXIF support; needed for saving without deleting EXIF
   tags and for the autorotate command)
 
