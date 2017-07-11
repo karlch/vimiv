@@ -34,6 +34,7 @@ The most important changes between versions are listed here.
     storage
   * Changed setting names to reflect new behaviour:
     * autoplay\_gifs renamed to play\_animations
+    * show\_library renamed to start\_show\_library
   * The set brightness/contrast/sharpness commands are now called edit
     brightness/contrast/sharpness.
   * All commands that started with set are now merged into a single set command

@@ -52,7 +52,7 @@ What each setting means and what values are possible is explained below:
 
 |Setting|Value|Default|Description|
 |-------|-----|-------|-----------|
-|show_library|Bool|no|If yes, always show library at start-up.|
+|start_show_library|Bool|no|If yes, always show library at start-up.|
 |-------|-----|-------|-----------|
 |<a name="library-width" class="anchor">library_width</a>|Int|300|Default width of the library when an image is open.|
 |-------|-----|-------|-----------|
