@@ -246,8 +246,9 @@ class SettingStorage(GObject.Object):
         """
         setting = self[name]
         if new_value is None:
-            new_value = setting.get_default()
-        setting.override(new_value)
+            setting.set_to_default()
+        else:
+            setting.override(new_value)
         self.emit("changed", name)
 
     def toggle(self, name):

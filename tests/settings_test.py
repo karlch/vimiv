@@ -7,7 +7,7 @@ from unittest import TestCase, main
 from gi import require_version
 require_version('GLib', '2.0')
 from gi.repository import GLib
-from vimiv import settings
+from vimiv import exceptions, settings
 
 
 class BoolSettingTest(TestCase):
@@ -246,8 +246,16 @@ class SettingStorageTest(TestCase):
         """Override setting directly in storage."""
         self.storage.override("play_animations", "false")
         self.assertEqual(self.storage["play_animations"].get_value(), False)
-        self.storage.override("play_animations", "true")
+        # Override with default value
+        self.storage.override("play_animations")
         self.assertEqual(self.storage["play_animations"].get_value(), True)
+
+    def test_fail_methods(self):
+        """Fail methods in setting storage."""
+        self.assertRaises(exceptions.NotABoolean,
+                          self.storage.toggle, "border_width")
+        self.assertRaises(exceptions.NotANumber,
+                          self.storage.add_to, "show_hidden", "1", "1")
 
     def test_access_unavailable_setting_in_storage(self):
         """Try to access a setting that does not exist in storage."""
