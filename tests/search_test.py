@@ -1,10 +1,9 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Test Search independently of the command line."""
 
-from unittest import main, TestCase
+from unittest import TestCase, main
 
 from vimiv.commandline import Search
-
 from vimiv.settings import settings
 
 

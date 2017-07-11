@@ -2,7 +2,6 @@
 """Test image mode for vimiv's testsuite."""
 
 import os
-
 from unittest import main
 
 from vimiv_testcase import VimivTestCase, refresh_gui

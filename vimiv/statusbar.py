@@ -4,7 +4,6 @@
 import os
 
 from gi.repository import Gdk, GLib, Gtk
-
 from vimiv.settings import settings
 
 

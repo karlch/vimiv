@@ -6,11 +6,10 @@ import shutil
 import time
 from unittest import TestCase, main
 
+import vimiv.imageactions as imageactions
 from gi import require_version
 require_version('GdkPixbuf', '2.0')
 from gi.repository import GdkPixbuf
-
-import vimiv.imageactions as imageactions
 
 from vimiv_testcase import compare_files
 

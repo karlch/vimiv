@@ -12,7 +12,6 @@ import tempfile
 import time
 
 from gi.repository import GLib
-
 from vimiv.exceptions import TrashUndeleteError
 
 

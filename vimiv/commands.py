@@ -3,8 +3,8 @@
 
 from vimiv.exceptions import AliasError
 from vimiv.helpers import error_message
-from vimiv.settings import (settings, WrongSettingValue, SettingNotFoundError,
-                            NotABoolean, NotANumber)
+from vimiv.settings import (NotABoolean, NotANumber, SettingNotFoundError,
+                            WrongSettingValue, settings)
 from vimiv.tags import TagHandler
 
 

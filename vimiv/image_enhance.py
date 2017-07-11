@@ -2,7 +2,6 @@
 """Wrapper functions for the _image_enhance C extension."""
 
 from gi.repository import GdkPixbuf, GLib
-
 from vimiv import _image_enhance
 
 

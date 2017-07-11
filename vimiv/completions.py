@@ -6,7 +6,7 @@ import re
 from itertools import takewhile
 from string import digits
 
-from gi.repository import Gtk, GLib
+from gi.repository import GLib, Gtk
 from vimiv.fileactions import is_image
 from vimiv.helpers import listdir_wrapper, read_info_from_man
 from vimiv.settings import settings

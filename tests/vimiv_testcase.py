@@ -6,8 +6,9 @@ import time
 from unittest import TestCase, main
 
 from gi import require_version
+require_version("GdkPixbuf", "2.0")
 require_version("Gtk", "3.0")
-from gi.repository import Gio, GLib, Gtk, GdkPixbuf
+from gi.repository import GdkPixbuf, Gio, GLib, Gtk
 from vimiv.app import Vimiv
 from vimiv.settings import settings
 

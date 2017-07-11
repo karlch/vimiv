@@ -2,7 +2,6 @@
 """Window class for vimiv."""
 
 from gi.repository import Gdk, Gtk
-
 from vimiv.settings import settings
 
 

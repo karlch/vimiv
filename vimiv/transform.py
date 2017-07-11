@@ -2,7 +2,6 @@
 """Deals with transformations like rotate and flip and deleting files."""
 
 import os
-
 from threading import Thread
 
 from gi.repository import GObject

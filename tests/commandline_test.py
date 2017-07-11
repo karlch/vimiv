@@ -2,9 +2,9 @@
 """Command line tests for vimiv's test suite."""
 
 import os
-import tempfile
 import shutil
-from subprocess import Popen, PIPE
+import tempfile
+from subprocess import PIPE, Popen
 from unittest import main
 
 from vimiv.settings import settings

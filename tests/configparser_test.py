@@ -10,9 +10,7 @@ from unittest import TestCase, main
 from gi import require_version
 require_version('GLib', '2.0')
 from gi.repository import GLib
-
 import vimiv.config_parser as parser
-
 from vimiv.settings import settings
 
 

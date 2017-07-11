@@ -4,13 +4,11 @@
 import os
 import tempfile
 import time
-
 from unittest import TestCase, main
 
 from gi import require_version
 require_version('Gtk', '3.0')
 from gi.repository import GLib
-
 from vimiv import trash_manager
 
 

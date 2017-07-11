@@ -6,10 +6,10 @@ import re
 from subprocess import PIPE, Popen
 from threading import Thread
 
-from gi.repository import GLib, Gtk, GObject
-from vimiv.exceptions import NoSearchResultsError
-from vimiv.helpers import read_file, error_message, expand_filenames
+from gi.repository import GLib, GObject, Gtk
 from vimiv.commands import Commands
+from vimiv.exceptions import NoSearchResultsError
+from vimiv.helpers import error_message, expand_filenames, read_file
 from vimiv.settings import settings
 
 

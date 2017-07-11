@@ -3,7 +3,7 @@
 
 import os
 
-from gi.repository import Gtk, GdkPixbuf
+from gi.repository import GdkPixbuf, Gtk
 from vimiv import image_enhance
 from vimiv.fileactions import edit_supported
 from vimiv.imageactions import save_pixbuf

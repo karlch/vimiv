@@ -3,7 +3,7 @@
 
 from unittest import main
 
-from vimiv_testcase import VimivTestCase, refresh_gui, compare_pixbufs
+from vimiv_testcase import VimivTestCase, compare_pixbufs, refresh_gui
 
 
 class AnimationTest(VimivTestCase):

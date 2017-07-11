@@ -4,9 +4,8 @@
 import os
 
 from gi.repository import GLib, GObject
-
-from vimiv.exceptions import (WrongSettingValue, NotABoolean, NotANumber,
-                              SettingNotFoundError)
+from vimiv.exceptions import (NotABoolean, NotANumber, SettingNotFoundError,
+                              WrongSettingValue)
 
 
 class Setting(object):

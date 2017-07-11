@@ -6,7 +6,7 @@ import sys
 import tempfile
 from time import time
 
-from gi.repository import Gdk, Gio, GLib, Gtk, GObject
+from gi.repository import Gdk, Gio, GLib, GObject, Gtk
 from vimiv.commandline import CommandLine
 from vimiv.completions import Completion
 from vimiv.config_parser import parse_config

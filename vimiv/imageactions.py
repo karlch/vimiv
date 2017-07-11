@@ -5,7 +5,6 @@ import os
 from multiprocessing.pool import ThreadPool as Pool
 
 from gi.repository import GdkPixbuf, GObject
-
 from vimiv.fileactions import edit_supported
 
 # We need the try ... except wrapper here

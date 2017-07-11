@@ -6,7 +6,6 @@ import sys
 from unittest import main
 
 from gi.repository import GLib
-
 from vimiv.app import Vimiv
 
 from vimiv_testcase import VimivTestCase, refresh_gui

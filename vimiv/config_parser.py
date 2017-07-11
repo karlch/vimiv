@@ -7,7 +7,7 @@ import sys
 
 from gi.repository import GLib
 from vimiv.helpers import error_message
-from vimiv.settings import WrongSettingValue, SettingNotFoundError, settings
+from vimiv.settings import SettingNotFoundError, WrongSettingValue, settings
 
 
 def get_aliases(config):

@@ -5,7 +5,7 @@ import os
 import sys
 import time
 
-from gi.repository import Gtk, GLib
+from gi.repository import GLib, Gtk
 
 
 class Log():

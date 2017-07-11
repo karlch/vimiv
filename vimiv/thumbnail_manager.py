@@ -17,7 +17,7 @@ import tempfile
 from multiprocessing.pool import ThreadPool as Pool
 
 from gi._error import GError
-from gi.repository import Gtk, GLib, GdkPixbuf
+from gi.repository import GdkPixbuf, GLib, Gtk
 from gi.repository.GdkPixbuf import Pixbuf
 
 ThumbTuple = collections.namedtuple('ThumbTuple', ['original', 'thumbnail'])

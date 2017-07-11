@@ -2,7 +2,6 @@
 """Test settings.py for vimiv's test suite."""
 
 import os
-
 from unittest import TestCase, main
 
 from gi import require_version

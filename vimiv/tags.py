@@ -3,8 +3,8 @@
 
 import os
 
-from gi.repository import Gtk, GLib
-from vimiv.helpers import read_file, error_message
+from gi.repository import GLib, Gtk
+from vimiv.helpers import error_message, read_file
 
 
 class TagHandler(object):
