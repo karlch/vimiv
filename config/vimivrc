@@ -31,6 +31,9 @@ desktop_start_dir: ~
 file_check_amount: 30
 tilde_in_statusbar: yes
 
+[EDIT] #########################################################################
+autosave_images: yes
+
 [ALIASES] ######################################################################
 
 # vim:ft=config

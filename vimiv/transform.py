@@ -8,6 +8,7 @@ from gi.repository import GObject
 from vimiv import imageactions
 from vimiv.exceptions import TrashUndeleteError
 from vimiv.fileactions import edit_supported
+from vimiv.settings import settings
 from vimiv.trash_manager import TrashManager
 
 
@@ -129,8 +130,11 @@ class Transform(GObject.Object):
         # being changed and what should still be done
         if self.threads_running:
             return
-        t = Thread(target=self._thread_for_apply)
-        t.start()
+        if settings["autosave_images"].get_value():
+            t = Thread(target=self._thread_for_apply)
+            t.start()
+        else:
+            self._changes.clear()
 
     def _thread_for_apply(self):
         """Rotate and flip image file in an extra thread."""

@@ -234,7 +234,8 @@ class SettingStorage(GObject.Object):
             BoolSetting("show_hidden", False),
             DirectorySetting("desktop_start_dir", os.path.expanduser("~")),
             IntSetting("file_check_amount", 30),
-            BoolSetting("tilde_in_statusbar", True)]
+            BoolSetting("tilde_in_statusbar", True),
+            BoolSetting("autosave_images", True)]
         self._n = 0
 
     def override(self, name, new_value=None):
