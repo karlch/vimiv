@@ -140,6 +140,22 @@ class ConfigparserTest(TestCase):
         self.assertIn("Invalid configfile", output)
         self.check_defaults(parsed_settings)
 
+        # Setting has wrong type
+        text = "[GENERAL]\nslideshow_delay: not_a_number\n"
+        configfile = self.create_configfile(text=text)
+        parsed_settings = parser.parse_config(configfile, running_tests=True)
+        output = sys.stdout.getvalue().strip()
+        self.assertIn("Could not convert 'not_a_number' to float", output)
+        self.check_defaults(parsed_settings)
+
+        # Unknown setting
+        text = "[GENERAL]\nfoo_bar_setting: yes\n"
+        configfile = self.create_configfile(text=text)
+        parsed_settings = parser.parse_config(configfile, running_tests=True)
+        output = sys.stdout.getvalue().strip()
+        self.assertIn("Unknown setting foo_bar_setting", output)
+        self.check_defaults(parsed_settings)
+
     def test_parse_keys(self):
         """Parse a correct minimal keyfile."""
         keyfile = self.create_keyfile(self.keybindings)
