@@ -5,9 +5,16 @@ import os
 from random import shuffle
 
 from gi.repository import Gdk, GdkPixbuf, Gtk
-from PIL import Image
 from vimiv.helpers import listdir_wrapper
 from vimiv.settings import settings
+
+# We need the try ... except wrapper here
+# pylint: disable=ungrouped-imports
+try:
+    from gi.repository import GExiv2
+    _has_exif = True
+except ImportError:
+    _has_exif = False
 
 
 def recursive_search(directory):
@@ -105,6 +112,31 @@ def is_animation(filename):
     return "gif" in info.get_extensions()
 
 
+def is_svg(filename):
+    """Check whether a file is a vector graphic.
+
+    Args:
+        filename: Name of file to check.
+    """
+    complete_name = os.path.abspath(os.path.expanduser(filename))
+    info = GdkPixbuf.Pixbuf.get_file_info(complete_name)[0]
+    return "svg" in info.get_extensions() if info else False
+
+
+def edit_supported(filename):
+    """Check whether a file is editable for vimiv.
+
+    Args:
+        filename: Name of file to check.
+    """
+    complete_name = os.path.abspath(os.path.expanduser(filename))
+    info = GdkPixbuf.Pixbuf.get_file_info(complete_name)[0]
+    extension = info.get_extensions()[0]
+    if extension in ["jpeg", "png", "tiff", "ico", "bmp"]:
+        return True
+    return False
+
+
 class FileExtras(object):
     """Extra fileactions for vimiv."""
 
@@ -134,40 +166,35 @@ class FileExtras(object):
             self._app["statusbar"].message("No files in path", "info")
             return
 
-        # Check if exifdata is available and needed
+        # Check if exif data is available and needed
         tofind = ("%" in string)
         if tofind:
-            try:
-                for fil in self._app.get_paths():
-                    with Image.open(fil) as im:
-                        # This will be removed once PIL is deprecated
-                        # pylint: disable=protected-access
-                        exif = im._getexif()
-                        if not (exif and 306 in exif):
-                            raise AttributeError
-            except AttributeError:
+            if not _has_exif:
                 self._app["statusbar"].message(
-                    "No exif data for %s available" % (fil), "error")
+                    "Install gexiv2 for EXIF support in vimiv", "error")
                 return
+            for fil in self._app.get_paths():
+                exif = GExiv2.Metadata(fil)
+                try:
+                    exif.get_date_time()
+                except KeyError:
+                    self._app["statusbar"].message(
+                        "No exif data for %s available" % (fil), "error")
+                    return
 
         for i, fil in enumerate(self._app.get_paths()):
             ending = os.path.splitext(fil)[1]
             num = "%03d" % (i + 1)
             # Exif stuff
             if tofind:
-                with Image.open(fil) as im:
-                    # This will be removed once PIL is deprecated
-                    # pylint: disable=protected-access
-                    exif = im._getexif()
-                    date = exif[306]
-                    time = date.split()[1].split(":")
-                    date = date.split()[0].split(":")
-                    outstring = string.replace("%Y", date[0])  # year
-                    outstring = outstring.replace("%m", date[1])  # month
-                    outstring = outstring.replace("%d", date[2])  # day
-                    outstring = outstring.replace("%H", time[0])  # hour
-                    outstring = outstring.replace("%M", time[1])  # minute
-                    outstring = outstring.replace("%S", time[2])  # second
+                exif = GExiv2.Metadata(fil)
+                date = exif.get_date_time()
+                outstring = string.replace("%Y", str(date.year))
+                outstring = outstring.replace("%m", str(date.month))
+                outstring = outstring.replace("%d", str(date.day))
+                outstring = outstring.replace("%H", str(date.hour))
+                outstring = outstring.replace("%M", str(date.minute))
+                outstring = outstring.replace("%S", str(date.second))
             else:
                 outstring = string
             # Ending

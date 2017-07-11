@@ -2,110 +2,126 @@
 """Actions which act on the actual image file."""
 
 import os
-from shutil import which
-from subprocess import PIPE, Popen
+from multiprocessing.pool import ThreadPool as Pool
 
-from PIL import Image
+from gi.repository import GdkPixbuf, GObject
+
+from vimiv.fileactions import edit_supported
+
+# We need the try ... except wrapper here
+# pylint: disable=ungrouped-imports
+try:
+    from gi.repository import GExiv2
+    _has_exif = True
+except ImportError:
+    _has_exif = False
 
 
-def save_image(im, filename):
-    """Save the image with all the exif keys that exist.
+def save_pixbuf(pixbuf, filename, update_orientation_tag=False):
+    """Save the image with all the exif keys that exist if we have exif support.
+
+    NOTE: This is used to override edited images, not to save images to new
+        paths. The filename must exist as it is used to retrieve the image
+        format and exif data.
 
     Args:
-        im: PIL image to act on.
+        pixbuf: GdkPixbuf.Pixbuf image to act on.
         filename: Name of the image to save.
+        update_orientation_tag: If True, set orientation tag to NORMAL.
     """
-    kwargs = im.info
-    im.save(filename, **kwargs)
+    if not os.path.isfile(filename):
+        raise FileNotFoundError("Original file to retrieve data from not found")
+    # Get needed information
+    info = GdkPixbuf.Pixbuf.get_file_info(filename)[0]
+    extension = info.get_extensions()[0]
+    if _has_exif:
+        exif = GExiv2.Metadata(filename)
+    # Save
+    pixbuf.savev(filename, extension, [], [])
+    if _has_exif and exif.get_supports_exif():
+        if update_orientation_tag:
+            exif.set_orientation(GExiv2.Orientation.NORMAL)
+        exif.save_file()
 
 
-def rotate_file(filelist, cwise):
-    """Rotate every image in filelist cwise*90° counterclockwise.
+def rotate_file(filename, cwise):
+    """Rotate a file and save it.
 
     Args:
-        filelist: List of files to operate on.
-        cwise: Rotation amount. Rotation is cwise*90° counterclockwise.
+        filename: Name of the image to rotate.
+        cwise: Rotate image 90 * cwise degrees.
     """
-    # Always work on realpath, not on symlink
-    filelist = [os.path.realpath(image) for image in filelist]
-    for image in filelist:
-        with Image.open(image) as im:
-            if cwise == 1:
-                im = im.transpose(Image.ROTATE_90)
-            elif cwise == 2:
-                im = im.transpose(Image.ROTATE_180)
-            elif cwise == 3:
-                im = im.transpose(Image.ROTATE_270)
-            save_image(im, image)
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+    pixbuf = pixbuf.rotate_simple(90 * cwise)
+    save_pixbuf(pixbuf, filename, update_orientation_tag=True)
 
 
-def flip_file(filelist, horizontal):
-    """Flip every image in the correct direction.
+def flip_file(filename, horizontal):
+    """Flip a file and save it.
 
     Args:
-        filelist: List of files to operate on.
-        horizontal: If True, flip horizontally. Else flip vertically.
+        filename: Name of the image to flip.
+        horizontal: If True, flip horizontally. Else vertically.
     """
-    # Always work on realpath, not on symlink
-    filelist = [os.path.realpath(image) for image in filelist]
-    for image in filelist:
-        with Image.open(image) as im:
-            if horizontal:
-                im = im.transpose(Image.FLIP_LEFT_RIGHT)
-            else:
-                im = im.transpose(Image.FLIP_TOP_BOTTOM)
-            save_image(im, image)
+    pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+    pixbuf = pixbuf.flip(horizontal)
+    save_pixbuf(pixbuf, filename)
 
 
-def autorotate(filelist, method="auto"):
-    """Autorotate all pictures in filelist according to exif information.
+class Autorotate(GObject.Object):
+    """Class to rotate a list of images according to EXIF in a thread pool.
 
-    Args:
-        filelist: List of files to operate on.
-        method: Method to use. Auto tries jhead and falls back to PIL.
+    Attributes:
+        _filelist: List of files to rotate.
+        _rotated_count: Int to count the amount of files that have been rotated.
+        _processed_count: Int to count the amount of files that have been
+            processed.
+        _thread_pool: ThreadPool to use when rotating all images.
+
+    Signals:
+        completed: Emitted when all files where rotated so the statusbar can
+            update.
     """
-    rotated_images = 0
-    # Check for which method in auto
-    if method == "auto":
-        method = "jhead" if which("jhead") else "PIL"
-    # jhead does this better
-    if method == "jhead":
-        cmd = ["jhead", "-autorot", "-ft"] + filelist
-        p = Popen(cmd, stdin=PIPE, stdout=PIPE, stderr=PIPE)
-        out, err = p.communicate()
-        out = out.decode(encoding="UTF-8")
-        err = err.decode(encoding="UTF-8")
-        # Find out how many images were rotated
-        for line in out.split("\n"):
-            if "Modified" in line and line.split()[1] not in err:
-                rotated_images += 1
-        # Added to the message displayed when done
-        method = "jhead"
-    elif method == "PIL":
-        for path in filelist:
-            with Image.open(path) as im:
-                # This will be removed once PIL is deprecated
-                # pylint: disable=protected-access
-                exif = im._getexif()
-                orientation_key = 274  # cf ExifTags
-                rotated = True
 
-                # Only do something if orientation info is there
-                if exif and orientation_key in exif:
-                    orientation = exif[orientation_key]
-                    # Rotate and save the image
-                    if orientation == 3:
-                        im = im.transpose(Image.ROTATE_180)
-                    elif orientation == 6:
-                        im = im.transpose(Image.ROTATE_270)
-                    elif orientation == 8:
-                        im = im.transpose(Image.ROTATE_90)
-                    else:
-                        rotated = False
-                    if rotated:
-                        save_image(im, path)
-                        rotated_images += 1
-            method = "PIL"
+    def __init__(self, filelist):
+        super(Autorotate, self).__init__()
+        self._filelist = filelist
+        self._rotated_count = 0
+        self._processed_count = 0
 
-    # Return the amount of rotated images and the method used
-    return rotated_images, method
+        _cpu_count = os.cpu_count()
+        if _cpu_count is None:
+            _cpu_count = 1
+        elif _cpu_count > 1:
+            _cpu_count -= 1
+        self._thread_pool = Pool(_cpu_count)
+
+    def run(self):
+        """Start autorotating the images in self._filelist."""
+        for filename in self._filelist:
+            self._thread_pool.apply_async(self._rotate, (filename,),
+                                          callback=self._on_rotated)
+
+    def _rotate(self, filename):
+        """Rotate filename using pixbuf.apply_embedded_orientation()."""
+        if not edit_supported(filename):
+            return
+        exif = GExiv2.Metadata(filename)
+        if not exif.get_supports_exif():
+            return
+        orientation = exif.get_orientation()
+        if orientation not in [GExiv2.Orientation.NORMAL,
+                               GExiv2.Orientation.UNSPECIFIED]:
+            pixbuf = GdkPixbuf.Pixbuf.new_from_file(filename)
+            pixbuf = pixbuf.apply_embedded_orientation()
+            save_pixbuf(pixbuf, filename, update_orientation_tag=True)
+            self._rotated_count += 1
+
+    def _on_rotated(self, thread_pool_result):
+        self._processed_count += 1
+        if self._processed_count == len(self._filelist):
+            self.emit("completed", self._rotated_count)
+
+
+GObject.signal_new("completed", Autorotate, GObject.SIGNAL_RUN_LAST, None,
+                   (GObject.TYPE_PYOBJECT,))

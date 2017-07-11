@@ -3,10 +3,14 @@
 
 import os
 import shutil
+import time
 from unittest import TestCase, main
 
+from gi import require_version
+require_version('GdkPixbuf', '2.0')
+from gi.repository import GdkPixbuf
+
 import vimiv.imageactions as imageactions
-from PIL import Image
 
 from vimiv_testcase import compare_files
 
@@ -20,9 +24,9 @@ class ImageActionsTest(TestCase):
         self.orig = os.path.abspath("arch_001.jpg")
         self.filename = os.path.abspath("image_to_edit.jpg")
         self.filename_2 = os.path.abspath("image_to_edit_2.jpg")
+        self._waiting = False  # Used to wait for autorotate
         shutil.copyfile(self.orig, self.filename)
         shutil.copyfile(self.orig, self.filename_2)
-        self.files = [self.filename]
 
     def test_rotate(self):
         """Rotate image file."""
@@ -32,11 +36,11 @@ class ImageActionsTest(TestCase):
             Args:
                 rotate_int: Number defining the rotation.
             """
-            with Image.open(self.filename) as im:
-                orientation_before = im.size[0] < im.size[1]
-            imageactions.rotate_file(self.files, rotate_int)
-            with Image.open(self.filename) as im:
-                orientation_after = im.size[0] < im.size[1]
+            pb = GdkPixbuf.Pixbuf.new_from_file(self.filename)
+            orientation_before = pb.get_width() < pb.get_height()
+            imageactions.rotate_file(self.filename, rotate_int)
+            pb = GdkPixbuf.Pixbuf.new_from_file(self.filename)
+            orientation_after = pb.get_width() < pb.get_height()
             if rotate_int in [1, 3]:
                 self.assertNotEqual(orientation_before, orientation_after)
             elif rotate_int == 2:
@@ -57,33 +61,38 @@ class ImageActionsTest(TestCase):
         # Images equal before the flip
         self.assertTrue(compare_files(self.orig, self.filename))
         # Images differ after the flip
-        imageactions.flip_file(self.files, False)
+        imageactions.flip_file(self.filename, False)
         self.assertFalse(compare_files(self.orig, self.filename))
         # Images equal after flipping again
-        imageactions.flip_file(self.files, False)
+        imageactions.flip_file(self.filename, False)
         self.assertTrue(compare_files(self.orig, self.filename))
         # Same for horizontal flip
         # Images equal before the flip
         self.assertTrue(compare_files(self.orig, self.filename))
         # Images differ after the flip
-        imageactions.flip_file(self.files, True)
+        imageactions.flip_file(self.filename, True)
         self.assertFalse(compare_files(self.orig, self.filename))
         # Images equal after flipping again
-        imageactions.flip_file(self.files, True)
+        imageactions.flip_file(self.filename, True)
         self.assertTrue(compare_files(self.orig, self.filename))
 
     def test_autorotate(self):
         """Autorotate files."""
-        # Method jhead
-        if not shutil.which("jhead"):
-            self.fail("jhead is not installed.")
-        n_rotated, method = imageactions.autorotate(self.files)
-        self.assertEqual(method, "jhead")
-        self.assertEqual(n_rotated, 1)
-        # Method PIL
-        n_rotated, method = imageactions.autorotate([self.filename_2], "PIL")
-        self.assertEqual(method, "PIL")
-        self.assertEqual(n_rotated, 1)
+        pb = GdkPixbuf.Pixbuf.new_from_file(self.filename)
+        orientation_before = pb.get_width() < pb.get_height()
+        autorotate = imageactions.Autorotate([self.filename])
+        autorotate.connect("completed", self._on_autorotate_completed)
+        autorotate.run()
+        # Wait for it to complete
+        self._waiting = True
+        while self._waiting:
+            time.sleep(0.05)
+        pb = GdkPixbuf.Pixbuf.new_from_file(self.filename)
+        orientation_after = pb.get_width() < pb.get_height()
+        self.assertNotEqual(orientation_before, orientation_after)
+
+    def _on_autorotate_completed(self, autorotate, amount):
+        self._waiting = False
 
     def tearDown(self):
         os.chdir(self.working_directory)

@@ -16,7 +16,6 @@ import os
 import tempfile
 from multiprocessing.pool import ThreadPool as Pool
 
-from PIL import Image
 from gi._error import GError
 from gi.repository import Gtk, GLib, GdkPixbuf
 from gi.repository.GdkPixbuf import Pixbuf
@@ -236,8 +235,8 @@ class ThumbnailStore(object):
         return int(os.path.getmtime(src))
 
     def _get_thumbnail_mtime(self, thumbnail_path):
-        with Image.open(thumbnail_path) as image:
-            mtime = image.info[self.KEY_MTIME]
+        pixbuf = Pixbuf.new_from_file(thumbnail_path)
+        mtime = pixbuf.get_options()["tEXt::" + self.KEY_MTIME]
 
         return mtime
 
@@ -259,9 +258,7 @@ class ThumbnailStore(object):
         width = 0
         height = 0
         try:
-            with Image.open(source_file) as img:
-                width = img.size[0]
-                height = img.size[1]
+            _, width, height = GdkPixbuf.Pixbuf.get_file_info(source_file)
         except IOError:
             pass
 

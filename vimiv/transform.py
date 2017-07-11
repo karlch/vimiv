@@ -8,7 +8,7 @@ from threading import Thread
 from gi.repository import GObject
 from vimiv import imageactions
 from vimiv.exceptions import TrashUndeleteError
-from vimiv.fileactions import is_animation
+from vimiv.fileactions import edit_supported
 from vimiv.trash_manager import TrashManager
 
 
@@ -98,10 +98,10 @@ class Transform(GObject.Object):
             self._app["statusbar"].message(
                 "No image to rotate", "error")
             return
-        # Do not rotate animations
-        elif is_animation(self._app.get_path()):
+        # Do not rotate animations or vector graphics
+        elif not edit_supported(self._app.get_path()):
             self._app["statusbar"].message(
-                "Animations cannot be rotated", "warning")
+                "This filetype cannot be rotated", "warning")
             return
         try:
             cwise = int(cwise)
@@ -139,12 +139,11 @@ class Transform(GObject.Object):
         to_remove = list(self._changes.keys())
         for f in self._changes:
             if self._changes[f][0]:
-                imageactions.rotate_file([f],
-                                         self._changes[f][0])
+                imageactions.rotate_file(f, self._changes[f][0])
             if self._changes[f][1]:
-                imageactions.flip_file([f], True)
+                imageactions.flip_file(f, True)
             if self._changes[f][2]:
-                imageactions.flip_file([f], False)
+                imageactions.flip_file(f, False)
         for key in to_remove:
             del self._changes[key]
         self.emit("applied-to-file", to_remove)
@@ -154,17 +153,16 @@ class Transform(GObject.Object):
         """Flip the displayed image and call thread to flip files.
 
         Args:
-            horizontal: If 1 flip horizontally. Else vertically.
-            rotate_file: If True call thread to rotate files.
+            horizontal: If True, flip horizontally. Else vertically.
         """
         if not self._app.get_paths():
             self._app["statusbar"].message(
                 "No image to flip", "error")
             return
-        # Do not flip animations
-        elif is_animation(self._app.get_path()):
+        # Do not flip animations or vector graphics
+        elif not edit_supported(self._app.get_path()):
             self._app["statusbar"].message(
-                "Animations cannot be flipped", "warning")
+                "This filetype cannot be flipped", "warning")
             return
         try:
             horizontal = int(horizontal)
@@ -191,12 +189,14 @@ class Transform(GObject.Object):
 
     def rotate_auto(self):
         """Autorotate all pictures in the current pathlist."""
-        amount, method = imageactions.autorotate(self._app.get_paths())
-        if amount:
-            self._app["image"].load()
-            message = "Autorotated %d image(s) using %s." % (amount, method)
-        else:
-            message = "No image rotated. Tried using %s." % (method)
+        autorotate = imageactions.Autorotate(self._app.get_paths())
+        self.threads_running = True
+        autorotate.connect("completed", self._on_autorotate_completed)
+        autorotate.run()
+
+    def _on_autorotate_completed(self, autorotate, amount):
+        message = "Completed autorotate, %d files rotated" % (amount)
+        self.threads_running = False
         self._app["statusbar"].message(message, "info")
 
 

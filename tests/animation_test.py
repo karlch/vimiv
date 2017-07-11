@@ -18,17 +18,15 @@ class AnimationTest(VimivTestCase):
         """Pause and play an animated gif."""
         self._update_gif(True)
         # Frames should be updated
-        first_pb = self.image.pixbuf_original.copy()
-        delay = self.image.pixbuf_iter.get_delay_time()
-        refresh_gui((delay + 50) / 1000)
-        second_pb = self.image.pixbuf_original.copy()
+        first_pb = self.image.get_pixbuf_original()
+        refresh_gui(0.1)
+        second_pb = self.image.get_pixbuf_original()
         self.assertFalse(compare_pixbufs(first_pb, second_pb))
         # Frames should no longer be updated
         self._update_gif(False)
-        first_pb = self.image.pixbuf_original.copy()
-        delay = self.image.pixbuf_iter.get_delay_time()
-        refresh_gui((delay + 50) / 1000)
-        second_pb = self.image.pixbuf_original.copy()
+        first_pb = self.image.get_pixbuf_original()
+        refresh_gui(0.1)
+        second_pb = self.image.get_pixbuf_original()
         self.assertTrue(compare_pixbufs(first_pb, second_pb))
         # Back to standard state
         self._update_gif(True)
@@ -36,9 +34,9 @@ class AnimationTest(VimivTestCase):
     def test_fail_transform_animation(self):
         """Fail transforming an animation."""
         self.vimiv["transform"].rotate(3)
-        self.check_statusbar("WARNING: Animations cannot be rotated")
+        self.check_statusbar("WARNING: This filetype cannot be rotated")
         self.vimiv["transform"].flip(True)
-        self.check_statusbar("WARNING: Animations cannot be flipped")
+        self.check_statusbar("WARNING: This filetype cannot be flipped")
 
     def test_zoom_animation(self):
         """Zoom an animation."""

@@ -11,8 +11,12 @@ __email__ = "karlch@protonmail.com"
 try:
     from gi import require_version
     require_version("Gtk", "3.0")
+    try:
+        require_version("GExiv2", "0.10")
+    # No EXIF support
+    except ValueError:
+        pass
     from gi.repository import GLib, Gtk, Gdk, GdkPixbuf, Pango
-    from PIL import Image, ImageEnhance
 
 except ImportError as import_error:
     message = import_error.msg + "\n" + "Are all dependencies installed?"

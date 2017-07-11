@@ -7,7 +7,9 @@ import tempfile
 from time import sleep
 from unittest import main
 
-from PIL import Image
+from gi import require_version
+require_version('GdkPixbuf', '2.0')
+from gi.repository import GdkPixbuf
 
 from vimiv_testcase import VimivTestCase
 
@@ -22,6 +24,7 @@ class TransformTest(VimivTestCase):
         shutil.copytree("vimiv/testimages", "vimiv/testimages_man")
         cls.init_test(cls, ["vimiv/testimages_man/arch-logo.png"])
         cls.transform = cls.vimiv["transform"]
+        cls._waiting = False  # Used to wait for autorotate
 
     def test_get_images(self):
         """Get images to transform."""
@@ -97,8 +100,10 @@ class TransformTest(VimivTestCase):
         self.assertGreater(pixbuf.get_height(), pixbuf.get_width())
         while self.transform.threads_running:
             sleep(0.05)
-        with Image.open(self.vimiv.get_path()) as im:
-            self.assertGreater(im.height, im.width)
+        # Check file
+        updated_pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.vimiv.get_path())
+        self.assertGreater(updated_pixbuf.get_height(),
+                           updated_pixbuf.get_width())
         # Rotate back
         self.transform.rotate(-1)
         self.transform.apply()
@@ -106,8 +111,9 @@ class TransformTest(VimivTestCase):
         self.assertLess(pixbuf.get_height(), pixbuf.get_width())
         while self.transform.threads_running:
             sleep(0.05)
-        with Image.open(self.vimiv.get_path()) as im:
-            self.assertLess(im.height, im.width)
+        # Check file
+        updated_pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.vimiv.get_path())
+        self.assertLess(updated_pixbuf.get_height(), updated_pixbuf.get_width())
         # Fail because of no paths
         backup = list(self.vimiv.get_paths())
         self.vimiv.populate([])
@@ -165,11 +171,11 @@ class TransformTest(VimivTestCase):
     def test_auto_rotate(self):
         """Auto rotate images from transform checking messages."""
         self.transform.rotate_auto()
-        statusbar_text = self.vimiv["statusbar"].get_message()
-        self.assertIn("Autorotated 1", statusbar_text)
-        self.transform.rotate_auto()
-        statusbar_text = self.vimiv["statusbar"].get_message()
-        self.assertIn("No image rotated.", statusbar_text)
+        # Wait for it to complete
+        while self.transform.threads_running:
+            sleep(0.05)
+        self.assertIn("autorotate, 1 file",
+                      self.vimiv["statusbar"].get_message())
 
     @classmethod
     def tearDownClass(cls):
