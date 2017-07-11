@@ -28,3 +28,7 @@ class AliasError(Exception):
 
 class TrashUndeleteError(Exception):
     """Raised when there were problems calling :undelete."""
+
+
+class NotTransformable(Exception):
+    """Raised when an image is not transformable for transform.py."""

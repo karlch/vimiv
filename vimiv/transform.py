@@ -6,7 +6,7 @@ from threading import Thread
 
 from gi.repository import GObject
 from vimiv import imageactions
-from vimiv.exceptions import TrashUndeleteError
+from vimiv.exceptions import NotTransformable, TrashUndeleteError
 from vimiv.fileactions import edit_supported
 from vimiv.settings import settings
 from vimiv.trash_manager import TrashManager
@@ -94,35 +94,31 @@ class Transform(GObject.Object):
         Args:
             cwise: Rotate image 90 * cwise degrees.
         """
-        if not self._app.get_paths():
-            self._app["statusbar"].message(
-                "No image to rotate", "error")
-            return
-        # Do not rotate animations or vector graphics
-        elif not edit_supported(self._app.get_path()):
-            self._app["statusbar"].message(
-                "This filetype cannot be rotated", "warning")
-            return
         try:
+            self._is_transformable()
             cwise = int(cwise)
-            images = self.get_images("Rotated")
-            cwise = cwise % 4
-            # Update properties
-            for fil in images:
-                if fil in self._changes:
-                    self._changes[fil][0] = \
-                        (self._changes[fil][0] + cwise) % 4
-                else:
-                    self._changes[fil] = [cwise, 0, 0]
-            # Rotate the image shown
-            if self._app.get_path() in images:
-                self.emit("changed", "rotate", cwise)
-            # Reload thumbnails of rotated images immediately
-            if self._app["thumbnail"].toggled:
-                self.apply()
+        except NotTransformable as e:
+            self._app["statusbar"].message(str(e) + " rotate", "error")
+            return
         except ValueError:
             self._app["statusbar"].message(
                 "Argument for rotate must be of type integer", "error")
+            return
+        images = self.get_images("Rotated")
+        cwise = cwise % 4
+        # Update properties
+        for fil in images:
+            if fil in self._changes:
+                self._changes[fil][0] = \
+                    (self._changes[fil][0] + cwise) % 4
+            else:
+                self._changes[fil] = [cwise, 0, 0]
+        # Rotate the image shown
+        if self._app.get_path() in images:
+            self.emit("changed", "rotate", cwise)
+        # Reload thumbnails of rotated images immediately
+        if self._app["thumbnail"].toggled:
+            self.apply()
 
     def apply(self):
         """Start thread for rotate and flip."""
@@ -152,43 +148,46 @@ class Transform(GObject.Object):
         self.emit("applied-to-file", to_remove)
         self.threads_running = False
 
+    def _is_transformable(self):
+        """Check if the current image is transformable."""
+        if not self._app.get_paths():
+            raise NotTransformable("No image to")
+        elif not edit_supported(self._app.get_path()):
+            raise NotTransformable("Filetype not supported for")
+
     def flip(self, horizontal):
         """Flip the displayed image and call thread to flip files.
 
         Args:
             horizontal: If True, flip horizontally. Else vertically.
         """
-        if not self._app.get_paths():
-            self._app["statusbar"].message(
-                "No image to flip", "error")
-            return
-        # Do not flip animations or vector graphics
-        elif not edit_supported(self._app.get_path()):
-            self._app["statusbar"].message(
-                "This filetype cannot be flipped", "warning")
-            return
         try:
+            self._is_transformable()
             horizontal = int(horizontal)
-            images = self.get_images("Flipped")
-            # Apply changes
-            for fil in images:
-                if fil not in self._changes:
-                    self._changes[fil] = [0, 0, 0]
-                if horizontal:
-                    self._changes[fil][1] = \
-                        (self._changes[fil][1] + 1) % 2
-                else:
-                    self._changes[fil][2] = \
-                        (self._changes[fil][2] + 1) % 2
-            # Flip the image shown
-            if self._app.get_path() in images:
-                self.emit("changed", "flip", horizontal)
-            # Reload thumbnails of flipped images immediately
-            if self._app["thumbnail"].toggled:
-                self.apply()
+        except NotTransformable as e:
+            self._app["statusbar"].message(str(e) + " flip", "error")
+            return
         except ValueError:
             self._app["statusbar"].message(
                 "Argument for flip must be of type integer", "error")
+            return
+        images = self.get_images("Flipped")
+        # Apply changes
+        for fil in images:
+            if fil not in self._changes:
+                self._changes[fil] = [0, 0, 0]
+            if horizontal:
+                self._changes[fil][1] = \
+                    (self._changes[fil][1] + 1) % 2
+            else:
+                self._changes[fil][2] = \
+                    (self._changes[fil][2] + 1) % 2
+        # Flip the image shown
+        if self._app.get_path() in images:
+            self.emit("changed", "flip", horizontal)
+        # Reload thumbnails of flipped images immediately
+        if self._app["thumbnail"].toggled:
+            self.apply()
 
     def rotate_auto(self):
         """Autorotate all pictures in the current pathlist."""
