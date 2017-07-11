@@ -137,8 +137,65 @@ def edit_supported(filename):
     return False
 
 
-class FileExtras(object):
-    """Extra fileactions for vimiv."""
+def format_files(app, string):
+    """Format image names in filelist according to a formatstring.
+
+    Numbers files in form of formatstring_000.extension. Replaces exif
+    information accordingly.
+
+    Args:
+        app: Vimiv application to interact with.
+        string: Formatstring to use.
+    """
+    # Catch problems
+    if app["library"].is_focus():
+        message = "Format only works on opened image files"
+        app["statusbar"].message(message, "info")
+        return
+    if not app.get_paths():
+        app["statusbar"].message("No files in path", "info")
+        return
+
+    # Check if exif data is available and needed
+    tofind = ("%" in string)
+    if tofind:
+        if not _has_exif:
+            app["statusbar"].message(
+                "Install gexiv2 for EXIF support in vimiv", "error")
+            return
+        for fil in app.get_paths():
+            exif = GExiv2.Metadata(fil)
+            try:
+                exif.get_date_time()
+            except KeyError:
+                app["statusbar"].message(
+                    "No exif data for %s available" % (fil), "error")
+                return
+
+    for i, fil in enumerate(app.get_paths()):
+        ending = os.path.splitext(fil)[1]
+        num = "%03d" % (i + 1)
+        # Exif stuff
+        if tofind:
+            exif = GExiv2.Metadata(fil)
+            date = exif.get_date_time()
+            outstring = string.replace("%Y", str(date.year))
+            outstring = outstring.replace("%m", str(date.month))
+            outstring = outstring.replace("%d", str(date.day))
+            outstring = outstring.replace("%H", str(date.hour))
+            outstring = outstring.replace("%M", str(date.minute))
+            outstring = outstring.replace("%S", str(date.second))
+        else:
+            outstring = string
+        # Ending
+        outstring += num + ending
+        os.rename(fil, outstring)
+
+    app.emit("paths-changed", format_files)
+
+
+class ClipboardHandler(object):
+    """Deals with copying to the system clipboard."""
 
     def __init__(self, app):
         """Receive and set main vimiv application.
@@ -147,61 +204,6 @@ class FileExtras(object):
             _app: The main vimiv class to interact with.
         """
         self._app = app
-
-    def format_files(self, string):
-        """Format image names in filelist according to a formatstring.
-
-        Numbers files in form of formatstring_000.extension. Replaces exif
-        information accordingly.
-
-        Args:
-            string: Formatstring to use.
-        """
-        # Catch problems
-        if self._app["library"].is_focus():
-            message = "Format only works on opened image files"
-            self._app["statusbar"].message(message, "info")
-            return
-        if not self._app.get_paths():
-            self._app["statusbar"].message("No files in path", "info")
-            return
-
-        # Check if exif data is available and needed
-        tofind = ("%" in string)
-        if tofind:
-            if not _has_exif:
-                self._app["statusbar"].message(
-                    "Install gexiv2 for EXIF support in vimiv", "error")
-                return
-            for fil in self._app.get_paths():
-                exif = GExiv2.Metadata(fil)
-                try:
-                    exif.get_date_time()
-                except KeyError:
-                    self._app["statusbar"].message(
-                        "No exif data for %s available" % (fil), "error")
-                    return
-
-        for i, fil in enumerate(self._app.get_paths()):
-            ending = os.path.splitext(fil)[1]
-            num = "%03d" % (i + 1)
-            # Exif stuff
-            if tofind:
-                exif = GExiv2.Metadata(fil)
-                date = exif.get_date_time()
-                outstring = string.replace("%Y", str(date.year))
-                outstring = outstring.replace("%m", str(date.month))
-                outstring = outstring.replace("%d", str(date.day))
-                outstring = outstring.replace("%H", str(date.hour))
-                outstring = outstring.replace("%M", str(date.minute))
-                outstring = outstring.replace("%S", str(date.second))
-            else:
-                outstring = string
-            # Ending
-            outstring += num + ending
-            os.rename(fil, outstring)
-
-        self._app.emit("paths-changed", self)
 
     def copy_name(self, abspath=False):
         """Copy image name to clipboard.

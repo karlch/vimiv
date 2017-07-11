@@ -2,6 +2,7 @@
 """Contains all commands and functions for vimiv."""
 
 from vimiv.exceptions import AliasError
+from vimiv.fileactions import format_files
 from vimiv.helpers import error_message
 from vimiv.settings import (NotABoolean, NotANumber, SettingNotFoundError,
                             WrongSettingValue, settings)
@@ -43,9 +44,9 @@ class Commands(object):
                          positional_args=["name", "command"])
         self.add_command("autorotate", self._app["transform"].rotate_auto)
         self.add_command("center", self._app["main_window"].center_window)
-        self.add_command("copy_basename", self._app["fileextras"].copy_name,
+        self.add_command("copy_basename", self._app["clipboard"].copy_name,
                          default_args=[False])
-        self.add_command("copy_abspath", self._app["fileextras"].copy_name,
+        self.add_command("copy_abspath", self._app["clipboard"].copy_name,
                          default_args=[True])
         self.add_command("delete", self._app["transform"].delete)
         self.add_command("undelete", self._app["transform"].undelete,
@@ -68,7 +69,7 @@ class Commands(object):
                          default_args=[0, "vertical"])
         self.add_command("flip", self._app["transform"].flip,
                          positional_args=["direction"])
-        self.add_command("format", self._app["fileextras"].format_files,
+        self.add_command("format", format_files, default_args=[self._app],
                          positional_args=["formatstring"])
         self.add_command("fullscreen", self._app["window"].toggle_fullscreen)
         self.add_command("last", self._app["image"].move_pos,

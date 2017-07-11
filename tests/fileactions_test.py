@@ -25,7 +25,7 @@ class FormatTest(VimivTestCase):
         shutil.copytree("testimages/", "testimages_to_format/")
         self.run_command("./testimages_to_format/arch-logo.png")
         self.vimiv["library"].toggle()
-        self.vimiv["fileextras"].format_files("formatted_")
+        fileactions.format_files(self.vimiv, "formatted_")
         files = [fil for fil in os.listdir() if "formatted_" in fil]
         files = sorted(files)
         expected_files = ["formatted_001.png", "formatted_002.jpg",
@@ -35,7 +35,7 @@ class FormatTest(VimivTestCase):
             self.assertIn(fil, files)
         # Should not work without a path
         self.vimiv.populate([])
-        self.vimiv["fileextras"].format_files("formatted_")
+        fileactions.format_files(self.vimiv, "formatted_")
         self.check_statusbar("INFO: No files in path")
 
     def test_format_files_with_exif(self):
@@ -45,7 +45,7 @@ class FormatTest(VimivTestCase):
                         "testimages_to_format/arch_001.jpg")
         self.run_command("./testimages_to_format/arch_001.jpg")
         self.vimiv["library"].toggle()
-        self.vimiv["fileextras"].format_files("formatted_%Y_")
+        fileactions.format_files(self.vimiv, "formatted_%Y_")
         self.assertIn("formatted_2016_001.jpg", os.listdir())
 
     def test_fail_format_files_with_exif(self):
@@ -55,7 +55,7 @@ class FormatTest(VimivTestCase):
                         "testimages_to_format/arch-logo.png")
         self.run_command("./testimages_to_format/arch-logo.png")
         self.vimiv["library"].toggle()
-        self.vimiv["fileextras"].format_files("formatted_%Y_")
+        fileactions.format_files(self.vimiv, "formatted_%Y_")
         message = self.vimiv["statusbar"].get_message()
         self.assertIn("No exif data for", message)
 
@@ -63,7 +63,7 @@ class FormatTest(VimivTestCase):
         # Should not work in library
         if os.path.basename(os.getcwd()) != "vimiv":
             self.vimiv["library"].move_up()
-            self.vimiv["fileextras"].format_files("formatted_")
+            fileactions.format_files(self.vimiv, "formatted_")
             self.check_statusbar(
                 "INFO: Format only works on opened image files")
         # Remove generated paths
@@ -90,22 +90,22 @@ class ClipboardTest(VimivTestCase):
         clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD)
         primary = Gtk.Clipboard.get(Gdk.SELECTION_PRIMARY)
         # Copy basename and abspath to clipboard
-        self.vimiv["fileextras"].copy_name(False)
+        self.vimiv["clipboard"].copy_name(False)
         # Check if the info message is displayed correctly
         self.check_statusbar("INFO: Copied " + basename + " to clipboard")
         clipboard.request_text(compare_text, basename)
         self.assertTrue(self.compare_result)
-        self.vimiv["fileextras"].copy_name(True)
+        self.vimiv["clipboard"].copy_name(True)
         clipboard.request_text(compare_text, abspath)
         self.assertTrue(self.compare_result)
         # Toggle to primary and copy basename
         self.run_command("set copy_to_primary!")
-        self.vimiv["fileextras"].copy_name(False)
+        self.vimiv["clipboard"].copy_name(False)
         primary.request_text(compare_text, basename)
         self.assertTrue(self.compare_result)
         # Toggle back to clipboard and copy basename
         self.run_command("set copy_to_primary!")
-        self.vimiv["fileextras"].copy_name(False)
+        self.vimiv["clipboard"].copy_name(False)
         clipboard.request_text(compare_text, basename)
         self.assertTrue(self.compare_result)
 

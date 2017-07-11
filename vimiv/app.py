@@ -11,7 +11,7 @@ from vimiv.commandline import CommandLine
 from vimiv.completions import Completion
 from vimiv.config_parser import parse_config
 from vimiv.eventhandler import EventHandler
-from vimiv.fileactions import FileExtras, populate
+from vimiv.fileactions import ClipboardHandler, populate
 from vimiv.information import Information
 from vimiv.library import Library
 from vimiv.log import Log
@@ -360,7 +360,7 @@ class Vimiv(Gtk.Application):
         self["commandline"] = CommandLine(self)
         self["tags"] = TagHandler(self)
         self["mark"] = Mark(self)
-        self["fileextras"] = FileExtras(self)
+        self["clipboard"] = ClipboardHandler(self)
         self["statusbar"] = Statusbar(self)
         self["completions"] = Completion(self)
         self["slideshow"] = Slideshow(self)
