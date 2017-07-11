@@ -205,8 +205,8 @@ class Library(Gtk.TreeView):
             curdir = os.getcwd()
             os.chdir(directory)
             if not start:
-                self.reload(os.getcwd(), curdir)
                 self.focus()
+                self.reload(os.getcwd(), curdir)
         except (FileNotFoundError, PermissionError):
             self._app["statusbar"].message("Directory not accessible", "error")
 

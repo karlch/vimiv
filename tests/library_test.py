@@ -190,6 +190,10 @@ class LibraryTest(VimivTestCase):
         tmpdir = tempfile.TemporaryDirectory(prefix="vimiv-")
         self.lib.move_up(tmpdir.name)
         self.assertEqual(os.getcwd(), tmpdir.name)
+        self.check_statusbar("WARNING: Directory is empty")
+        # Check if exception is caught properly
+        self.lib.scroll("l")
+        self.check_statusbar("ERROR: No file to select")
         self.lib.scroll("h")
         self.assertEqual(os.getcwd(), os.path.dirname(tmpdir.name))
         tmpdir.cleanup()
