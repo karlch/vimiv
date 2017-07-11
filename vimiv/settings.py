@@ -226,7 +226,7 @@ class SettingStorage(GObject.Object):
             IntSetting("thumb_padding", 10),
             IntSetting("completion_height", 200),
             BoolSetting("play_animations", True),
-            BoolSetting("show_library", False),
+            BoolSetting("start_show_library", False),
             IntSetting("library_width", 300),
             BoolSetting("expand_lib", True),
             IntSetting("border_width", 0),

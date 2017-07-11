@@ -229,7 +229,7 @@ class SettingStorageTest(TestCase):
                     "thumb_padding": 10,
                     "completion_height": 200,
                     "play_animations": True,
-                    "show_library": False,
+                    "start_show_library": False,
                     "library_width": 300,
                     "expand_lib": True,
                     "border_width": 0,

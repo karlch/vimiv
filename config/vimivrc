@@ -21,7 +21,7 @@ completion_height: 200
 play_animations: yes
 
 [LIBRARY] ######################################################################
-show_library: no
+start_show_library: no
 library_width: 300
 expand_lib: yes
 border_width: 0

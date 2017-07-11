@@ -160,8 +160,8 @@ class Vimiv(Gtk.Application):
 
         set_option("bar", "display_bar", 1)
         set_option("no-bar", "display_bar", 0)
-        set_option("library", "show_library", 1)
-        set_option("no-library", "show_library", 0)
+        set_option("library", "start_show_library", 1)
+        set_option("no-library", "start_show_library", 0)
         set_option("fullscreen", "start_fullscreen", 1)
         set_option("no-fullscreen", "start_fullscreen", 0)
         set_option("shuffle", "shuffle", 1)
@@ -201,7 +201,7 @@ class Vimiv(Gtk.Application):
         if self._paths:
             self["image"].load()
             # Show library at the beginning?
-            if not settings["show_library"].get_value():
+            if not settings["start_show_library"].get_value():
                 self["library"].grid.hide()
             self["main_window"].grab_focus()
             # Start in slideshow mode?

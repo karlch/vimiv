@@ -69,7 +69,7 @@ class ConfigparserTest(TestCase):
                                 "copy_to_primary": "no",
                                 "commandline_padding": 0,
                                 "completion_height": 100},
-                    "LIBRARY": {"show_library": "yes",
+                    "LIBRARY": {"start_show_library": "yes",
                                 "library_width": "200",
                                 "expand_lib": "no",
                                 "border_width": "12",
@@ -95,7 +95,7 @@ class ConfigparserTest(TestCase):
         self.assertEqual(settings["copy_to_primary"].get_value(), False)
         self.assertEqual(settings["commandline_padding"].get_value(), 0)
         self.assertEqual(settings["completion_height"].get_value(), 100)
-        self.assertEqual(settings["show_library"].get_value(), True)
+        self.assertEqual(settings["start_show_library"].get_value(), True)
         self.assertEqual(settings["library_width"].get_value(), 200)
         self.assertEqual(settings["expand_lib"].get_value(), False)
         self.assertEqual(settings["border_width"].get_value(), 12)
