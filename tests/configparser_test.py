@@ -107,8 +107,8 @@ class ConfigparserTest(TestCase):
                          os.path.expanduser("~/.local"))
         self.assertEqual(settings["file_check_amount"].get_value(), 10)
         self.assertEqual(settings["tilde_in_statusbar"].get_value(), False)
-        # self.assertIn("testalias", aliases.keys())
-        # self.assertEqual(aliases["testalias"], "zoom_in")
+        self.assertIn("testalias", settings.get_aliases().keys())
+        self.assertEqual("zoom_in", settings.get_aliases()["testalias"])
 
     def test_broken_configfiles(self):
         """Parse broken configfiles.
