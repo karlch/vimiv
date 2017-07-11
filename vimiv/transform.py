@@ -154,6 +154,17 @@ class Transform(GObject.Object):
             raise NotTransformable("No image to")
         elif not edit_supported(self._app.get_path()):
             raise NotTransformable("Filetype not supported for")
+        # Some operations only make sense if we are allowed to save to file
+        elif not settings["autosave_images"].get_value():
+            message = ""
+            if self._app["thumbnail"].toggled:
+                message = 'When operating in thumbnail mode ' \
+                          '"autosave_images" must be enabled for'
+            elif self._app["mark"].marked:
+                message = 'When images are marked ' \
+                          '"autosave_images" must be enabled for'
+            if message:
+                raise NotTransformable(message)
 
     def flip(self, horizontal):
         """Flip the displayed image and call thread to flip files.

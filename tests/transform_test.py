@@ -168,6 +168,25 @@ class TransformTest(VimivTestCase):
         self.run_command("flip value")
         self.check_statusbar("ERROR: Argument for flip must be of type integer")
 
+    def test_fail_transform_without_autosave_images(self):
+        """Fail specific transforms because autosave_images is false."""
+        self.settings.override("autosave_images", "false")
+        self.vimiv["mark"].marked = ["some file"]
+        self.run_command("flip 1")
+        self.check_statusbar(
+            'ERROR: When images are marked "autosave_images" must be enabled '
+            'for flip')
+        self.vimiv["mark"].marked = []
+
+        self.vimiv["thumbnail"].toggle()
+        self.run_command("flip 1")
+        self.check_statusbar(
+            'ERROR: When operating in thumbnail mode ' '"autosave_images" must '
+            'be enabled for flip')
+        self.vimiv["thumbnail"].toggle()
+
+        self.settings.override("autosave_images", "true")
+
     def test_auto_rotate(self):
         """Auto rotate images from transform checking messages."""
         self.transform.rotate_auto()
