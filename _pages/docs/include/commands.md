@@ -88,6 +88,10 @@
 |----|-----------|
 |<a href="#version">version</a>|Display pop-up with version information.|
 |----|-----------|
+|<a href="#w">w</a>|Explicitly save changed images to disk.|
+|----|-----------|
+|<a href="#w">wq</a>|Same as :w but also quit vimiv.|
+|----|-----------|
 |<a href="#zoom_in">zoom_in</a>|Zoom in.|
 |----|-----------|
 |<a href="#zoom_out">zoom_out</a>|Zoom out.|

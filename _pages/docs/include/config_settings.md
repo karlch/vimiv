@@ -1,12 +1,13 @@
-Settings are configured in the vimivrc file. This file is separated into three
+Settings are configured in the vimivrc file. This file is separated into four
 sections:
 
 * GENERAL
 * LIBRARY
+* EDIT
 * ALIASES
 
-The first two sections group settings, the third is used to define aliases. What
-each setting means and what values are possible is explained below:
+The first three sections group settings, the fourth is used to define aliases.
+What each setting means and what values are possible is explained below:
 
 #### GENERAL
 
@@ -68,6 +69,13 @@ each setting means and what values are possible is explained below:
 |file_check_amount|Int|30|The amount of files vimiv should check in a directory for whether they are images or not. This affects the size column of directories in the library. As soon as this number is reached, checks are stopped and a + is appended, e.g. 30+. A higher number increases precision and information at the cost of speed.|
 |-------|-----|-------|-----------|
 |tilde_in_statusbar|Bool|yes|If yes, collapse $HOME to ~ in the statusbar in the library.|
+|-------|-----|-------|-----------|
+
+#### EDIT
+
+|Setting|Value|Default|Description|
+|-------|-----|-------|-----------|
+|<a name="autosave-images" class="anchor">autosave_images</a>|Bool|yes|If yes, automatically save rotated/flipped images to disk. Otherwise to keep changes :w must be called explicitly.|
 |-------|-----|-------|-----------|
 
 #### ALIASES

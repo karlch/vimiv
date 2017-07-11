@@ -298,6 +298,16 @@ Display pop-up with version information.
 
 Includes version number, link to the website and license.
 
+##### w
+Explicitly save changed images to disk.
+
+This is useful if the [autosave\_images]({{ site.baseurl
+}}/docs/configuration#autosave-images) is set to false and one wants to keep
+applied rotations/flips.
+
+##### wq
+Same as :w but also quit vimiv.
+
 ##### zoom\_in
 **Syntax:** <t class="command"><b>:zoom_in</b> <i>[steps]</i></t>
 

@@ -44,6 +44,8 @@ The most important changes between versions are listed here.
   * Support for editing sharpness was dropped
   * Editing saturation is now possible
   * New optional dependency `gexiv2` for Exif support
+* New autosave\_images setting
+* New :w and :wq commands
 
 #### v0.8
 * Rewrite large parts to make vimiv a Gtk.Application

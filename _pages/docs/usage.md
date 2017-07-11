@@ -48,9 +48,11 @@ It is also possible to vary the size of the thumbnails with the `+/-` keys.
 #### Image editing
 
 Images can be rotated with the `<` and `>`, flipped with the `|` and `_` keys.
-These changes are automatically applied to the file. An image is deleted with
-`x`. This actually moves the image to the trash directory specified by the
-freedesktop standard, by default <b class="filename">$XDG_DATA_HOME/Trash</b>.
+These changes are automatically applied to the file as long as the
+[autosave\_images]({{ site.baseurl }}/docs/configuration#autosave-images)
+setting is true. An image is deleted with `x`. This actually moves the image to
+the trash directory specified by the freedesktop standard, by default
+<b class="filename">$XDG_DATA_HOME/Trash</b>.
 
 For additional editing open manipulate mode with `c`. Here brightness, contrast
 and saturation can be edited. To focus the respective slider use the `bcs` keys.
