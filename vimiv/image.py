@@ -51,12 +51,8 @@ class Image(Gtk.Image):
                                                 self._on_search_completed)
         settings.connect("changed", self._on_settings_changed)
 
-    def update(self, update_info=True):
-        """Show the final image.
-
-        Args:
-            update_info: If True update the statusbar with new information.
-        """
+    def _update(self):
+        """Show the final image."""
         if not self._app.get_paths():
             return
         # Scale image
@@ -72,9 +68,8 @@ class Image(Gtk.Image):
             pixbuf_final = self._pixbuf_original.scale_simple(
                 pbf_width, pbf_height, GdkPixbuf.InterpType.BILINEAR)
         self.set_from_pixbuf(pixbuf_final)
-        # Update the statusbar if required
-        if update_info:
-            self._app["statusbar"].update_info()
+        # Update the statusbar
+        self._app["statusbar"].update_info()
 
     def zoom_delta(self, zoom_in=True, step=1):
         """Zoom the image by delta percent.
@@ -261,12 +256,12 @@ class Image(Gtk.Image):
                 self._app["statusbar"].message(message, "warning")
                 self.zoom_percent = fallback_zoom
             return
-        self.update()
+        self._update()
 
     def _play_gif(self):
         """Run the animation of a gif."""
         self._pixbuf_original = self._pixbuf_iter.get_pixbuf()
-        GLib.idle_add(self.update)
+        GLib.idle_add(self._update)
         if self._pixbuf_iter.advance():
             # Clear old timer
             if self._timer_id:
@@ -330,7 +325,7 @@ class Image(Gtk.Image):
 
     def _finish_image_pixbuf(self, loader, image_id):
         if self._identifier == image_id:
-            GLib.idle_add(self.update)
+            GLib.idle_add(self._update)
 
     def _set_image_anim(self, loader):
         self._pixbuf_iter = loader.get_animation().get_iter()
@@ -347,7 +342,7 @@ class Image(Gtk.Image):
 
     def set_pixbuf(self, pixbuf):
         self._pixbuf_original = pixbuf
-        self.update()
+        self._update()
 
     def _on_image_changed(self, transform, change, arg):
         """Update image after a transformation.
@@ -365,7 +360,7 @@ class Image(Gtk.Image):
         if self.fit_image != "user":
             self.zoom_to(0, self.fit_image)
         else:
-            self.update()
+            self._update()
 
     def _on_search_completed(self, search, new_pos, last_focused):
         if last_focused == "im":
@@ -376,7 +371,7 @@ class Image(Gtk.Image):
         # Rescale image after setting overzoom
         if setting == "overzoom" and self.fit_image != "user":
             self.zoom_percent = self.get_zoom_percent_to_fit(self.fit_image)
-            self.update()
+            self._update()
         # Change play status of gifs
         elif setting == "play_animations":
             if self._app.get_paths() and is_animation(self._app.get_path()) \
