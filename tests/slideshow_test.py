@@ -26,7 +26,8 @@ class SlideshowTest(VimivTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.init_test(cls, ["vimiv/testimages/arch_001.jpg"])
+        cls.init_test(cls, ["vimiv/testimages/arch_001.jpg",
+                            "vimiv/testimages/vimiv.tiff"])
         cls.slideshow = cls.vimiv["slideshow"]
 
     def test_toggle(self):
@@ -72,15 +73,21 @@ class SlideshowTest(VimivTestCase):
 
     def test_running(self):
         """Check if slideshow runs correctly."""
-        self.assertEqual(self.vimiv.get_index(), 1)
+        self.assertEqual(self.vimiv.get_index(), 0)
         self.slideshow.toggle()
         # Set delay when running
         self.run_command("set slideshow_delay 0.5")
-        for i in range(2, 4):
-            refresh_gui(self.vimiv)
-            self.assertEqual(self.vimiv.get_index(), i)
+        self.assertEqual(self._get_delay(), 0.5)
+        # Paths are updated
         refresh_gui(self.vimiv)
-        self.run_command("set slideshow_delay 2.0")
+        self.assertEqual(self.vimiv.get_index(), 1)
+        refresh_gui(self.vimiv)
+        self.assertEqual(self.vimiv.get_index(), 0)
+        # Info message should be displayed for a while
+        self.check_statusbar("INFO: Back at beginning of slideshow")
+        while not self.vimiv.get_index():
+            self.check_statusbar("INFO: Back at beginning of slideshow")
+            Gtk.main_iteration_do(False)
 
     def test_get_formatted_delay(self):
         """Read out the formatted delay from the slideshow."""
