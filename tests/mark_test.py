@@ -54,6 +54,17 @@ class MarkTest(VimivTestCase):
         expected_marked = [os.path.abspath(image) for image in expected_marked]
         self.assertEqual(expected_marked, self.vimiv["mark"].marked)
 
+    def test_fail_mark(self):
+        """Fail marking."""
+        # Directory
+        while not os.path.isdir(self.vimiv.get_pos(True)):
+            self.vimiv["library"].scroll("j")
+        self.vimiv["mark"].mark()
+        self.check_statusbar("WARNING: Marking directories is not supported")
+        # Too less images for mark between
+        self.vimiv["mark"].mark_between()
+        self.check_statusbar("ERROR: Not enough marks")
+
     def tearDown(self):
         self.vimiv["mark"].marked = []
         self.vimiv["library"].move_pos(False)
