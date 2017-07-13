@@ -6,8 +6,9 @@ import os
 import sys
 
 from gi.repository import GLib
+from vimiv.exceptions import SettingNotFoundError, WrongSettingValue
 from vimiv.helpers import error_message
-from vimiv.settings import SettingNotFoundError, WrongSettingValue, settings
+from vimiv.settings import settings
 
 
 def get_aliases(config):
