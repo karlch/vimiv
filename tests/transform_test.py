@@ -133,8 +133,7 @@ class TransformTest(VimivTestCase):
         self.assertLess(pixbuf.get_height(), pixbuf.get_width())
         # Fail because of invalid argument
         self.run_command("rotate value")
-        self.check_statusbar(
-            "ERROR: Argument for rotate must be of type integer")
+        self.check_statusbar("ERROR: Could not convert 'value' to int")
 
     def test_flip(self):
         """Flip image."""
@@ -166,7 +165,7 @@ class TransformTest(VimivTestCase):
         self.assertNotEqual(pixbuf_after_3, pixbuf_after_4)
         # Fail because of invalid argument
         self.run_command("flip value")
-        self.check_statusbar("ERROR: Argument for flip must be of type integer")
+        self.check_statusbar("ERROR: Could not convert 'value' to int")
 
     def test_fail_transform_without_autosave_images(self):
         """Fail specific transforms because autosave_images is false."""

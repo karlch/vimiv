@@ -5,8 +5,10 @@ import os
 
 from gi.repository import GdkPixbuf, Gtk
 from vimiv import image_enhance
+from vimiv.exceptions import WrongSettingValue
 from vimiv.fileactions import edit_supported
 from vimiv.imageactions import save_pixbuf
+from vimiv.settings import get_int
 
 
 class Manipulate(Gtk.ScrolledWindow):
@@ -187,17 +189,16 @@ class Manipulate(Gtk.ScrolledWindow):
         else:
             self.sliders[name].grab_focus()
 
-    def change_slider(self, step=1):
+    def change_slider(self, step="1"):
         """Change the value of the currently focused slider.
 
         Args:
             step: Step to edit the slider by.
         """
         try:
-            step = int(step)
-        except ValueError:
-            self._app["statusbar"].message(
-                "Argument for slider must be of type integer", "error")
+            step = get_int(step, allow_sign=True)
+        except WrongSettingValue as e:
+            self._app["statusbar"].message(str(e), "error")
             return
         for slider in self.sliders.values():
             if slider.is_focus():

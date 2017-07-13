@@ -6,9 +6,10 @@ from threading import Thread
 
 from gi.repository import GObject
 from vimiv import imageactions
-from vimiv.exceptions import NotTransformable, TrashUndeleteError
+from vimiv.exceptions import (NotTransformable, TrashUndeleteError,
+                              WrongSettingValue)
 from vimiv.fileactions import edit_supported
-from vimiv.settings import settings
+from vimiv.settings import get_int, settings
 from vimiv.trash_manager import TrashManager
 
 
@@ -116,13 +117,12 @@ class Transform(GObject.Object):
         """
         try:
             self._is_transformable()
-            cwise = int(cwise)
+            cwise = get_int(cwise, allow_sign=True)
         except NotTransformable as e:
             self._app["statusbar"].message(str(e) + " rotate", "error")
             return
-        except ValueError:
-            self._app["statusbar"].message(
-                "Argument for rotate must be of type integer", "error")
+        except WrongSettingValue as e:
+            self._app["statusbar"].message(str(e), "error")
             return
         images = self.get_images("Rotated")
         cwise = cwise % 4
@@ -194,13 +194,12 @@ class Transform(GObject.Object):
         """
         try:
             self._is_transformable()
-            horizontal = int(horizontal)
+            horizontal = get_int(horizontal)
         except NotTransformable as e:
             self._app["statusbar"].message(str(e) + " flip", "error")
             return
-        except ValueError:
-            self._app["statusbar"].message(
-                "Argument for flip must be of type integer", "error")
+        except WrongSettingValue as e:
+            self._app["statusbar"].message(str(e), "error")
             return
         images = self.get_images("Flipped")
         # Apply changes
