@@ -7,7 +7,7 @@ from threading import Thread
 from gi.repository import GObject
 from vimiv import imageactions
 from vimiv.exceptions import (NotTransformable, TrashUndeleteError,
-                              WrongSettingValue)
+                              StringConversionError)
 from vimiv.fileactions import edit_supported
 from vimiv.helpers import get_int
 from vimiv.settings import settings
@@ -122,7 +122,7 @@ class Transform(GObject.Object):
         except NotTransformable as e:
             self._app["statusbar"].message(str(e) + " rotate", "error")
             return
-        except WrongSettingValue as e:
+        except StringConversionError as e:
             self._app["statusbar"].message(str(e), "error")
             return
         images = self.get_images("Rotated")
@@ -199,7 +199,7 @@ class Transform(GObject.Object):
         except NotTransformable as e:
             self._app["statusbar"].message(str(e) + " flip", "error")
             return
-        except WrongSettingValue as e:
+        except StringConversionError as e:
             self._app["statusbar"].message(str(e), "error")
             return
         images = self.get_images("Flipped")

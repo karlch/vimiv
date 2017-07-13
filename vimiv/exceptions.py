@@ -6,8 +6,8 @@ class NoSearchResultsError(Exception):
     """Raised when a search result is accessed although there are no results."""
 
 
-class WrongSettingValue(Exception):
-    """Raised when a setting does not have the correct format."""
+class StringConversionError(ValueError):
+    """Raised when a setting or argument could not be converted to its type."""
 
 
 class SettingNotFoundError(Exception):

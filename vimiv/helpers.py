@@ -6,7 +6,7 @@ import os
 import re
 
 from gi.repository import Gtk
-from vimiv.exceptions import WrongSettingValue
+from vimiv.exceptions import StringConversionError
 
 
 def listdir_wrapper(path, show_hidden=False):
@@ -158,9 +158,9 @@ def get_int(value, allow_sign=False):
         int_val = int(value)
     except ValueError:
         error = "Could not convert '%s' to int" % (value)
-        raise WrongSettingValue(error)
+        raise StringConversionError(error)
     if int_val < 0 and not allow_sign:
-        raise WrongSettingValue("Negative numbers are not supported.")
+        raise StringConversionError("Negative numbers are not supported.")
     return int_val
 
 
@@ -177,7 +177,7 @@ def get_float(value, allow_sign=False):
         float_val = float(value)
     except ValueError:
         error = "Could not convert '%s' to float" % (value)
-        raise WrongSettingValue(error)
+        raise StringConversionError(error)
     if float_val < 0 and not allow_sign:
-        raise WrongSettingValue("Negative numbers are not supported.")
+        raise StringConversionError("Negative numbers are not supported.")
     return float_val

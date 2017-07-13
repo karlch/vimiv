@@ -5,7 +5,7 @@ import os
 
 from gi.repository import GdkPixbuf, Gtk
 from vimiv import image_enhance
-from vimiv.exceptions import WrongSettingValue
+from vimiv.exceptions import StringConversionError
 from vimiv.fileactions import edit_supported
 from vimiv.helpers import get_int
 from vimiv.imageactions import save_pixbuf
@@ -197,7 +197,7 @@ class Manipulate(Gtk.ScrolledWindow):
         """
         try:
             step = get_int(step, allow_sign=True)
-        except WrongSettingValue as e:
+        except StringConversionError as e:
             self._app["statusbar"].message(str(e), "error")
             return
         for slider in self.sliders.values():

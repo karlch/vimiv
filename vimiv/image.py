@@ -5,7 +5,7 @@ from random import shuffle
 from threading import Thread
 
 from gi.repository import GdkPixbuf, GLib, Gtk
-from vimiv.exceptions import WrongSettingValue
+from vimiv.exceptions import StringConversionError
 from vimiv.fileactions import is_animation, is_svg
 from vimiv.helpers import get_float
 from vimiv.settings import settings
@@ -87,7 +87,7 @@ class Image(Gtk.Image):
         if isinstance(step, str):
             try:
                 step = get_float(step, allow_sign=True)
-            except WrongSettingValue as e:
+            except StringConversionError as e:
                 self._app["statusbar"].message(str(e), "error")
                 return
         fallback_zoom = self.zoom_percent
@@ -112,7 +112,7 @@ class Image(Gtk.Image):
         if isinstance(percent, str):
             try:
                 percent = get_float(percent)
-            except WrongSettingValue as e:
+            except StringConversionError as e:
                 self._app["statusbar"].message(str(e), "error")
                 return
         self._size = self._get_available_size()

@@ -5,7 +5,7 @@ import os
 
 from gi.repository import GLib, GObject
 from vimiv.exceptions import (NotABoolean, NotANumber, SettingNotFoundError,
-                              WrongSettingValue)
+                              StringConversionError)
 from vimiv.helpers import get_boolean, get_float, get_int
 
 
@@ -111,14 +111,14 @@ class ThumbnailSizeSetting(Setting):
         int_tuple = new_value.split(",")
         if len(int_tuple) != 2:
             error = "Tuple must be of the form (val, val)"
-            raise WrongSettingValue(error)
+            raise StringConversionError(error)
         int_tuple = (get_int(int_tuple[0]), get_int(int_tuple[1]))
         if int_tuple[0] != int_tuple[1]:
             error = "Thumbnail width and height must be equal"
-            raise WrongSettingValue(error)
+            raise StringConversionError(error)
         if int_tuple[0] not in [64, 128, 256, 512]:
             error = "Thumbnail size must be one of 64, 128, 256 and 512"
-            raise WrongSettingValue(error)
+            raise StringConversionError(error)
         self._value = tuple(int_tuple)
 
 
@@ -138,7 +138,7 @@ class GeometrySetting(Setting):
         geometry = new_value.split("x")
         if len(geometry) != 2:
             error = "Geometry must be of the form WIDTHxHEIGHT"
-            raise WrongSettingValue(error)
+            raise StringConversionError(error)
         self._value = (get_int(geometry[0]), get_int(geometry[1]))
 
 
@@ -155,7 +155,7 @@ class DirectorySetting(Setting):
             self._value = directory
         else:
             error = "Directory '%s' does not exist" % (new_value)
-            raise WrongSettingValue(error)
+            raise StringConversionError(error)
 
 
 class MarkupSetting(Setting):
@@ -174,10 +174,10 @@ class MarkupSetting(Setting):
         new_value = new_value.strip()
         if not new_value.startswith("<span"):
             error = 'Markup must start with "<span"'
-            raise WrongSettingValue(error)
+            raise StringConversionError(error)
         elif not new_value.endswith(">"):
             error = 'Markup must end with ">"'
-            raise WrongSettingValue(error)
+            raise StringConversionError(error)
         self._value = GLib.markup_escape_text(new_value)
 
     def surround(self, string):

@@ -6,7 +6,7 @@ import os
 import sys
 
 from gi.repository import GLib
-from vimiv.exceptions import SettingNotFoundError, WrongSettingValue
+from vimiv.exceptions import SettingNotFoundError, StringConversionError
 from vimiv.helpers import error_message
 from vimiv.settings import settings
 
@@ -84,7 +84,7 @@ def parse_config(commandline_config=None, running_tests=False):
         for setting in section:
             try:
                 settings.override(setting, section[setting])
-            except WrongSettingValue as e:
+            except StringConversionError as e:
                 message += str(e) + "\n"
             except SettingNotFoundError:
                 message += "Unknown setting %s\n" % (setting)

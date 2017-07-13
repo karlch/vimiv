@@ -1,7 +1,7 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Contains all commands and functions for vimiv."""
 
-from vimiv.exceptions import (AliasError, WrongSettingValue, NotABoolean,
+from vimiv.exceptions import (AliasError, StringConversionError, NotABoolean,
                               NotANumber, SettingNotFoundError)
 from vimiv.fileactions import format_files
 from vimiv.helpers import error_message
@@ -196,7 +196,7 @@ class Commands(object):
                 settings.add_to(setting, value, multiplier)
             else:
                 settings.override(setting, value)
-        except (WrongSettingValue, SettingNotFoundError, NotABoolean,
+        except (StringConversionError, SettingNotFoundError, NotABoolean,
                 NotANumber) as e:
             self._app["statusbar"].message(str(e), "error")
 

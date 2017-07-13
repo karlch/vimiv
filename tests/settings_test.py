@@ -57,13 +57,13 @@ class IntSettingTest(TestCase):
 
     def test_fail_override(self):
         """Fail overriding an integer setting."""
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "-2")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "42.42")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "hello")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "True")
 
 
@@ -84,11 +84,11 @@ class FloatSettingTest(TestCase):
 
     def test_fail_override(self):
         """Fail overriding a float setting."""
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "-12.12")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "hello")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "True")
 
 
@@ -109,17 +109,17 @@ class ThumbnailSizeSettingTest(TestCase):
 
     def test_fail_override(self):
         """Fail overriding a thumbnail size setting."""
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "hello")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "100 100")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "100,-100")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "(100, 256)")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "(512, 256)")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "(100, 100)")
 
 
@@ -140,13 +140,13 @@ class GeometrySettingTest(TestCase):
 
     def test_fail_override(self):
         """Fail overriding a geometry setting."""
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "hello")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "100 100")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "100x-100")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "100.5x100")
 
 
@@ -168,11 +168,11 @@ class DirectorySettingTest(TestCase):
 
     def test_fail_override(self):
         """Fail overriding a directory setting."""
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "hello")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "100")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "/foo/bar/baz")
 
 
@@ -195,11 +195,11 @@ class MarkupSettingtest(TestCase):
 
     def test_fail_override(self):
         """Fail overriding a markup setting."""
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "hello")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "<span hi")
-        self.assertRaises(settings.WrongSettingValue, self.setting.override,
+        self.assertRaises(settings.StringConversionError, self.setting.override,
                           "hi>")
 
 
