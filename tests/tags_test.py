@@ -32,6 +32,18 @@ class TagsTest(VimivTestCase):
         self.vimiv["tags"].remove("arch_test_tag")
         self.assertFalse(os.path.isfile(created_file))
 
+    def test_tag_create_remove_with_whitespace(self):
+        """Create and remove a tag with whitespace in the name."""
+        taglist = ["vimiv/testimages/arch-logo.png",
+                   "vimiv/testimages/arch_001.jpg"]
+        taglist = [os.path.abspath(image) for image in taglist]
+        self.vimiv["tags"].write(taglist, "arch test tag")
+        created_file = os.path.join(self.tagdir, "arch test tag")
+        file_content = read_file(created_file)
+        self.assertEqual(file_content, taglist)
+        self.vimiv["tags"].remove("arch test tag")
+        self.assertFalse(os.path.isfile(created_file))
+
     def test_tag_append(self):
         """Append to a tag."""
         taglist = [os.path.abspath("vimiv/testimages/arch-logo.png")]
