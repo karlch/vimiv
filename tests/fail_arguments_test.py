@@ -29,18 +29,22 @@ class FailingArgTest(VimivTestCase):
         for cmd in ["zoom_in", "zoom_out", "zoom_to"]:
             self.fail_arguments(cmd, 2, too_many=True)
         # 1 Argument required
-        for cmd in ["flip", "format", "rotate", "tag_write", "tag_load",
-                    "tag_remove", "undelete"]:
+        for cmd in ["flip", "rotate"]:
             self.fail_arguments(cmd, 2, too_many=True)
             self.fail_arguments(cmd, 0, too_many=False)
         # 1 Argument required, 1 argument optional
         for cmd in ["edit", "set"]:
             self.fail_arguments(cmd, 3, too_many=True)
             self.fail_arguments(cmd, 0, too_many=False)
-        # 2 Arguments required
+        # 1 Argument required, any amount possible
+        for cmd in ["format", "tag_write", "tag_load", "tag_remove",
+                    "undelete"]:
+            self.fail_arguments(cmd, 0, too_many=False)
+            self.allow_arbitary_n_arguments(cmd, 1)
+        # 2 Arguments required, any amount possible
         for cmd in ["alias"]:
-            self.fail_arguments(cmd, 3, too_many=True)
             self.fail_arguments(cmd, 1, too_many=False)
+            self.allow_arbitary_n_arguments(cmd, 1)
 
     def fail_arguments(self, command, n_args, too_many=True):
         """Fail a command because of too many or too few arguments.
@@ -60,6 +64,19 @@ class FailingArgTest(VimivTestCase):
             if too_many \
             else "ERROR: Missing positional arguments for command"
         self.assertIn(expected, self.vimiv["statusbar"].get_message())
+
+    def allow_arbitary_n_arguments(self, command, min_n):
+        """Fail if the command does not allow an arbitrary amount of arguments.
+
+        Args:
+            min_n: Minimum amount of arguments needed.
+        """
+        for i in range(min_n, min_n * 100, 33):
+            command = command + " a" * i
+            self.run_command(command)
+            not_expected = "ERROR: Too many arguments for command"
+            self.assertNotIn(not_expected,
+                             self.vimiv["statusbar"].get_message())
 
 
 if __name__ == "__main__":

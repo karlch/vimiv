@@ -1,8 +1,9 @@
 # vim: ft=python fileencoding=utf-8 sw=4 et sts=4
 """Contains all commands and functions for vimiv."""
 
-from vimiv.exceptions import (AliasError, StringConversionError, NotABoolean,
-                              NotANumber, SettingNotFoundError)
+from vimiv.exceptions import (AliasError, ArgumentAmountError,
+                              StringConversionError, NotABoolean, NotANumber,
+                              SettingNotFoundError)
 from vimiv.fileactions import format_files
 from vimiv.helpers import error_message
 from vimiv.settings import settings
@@ -41,7 +42,8 @@ class Commands(object):
                          self._app["manipulate"].finish,
                          default_args=[True])
         self.add_command("alias", self.add_alias,
-                         positional_args=["name", "command"])
+                         positional_args=["name", "command"],
+                         last_arg_allows_space=True)
         self.add_command("autorotate", self._app["transform"].rotate_auto)
         self.add_command("center", self._app["main_window"].center_window)
         self.add_command("copy_basename", self._app["clipboard"].copy_name,
@@ -50,7 +52,8 @@ class Commands(object):
                          default_args=[True])
         self.add_command("delete", self._app["transform"].delete)
         self.add_command("undelete", self._app["transform"].undelete,
-                         positional_args=["basename"])
+                         positional_args=["basename"],
+                         last_arg_allows_space=True)
         self.add_command("discard_changes",
                          self._app["manipulate"].finish,
                          default_args=[False])
@@ -70,7 +73,8 @@ class Commands(object):
         self.add_command("flip", self._app["transform"].flip,
                          positional_args=["direction"])
         self.add_command("format", format_files, default_args=[self._app],
-                         positional_args=["formatstring"])
+                         positional_args=["formatstring"],
+                         last_arg_allows_space=True)
         self.add_command("fullscreen", self._app["window"].toggle_fullscreen)
         self.add_command("last", self._app["image"].move_pos,
                          default_args=[True], supports_count=True)
@@ -110,12 +114,15 @@ class Commands(object):
         self.add_command("slideshow", self._app["slideshow"].toggle,
                          supports_count=True)
         self.add_command("tag_load", self._app["tags"].load,
-                         positional_args=["tagname"])
+                         positional_args=["tagname"],
+                         last_arg_allows_space=True)
         self.add_command("tag_remove", self._app["tags"].remove,
-                         positional_args=["tagname"])
+                         positional_args=["tagname"],
+                         last_arg_allows_space=True)
         self.add_command("tag_write", self._app["tags"].write,
                          default_args=[self._app["mark"].marked],
-                         positional_args=["tagname"])
+                         positional_args=["tagname"],
+                         last_arg_allows_space=True)
         self.add_command("thumbnail", self._app["thumbnail"].toggle)
         self.add_command("version", self._app["information"].show_version_info)
         self.add_command("w", self._app["transform"].write)
@@ -225,7 +232,8 @@ class Commands(object):
 
     def add_command(self, name, function, default_args=None,
                     positional_args=None, optional_args=None,
-                    supports_count=False, is_hidden=False):
+                    supports_count=False, is_hidden=False,
+                    last_arg_allows_space=False):
         """Add a command.
 
         Args:
@@ -237,6 +245,8 @@ class Commands(object):
             supports_count: If false, delete any num_str before running the
                 command.
             is_hidden: If true, hide command from the command line.
+            last_arg_allows_space: If True, last argument is a type string which
+                may contain whitespace.
         """
         command = Command(name, function)
         command.set_default_args(default_args)
@@ -244,6 +254,7 @@ class Commands(object):
         command.set_optional_args(optional_args)
         command.set_supports_count(supports_count)
         command.set_is_hidden(is_hidden)
+        command.set_last_arg_allows_space(last_arg_allows_space)
         self._commands[name] = command
 
     def add_alias(self, name, command_name):
@@ -281,13 +292,16 @@ class Command(object):
 
     Attributes:
         name: Name of the command as used in the command line.
-        function: Function the command should call.
-        default_args: Default arguments to pass to the function.
-        positional_args: Arguments that must be passed by the user.
-        optional_args: Arguments that may be passed by the user.
         supports_count: If false, delete any num_str before running the
             command.
         is_hidden: If true, hide command from the command line.
+
+        _function: Function the command should call.
+        _default_args: Default arguments to pass to the function.
+        _positional_args: Arguments that must be passed by the user.
+        _optional_args: Arguments that may be passed by the user.
+        _last_arg_allows_space: If True, last argument is a type string which
+            may contain whitespace.
     """
 
     def __init__(self, name, function):
@@ -298,21 +312,22 @@ class Command(object):
             function: Function the command should call.
         """
         self.name = name
-        self.function = function
-        self.default_args = None
-        self.positional_args = None
-        self.optional_args = None
         self.supports_count = False
         self.is_hidden = False
+        self._function = function
+        self._default_args = None
+        self._positional_args = None
+        self._optional_args = None
+        self._last_arg_allows_space = False
 
     def set_default_args(self, args):
-        self.default_args = args
+        self._default_args = args
 
     def set_positional_args(self, args):
-        self.positional_args = args
+        self._positional_args = args
 
     def set_optional_args(self, args):
-        self.optional_args = args
+        self._optional_args = args
 
     def set_supports_count(self, supports_count):
         self.supports_count = supports_count
@@ -320,18 +335,49 @@ class Command(object):
     def set_is_hidden(self, is_hidden):
         self.is_hidden = is_hidden
 
-    def get_max_args(self):
+    def set_last_arg_allows_space(self, last_arg_allows_space):
+        self._last_arg_allows_space = last_arg_allows_space
+
+    def _get_max_args(self):
         """Return the maximum amount of arguments a command may receive.
 
         Return:
             The maximum of arguments as integer.
         """
         num = 0
-        if self.positional_args:
-            num += len(self.positional_args)
-        if self.optional_args:
-            num += len(self.optional_args)
+        if self._positional_args:
+            num += len(self._positional_args)
+        if self._optional_args:
+            num += len(self._optional_args)
         return num
 
-    def get_min_args(self):
-        return len(self.positional_args) if self.positional_args else 0
+    def _get_min_args(self):
+        return len(self._positional_args) if self._positional_args else 0
+
+    def run(self, arguments):
+        """Run the command.
+
+        This checks if the given arguments are compatible with the command,
+        converts them properly and then calls self.function.
+
+        Args:
+            arguments: Arguments passed to the command.
+        """
+        # Too less arguments
+        if len(arguments) < self._get_min_args():
+            message = "Missing positional arguments for command %s: %s" \
+                % (self.name, ", ".join(self._positional_args))
+            raise ArgumentAmountError(message)
+        # Join last arguments to one string?
+        if self._last_arg_allows_space:
+            last_args = arguments[self._get_min_args() - 1:]
+            last_arg = " ".join(last_args)
+            arguments = arguments[:self._get_min_args() - 1] + [last_arg]
+        # Too many arguments
+        if len(arguments) > self._get_max_args():
+            message = "Too many arguments for command " + self.name
+            raise ArgumentAmountError(message)
+        # Run
+        if self._default_args:
+            arguments = self._default_args + arguments
+        self._function(*arguments)

@@ -8,7 +8,7 @@ from threading import Thread
 
 from gi.repository import GLib, GObject, Gtk
 from vimiv.commands import Commands
-from vimiv.exceptions import NoSearchResultsError
+from vimiv.exceptions import ArgumentAmountError, NoSearchResultsError
 from vimiv.helpers import error_message, expand_filenames, read_file
 from vimiv.settings import settings
 
@@ -147,35 +147,28 @@ class CommandLine(Gtk.Entry):
                 eventhandler.
         """
         # Get name and arguments
-        name_func_and_args = cmd.split()
-        name_func = name_func_and_args[0]
-        given_args = name_func_and_args[1:]
+        name = cmd.split()[0]
+        arguments = cmd.split()[1:]
         command_names = [cmd.name for cmd in self.commands]
-        if name_func in command_names:
-            command = self.commands[name_func]
+        if name in command_names:
+            command = self.commands[name]
             # Do not allow calling hidden commands from the command line
             if not keyname and command.is_hidden:
                 message = "Called a hidden command from the command line"
                 self._app["statusbar"].message(message, "error")
                 return
-            # Check if the amount of arguments
-            if len(given_args) < command.get_min_args():
-                message = "Missing positional arguments for command " + \
-                    name_func + ": " + ", ".join(command.positional_args)
-                self._app["statusbar"].message(message, "error")
-            elif len(given_args) > command.get_max_args():
-                message = "Too many arguments for command " + name_func
-                self._app["statusbar"].message(message, "error")
-            else:
+            # Check if the command supports passing count
+            if not command.supports_count:
+                self._app["eventhandler"].num_clear()
+            # Run command checking arguments
+            try:
+                command.run(arguments)
+            except ArgumentAmountError as e:
+                self._app["statusbar"].message(str(e), "error")
                 # Check if the function supports passing count
-                if not command.supports_count:
-                    self._app["eventhandler"].num_clear()
-                args = command.default_args + given_args \
-                    if command.default_args else given_args
-                command.function(*args)
         # If the command name is not in the dictionary throw an error
         else:
-            message = "No command called " + name_func
+            message = "No command called " + name
             if keyname:
                 message += " bound to " + keyname
             self._app["statusbar"].message(message, "error")

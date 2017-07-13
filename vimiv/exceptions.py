@@ -32,3 +32,7 @@ class TrashUndeleteError(Exception):
 
 class NotTransformable(Exception):
     """Raised when an image is not transformable for transform.py."""
+
+
+class ArgumentAmountError(Exception):
+    """Raised if the amount of arguments is not compatible with a command."""
