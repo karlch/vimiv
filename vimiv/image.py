@@ -7,7 +7,8 @@ from threading import Thread
 from gi.repository import GdkPixbuf, GLib, Gtk
 from vimiv.exceptions import WrongSettingValue
 from vimiv.fileactions import is_animation, is_svg
-from vimiv.settings import get_float, settings
+from vimiv.helpers import get_float
+from vimiv.settings import settings
 
 
 class Image(Gtk.Image):

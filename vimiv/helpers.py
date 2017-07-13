@@ -6,6 +6,7 @@ import os
 import re
 
 from gi.repository import Gtk
+from vimiv.exceptions import WrongSettingValue
 
 
 def listdir_wrapper(path, show_hidden=False):
@@ -131,3 +132,52 @@ def expand_filenames(filename, filelist, command):
     command = re.sub(r'(?<!\\)(\*)', " ".join(filelist), command)
     command = re.sub(r'(\\)(?!\\)', "", command)
     return command
+
+
+def get_boolean(value):
+    """Convert a value to a boolean.
+
+    Args:
+        value: String value to convert.
+    Return:
+        bool: True if string.lower() in ["yes", "true"]. False otherwise.
+    """
+    return True if value.lower() in ["yes", "true"] else False
+
+
+def get_int(value, allow_sign=False):
+    """Convert a value to an integer.
+
+    Args:
+        value: String value to convert.
+        allow_sign: If True, negative values are allowed.
+    Return:
+        int(value) if possible.
+    """
+    try:
+        int_val = int(value)
+    except ValueError:
+        error = "Could not convert '%s' to int" % (value)
+        raise WrongSettingValue(error)
+    if int_val < 0 and not allow_sign:
+        raise WrongSettingValue("Negative numbers are not supported.")
+    return int_val
+
+
+def get_float(value, allow_sign=False):
+    """Convert a value to a float.
+
+    Args:
+        value: String value to convert.
+        allow_sign: If True, negative values are allowed.
+    Return:
+        float(value) if possible.
+    """
+    try:
+        float_val = float(value)
+    except ValueError:
+        error = "Could not convert '%s' to float" % (value)
+        raise WrongSettingValue(error)
+    if float_val < 0 and not allow_sign:
+        raise WrongSettingValue("Negative numbers are not supported.")
+    return float_val

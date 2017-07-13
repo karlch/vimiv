@@ -7,8 +7,8 @@ from gi.repository import GdkPixbuf, Gtk
 from vimiv import image_enhance
 from vimiv.exceptions import WrongSettingValue
 from vimiv.fileactions import edit_supported
+from vimiv.helpers import get_int
 from vimiv.imageactions import save_pixbuf
-from vimiv.settings import get_int
 
 
 class Manipulate(Gtk.ScrolledWindow):

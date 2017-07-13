@@ -9,7 +9,8 @@ from vimiv import imageactions
 from vimiv.exceptions import (NotTransformable, TrashUndeleteError,
                               WrongSettingValue)
 from vimiv.fileactions import edit_supported
-from vimiv.settings import get_int, settings
+from vimiv.helpers import get_int
+from vimiv.settings import settings
 from vimiv.trash_manager import TrashManager
 
 

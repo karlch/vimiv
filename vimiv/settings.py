@@ -6,6 +6,7 @@ import os
 from gi.repository import GLib, GObject
 from vimiv.exceptions import (NotABoolean, NotANumber, SettingNotFoundError,
                               WrongSettingValue)
+from vimiv.helpers import get_boolean, get_float, get_int
 
 
 class Setting(object):
@@ -313,55 +314,6 @@ class SettingStorage(GObject.Object):
             return self._settings[self._n - 1]
         else:
             raise StopIteration
-
-
-def get_boolean(value):
-    """Convert a value to a boolean.
-
-    Args:
-        value: String value to convert.
-    Return:
-        bool: True if string.lower() in ["yes", "true"]. False otherwise.
-    """
-    return True if value.lower() in ["yes", "true"] else False
-
-
-def get_int(value, allow_sign=False):
-    """Convert a value to an integer.
-
-    Args:
-        value: String value to convert.
-        allow_sign: If True, negative values are allowed.
-    Return:
-        int(value) if possible.
-    """
-    try:
-        int_val = int(value)
-    except ValueError:
-        error = "Could not convert '%s' to int" % (value)
-        raise WrongSettingValue(error)
-    if int_val < 0 and not allow_sign:
-        raise WrongSettingValue("Negative numbers are not supported.")
-    return int_val
-
-
-def get_float(value, allow_sign=False):
-    """Convert a value to a float.
-
-    Args:
-        value: String value to convert.
-        allow_sign: If True, negative values are allowed.
-    Return:
-        float(value) if possible.
-    """
-    try:
-        float_val = float(value)
-    except ValueError:
-        error = "Could not convert '%s' to float" % (value)
-        raise WrongSettingValue(error)
-    if float_val < 0 and not allow_sign:
-        raise WrongSettingValue("Negative numbers are not supported.")
-    return float_val
 
 
 # Initiate signals for the SettingsStorage

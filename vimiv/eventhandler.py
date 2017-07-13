@@ -3,7 +3,7 @@
 
 from gi.repository import Gdk, GLib, GObject
 from vimiv.config_parser import parse_keys
-from vimiv.settings import get_float, get_int
+from vimiv.helpers import get_float, get_int
 
 
 class EventHandler(GObject.Object):
