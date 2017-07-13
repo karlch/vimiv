@@ -15,16 +15,18 @@ def enhance_bc(pixbuf, brightness, contrast):
     Return:
         The enhanced GdkPixbuf.Pixbuf
     """
-    width = pixbuf.get_width()
-    height = pixbuf.get_height()
     data = pixbuf.get_pixels()
     has_alpha = pixbuf.get_has_alpha()
     c_has_alpha = 1 if has_alpha else 0  # Numbers are easier for C
-    rowstride = 4 * width if has_alpha else 3 * width
     # Update plain bytes using C extension
     # Pylint does not read this properly
     # pylint: disable=no-member
     data = _image_enhance.enhance_bc(data, c_has_alpha, brightness, contrast)
     gdata = GLib.Bytes.new(data)
-    return GdkPixbuf.Pixbuf.new_from_bytes(
-        gdata, GdkPixbuf.Colorspace.RGB, has_alpha, 8, width, height, rowstride)
+    return GdkPixbuf.Pixbuf.new_from_bytes(gdata,
+                                           pixbuf.get_colorspace(),
+                                           has_alpha,
+                                           pixbuf.get_bits_per_sample(),
+                                           pixbuf.get_width(),
+                                           pixbuf.get_height(),
+                                           pixbuf.get_rowstride())
