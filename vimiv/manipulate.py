@@ -33,7 +33,7 @@ class Manipulate(Gtk.ScrolledWindow):
         self._app = app
 
         # Defaults
-        self._manipulations = {"bri": 1, "con": 1, "sat": 1}
+        self._manipulations = {"bri": 0, "con": 0, "sat": 0}
         self._pixbuf = GdkPixbuf.Pixbuf()
 
         # A scrollable window so all tools are always accessible
@@ -97,9 +97,9 @@ class Manipulate(Gtk.ScrolledWindow):
             0 if no edits were done or force, 1 else.
         """
         if force:
-            self._manipulations = {"bri": 1, "con": 1, "sat": 1}
+            self._manipulations = {"bri": 0, "con": 0, "sat": 0}
             return 0
-        elif self._manipulations != {"bri": 1, "con": 1, "sat": 1}:
+        elif self._manipulations != {"bri": 0, "con": 0, "sat": 0}:
             self._app["statusbar"].message(
                 "Image has been edited, add ! to force", "warning")
             return 1
@@ -149,7 +149,8 @@ class Manipulate(Gtk.ScrolledWindow):
         # Apply brightness, contrast and saturation
         pixbuf = image_enhance.enhance_bc(pixbuf, self._manipulations["bri"],
                                           self._manipulations["con"])
-        pixbuf.saturate_and_pixelate(pixbuf, self._manipulations["sat"], False)
+        pixbuf.saturate_and_pixelate(pixbuf, self._manipulations["sat"] + 1,
+                                     False)
         # Show the edited pixbuf
         self._app["image"].set_pixbuf(pixbuf)
         # Save file if needed
@@ -164,7 +165,7 @@ class Manipulate(Gtk.ScrolledWindow):
             name: Name of slider to operate on.
         """
         val = slider.get_value()
-        val = (val + 127) / 127
+        val /= 127
         # Change brightness, contrast or saturation
         self._manipulations[name] = val
         # Run the manipulation function
@@ -223,7 +224,7 @@ class Manipulate(Gtk.ScrolledWindow):
         if accept:
             self._apply(real=True)
         # Reset all the manipulations
-        self._manipulations = {"bri": 1, "con": 1, "sat": 1}
+        self._manipulations = {"bri": 0, "con": 0, "sat": 0}
         for slider in self.sliders.values():
             slider.set_value(0)
         # Show the original image

@@ -7,6 +7,7 @@
 #include <Python.h>
 
 #include "enhance.h"
+#include "math_func_eval.h"
 
 /*****************************
 *  Generate python functions *
@@ -17,10 +18,11 @@ enhance_bc(PyObject *self, PyObject *args)
 {
     /* Receive arguments from python */
     PyObject *py_data;
+    U_SHORT has_alpha;
     float brightness;
     float contrast;
-    if (!PyArg_ParseTuple(args, "Off",
-                          &py_data, &brightness, &contrast))
+    if (!PyArg_ParseTuple(args, "Oiff",
+                          &py_data, &has_alpha, &brightness, &contrast))
         return NULL;
 
     /* Convert python bytes to U_CHAR* for pixel data */
@@ -33,7 +35,7 @@ enhance_bc(PyObject *self, PyObject *args)
 
     /* Run the C function to enhance brightness and contrast */
     char *updated_data = PyMem_Malloc(size);
-    enhance_bc_c(data, size, brightness, contrast, updated_data);
+    enhance_bc_c(data, size, has_alpha, brightness, contrast, updated_data);
 
     /* Return python bytes of updated data and free memory */
     PyObject *py_updated_data = PyBytes_FromStringAndSize(updated_data, size);
@@ -76,24 +78,25 @@ static inline U_CHAR clamp(float value)
 {
     if (value < 0)
         return 0;
-    else if (value > 255)
+    else if (value > 1)
         return 255;
-    return (U_CHAR) value;
+    return (U_CHAR) (value * 255);
 }
 
-/* Enhance brightness by multiplying pixel value with factor */
+/* Enhance brightness using the GIMP algorithm. */
 static inline float enhance_brightness(float value, float factor)
 {
-    return value * factor;
+    if (factor < 0)
+        return value * (1 + factor);
+    return value + (1 - value) * factor;
 }
 
-/* Enhance contrast by finding the difference to the mean value of 127 and
-   changing it by factor. This makes high values higher and low values lower
-   keeping the mean. */
+/* Enhance contrast using the GIMP algorithm:
+   value = (value - 0.5) * (tan ((factor + 1) * PI/4) ) + 0.5; */
 static inline float enhance_contrast(float value, float factor)
 {
-    float diff = (127 - value) * factor;
-    return 127 - diff;
+    U_CHAR tan_pos = (U_CHAR) (factor * 127 + 127);
+    return (value - 0.5) * (TAN[tan_pos]) + 0.5;
 }
 
 /* Return the ARGB content of one pixel at index in data. */
@@ -107,19 +110,20 @@ static inline void set_pixel_content(U_CHAR* data, int index, U_CHAR* content)
    according to the two functions above. Change the values in updated_data which
    is of type char* so one pixel is equal to one byte allowing to create a
    python memoryview obect directly from memory. */
-void enhance_bc_c(U_CHAR* data, const int size, float brightness,
-                  float contrast, char* updated_data)
+void enhance_bc_c(U_CHAR* data, const int size, U_SHORT has_alpha,
+                  float brightness, float contrast, char* updated_data)
 {
     for (int pixel = 0; pixel < size; pixel++) {
         /* Skip alpha channel */
-        if (pixel  % 4 != ALPHA_CHANNEL) {
+        if (has_alpha && pixel % 4 == ALPHA_CHANNEL)
+            updated_data[pixel] = data[pixel];
+        else {
             float value = (float) data[pixel];
+            value /= 255;
             value = enhance_brightness(value, brightness);
             value = enhance_contrast(value, contrast);
             value = clamp(value);
             updated_data[pixel] = value;
         }
-        else
-            updated_data[pixel] = (U_CHAR) data[pixel];
     }
 }
