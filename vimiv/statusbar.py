@@ -11,7 +11,6 @@ class Statusbar(Gtk.Grid):
     """Create the statusbar and handle all events for it.
 
     Attributes:
-        size: Height of the statusbar.
         lock: If True, do not update any information.
         separator: Gtk.Separator used as background of the statusbar. Makes sure
             the other widgets do not interfere with the overlaying bar.
