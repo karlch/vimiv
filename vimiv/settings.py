@@ -3,7 +3,7 @@
 
 import os
 
-from gi.repository import GLib, GObject
+from gi.repository import GObject
 from vimiv.exceptions import (NotABoolean, NotANumber, SettingNotFoundError,
                               StringConversionError)
 from vimiv.helpers import get_boolean, get_float, get_int
@@ -178,7 +178,7 @@ class MarkupSetting(Setting):
         elif not new_value.endswith(">"):
             error = 'Markup must end with ">"'
             raise StringConversionError(error)
-        self._value = GLib.markup_escape_text(new_value)
+        self._value = new_value
 
     def surround(self, string):
         """Surround a string with the markup tags.
