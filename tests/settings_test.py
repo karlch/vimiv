@@ -4,9 +4,6 @@
 import os
 from unittest import TestCase, main
 
-from gi import require_version
-require_version('GLib', '2.0')
-from gi.repository import GLib
 from vimiv.exceptions import NotABoolean, NotANumber, StringConversionError
 from vimiv import settings
 
@@ -183,14 +180,13 @@ class MarkupSettingtest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.name = "markup"
-        cls.default = GLib.markup_escape_text('<span foreground="#875FFF">')
+        cls.default = '<span foreground="#875FFF">'
         cls.setting = settings.MarkupSetting(cls.name, cls.default)
 
     def test_override(self):
         """Test overriding a markup setting."""
-        new_markup = GLib.markup_escape_text('<span foreground="#FFFFFF">')
-        new_markup_string = '<span foreground="#FFFFFF">'
-        self.setting.override(new_markup_string)
+        new_markup = '<span foreground="#FFFFFF">'
+        self.setting.override(new_markup)
         self.assertEqual(self.setting.get_value(), new_markup)
         self.assertFalse(self.setting.is_default())
 

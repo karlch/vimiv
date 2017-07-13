@@ -7,9 +7,6 @@ import sys
 import tempfile
 from unittest import TestCase, main
 
-from gi import require_version
-require_version('GLib', '2.0')
-from gi.repository import GLib
 import vimiv.config_parser as parser
 from vimiv.settings import settings
 
@@ -100,8 +97,7 @@ class ConfigparserTest(TestCase):
         self.assertEqual(settings["expand_lib"].get_value(), False)
         self.assertEqual(settings["border_width"].get_value(), 12)
         self.assertEqual(
-            settings["markup"].get_value(),
-            GLib.markup_escape_text("<span foreground=\"#FF0000\">"))
+            settings["markup"].get_value(), "<span foreground=\"#FF0000\">")
         self.assertEqual(settings["show_hidden"].get_value(), False)
         self.assertEqual(settings["desktop_start_dir"].get_value(),
                          os.path.expanduser("~/.local"))
