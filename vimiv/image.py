@@ -29,6 +29,7 @@ class Image(Gtk.Image):
         _pixbuf_original: Original image.
         _size: Size of the displayed image as a tuple.
         _timer_id: Id of current animation timer.
+        _faulty_image: Necessary evil for images that PixbufLoader cannot read.
     """
 
     def __init__(self, app):
@@ -44,6 +45,7 @@ class Image(Gtk.Image):
         self._identifier = 0
         self._size = (1, 1)
         self._timer_id = 0
+        self._faulty_image = False
 
         # Connect signals
         self._app["transform"].connect("changed", self._on_image_changed)
@@ -53,7 +55,7 @@ class Image(Gtk.Image):
 
     def _update(self):
         """Show the final image."""
-        if not self._app.get_paths():
+        if not self._app.get_paths() or self._faulty_image:
             return
         # Scale image
         pbo_width = self._pixbuf_original.get_width()
@@ -314,12 +316,25 @@ class Image(Gtk.Image):
         load_thread.start()
 
     def _load_thread(self, loader, path):
-        with open(path, "rb") as f:
-            loader.write(f.read())
-        loader.close()
+        # The try ... except wrapper and the _faulty_image attribute are used to
+        # catch weird images that break GdkPixbufLoader but work otherwise
+        # See https://github.com/karlch/vimiv/issues/49 for more information
+        try:
+            self._faulty_image = True
+            with open(path, "rb") as f:
+                image_bytes = f.read()
+                loader.write(image_bytes)
+            self._faulty_image = False
+            loader.close()
+        except GLib.GError:
+            self._pixbuf_original = GdkPixbuf.Pixbuf.new_from_file(path)
+            self._faulty_image = False
+            self._set_image_pixbuf()
+            GLib.idle_add(self._update)
 
-    def _set_image_pixbuf(self, loader):
-        self._pixbuf_original = loader.get_pixbuf()
+    def _set_image_pixbuf(self, loader=None):
+        if loader:
+            self._pixbuf_original = loader.get_pixbuf()
         self._size = self._get_available_size()
         self.zoom_percent = self.get_zoom_percent_to_fit(self.fit_image)
 
