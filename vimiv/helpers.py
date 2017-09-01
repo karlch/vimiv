@@ -155,7 +155,8 @@ def get_int(value, allow_sign=False):
         int(value) if possible.
     """
     try:
-        int_val = int(value)
+        # rstrip needed when 0. is passed via [count]
+        int_val = int(value.rstrip("."))
     except ValueError:
         error = "Could not convert '%s' to int" % (value)
         raise StringConversionError(error)

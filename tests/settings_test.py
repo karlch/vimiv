@@ -52,6 +52,8 @@ class IntSettingTest(TestCase):
         self.setting.override("5")
         self.assertEqual(self.setting.get_value(), 5)
         self.assertFalse(self.setting.is_default())
+        self.setting.override("0.")
+        self.assertEqual(self.setting.get_value(), 0)
 
     def test_fail_override(self):
         """Fail overriding an integer setting."""

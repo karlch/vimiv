@@ -94,7 +94,7 @@ class TransformTest(VimivTestCase):
         pixbuf = self.vimiv["image"].get_pixbuf()
         self.assertLess(pixbuf.get_height(), pixbuf.get_width())
         # Rotate
-        self.transform.rotate(1)
+        self.transform.rotate("1")
         self.transform.apply()
         pixbuf = self.vimiv["image"].get_pixbuf()
         self.assertGreater(pixbuf.get_height(), pixbuf.get_width())
@@ -105,7 +105,7 @@ class TransformTest(VimivTestCase):
         self.assertGreater(updated_pixbuf.get_height(),
                            updated_pixbuf.get_width())
         # Rotate back
-        self.transform.rotate(-1)
+        self.transform.rotate("-1")
         self.transform.apply()
         pixbuf = self.vimiv["image"].get_pixbuf()
         self.assertLess(pixbuf.get_height(), pixbuf.get_width())
@@ -117,7 +117,7 @@ class TransformTest(VimivTestCase):
         # Fail because of no paths
         backup = list(self.vimiv.get_paths())
         self.vimiv.populate([])
-        self.transform.rotate(1)
+        self.transform.rotate("1")
         self.check_statusbar("ERROR: No image to rotate")
         self.vimiv.populate(backup)
         ##################
@@ -139,17 +139,17 @@ class TransformTest(VimivTestCase):
         """Flip image."""
         # Flip
         pixbuf_before = self.vimiv["image"].get_pixbuf()
-        self.transform.flip(1)
+        self.transform.flip("1")
         pixbuf_after = self.vimiv["image"].get_pixbuf()
         self.assertNotEqual(pixbuf_before, pixbuf_after)
         # Flip back
-        self.transform.flip(1)
+        self.transform.flip("1")
         pixbuf_after_2 = self.vimiv["image"].get_pixbuf()
         self.assertNotEqual(pixbuf_after, pixbuf_after_2)
         # Fail because of no paths
         backup = list(self.vimiv.get_paths())
         self.vimiv.populate([])
-        self.transform.flip(1)
+        self.transform.flip("1")
         self.check_statusbar("ERROR: No image to flip")
         self.vimiv.populate(backup)
         ##################
@@ -199,7 +199,7 @@ class TransformTest(VimivTestCase):
         """Write changes to disk via write command."""
         self.settings.override("autosave_images", "false")
         pixbuf = self.vimiv["image"].get_pixbuf_original()
-        self.transform.rotate(1)
+        self.transform.rotate("1")
         # File has not changed
         file_pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.vimiv.get_path())
         self.assertEqual(pixbuf.get_height(), file_pixbuf.get_height())
@@ -208,7 +208,7 @@ class TransformTest(VimivTestCase):
         file_pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.vimiv.get_path())
         self.assertNotEqual(pixbuf.get_height(), file_pixbuf.get_height())
         # Set back
-        self.transform.rotate(-1)
+        self.transform.rotate("-1")
         self.transform.write()
         file_pixbuf = GdkPixbuf.Pixbuf.new_from_file(self.vimiv.get_path())
         self.assertEqual(pixbuf.get_height(), file_pixbuf.get_height())

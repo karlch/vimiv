@@ -78,12 +78,12 @@ class ManipulateTest(VimivTestCase):
         """Change slider value in manipulate."""
         # Change value
         self.manipulate.focus_slider("bri")
-        self.manipulate.change_slider(-1)
+        self.manipulate.change_slider("-1")
         received_value = self.manipulate.sliders["bri"].get_value()
         self.assertEqual(received_value, -1)
         # Change value with a numstr
         self.vimiv["eventhandler"].set_num_str(5)
-        self.manipulate.change_slider(2)
+        self.manipulate.change_slider("2")
         received_value = self.manipulate.sliders["bri"].get_value()
         self.assertEqual(received_value, -1 + 2 * 5)
         # Not an integer

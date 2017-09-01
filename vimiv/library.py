@@ -437,7 +437,7 @@ class Library(Gtk.TreeView):
             width = min(width, self._app["window"].winsize[0])
             width = max(width, 100)
             if width != settings["library_width"].get_value():
-                settings.override("library_width", width)
+                settings.override("library_width", str(width))
                 return
             else:
                 self.set_size_request(width, 10)
