@@ -3,7 +3,7 @@
 [![License badge](https://img.shields.io/aur/license/vimiv.svg)](https://raw.githubusercontent.com/karlch/vimiv/master/LICENSE)
 [![Coverage](https://codecov.io/gh/karlch/vimiv/branch/master/graph/badge.svg)](https://codecov.io/gh/karlch/vimiv)
 [![Code Health](https://landscape.io/github/karlch/vimiv/master/landscape.svg?style=flat)](https://landscape.io/github/karlch/vimiv/master)
-[![Version badge](https://img.shields.io/aur/version/vimiv.svg)](https://aur.archlinux.org/packages/vimiv/)
+[![Version badge](https://img.shields.io/github/tag/karlch/vimiv.svg)](https://github.com/karlch/vimiv/releases)
 
 #### Version 0.9.0 (unreleased)
 
@@ -48,9 +48,9 @@ page. To install a simple `# make install` should suffice. To remove vimiv the
 standard `# make uninstall` works.  You may need to update your icon cache after
 installation.
 
-For Arch Linux users there are two packages in the AUR.
-<a href="https://aur.archlinux.org/packages/vimiv/">vimiv</a> for the
-stable version and
+For Arch Linux users the latest release is available from
+<a href="https://www.archlinux.org/packages/community/x86_64/vimiv/">[community]</a>
+and there is the AUR package
 <a href="https://aur.archlinux.org/packages/vimiv-git/">vimiv-git</a>
 for the development branch.
 
