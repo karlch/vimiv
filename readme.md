@@ -1,6 +1,6 @@
 ![vimiv banner](https://raw.githubusercontent.com/karlch/vimiv/master/icons/vimiv_banner_400.png)
 
-[![License badge](https://img.shields.io/aur/license/vimiv.svg)](https://raw.githubusercontent.com/karlch/vimiv/master/LICENSE)
+[![License badge](https://img.shields.io/github/license/karlch/vimiv.svg)](https://raw.githubusercontent.com/karlch/vimiv/master/LICENSE)
 [![Coverage](https://codecov.io/gh/karlch/vimiv/branch/master/graph/badge.svg)](https://codecov.io/gh/karlch/vimiv)
 [![Code Health](https://landscape.io/github/karlch/vimiv/master/landscape.svg?style=flat)](https://landscape.io/github/karlch/vimiv/master)
 [![Version badge](https://img.shields.io/github/tag/karlch/vimiv.svg)](https://github.com/karlch/vimiv/releases)
