@@ -33,6 +33,7 @@ install:
 	gzip -n -9 -f $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5
 	scripts/install_icons.sh $(DESTDIR)
 	install -Dm644 LICENSE $(DESTDIR)$(LICENSEPREFIX)/vimiv/LICENSE
+	install -Dm644 vimiv.appdata.xml $(DESTDIR)/usr/share/metainfo/
 
 uninstall:
 	rm -rf $(DESTDIR)/etc/vimiv/

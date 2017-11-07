@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2017 Ankur Sinha <ankursinha AT fedoraproject.org> -->
+<component type="desktop">
+    <id>vimiv.desktop</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>MIT</project_license>
+    <name>Vimiv</name>
+    <summary>An image viewer with vim-like keybindings</summary>
+    <description>
+        <p>
+            Vimiv is an image viewer with vim-like keybindings. It is written in python3
+            using the Gtk3 toolkit. Some of the features are:
+        </p>
+        <ul>
+            <li>Thumbnail mode</li>
+            <li>Simple library browser</li>
+            <li>Basic image editing</li>
+            <li>Command line with tab completion</li>
+        </ul>
+    </description>
+    <screenshots>
+        <screenshot type="default">
+            <image>http://karlch.github.io/vimiv/images/screenshots/library.png </image>
+        </screenshot>
+        <screenshot>
+            <image>http://karlch.github.io/vimiv/images/screenshots/thumbnail.png </image>
+        </screenshot>
+        <screenshot>
+            <image>http://karlch.github.io/vimiv/images/screenshots/commandline.png </image>
+        </screenshot>
+    </screenshots>
+    <url type="homepage">http://karlch.github.io/vimiv</url>
+    <update_contact>ankursinha AT fedoraproject.org</update_contact>
+</component>
