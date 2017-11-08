@@ -3,7 +3,7 @@ SRC := vimiv
 PREFIX    := /usr
 MANPREFIX := $(PREFIX)/share/man
 LICENSEPREFIX := $(PREFIX)/share/licenses
-APPDATAPREFIX := $(PREFIX)/share/appadata
+APPDATAPREFIX := $(PREFIX)/share/appdata
 
 default:
 	@printf "There is nothing to do.\n"
