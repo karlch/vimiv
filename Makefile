@@ -3,6 +3,7 @@ SRC := vimiv
 PREFIX    := /usr
 MANPREFIX := $(PREFIX)/share/man
 LICENSEPREFIX := $(PREFIX)/share/licenses
+APPDATAPREFIX := $(PREFIX)/share/appadata
 
 default:
 	@printf "There is nothing to do.\n"
@@ -33,6 +34,7 @@ install:
 	gzip -n -9 -f $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5
 	scripts/install_icons.sh $(DESTDIR)
 	install -Dm644 LICENSE $(DESTDIR)$(LICENSEPREFIX)/vimiv/LICENSE
+	install -Dm644 vimiv.appdata.xml $(DESTDIR)$(APPDATAPREFIX)/vimiv.appdata.xml
 
 uninstall:
 	rm -rf $(DESTDIR)/etc/vimiv/
@@ -44,6 +46,7 @@ uninstall:
 	scripts/remove_icons.sh $(DESTDIR)
 	scripts/uninstall_pythonpkg.sh
 	rm -rf $(DESTDIR)$(LICENSEPREFIX)/vimiv/
+	rm -f $(DESTDIR)$(APPDATAPREFIX)/vimiv.appdata.xml
 
 clean:
 	rm -rf build vimiv.egg-info/
