@@ -6,7 +6,7 @@ permalink: /changelog
 
 The most important changes between versions are listed here.
 
-#### v0.9.0 (unreleased)
+#### v0.9
 * Async loading of images and gifs
 * Overzoom setting is now float instead of bool
 * Improve handling of animated gifs:
