@@ -22,7 +22,7 @@ kramdown:
 sass:
   style: :compressed
 
-gems:
+plugins:
   - jekyll-sitemap
 
 include:
