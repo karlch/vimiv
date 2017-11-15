@@ -12,7 +12,7 @@ setup(
     packages=['vimiv'],
     ext_modules = [enhance_module],
     scripts=['vimiv/vimiv'],
-    install_requires=['pillow', 'PyGObject'],
+    install_requires=['PyGObject'],
     description="An image viewer with vim-like keybindings",
     license="MIT",
     url="https://github.com/karlch/vimiv",
