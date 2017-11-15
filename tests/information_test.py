@@ -20,7 +20,7 @@ class InformationTest(TestCase):
     def test_print_version(self):
         """Print version information to screen."""
         version = self.information.get_version()
-        self.assertIn("0.9", version)
+        self.assertIn("0.9.1", version)
 
     def test_show_version_info(self):
         """Show the version info pop-up."""
