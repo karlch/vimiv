@@ -6,6 +6,9 @@ permalink: /changelog
 
 The most important changes between versions are listed here.
 
+#### v0.9.1
+* Remove dependency "pillow" in setup.py (thanks Anthraxx for pointing this out)
+
 #### v0.9
 * Async loading of images and gifs
 * Overzoom setting is now float instead of bool
