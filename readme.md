@@ -11,9 +11,9 @@
 |
 [Website](http://karlch.github.io/vimiv/ "website")
 |
-[Documentation](http://karlch.github.io/vimiv/documentation/ "website")
+[Documentation](http://karlch.github.io/vimiv/documentation "website")
 |
-[Changelog](http://karlch.github.io/vimiv/changelog/ "changelog")
+[Changelog](http://karlch.github.io/vimiv/changelog "changelog")
 
 Vimiv is an image viewer with vim-like keybindings. It is written in python3
 using the Gtk3 toolkit. Some of the features are:
@@ -23,11 +23,11 @@ using the Gtk3 toolkit. Some of the features are:
 * Command line with tab completion
 
 For much more information please check out the
-[documentation](http://karlch.github.io/vimiv/documentation/ "documentation").
+[documentation](http://karlch.github.io/vimiv/documentation "documentation").
 If you are new to vimiv, this is a good place to
-[get started](http://karlch.github.io/vimiv/documentation/usage/ "usage").
+[get started](http://karlch.github.io/vimiv/docs/usage "usage").
 For a quick overview check out the
-[keybinding cheatsheet](http://karlch.github.io/vimiv/documentation/commands/#cheatsheet).
+[keybinding cheatsheet](http://karlch.github.io/vimiv/docs/keybindings_commands#keybinding-cheatsheet).
 
 ## Screenshots
 
