@@ -16,7 +16,7 @@ vimivrc - configuration files for the vimiv image viewer
 
 More information in a nicer format is available at:
 
-http://karlch.github.io/vimiv/documentation/configuration/
+http://karlch.github.io/vimiv/docs/configuration
 
 ## SETTINGS
 {% include_relative include/config_settings.md %}

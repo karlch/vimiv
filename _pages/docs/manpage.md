@@ -32,7 +32,7 @@ python3 using the Gtk3 toolkit. Some of the features are:
 
 The complete documentation is not included in this manpage but is available at:
 
-http://karlch.github.io/vimiv/documentation/
+http://karlch.github.io/vimiv/documentation
 
 ## OPTIONS
 `-b`, `--bar`
