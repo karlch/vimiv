@@ -4,7 +4,7 @@
 import sys
 
 __license__ = "MIT"
-__version__ = "0.9.1"
+__version__ = "0.9.2.dev0"
 __author__ = __maintainer__ = "Christian Karl"
 __email__ = "karlch@protonmail.com"
 

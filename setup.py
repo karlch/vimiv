@@ -8,7 +8,7 @@ enhance_module = Extension("vimiv._image_enhance", sources = ["c-lib/enhance.c"]
 
 setup(
     name="vimiv",
-    version="0.9.1",
+    version="0.9.2.dev0",
     packages=['vimiv'],
     ext_modules = [enhance_module],
     scripts=['vimiv/vimiv'],

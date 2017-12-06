@@ -5,7 +5,7 @@
 [![Code Health](https://landscape.io/github/karlch/vimiv/master/landscape.svg?style=flat)](https://landscape.io/github/karlch/vimiv/master)
 [![Version badge](https://img.shields.io/github/tag/karlch/vimiv.svg)](https://github.com/karlch/vimiv/releases)
 
-#### Version 0.9.1
+#### Version 0.9.2 (unreleased)
 
 [Releases](https://github.com/karlch/vimiv/releases "releases")
 |
