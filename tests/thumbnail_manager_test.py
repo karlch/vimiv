@@ -13,7 +13,7 @@ from unittest import TestCase, main
 
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import GLib
+from vimiv.helpers import get_user_cache_dir
 from vimiv.thumbnail_manager import ThumbnailStore
 
 
@@ -23,7 +23,7 @@ class ThumbnailManagerTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.thumb_store = ThumbnailStore()
-        cache_dir = GLib.get_user_cache_dir()
+        cache_dir = get_user_cache_dir()
         cls.thumb_dir = os.path.join(cache_dir, "thumbnails/large")
 
     def test_get_thumbnail(self):

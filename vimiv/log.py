@@ -5,7 +5,9 @@ import os
 import sys
 import time
 
-from gi.repository import GLib, Gtk
+from gi.repository import Gtk
+
+from vimiv.helpers import get_user_data_dir
 
 
 class Log():
@@ -22,7 +24,7 @@ class Log():
         Args:
             app: The main vimiv application to interact with.
         """
-        datadir = os.path.join(GLib.get_user_data_dir(), "vimiv")
+        datadir = os.path.join(get_user_data_dir(), "vimiv")
         os.makedirs(datadir, exist_ok=True)
         self._filename = os.path.join(datadir, "vimiv.log")
         self._terminal = sys.stderr

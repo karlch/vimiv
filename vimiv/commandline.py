@@ -9,7 +9,8 @@ from threading import Thread
 from gi.repository import GLib, GObject, Gtk
 from vimiv.commands import Commands
 from vimiv.exceptions import ArgumentAmountError, NoSearchResultsError
-from vimiv.helpers import error_message, expand_filenames, read_file
+from vimiv.helpers import (error_message, expand_filenames, read_file,
+                           get_user_data_dir)
 from vimiv.settings import settings
 
 
@@ -50,7 +51,7 @@ class CommandLine(Gtk.Entry):
         self.search = Search(self)
 
         # Cmd history from file
-        datadir = os.path.join(GLib.get_user_data_dir(), "vimiv")
+        datadir = os.path.join(get_user_data_dir(), "vimiv")
         os.makedirs(datadir, exist_ok=True)
         # If there is a history file in the old location move it and inform the
         # user
@@ -416,7 +417,7 @@ class CommandLine(Gtk.Entry):
 
     def write_history(self):
         """Write commandline history to file."""
-        histfile = os.path.join(GLib.get_user_data_dir(), "vimiv", "history")
+        histfile = os.path.join(get_user_data_dir(), "vimiv", "history")
         with open(histfile, "w") as f:
             for cmd in self._history:
                 f.write(cmd + "\n")

@@ -3,8 +3,8 @@
 
 import os
 
-from gi.repository import GLib, Gtk
-from vimiv.helpers import error_message, read_file
+from gi.repository import Gtk
+from vimiv.helpers import error_message, read_file, get_user_data_dir
 
 
 class TagHandler(object):
@@ -25,7 +25,7 @@ class TagHandler(object):
         """
         self._app = app
         # Create tags directory
-        self.directory = os.path.join(GLib.get_user_data_dir(), "vimiv", "Tags")
+        self.directory = os.path.join(get_user_data_dir(), "vimiv", "Tags")
         os.makedirs(self.directory, exist_ok=True)
         # If there are tags in the old location, move them to the new one
         # TODO remove this in a new version, assigned for 0.10

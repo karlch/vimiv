@@ -7,6 +7,7 @@ import tempfile
 from subprocess import PIPE, Popen
 from unittest import main
 
+from vimiv.helpers import get_user_data_dir
 from vimiv.settings import settings
 
 from vimiv_testcase import VimivTestCase, refresh_gui
@@ -181,7 +182,7 @@ class SlowCommandlineTest(CommandlineTest):
         refresh_gui()
         self.assertEqual(self.vimiv.get_path(), expected_image)
         # Pass an image in another directory
-        testimage = tempfile.NamedTemporaryFile()
+        testimage = tempfile.NamedTemporaryFile(dir=get_user_data_dir())
         shutil.copyfile(expected_image, testimage.name)
         self.run_command(testimage.name)
         refresh_gui()

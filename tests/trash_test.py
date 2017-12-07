@@ -8,8 +8,8 @@ from unittest import TestCase, main
 
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import GLib
 from vimiv import trash_manager
+from vimiv.helpers import get_user_data_dir
 
 
 class TrashTest(TestCase):
@@ -21,9 +21,9 @@ class TrashTest(TestCase):
         cls.tmpdir = tempfile.TemporaryDirectory(prefix="vimiv-tests-")
         os.environ["XDG_DATA_HOME"] = cls.tmpdir.name
         cls.trash_manager = trash_manager.TrashManager()
-        cls.files_directory = os.path.join(GLib.get_user_data_dir(),
+        cls.files_directory = os.path.join(get_user_data_dir(),
                                            "Trash/files")
-        cls.info_directory = os.path.join(GLib.get_user_data_dir(),
+        cls.info_directory = os.path.join(get_user_data_dir(),
                                           "Trash/info")
         cls.testfile = ""
         cls.basename = ""

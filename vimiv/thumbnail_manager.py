@@ -20,6 +20,8 @@ from gi._error import GError
 from gi.repository import GdkPixbuf, GLib, Gtk
 from gi.repository.GdkPixbuf import Pixbuf
 
+from vimiv.helpers import get_user_cache_dir
+
 ThumbTuple = collections.namedtuple('ThumbTuple', ['original', 'thumbnail'])
 
 
@@ -147,7 +149,7 @@ class ThumbnailStore(object):
         """
         super(ThumbnailStore, self).__init__()
         import vimiv
-        self.base_dir = os.path.join(GLib.get_user_cache_dir(), "thumbnails")
+        self.base_dir = os.path.join(get_user_cache_dir(), "thumbnails")
         self.fail_dir = os.path.join(
             self.base_dir, "fail", "vimiv-" + vimiv.__version__)
         self.thumbnail_dir = ""

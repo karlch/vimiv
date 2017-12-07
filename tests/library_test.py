@@ -8,6 +8,7 @@ from unittest import main
 from gi import require_version
 require_version("Gtk", "3.0")
 from gi.repository import Gtk
+from vimiv.helpers import get_user_data_dir
 
 from vimiv_testcase import VimivTestCase
 
@@ -187,7 +188,7 @@ class LibraryTest(VimivTestCase):
 
     def test_empty_directory(self):
         """Move in and out of an empty directory."""
-        tmpdir = tempfile.TemporaryDirectory(prefix="vimiv-")
+        tmpdir = tempfile.TemporaryDirectory(dir=get_user_data_dir())
         self.lib.move_up(tmpdir.name)
         self.assertEqual(os.getcwd(), tmpdir.name)
         self.check_statusbar("WARNING: Directory is empty")

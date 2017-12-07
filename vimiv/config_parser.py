@@ -5,9 +5,8 @@ import configparser
 import os
 import sys
 
-from gi.repository import GLib
 from vimiv.exceptions import SettingNotFoundError, StringConversionError
-from vimiv.helpers import error_message
+from vimiv.helpers import error_message, get_user_config_dir
 from vimiv.settings import settings
 
 
@@ -56,7 +55,7 @@ def parse_config(commandline_config=None, running_tests=False):
     if not running_tests:
         configfiles += [
             "/etc/vimiv/vimivrc",
-            os.path.join(GLib.get_user_config_dir(), "vimiv/vimivrc"),
+            os.path.join(get_user_config_dir(), "vimiv/vimivrc"),
             os.path.expanduser("~/.vimiv/vimivrc")]
     if commandline_config:
         configfiles.append(commandline_config)
@@ -112,7 +111,7 @@ def parse_keys(keyfiles=None, running_tests=False):
     if not keyfiles:
         keyfiles = \
             ["/etc/vimiv/keys.conf",
-             os.path.join(GLib.get_user_config_dir(), "vimiv/keys.conf"),
+             os.path.join(get_user_config_dir(), "vimiv/keys.conf"),
              os.path.expanduser("~/.vimiv/keys.conf")]
     # Read the list of files
     keys = configparser.ConfigParser()

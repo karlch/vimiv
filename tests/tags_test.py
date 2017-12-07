@@ -6,8 +6,7 @@ from unittest import main
 
 from gi import require_version
 require_version('Gtk', '3.0')
-from gi.repository import GLib
-from vimiv.helpers import read_file
+from vimiv.helpers import read_file, get_user_data_dir
 
 from vimiv_testcase import VimivTestCase
 
@@ -18,7 +17,7 @@ class TagsTest(VimivTestCase):
     @classmethod
     def setUpClass(cls):
         cls.init_test(cls)
-        cls.tagdir = os.path.join(GLib.get_user_data_dir(), "vimiv", "Tags")
+        cls.tagdir = os.path.join(get_user_data_dir(), "vimiv", "Tags")
 
     def test_tag_create_remove(self):
         """Create and remove a tag."""

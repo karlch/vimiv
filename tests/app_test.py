@@ -95,17 +95,8 @@ class QuitTest(VimivTestCase):
         self.assertEqual(p.poll(), -9)
 
     def test_clean_quit(self):
-        """Quit vimiv and write history and log."""
-        self.run_command("!:", external=True)
+        """Quit vimiv without errors."""
         self.vimiv.quit_wrapper()
-        histfile = os.path.join(GLib.get_user_data_dir(), "vimiv", "history")
-        logfile = os.path.join(GLib.get_user_data_dir(), "vimiv", "vimiv.log")
-        with open(histfile) as f:
-            content = f.readlines()
-            self.assertEqual(content, [":!:\n"])
-        with open(logfile) as f:
-            content = f.readlines()
-            self.assertIn("Exited", content[-1])
 
 
 if __name__ == "__main__":

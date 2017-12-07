@@ -11,8 +11,8 @@ import shutil
 import tempfile
 import time
 
-from gi.repository import GLib
 from vimiv.exceptions import TrashUndeleteError
+from vimiv.helpers import get_user_data_dir
 
 
 class TrashManager():
@@ -26,10 +26,8 @@ class TrashManager():
 
     def __init__(self):
         """Create a new TrashManager."""
-        self.files_directory = os.path.join(GLib.get_user_data_dir(),
-                                            "Trash/files")
-        self.info_directory = os.path.join(GLib.get_user_data_dir(),
-                                           "Trash/info")
+        self.files_directory = os.path.join(get_user_data_dir(), "Trash/files")
+        self.info_directory = os.path.join(get_user_data_dir(), "Trash/info")
         os.makedirs(self.files_directory, exist_ok=True)
         os.makedirs(self.info_directory, exist_ok=True)
 

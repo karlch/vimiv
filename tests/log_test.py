@@ -7,7 +7,8 @@ from unittest import main
 
 from gi import require_version
 require_version("Gtk", "3.0")
-from gi.repository import Gdk, GLib
+from gi.repository import Gdk
+from vimiv.helpers import get_user_data_dir
 
 from vimiv_testcase import VimivTestCase
 
@@ -18,7 +19,7 @@ class LogTest(VimivTestCase):
     @classmethod
     def setUpClass(cls):
         cls.init_test(cls, debug=True)
-        cls.logfile = os.path.join(GLib.get_user_data_dir(),
+        cls.logfile = os.path.join(get_user_data_dir(),
                                    "vimiv", "vimiv.log")
 
     def test_creation(self):

@@ -182,3 +182,27 @@ def get_float(value, allow_sign=False):
     if float_val < 0 and not allow_sign:
         raise StringConversionError("Negative numbers are not supported.")
     return float_val
+
+
+def get_user_data_dir():
+    """Return XDG_DATA_HOME according to freedesktop standards."""
+    try:
+        return os.environ["XDG_DATA_HOME"]
+    except KeyError:
+        return os.path.expanduser("~/.local/share")
+
+
+def get_user_config_dir():
+    """Return XDG_CONFIG_HOME according to freedesktop standards."""
+    try:
+        return os.environ["XDG_CONFIG_HOME"]
+    except KeyError:
+        return os.path.expanduser("~/.config")
+
+
+def get_user_cache_dir():
+    """Return XDG_CACHE_HOME according to freedesktop standards."""
+    try:
+        return os.environ["XDG_CONFIG_HOME"]
+    except KeyError:
+        return os.path.expanduser("~/.cache")
