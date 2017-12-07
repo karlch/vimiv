@@ -38,7 +38,7 @@ class Window(Gtk.ApplicationWindow):
         self.resize(self.winsize[0], self.winsize[1])
 
         if settings["start_fullscreen"].get_value():
-            self.toggle_fullscreen()
+            self.fullscreen()
 
         # Auto resize
         self.connect("check-resize", self._auto_resize)
