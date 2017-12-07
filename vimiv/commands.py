@@ -36,7 +36,6 @@ class Commands(object):
         self._commands = {}
         self.aliases = {}
         self._n = 0
-        self._app["tag_handler"] = TagHandler(app)
         # Add all commands
         self.add_command("accept_changes",
                          self._app["manipulate"].finish,
