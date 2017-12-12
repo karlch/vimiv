@@ -29,6 +29,14 @@ stable version and
 [vimiv-git](https://aur.archlinux.org/packages/vimiv-git/)
 for the development branch.
 
+### Fedora Linux
+
+For Fedora, [stable releases of vimiv][https://src.fedoraproject.org/rpms/vimiv] can be
+installed from the official repositories using DNF or using Gnome Software:
+```
+# sudo dnf install vimiv
+```
+
 ### Dependencies
 
 * python3
