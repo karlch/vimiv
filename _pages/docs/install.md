@@ -25,7 +25,7 @@ works. You may need to update your icon cache after installation.
 
 
 For Arch Linux users the latest release is available from
-[vimiv](https://www.archlinux.org/packages/community/x86_64/vimiv/)
+[[community]](https://www.archlinux.org/packages/community/x86_64/vimiv/)
 and there is the AUR package
 [vimiv-git](https://aur.archlinux.org/packages/vimiv-git/)
 for the development branch.
