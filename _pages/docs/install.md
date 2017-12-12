@@ -23,15 +23,16 @@ works. You may need to update your icon cache after installation.
 
 ### Arch Linux
 
-For Arch Linux users there are two packages in the AUR.
-[vimiv](https://aur.archlinux.org/packages/vimiv/) for the
-stable version and
+
+For Arch Linux users the latest release is available from
+[vimiv](https://www.archlinux.org/packages/community/x86_64/vimiv/)
+and there is the AUR package
 [vimiv-git](https://aur.archlinux.org/packages/vimiv-git/)
 for the development branch.
 
 ### Fedora Linux
 
-For Fedora, [stable releases of vimiv][https://src.fedoraproject.org/rpms/vimiv] can be
+For Fedora, [stable releases of vimiv](https://src.fedoraproject.org/rpms/vimiv) can be
 installed from the official repositories using DNF or using Gnome Software:
 ```
 # sudo dnf install vimiv
