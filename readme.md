@@ -54,6 +54,10 @@ and there is the AUR package
 <a href="https://aur.archlinux.org/packages/vimiv-git/">vimiv-git</a>
 for the development branch.
 
+Fedora Linux users can install <a
+href="https://src.fedoraproject.org/rpms/vimiv">stable releases</a> from the
+official repositories using the provided package managers.
+
 ## Dependencies
 * python3
 * python-gobject
