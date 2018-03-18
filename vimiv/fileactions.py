@@ -97,8 +97,11 @@ def is_image(filename):
     Args:
         filename: Name of file to check.
     """
-    complete_name = os.path.abspath(os.path.expanduser(filename))
-    return bool(GdkPixbuf.Pixbuf.get_file_info(complete_name)[0])
+    try:
+        complete_name = os.path.abspath(os.path.expanduser(filename))
+        return bool(GdkPixbuf.Pixbuf.get_file_info(complete_name)[0])
+    except UnicodeEncodeError:
+        return False
 
 
 def is_animation(filename):
