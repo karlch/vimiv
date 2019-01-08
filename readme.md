@@ -29,6 +29,13 @@ If you are new to vimiv, this is a good place to
 For a quick overview check out the
 [keybinding cheatsheet](http://karlch.github.io/vimiv/docs/keybindings_commands#keybinding-cheatsheet).
 
+#### Note
+
+The future of vimiv is in the [Qt port](https://github.com/karlch/vimiv-qt) as
+discussed in [this issue](https://github.com/karlch/vimiv/issues/61). It is not
+yet feature-complete and certainly not stable, but if you feel adventurous
+alpha-testers are very welcome.
+
 ## Screenshots
 
 #### Open image and library
