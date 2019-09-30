@@ -203,6 +203,6 @@ def get_user_config_dir():
 def get_user_cache_dir():
     """Return XDG_CACHE_HOME according to freedesktop standards."""
     try:
-        return os.environ["XDG_CONFIG_HOME"]
+        return os.environ["XDG_CACHE_HOME"]
     except KeyError:
         return os.path.expanduser("~/.cache")
