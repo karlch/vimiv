@@ -5,6 +5,17 @@
 [![Code Health](https://landscape.io/github/karlch/vimiv/master/landscape.svg?style=flat)](https://landscape.io/github/karlch/vimiv/master)
 [![Version badge](https://img.shields.io/github/tag/karlch/vimiv.svg)](https://github.com/karlch/vimiv/releases)
 
+---
+> :construction: **NOTE:** The future of vimiv is in the
+> [Qt port](https://github.com/karlch/vimiv-qt) as discussed in
+> [this issue](https://github.com/karlch/vimiv/issues/61). New features will only be
+> implemented there and many improvements have already been made. Sticking with this
+> deprecated version is only recommended if you require a more stable software. In case
+> you miss anything in the Qt port, please
+> [open an issue](https://github.com/karlch/vimiv-qt/issues). Check the
+> [roadmap](https://karlch.github.io/vimiv-qt/roadmap.html) for more details.
+---
+
 #### Version 0.9.2 (unreleased)
 
 [Releases](https://github.com/karlch/vimiv/releases "releases")
@@ -28,13 +39,6 @@ If you are new to vimiv, this is a good place to
 [get started](http://karlch.github.io/vimiv/docs/usage "usage").
 For a quick overview check out the
 [keybinding cheatsheet](http://karlch.github.io/vimiv/docs/keybindings_commands#keybinding-cheatsheet).
-
-#### Note
-
-The future of vimiv is in the [Qt port](https://github.com/karlch/vimiv-qt) as
-discussed in [this issue](https://github.com/karlch/vimiv/issues/61). It is not
-yet feature-complete and certainly not stable, but if you feel adventurous
-alpha-testers are very welcome.
 
 ## Screenshots
 
