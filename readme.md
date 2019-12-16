@@ -13,7 +13,9 @@
 > deprecated version is only recommended if you require a more stable software. In case
 > you miss anything in the Qt port, please
 > [open an issue](https://github.com/karlch/vimiv-qt/issues). Check the
-> [roadmap](https://karlch.github.io/vimiv-qt/roadmap.html) for more details.
+> [roadmap](https://karlch.github.io/vimiv-qt/roadmap.html) and
+> [migrating](https://karlch.github.io/vimiv-qt/documentation/migrating.html)
+> for more details.
 ---
 
 #### Version 0.9.2 (unreleased)
