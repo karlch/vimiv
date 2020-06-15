@@ -34,7 +34,7 @@ install:
 	gzip -n -9 -f $(DESTDIR)$(MANPREFIX)/man5/vimivrc.5
 	scripts/install_icons.sh $(DESTDIR)
 	install -Dm644 LICENSE $(DESTDIR)$(LICENSEPREFIX)/vimiv/LICENSE
-	install -Dm644 vimiv.metainfo.xml $(DESTDIR)$(APPDATAPREFIX)/vimiv.metainfo.xml
+	install -Dm644 org.karlch.vimiv.gtk.metainfo.xml $(DESTDIR)$(APPDATAPREFIX)/org.karlch.vimiv.gtk.metainfo.xml
 
 uninstall:
 	rm -rf $(DESTDIR)/etc/vimiv/
@@ -46,7 +46,7 @@ uninstall:
 	scripts/remove_icons.sh $(DESTDIR)
 	scripts/uninstall_pythonpkg.sh
 	rm -rf $(DESTDIR)$(LICENSEPREFIX)/vimiv/
-	rm -f $(DESTDIR)$(APPDATAPREFIX)/vimiv.metainfo.xml
+	rm -f $(DESTDIR)$(APPDATAPREFIX)/org.karlch.vimiv.gtk.metainfo.xml
 
 clean:
 	rm -rf build vimiv.egg-info/

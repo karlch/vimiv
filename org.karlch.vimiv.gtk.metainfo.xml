@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2017 Ankur Sinha <ankursinha AT fedoraproject.org> -->
 <component type="desktop">
-    <id>vimiv.desktop</id>
+    <id>org.karlch.vimiv.gtk</id>
     <metadata_license>CC0-1.0</metadata_license>
     <project_license>MIT</project_license>
     <name>Vimiv</name>
